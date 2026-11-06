@@ -1,0 +1,3 @@
+# One safety envelope per converter project, enforced in four places
+
+The converter project declares the maximum voltage, current and temperature at each power port once. That single envelope generates the firmware trip thresholds, sets the current and voltage limits of the lab instruments before a bench run, becomes assertions on the simulator target, and is checked against component ratings during sizing in Design. No compared tool links these; in all of them they are four independent numbers in four tools, and a student will get one of them wrong. The envelope can be pre-filled from a selected standard (round 4 decides how) and can only be edited by a human (ADR 0010).

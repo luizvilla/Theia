@@ -41,3 +41,17 @@ Critique raised before round 1: the three workbenches were split by tool rather 
 | Q10 | Twist-only, no hardware sizing in v1? | Yes. | **No.** Either expose the Twist's sizing or start from the Ownverter (no output filter). The user study must give feedback on Design's breadth and depth. | [ADR 0006](adr/0006-design-workbench-includes-hardware-sizing.md) |
 | Q11 | Desktop only for v1? | Yes. | Yes, as frictionless as possible. | [ADR 0007](adr/0007-desktop-only-v1.md) |
 | Q12 | Block diagram as home, IDE opt-in? | Yes, like Arduino IDE 2. | Yes. It must be a landing page that makes people want to go on. | glossary (Home) |
+
+## Round 3 (2026-11-06)
+
+| # | Question | Recommendation | Answer | Recorded in |
+|---|---|---|---|---|
+| Q13 | Rename the control block? | "Digital block". | Some people think analog rather than digital. Proposed "industrial informatics block". **Open**, back in round 4. | — |
+| Q14 | Power ports instead of source/load? | Neutral port names. | Yes to power ports. High/low voltage side (used in the past, and in the OwnTech API: `V_HIGH`, `V1_LOW`, `V2_LOW`) should be a property of the port, since it is ambiguous as a name. | glossary |
+| Q15 | Protection as a chain across blocks? | Yes. | Tends to agree. How does this relate to what standards require for isolation, and how is it kept distinct from isolation itself? **Partly open.** | glossary (Protection chain) |
+| Q16 | One safety envelope enforced everywhere? | Yes, in four places. | Yes, and go further: select standards that give the envelope's maximum ratings. Isolation will come up; should isolation be part of a safety block? Where would it sit? Should safety be shown over the functional blocks as "requirement blocks"? **Extension open.** | [ADR 0009](adr/0009-one-safety-envelope.md) |
+| Q17 | Twist or Ownverter for v1? | Twist. | Twist. | [ADR 0008](adr/0008-twist-first.md) |
+| Q18 | Clickable mock-up before the real pipeline? | Yes; real pipeline is months. | Yes to a mock-up first. Disputes "months": the Pulsim integration took a few prompts with AI assistance. | this log |
+| Q19 | Online data platform out of v1? | Yes. | Yes. The second drawing was only a reference. | this log |
+| Q20 | AI autonomy levels? | Free / confirm / never. | Yes, plus: a human can grant the AI the right to run automated tests, by setting the bench current and voltage limits after the AI has proposed and confirmed them. | [ADR 0010](adr/0010-ai-agent-autonomy-levels.md) |
+| Q21 | Landing page with guided missions? | Missions, recent, blank. | Tends to agree; asked how competitors do it. Answered in round 4. | — |

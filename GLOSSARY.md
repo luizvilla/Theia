@@ -52,6 +52,20 @@ _Avoid_: GND (unqualified), earth (that is protective earth)
 Everything outside the converter that a test needs: whatever supplies and absorbs the converted energy, and the instruments and systems the converter or the bench talks to.
 _Avoid_: test bench (that is the physical setup), surroundings, system (unqualified)
 
+**Power port**:
+A point where the power block exchanges energy with the environment, named for what is connected to it; its voltage side (high or low), its kind (DC or AC) and its allowed power direction are properties of the port, not its name.
+_Avoid_: input, output, source, load (these change with power direction)
+
+## Safety
+
+**Safety envelope**:
+The maximum voltage, current and temperature allowed at each power port, declared once per converter project and enforced by firmware trips, instrument limits, simulator checks and component ratings.
+_Avoid_: limits (unqualified), ratings (those belong to components)
+
+**Protection chain**:
+One protective function traced across the blocks it passes through, from the quantity sensed to the action taken, with its threshold.
+_Avoid_: protection (unqualified), safety loop
+
 ## Workbenches
 
 **Workbench**:
