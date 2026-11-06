@@ -92,3 +92,12 @@ Findings after round 5:
 - **Windows is solved, not yet implemented.** Pulsim 2.0.0 ships `win_amd64` wheels and loads the firmware block with `ctypes.CDLL`, which accepts a `.dll`. What blocks Windows is Core2's `build.sh` (bash, `g++ -shared`, `-fsanitize=undefined`) and the absence of a compiler on student machines. Pulsim's inline compile path also assumes GCC-style flags and names its cache files `.so`, which is harmless on Windows but worth an upstream fix.
 - **The buck example has no hardware-free seam.** Its control law sits in `loop_critical_task` and calls `shield.sensors` and `shield.power` directly, and its user interface is a serial console menu, not ThingSet. Core2's `controlStep` seam (its ADR 0001) was added by hand for one application. The OwnTech examples repository holds 57 example folders. Taken up in round 6.
 - ThingSet over serial exists in Core4 on branch `serial_thingset_example_modular`.
+
+Twist facts gathered from `~/Documents/HARDWARE/TWIST` (v1.4.3, last commit 2025-11-28):
+
+- Bidirectional, 300 W, 200 kHz with interleaving. Two low-side channels (12 to 72 V, 8 A each, 16 A in parallel) and one high side. The documentation gives the high-side range inconsistently: "10 V to 100 V", "10 V to 110 V" and "12 V to 100 V" all appear.
+- Per power leg (`PowerLeg.kicad_sch`): a 33 µH inductor and 33 µF capacitors, plus a 47 µF capacitor. The schematic sheet for the auxiliary supply is named `Feeder.kicad_sch`.
+- Sensors: low-side and high-side currents through isolated Hall-effect sensors (±20 A), and high-side voltage through a divider plus an isolation amplifier. The measurement bridge block is therefore isolated on the Twist.
+- Operating modes come from the getting-started guide: buck (HIGH in, LOW out), independent, boost (LOW in, HIGH out), single-phase buck inverter, buck PFC. Each mode also says whether the electrolytic capacitor is fitted.
+- The buck voltage-mode example asks for a 20 to 60 V DC supply.
+- OwnModels holds PLECS and Simscape models. No Pulsim model of the Twist was found; Core2's `full_model.pulsim` is the uSolarVerter.
