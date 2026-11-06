@@ -33,17 +33,37 @@ flowchart LR
   TR --> CMP["Requirement vs simulation vs measurement"]
 ```
 
-## The five converter blocks
+## The five converter blocks and the environment
 
-As stated in round 1. Block boundaries are still being questioned (round 2).
+Boundaries as decided in round 2 (see the [glossary](../GLOSSARY.md) and Luiz's [reference drawing](images/five-blocks-reference.png)). Thick arrows carry energy, thin arrows carry signals, dotted arrows are auxiliary supply.
 
 ```mermaid
 flowchart LR
-  P[Power] -- "currents, voltages" --> M[Measurement]
-  M -- "conditioned signals" --> C[Control]
-  C -- PWM --> D[Driver]
-  D -- "gate commands" --> P
-  F[Feeder] -. "auxiliary energy" .-> M
-  F -. "auxiliary energy" .-> C
-  F -. "auxiliary energy" .-> D
+  subgraph ENV1["Environment"]
+    SRC["energy in"]
+  end
+  subgraph CONV["Converter"]
+    subgraph PWR["Power part · power ground"]
+      P["Power<br/>switches, filters, fuses/relays/PTCs,<br/>connectors, thermal, hot side of sensors"]
+      D["Driver<br/>PWM to gate, bootstrap or not,<br/>switch-dependent"]
+    end
+    subgraph DIG["Control part · digital ground"]
+      M["Measurement<br/>conditioning, amplification<br/>up to the MCU pin"]
+      C["Control<br/>MCU, ADCs, comms, PWM,<br/>relay and trip commands"]
+    end
+    A["Auxiliary power supply (feeder)<br/>auto-start, filtering, protection"]
+  end
+  subgraph ENV2["Environment"]
+    LOAD["energy out"]
+    EXT["outside world<br/>(PC, instruments, networks)"]
+  end
+  SRC ==> P ==> LOAD
+  P -- signals --> M --> C -- PWM --> D -- gate --> P
+  C <-- data --> EXT
+  P ==> A
+  A -.-> M
+  A -.-> C
+  A -.-> D
 ```
+
+The isolation barrier is not drawn: where it falls depends on the converter type and the standards it must meet.

@@ -4,4 +4,4 @@ Design, Code and Lab all read and write a single converter project instead of be
 
 ## Consequences
 
-- Every converter project is described with five converter blocks: power, measurement, control, driver and feeder.
+- Every converter project is described with five converter blocks: power, measurement, control, driver and auxiliary power supply (see the glossary for their boundaries, and [the reference drawing](../images/five-blocks-reference.png)).

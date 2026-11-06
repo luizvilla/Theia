@@ -30,3 +30,14 @@ Critique raised before round 1: the three workbenches were split by tool rather 
 - Most v1 testers do not know OwnTech, so the first-run experience cannot expose PlatformIO, Zephyr or the raw file tree.
 - The five-block description raises boundary questions: which block owns the ADC, PWM generation and dead time; whether "feeder" is the right word; where the source and load sit.
 - If v1 is Twist-only, the hardware is fixed, and it is unclear what the Design workbench designs.
+
+## Round 2 (2026-11-06)
+
+| # | Question | Recommendation | Answer | Recorded in |
+|---|---|---|---|---|
+| Q7 | Where are the block boundaries? | At the pins; whole MCU in Control. | Power: switches, filters, safety devices (fuses, relays, PTCs), connectors, thermal interfaces, hot side of sensors. Measurement: conditioning/amplification up to the MCU pin. Control: MCU, ADCs, industrial informatics incl. outside communication, PWM generation, relay/trip actuation. Driver: PWM to switches, bootstrapped or not, switch-dependent. Feeder: centre, auto-start, filtering for a quiet DGND, protection. The isolation barrier's place depends on converter type and standards. | glossary, [reference drawing](images/five-blocks-reference.png) |
+| Q8 | Rename feeder? | Auxiliary supply; describe only in v1. | Yes, **auxiliary power supply (APS)**. Luiz will keep saying "feeder" for a while. | glossary |
+| Q9 | Add an Environment outside the converter? | Yes: source, load, instruments; comms stay in Control. | Yes. Power flows from somewhere to somewhere; the outside-world link through Control is missing from the drawing. "Control" may need a better name. A second, non-canonical reference drawing was supplied. | glossary, [reference drawing](images/environment-reference-software-defined-converter.png) |
+| Q10 | Twist-only, no hardware sizing in v1? | Yes. | **No.** Either expose the Twist's sizing or start from the Ownverter (no output filter). The user study must give feedback on Design's breadth and depth. | [ADR 0006](adr/0006-design-workbench-includes-hardware-sizing.md) |
+| Q11 | Desktop only for v1? | Yes. | Yes, as frictionless as possible. | [ADR 0007](adr/0007-desktop-only-v1.md) |
+| Q12 | Block diagram as home, IDE opt-in? | Yes, like Arduino IDE 2. | Yes. It must be a landing page that makes people want to go on. | glossary (Home) |
