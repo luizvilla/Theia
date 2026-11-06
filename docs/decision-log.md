@@ -101,3 +101,29 @@ Twist facts gathered from `~/Documents/HARDWARE/TWIST` (v1.4.3, last commit 2025
 - Operating modes come from the getting-started guide: buck (HIGH in, LOW out), independent, boost (LOW in, HIGH out), single-phase buck inverter, buck PFC. Each mode also says whether the electrolytic capacitor is fitted.
 - The buck voltage-mode example asks for a 20 to 60 V DC supply.
 - OwnModels holds PLECS and Simscape models. No Pulsim model of the Twist was found; Core2's `full_model.pulsim` is the uSolarVerter.
+
+## Round 6 (2026-11-07)
+
+Luiz's framing: the ThingSet serial example in Core4 is the basis of the work. It is assumed to cover buck and boost already, and will be extended to inverter operation.
+
+| # | Question | Recommendation | Answer | Recorded in |
+|---|---|---|---|---|
+| Q37 | Layers named Specification · Build · Verification? | Yes ("evidence" is a false friend in French). | Yes. | glossary |
+| Q38 | Virtual Twist (host version of the API)? | Yes. | Objects: it would not test the real API, and the Theia app would have to maintain a copy of the API. Counter-proposal: extra elements in the API itself, also compiled, that let measurements come from the simulation. **Adopted.** | [ADR 0016](adr/0016-simulation-backend-inside-the-core-api.md), glossary |
+| Q39 | Board rating vs mission envelope? | Yes. | Yes. | glossary |
+| Q40 | Board description in the hardware repo? | Yes. | Yes. Where does that repo live, is it shipped, can it be added via git to import any board with a standard description, and can the API's `.dts` be used? | [ADR 0017](adr/0017-board-descriptions-in-hardware-repos.md) |
+| Q41 | Check the Twist plant model against the bench first? | Yes. | Yes; write a test procedure for the model, as done for the model tests in Core2. | this log |
+| Q42 | Mission files next to each example? | Yes. | Prefers one generic firmware based on the ThingSet serial example, giving maximum flexibility on the Twist. Missions would put that firmware into a given state. This avoids many examples with different communication tasks and single-character serial commands. **Follow-up in round 7.** | — |
+| Q43 | Merge Core4's branch into Core main or pin it? | Merge if within reach. | Asked whether Core4 changes the core or only adds an app on top, since Core holds an empty `main` and project specifics could live in `app.conf`. | finding below |
+| Q44 | Start from the Theia IDE template at the current Theia release? | Yes. | Yes. | this log |
+| Q45 | Installer bundles PlatformIO packages for offline first build? | Yes. | Yes. | this log |
+
+Findings for round 6:
+
+- **Core4 (`serial_thingset_example_modular`) is an app on top of Core, with three leaks.** It is based on OwnTech `main` at `294dfb2` (2026-07-30), carries 38 commits, and is one commit behind OwnTech `main`. Nearly all changes are in `src/`: `app.conf` (enables ThingSet, shell and serial; switches off logging), `app.overlay`, `main.cpp`, `thingset_callbacks.cpp`, `user_data_objects.*`, the scope capture, and Python/MATLAB tools with tests. Three changes reach Core itself:
+  - `zephyr/CMakeLists.txt`: changes the shield to `twist_v1_4_2` and lists the app's extra sources;
+  - `platformio.ini`;
+  - `owntech/scripts/pre_bootloader_serial.py`: picks the right interface on composite USB devices and refuses to fall back to another board. This is a genuine Core fix and deserves its own upstream PR.
+- **The Core4 firmware is a configurable tester.** Each power leg has `buck`/`boost` flags, duty cycle, reference, a tracked variable, capacitor and driver switches, phase shift, rising and falling dead time, and `v_max`. There are six calibration channels with gain and offset, plus board metadata (version, serial number). Its modes are `IDLE`, `POWER_ON` and `POWER_OFF`. Inverter operation is not there yet.
+- **The Twist devicetree** (`sensors.dtsi`, `twist_v1_4_2.overlay`) already describes every sensor, its ADC channels and its default gain and offset. It does not hold ratings, component values, modes or isolation.
+- **Zephyr dependencies of the API upper layers:** the shield API (about 3.3k lines) uses `kernel.h`, the console, and many devicetree macros. The task API uses `kernel.h` (threads, sleep, yield, work queues). The spin API (about 6.7k lines) also uses DMA, GPIO, UART, CDC-ACM, MCUboot and reboot.

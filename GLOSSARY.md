@@ -67,7 +67,7 @@ _Avoid_: input, output, source, load (these change with power direction)
 ## Safety
 
 **Safety envelope**:
-The maximum voltage, current and temperature allowed at each power port, declared once per converter project and enforced by firmware trips, instrument limits, simulator checks and component ratings.
+The maximum voltage, current and temperature allowed at each power port, at or below the board ratings, declared once per converter project and enforced by firmware trips, instrument limits, simulator checks and component ratings.
 _Avoid_: limits (unqualified), ratings (those belong to components)
 
 **Protection chain**:
@@ -117,5 +117,27 @@ A guided path from the landing page that opens a pre-filled converter project, b
 _Avoid_: tutorial, lesson, example (the example is what a mission is built on)
 
 **Home**:
-The landing view of a converter project: its block diagram, from which each block opens what belongs to it.
+The landing view of a converter project: its block diagram, from which each block opens what belongs to it, shown in one of three layers.
 _Avoid_: dashboard, start page
+
+**Specification layer** / **Build layer** / **Verification layer**:
+The three layers of Home: what the converter must do (requirements, safety envelope), what it is (blocks, ports, firmware), and what has been shown (each requirement coloured by its latest test record).
+_Avoid_: evidence (a false friend in French), data, validation (in V-model terms validation is the final check against the need, not a per-requirement check)
+
+## Boards and models
+
+**Board description**:
+The versioned file, kept with a board's hardware sources, that states the board's facts the firmware's devicetree does not: port ratings, component values, operating modes and which bridge blocks are isolated.
+_Avoid_: datasheet (that is a document for people), board file, BSP
+
+**Board rating**:
+A limit of the hardware itself, taken from the board description and not editable in a converter project.
+_Avoid_: envelope (that is the project's chosen limit, at or below the rating)
+
+**Plant model**:
+The simulated power block and environment that the firmware acts on when the target is the simulator.
+_Avoid_: simulation, model (unqualified), digital twin
+
+**Simulation backend**:
+The part of the OwnTech API that, when the target is the simulator, takes measurements from and gives PWM commands to the plant model instead of the hardware, so the rest of the API runs unchanged.
+_Avoid_: virtual board, mock API, emulator
