@@ -55,3 +55,20 @@ Critique raised before round 1: the three workbenches were split by tool rather 
 | Q19 | Online data platform out of v1? | Yes. | Yes. The second drawing was only a reference. | this log |
 | Q20 | AI autonomy levels? | Free / confirm / never. | Yes, plus: a human can grant the AI the right to run automated tests, by setting the bench current and voltage limits after the AI has proposed and confirmed them. | [ADR 0010](adr/0010-ai-agent-autonomy-levels.md) |
 | Q21 | Landing page with guided missions? | Missions, recent, blank. | Tends to agree; asked how competitors do it. Answered in round 4. | — |
+
+## Round 4 (2026-11-06)
+
+Competitor landing pages (answer to Q21): CCS 20 shows a Get Started view that detects a connected TI board and points to Resource Explorer examples (TI advises against blank projects). Simulink's Start Page has templates, examples and a Learn tab with the ~3 h Onramp course that saves progress. Typhoon has a launcher plus Example Explorer and the online HIL Academy. Arduino IDE 2 opens a blank sketch with examples in a menu. PLECS and imperix rely on demo models and online knowledge bases. No one offers guided paths that end in a real hardware result.
+
+| # | Question | Recommendation | Answer | Recorded in |
+|---|---|---|---|---|
+| Q13 | Name of the block that runs control? | Controller block; "control law" for the discipline. | Controller is fine. | glossary |
+| Q22 | Envelope, protection, isolation as three concepts; isolation as an attribute of the bridge blocks? | Yes. | Yes, three separate concepts. But how are they handled without three added elements that make it too complex? **Handling open.** | glossary (Bridge block, Isolation barrier) |
+| Q23 | Safety as a red overlay in a requirements layer, not a block? | Two layers: build and requirements. | Likes two layers, but things tend to come in threes: what is the third layer, if any? **Open.** | — |
+| Q24 | One curated low-voltage teaching profile, indicative only? | Yes; which standards do colleagues use? | OK. Teaching colleagues do not work with specific standards, so this is an added advantage. | [ADR 0009](adr/0009-one-safety-envelope.md) |
+| Q25 | Unattended-run right granted per campaign, limits read back, revoked by any trip? | Yes. | Yes. | [ADR 0010](adr/0010-ai-agent-autonomy-levels.md) |
+| Q26 | Mock-up as the real Theia app with canned data that turns into the skeleton? | Yes, with a fixed date. | Yes. A few discussions with colleagues, and a **working skeleton in about one month** to test with students. | [ADR 0012](adr/0012-mock-up-grows-into-skeleton.md) |
+| Q27 | Which OS? | Windows + Linux. | Mostly Windows, PhD students included; Linux too. macOS later (one client uses it, not her students). | [ADR 0011](adr/0011-windows-first-linux-second.md) |
+| Q28 | Board detection and saved mission progress? | Yes. | Yes. Also check the hash of the code on the board (as in the test bench) and ship pre-built binaries (as modular does). | this log |
+
+New question raised by Luiz: should modular (ThingSet, binary upload, dashboards, buttons) inspire the Lab? Findings: modular is an Electron + Freeboard desktop app with serial and ThingSet-over-CAN data sources, uPlot plots, CSV recording, mcumgr flashing and JSON dashboards. A Theia migration of modular was already started (`owntech_extension_overhaul` branch, Theia 1.71.1, Electron app, `modular-dashboard` plugin, implementation journal for phases 0 to 2). `test_bench_code` ships a pre-built `spin_code_compiled.mcuboot.bin`. Taken up in round 5.

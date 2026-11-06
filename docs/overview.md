@@ -40,24 +40,26 @@ Boundaries as decided in round 2 (see the [glossary](../GLOSSARY.md) and Luiz's 
 ```mermaid
 flowchart LR
   subgraph ENV1["Environment"]
-    SRC["energy in"]
+    SRC["supply / battery / grid<br/>(or its model)"]
   end
   subgraph CONV["Converter"]
-    subgraph PWR["Power part · power ground"]
+    subgraph PWR["Power side · power ground"]
       P["Power<br/>switches, filters, fuses/relays/PTCs,<br/>connectors, thermal, hot side of sensors"]
+    end
+    subgraph BR["Bridge blocks · an isolation barrier can only cross here"]
+      M["Measurement<br/>conditioning, amplification<br/>up to the controller pin"]
       D["Driver<br/>PWM to gate, bootstrap or not,<br/>switch-dependent"]
+      A["Auxiliary power supply (feeder)<br/>auto-start, filtering, protection"]
     end
-    subgraph DIG["Control part · digital ground"]
-      M["Measurement<br/>conditioning, amplification<br/>up to the MCU pin"]
-      C["Control<br/>MCU, ADCs, comms, PWM,<br/>relay and trip commands"]
+    subgraph DIG["Controller side · digital ground"]
+      C["Controller<br/>MCU, ADCs, comms, PWM,<br/>relay and trip commands"]
     end
-    A["Auxiliary power supply (feeder)<br/>auto-start, filtering, protection"]
   end
   subgraph ENV2["Environment"]
-    LOAD["energy out"]
+    LOAD["load / battery / grid<br/>(or its model)"]
     EXT["outside world<br/>(PC, instruments, networks)"]
   end
-  SRC ==> P ==> LOAD
+  SRC <==>|"power port"| P <==>|"power port"| LOAD
   P -- signals --> M --> C -- PWM --> D -- gate --> P
   C <-- data --> EXT
   P ==> A
@@ -66,4 +68,4 @@ flowchart LR
   A -.-> D
 ```
 
-The isolation barrier is not drawn: where it falls depends on the converter type and the standards it must meet.
+The isolation barrier is not drawn as a line: it is recorded as whether each bridge block is isolated, and with which insulation class. Power ports carry energy in either direction; their voltage side (high or low) is a property, not a name. On the Twist the ports are HIGH, LOW1 and LOW2.

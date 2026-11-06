@@ -15,7 +15,7 @@ _Avoid_: spec (unqualified), target (reserved, see Target)
 ## Converter blocks
 
 **Converter block**:
-One of the five functional parts every converter is described with: power, measurement, control, driver and auxiliary power supply.
+One of the five functional parts every converter is described with: power, measurement, controller, driver and auxiliary power supply.
 _Avoid_: module, subsystem, stage (unqualified)
 
 **Power block**:
@@ -23,27 +23,35 @@ The switches, the filters, the protection devices (fuses, relays, PTCs), the pow
 _Avoid_: power stage (acceptable in speech), plant (reserved for the simulated model)
 
 **Measurement block**:
-The circuits that receive the sensor signals, condition and amplify them, and deliver them to the microcontroller pins.
+The circuits that receive the sensor signals, condition and amplify them, and deliver them to the controller block's pins.
 _Avoid_: sensing, acquisition, sensors (the hot side of the sensors belongs to the power block)
 
-**Control block**:
-The microcontroller with its ADCs, everything related to industrial informatics including communication with the outside world, PWM generation, and the commands that actuate relays and trips.
-_Avoid_: controller (when meaning the hardware), MCU (unqualified). _Name under review in round 3._
+**Controller block**:
+The device that runs the control law, usually a microcontroller with its ADCs, together with communication with the outside world, PWM generation and the commands that actuate relays and trips; it may also be an analog controller IC.
+_Avoid_: control block, control (unqualified), industrial informatics block, MCU (unqualified)
+
+**Control law**:
+The mathematical rule, designed in the Design workbench, by which the controller block turns measurements into commands.
+_Avoid_: control (unqualified), controller (when meaning the law), compensator (acceptable for a linear control law)
 
 **Driver block**:
 The hardware that receives PWM signals and switches the power switches, bootstrapped or not; it is chosen for, and depends on, the switches it drives.
 _Avoid_: gate stage, driver (when meaning a software driver)
 
 **Auxiliary power supply (APS)**:
-The block at the centre that takes a small amount of energy and supplies the measurement, control and driver blocks, including start-up, filtering that keeps the digital ground quiet, and its own protection.
+The block at the centre that takes a small amount of energy and supplies the measurement, controller and driver blocks, including start-up, filtering that keeps the digital ground quiet, and its own protection.
 _Avoid_: feeder (in writing; Luiz's long-standing name for it, still understood in speech), aux, housekeeping supply
 
+**Bridge block**:
+The measurement, driver or auxiliary power supply block: the three blocks that connect the power side to the controller side, and the only ones an isolation barrier can cross.
+_Avoid_: interface block
+
 **Isolation barrier**:
-The galvanic separation between power and control sides; where it sits among the blocks depends on the converter type and the applicable standards.
-_Avoid_: isolation (unqualified)
+The galvanic separation between the power side and the controller side, recorded as whether each bridge block is isolated and with which insulation class; where it falls depends on the converter type and the applicable standards.
+_Avoid_: isolation (unqualified), insulation (when meaning the barrier as a whole)
 
 **Power ground** / **Digital ground**:
-The two ground references of a converter: the power side's and the control side's.
+The two ground references of a converter: the power side's and the controller side's.
 _Avoid_: GND (unqualified), earth (that is protective earth)
 
 ## Environment
@@ -73,11 +81,11 @@ One of three views of the converter project, each devoted to one activity: Desig
 _Avoid_: page, perspective (Theia's implementation term), mode
 
 **Design workbench**:
-Where requirements are set and the converter's hardware and control are designed with models that do not run the firmware.
+Where requirements are set and the converter's hardware and control law are designed with models that do not run the firmware.
 _Avoid_: simulation workbench
 
 **Code workbench**:
-Where the firmware that runs on the control block is written.
+Where the firmware that runs on the controller block is written.
 _Avoid_: firmware IDE
 
 **Lab workbench**:
@@ -85,7 +93,7 @@ Where test procedures run the real firmware against a target and file test recor
 _Avoid_: test bench (that is the physical setup), experiment workbench
 
 **Target**:
-Where the firmware runs during a test campaign: inside the simulator against the plant model, or on the real control block against real hardware.
+Where the firmware runs during a test campaign: inside the simulator against the plant model, or on the real controller block against real hardware.
 _Avoid_: platform, backend, execution mode
 
 **Home**:
