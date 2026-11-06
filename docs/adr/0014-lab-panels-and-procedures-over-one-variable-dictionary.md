@@ -1,0 +1,3 @@
+# Lab work is panels and procedures over one ThingSet variable dictionary
+
+The Lab workbench has two kinds of artifacts. Procedures are Python scripts that run a fixed sequence and file test records (the TyphoonTest model). Panels are modular-style views that show variables and let the user set variables or launch procedures (the imperix Cockpit / Typhoon HIL SCADA model); panels contain no conditions or sequences, so ADR 0004 holds. Both, as well as the AI agent, test records and safety-envelope readback, use the variable dictionary the firmware exposes through ThingSet. The simulator target exposes the same dictionary, so a panel or procedure works unchanged on Pulsim and on the board, and the dictionary can be amended per development without touching the tools.

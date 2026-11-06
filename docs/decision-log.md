@@ -72,3 +72,23 @@ Competitor landing pages (answer to Q21): CCS 20 shows a Get Started view that d
 | Q28 | Board detection and saved mission progress? | Yes. | Yes. Also check the hash of the code on the board (as in the test bench) and ship pre-built binaries (as modular does). | this log |
 
 New question raised by Luiz: should modular (ThingSet, binary upload, dashboards, buttons) inspire the Lab? Findings: modular is an Electron + Freeboard desktop app with serial and ThingSet-over-CAN data sources, uPlot plots, CSV recording, mcumgr flashing and JSON dashboards. A Theia migration of modular was already started (`owntech_extension_overhaul` branch, Theia 1.71.1, Electron app, `modular-dashboard` plugin, implementation journal for phases 0 to 2). `test_bench_code` ships a pre-built `spin_code_compiled.mcuboot.bin`. Taken up in round 5.
+
+## Round 5 (2026-11-06)
+
+| # | Question | Recommendation | Answer | Recorded in |
+|---|---|---|---|---|
+| Q22/Q23 follow-up | Third layer "Evidence"? | Requirements / Build / Evidence. | Likes the idea, doubts the word: "Evidence"? "Data"? "Validation"? Maybe "Specs, Build, Validation", or V-model naming. **Naming open.** | — |
+| Q29 | One safety panel: envelope edited, isolation switches suggested, protection checklist derived? | Yes. | Yes. | this log |
+| Q30 | Three layers on Home, evidence coloured by latest test record? | Yes. | Yes (naming open, see above). | this log |
+| Q31 | One app with modular? | Yes, built on modular's Theia branch, agree with Jean. | Yes, this app aggregates the whole workflow and will retire modular; a modular-like part goes into Lab. The Theia experiment in the modular folder is abandoned. Jean follows modular's progress. | [ADR 0013](adr/0013-one-app-retires-modular.md) |
+| Q32 | Panels and procedures, no logic in panels? | Yes. | Yes: procedures are like scripts; panels monitor incoming data and trigger outgoing signals. | [ADR 0014](adr/0014-lab-panels-and-procedures-over-one-variable-dictionary.md), glossary |
+| Q33 | ThingSet as the single variable dictionary, simulator speaks it too? | Yes. | Yes; makes it easy to amend data for a given development. | [ADR 0014](adr/0014-lab-panels-and-procedures-over-one-variable-dictionary.md), glossary |
+| Q34 | Build identity, comparison on Home, pre-built mission binaries? | Yes. | Yes. | glossary |
+| Q35 | How do Windows students compile for the simulator? | Bundle a portable host compiler. | (a), bundle it. Asked whether this is a solved problem or a real limitation. | [ADR 0015](adr/0015-bundled-host-compiler.md) |
+| Q36 | One mission for the skeleton? | "Hold 12 V on the Twist". | One mission, based on the existing Twist buck voltage-mode example (`examples/TWIST/DC_DC/buck_voltage_mode`). Basing missions on examples opens the way to turning all examples into missions later. | glossary (Mission) |
+
+Findings after round 5:
+
+- **Windows is solved, not yet implemented.** Pulsim 2.0.0 ships `win_amd64` wheels and loads the firmware block with `ctypes.CDLL`, which accepts a `.dll`. What blocks Windows is Core2's `build.sh` (bash, `g++ -shared`, `-fsanitize=undefined`) and the absence of a compiler on student machines. Pulsim's inline compile path also assumes GCC-style flags and names its cache files `.so`, which is harmless on Windows but worth an upstream fix.
+- **The buck example has no hardware-free seam.** Its control law sits in `loop_critical_task` and calls `shield.sensors` and `shield.power` directly, and its user interface is a serial console menu, not ThingSet. Core2's `controlStep` seam (its ADR 0001) was added by hand for one application. The OwnTech examples repository holds 57 example folders. Taken up in round 6.
+- ThingSet over serial exists in Core4 on branch `serial_thingset_example_modular`.

@@ -96,6 +96,26 @@ _Avoid_: test bench (that is the physical setup), experiment workbench
 Where the firmware runs during a test campaign: inside the simulator against the plant model, or on the real controller block against real hardware.
 _Avoid_: platform, backend, execution mode
 
+**Panel**:
+A Lab view for hands-on operation of a target: it shows incoming variables and lets the user set variables or launch a procedure, and holds no logic of its own.
+_Avoid_: dashboard (modular's term, acceptable in speech), SCADA, GUI
+
+**Procedure**:
+A Python script that drives a target through a fixed sequence and files a test record.
+_Avoid_: script (unqualified), test (unqualified), supervisor
+
+**Variable dictionary**:
+The list of variables a firmware exposes, with name, unit and access, shared by panels, procedures, the AI agent, test records and the simulator target.
+_Avoid_: object tree (ThingSet's term), register map
+
+**Build identity**:
+The git commit, dirty flag and binary hash compiled into a firmware and reported by the board, used to tell whether the board runs the project's code.
+_Avoid_: firmware version (unqualified), hash (unqualified)
+
+**Mission**:
+A guided path from the landing page that opens a pre-filled converter project, built on an existing OwnTech example, and ends in a real result.
+_Avoid_: tutorial, lesson, example (the example is what a mission is built on)
+
 **Home**:
 The landing view of a converter project: its block diagram, from which each block opens what belongs to it.
 _Avoid_: dashboard, start page

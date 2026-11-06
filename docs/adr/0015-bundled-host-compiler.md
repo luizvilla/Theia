@@ -1,0 +1,3 @@
+# The installer bundles a portable host C/C++ compiler
+
+The simulator target runs the user's firmware code inside Pulsim as a native shared library, which needs a host compiler. Windows students have none, so the installer bundles a portable compiler (llvm-mingw or equivalent) and the firmware-block build is rewritten as a cross-platform script producing a `.dll` on Windows and a `.so` on Linux. Requiring WSL was rejected as too much friction for students; compiling on a server was rejected because it breaks local-first use and needs a network. This is the first technical risk tackled for the one-month skeleton.
