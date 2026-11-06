@@ -81,8 +81,8 @@ New question raised by Luiz: should modular (ThingSet, binary upload, dashboards
 | Q29 | One safety panel: envelope edited, isolation switches suggested, protection checklist derived? | Yes. | Yes. | this log |
 | Q30 | Three layers on Home, evidence coloured by latest test record? | Yes. | Yes (naming open, see above). | this log |
 | Q31 | One app with modular? | Yes, built on modular's Theia branch, agree with Jean. | Yes, this app aggregates the whole workflow and will retire modular; a modular-like part goes into Lab. The Theia experiment in the modular folder is abandoned. Jean follows modular's progress. | [ADR 0013](adr/0013-one-app-retires-modular.md) |
-| Q32 | Panels and procedures, no logic in panels? | Yes. | Yes: procedures are like scripts; panels monitor incoming data and trigger outgoing signals. | [ADR 0014](adr/0014-lab-panels-and-procedures-over-one-variable-dictionary.md), glossary |
-| Q33 | ThingSet as the single variable dictionary, simulator speaks it too? | Yes. | Yes; makes it easy to amend data for a given development. | [ADR 0014](adr/0014-lab-panels-and-procedures-over-one-variable-dictionary.md), glossary |
+| Q32 | Panels and procedures, no logic in panels? | Yes. | Yes: procedures are like scripts; panels monitor incoming data and trigger outgoing signals. | [ADR 0014](adr/0014-lab-panels-and-procedures-over-one-data-object-table.md), glossary |
+| Q33 | ThingSet as the single variable dictionary, simulator speaks it too? | Yes. | Yes; makes it easy to amend data for a given development. | [ADR 0014](adr/0014-lab-panels-and-procedures-over-one-data-object-table.md), glossary |
 | Q34 | Build identity, comparison on Home, pre-built mission binaries? | Yes. | Yes. | glossary |
 | Q35 | How do Windows students compile for the simulator? | Bundle a portable host compiler. | (a), bundle it. Asked whether this is a solved problem or a real limitation. | [ADR 0015](adr/0015-bundled-host-compiler.md) |
 | Q36 | One mission for the skeleton? | "Hold 12 V on the Twist". | One mission, based on the existing Twist buck voltage-mode example (`examples/TWIST/DC_DC/buck_voltage_mode`). Basing missions on examples opens the way to turning all examples into missions later. | glossary (Mission) |
@@ -127,3 +127,17 @@ Findings for round 6:
 - **The Core4 firmware is a configurable tester.** Each power leg has `buck`/`boost` flags, duty cycle, reference, a tracked variable, capacitor and driver switches, phase shift, rising and falling dead time, and `v_max`. There are six calibration channels with gain and offset, plus board metadata (version, serial number). Its modes are `IDLE`, `POWER_ON` and `POWER_OFF`. Inverter operation is not there yet.
 - **The Twist devicetree** (`sensors.dtsi`, `twist_v1_4_2.overlay`) already describes every sensor, its ADC channels and its default gain and offset. It does not hold ratings, component values, modes or isolation.
 - **Zephyr dependencies of the API upper layers:** the shield API (about 3.3k lines) uses `kernel.h`, the console, and many devicetree macros. The task API uses `kernel.h` (threads, sleep, yield, work queues). The spin API (about 6.7k lines) also uses DMA, GPIO, UART, CDC-ACM, MCUboot and reboot.
+
+## Round 7 (2026-11-07)
+
+| # | Question | Recommendation | Answer | Recorded in |
+|---|---|---|---|---|
+| Q38 follow-up | (Luiz) Does the simulator need all the simulation-backend plumbing? Core2 does without it. | — | Answered in round 8: Core2 avoids it because its control logic sits in a hardware-free function. Since missions carry their own `main.cpp`, they can be written that way. | [ADR 0018](adr/0018-skeleton-simulates-a-hardware-free-control-function.md); ADR 0016 deferred |
+| Q46 | Generic chassis firmware with a control-law slot? | Yes. | Misunderstanding. The intent is that ThingSet replaces the communication task as a standard way to exchange data with the board (partly the interface with the environment, here the computer), while the code stays mostly the examples' code. Data objects shown as a table that can be amended and that generates more data objects. | [ADR 0019](adr/0019-thingset-replaces-the-communication-task.md), glossary (Data object, Data object table) |
+| Q47 | Where does the firmware live? | Examples repo. | (b) examples repo; for the mock-up, Luiz's fork of the examples. | this log |
+| Q48 | Mission = one file describing a firmware state? | Yes. | The mission holds all that **plus its `main.cpp`**, so students have firmware to iterate on. This also helps pull the existing examples into the app later. | glossary (Mission) |
+| Q49 | Buck only in the skeleton? | Buck, boost stretch, inverter later. | Buck only for now. | this log |
+| Q50 | Four-week plan with a fallback rule? | Yes. | Call them four **steps**, not weeks. If step 1 stalls that is fine; the month is not a tight deadline. | [plan](plan.md) |
+| Q51 | Who builds it? | Luiz + AI, one PhD student on the plant model, ask Jean about panels. | Luiz builds it all, and asks the others to test it. | this log |
+| Q52 | Study measures: step completion and time, SUS, three open questions on Design, think-aloud observer? | Yes. | Yes. | [plan](plan.md) |
+| Q53 | Interface language? | English UI, missions in French and English. | English only; students will adapt. | this log |

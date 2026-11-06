@@ -1,0 +1,3 @@
+# Lab work is panels and procedures over one ThingSet data object table
+
+The Lab workbench has two kinds of artifacts. Procedures are Python scripts that run a fixed sequence and file test records (the TyphoonTest model). Panels are modular-style views that show data objects and let the user set data objects or launch procedures (the imperix Cockpit / Typhoon HIL SCADA model); panels contain no conditions or sequences, so ADR 0004 holds. Both, as well as the AI agent, test records and safety-envelope readback, use the data object table the firmware exposes through ThingSet. The simulator target exposes the same data objects, so a panel or procedure works unchanged on Pulsim and on the board, and the table can be amended per development without touching the tools.

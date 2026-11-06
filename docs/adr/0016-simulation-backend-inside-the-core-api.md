@@ -1,3 +1,7 @@
+---
+status: proposed, deferred until after the skeleton (see ADR 0018)
+---
+
 # The simulator target uses a simulation backend inside the Core API, not a copy of the API
 
 To run unmodified application code on the simulator target, the OwnTech Core API gains a simulation backend at its lowest layer: alternative implementations of the hardware drivers (ADC, HRTIM, timers, comparator, DAC, flash) that exchange measurements and PWM commands with the plant model, plus a small host shim for the Zephyr kernel calls the upper layers use. Everything above the drivers (shield, spin, task and safety APIs, calibration) is the real code. The backend lives in the Core repository next to the real drivers and is maintained by the Core team, not by the Theia application.

@@ -1,0 +1,3 @@
+# ThingSet replaces each firmware's own communication task; the rest of the code stays specific
+
+Every mission firmware talks to the computer through ThingSet instead of its own communication task (the OwnTech examples use single-character serial menus). The control and application code stays specific to each mission, as in the examples. This gives one standard way to exchange data with the board, which is the controller block's interface with the environment, without forcing a single generic firmware. A generic, configure-only firmware was considered (Core4's tester) and rejected as the mission basis, because students must have firmware code to iterate on. Data objects are shown as an editable table, and adding a row generates a new data object in the firmware.
