@@ -141,3 +141,17 @@ Findings for round 6:
 | Q51 | Who builds it? | Luiz + AI, one PhD student on the plant model, ask Jean about panels. | Luiz builds it all, and asks the others to test it. | this log |
 | Q52 | Study measures: step completion and time, SUS, three open questions on Design, think-aloud observer? | Yes. | Yes. | [plan](plan.md) |
 | Q53 | Interface language? | English UI, missions in French and English. | English only; students will adapt. | this log |
+
+## Round 8 (2026-11-07)
+
+Answer to Luiz's Q38 follow-up: Core2 needs no plumbing because its control logic is in `controlStep()`, which calls no `shield.*` functions. Only that function is compiled into Pulsim. The buck example calls `shield.sensors` and `shield.power` inside `loop_critical_task`, so running it unmodified would need the API on the host. Missions carry their own `main.cpp` (Q48), so they are written Core2-style and the plumbing is deferred (ADR 0018).
+
+| # | Question | Recommendation | Answer | Recorded in |
+|---|---|---|---|---|
+| Q54 | Core2 testing vocabulary and tooling, plus L2 for the bench? | Yes. | Yes. | [ADR 0020](adr/0020-core2-testing-vocabulary-with-l2.md), glossary |
+| Q55 | Each requirement has at least one test case, and the link is checked? | Yes. | Yes. | [ADR 0020](adr/0020-core2-testing-vocabulary-with-l2.md) |
+| Q56 | Firmware scope only for bench waveforms in the skeleton? | Yes. | Yes. | [ADR 0020](adr/0020-core2-testing-vocabulary-with-l2.md), glossary |
+| Q57 | Design: analytic Python models visible to students, with a Pulsim AC cross-check? | Yes. | Yes. | this log |
+| Q58 | `data_objects.yaml` as source, C generated? | (a). | (a), so a table can be built from the YAML for easier visualisation. | [ADR 0021](adr/0021-data-objects-yaml-generates-c.md) |
+| Q59 | AI provider and who pays? | University key with a cap; AI optional. | Suggests a local AI when a student has no API key, rather than sharing his own key. **Follow-up in round 9.** | — |
+| Q60 | Licence and name? | LGPL-2.1, OwnStudio. | LGPL-2.1, OwnStudio. | [ADR 0022](adr/0022-name-and-licence.md) |

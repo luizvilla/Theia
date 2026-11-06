@@ -1,4 +1,4 @@
-# Power electronics workbench
+# OwnStudio
 
 An application that carries one power converter from requirements to a validated prototype, through three workbenches that all work on the same converter project.
 
@@ -74,6 +74,34 @@ _Avoid_: limits (unqualified), ratings (those belong to components)
 One protective function traced across the blocks it passes through, from the quantity sensed to the action taken, with its threshold.
 _Avoid_: protection (unqualified), safety loop
 
+## Testing
+
+Terms taken from Core2's testing vocabulary, with level L2 added for the bench.
+
+**Test procedure**:
+The document or script that defines test cases, the order in which they run, and how their results are recorded.
+_Avoid_: test plan, test spec
+
+**Test case**:
+One identified check with a fixed setup, stimulus and numeric pass criteria, verifying one or more requirements.
+_Avoid_: test, scenario (when meaning the whole check)
+
+**Test campaign**:
+One run of a set of test cases against a single build identity and a single target.
+_Avoid_: test session, test run (when meaning the whole set)
+
+**Test record**:
+The filed evidence of a test campaign: setup, versions, per-criterion verdicts and raw data.
+_Avoid_: report, log, result file
+
+**Test level**:
+How much of the system a test case exercises: L0 one object with synthetic inputs, L1 closed loop against the plant model on the simulator target, L2 closed loop on the bench.
+_Avoid_: stage, phase
+
+**Firmware scope**:
+A triggered capture buffer inside the firmware that records fast signals from the board's own sensors and is downloaded after the event.
+_Avoid_: oscilloscope (that is an instrument), scope (unqualified)
+
 ## Workbenches
 
 **Workbench**:
@@ -109,7 +137,7 @@ One named value a firmware exchanges with the outside world through ThingSet, wi
 _Avoid_: variable (unqualified), register, parameter (unqualified)
 
 **Data object table**:
-The editable table of all data objects of a firmware; it is shared by panels, procedures, the AI agent, test records and the simulator target, and adding a row adds a data object.
+The table view of all data objects of a firmware, edited by the user and stored as a text file from which the firmware's declarations are generated; it is shared by panels, procedures, the AI agent, test records and the simulator target, and adding a row adds a data object.
 _Avoid_: variable dictionary, object tree (ThingSet's term), register map
 
 **Build identity**:
