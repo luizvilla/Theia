@@ -4,6 +4,7 @@ import { inject, injectable, postConstruct } from '@theia/core/shared/inversify'
 import { Message } from '@theia/core/shared/@lumino/messaging';
 import { ReactWidget } from '@theia/core/lib/browser/widgets/react-widget';
 import { OpenerService, codicon, open } from '@theia/core/lib/browser';
+import { CommandService } from '@theia/core/lib/common';
 import { BlockKey, Mission, Port, wrap } from './mission';
 import { MissionService } from './mission-service';
 import { BoardModel } from './board-model';
@@ -45,6 +46,7 @@ export class HomeWidget extends ReactWidget {
     @inject(MissionService) protected readonly missions: MissionService;
     @inject(BoardModel) protected readonly board: BoardModel;
     @inject(OpenerService) protected readonly opener: OpenerService;
+    @inject(CommandService) protected readonly commands: CommandService;
 
     protected layer: Layer = 'build';
 
@@ -147,6 +149,7 @@ export class HomeWidget extends ReactWidget {
                     <td>{port}</td><td>{e.v_max_V ?? '—'} V</td><td>{e.i_max_A ?? '—'} A</td></tr>)}</tbody>
             </table>
             <p className='ownstudio-muted'>Teaching profile: indicative, not certification.</p>
+            <button className='theia-button' onClick={() => this.commands.executeCommand('ownstudio.safety.open')}>Open the safety panel</button>
         </>;
     }
 

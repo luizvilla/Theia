@@ -127,3 +127,18 @@ body.theia-dark .ownstudio-diagram .os-block rect { stroke: var(--ownstudio-ligh
 .ownstudio-diagram .os-isolated text { fill: #FFFFFF !important; font-size: 10px; font-weight: 700; }
 .ownstudio-diagram .os-not-isolated rect { fill: var(--theia-editor-background); stroke: var(--ownstudio-persimmon); }
 .ownstudio-diagram .os-not-isolated text { fill: var(--ownstudio-persimmon) !important; font-size: 10px; font-weight: 700; }
+
+/* Safety panel */
+.ownstudio-safety-body { max-width: 980px; }
+.ownstudio-safety-body h2 { color: var(--ownstudio-persimmon); }
+.ownstudio-safety-summary { font-size: 14px; font-weight: 700; }
+.ownstudio-safety-gaps { color: var(--ownstudio-persimmon); }
+.ownstudio-number { width: 72px; }
+.ownstudio-envelope-table td, .ownstudio-envelope-table th { padding-right: 18px; }
+.ownstudio-checklist { list-style: none; padding: 0; font-size: 13px; line-height: 1.5; }
+.ownstudio-checklist > li { margin-bottom: 10px; }
+.ownstudio-checklist ul { margin: 2px 0 0 22px; padding: 0; font-size: 12px; opacity: 0.85; }
+.ownstudio-check-covered > div .codicon { color: #2F9E60; }
+.ownstudio-check-above > div .codicon, .ownstudio-check-inactive > div .codicon { color: var(--ownstudio-persimmon); }
+.ownstudio-check-none > div .codicon, .ownstudio-check-rating > div .codicon { color: #E5484D; }
+.ownstudio-switch input { vertical-align: -2px; }

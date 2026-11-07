@@ -18,6 +18,8 @@ import { BOARD_SERVICE_PATH, BoardService } from '../common/board-protocol';
 import { MissionService } from './mission-service';
 import { BoardClientImpl, BoardModel } from './board-model';
 import { BoardContribution, BoardPreferenceContribution } from './board-contribution';
+import { SAFETY_WIDGET_ID, SafetyWidget } from './safety-widget';
+import { SafetyContribution } from './safety-contribution';
 
 export default new ContainerModule(bind => {
     bind(MissionService).toSelf().inSingletonScope();
@@ -31,6 +33,14 @@ export default new ContainerModule(bind => {
     bind(CommandContribution).toService(BoardContribution);
     bind(FrontendApplicationContribution).toService(BoardContribution);
     bind(PreferenceContribution).toConstantValue(BoardPreferenceContribution);
+
+    bind(SafetyWidget).toSelf();
+    bind(WidgetFactory).toDynamicValue(ctx => ({
+        id: SAFETY_WIDGET_ID,
+        createWidget: () => ctx.container.get(SafetyWidget),
+    })).inSingletonScope();
+    bind(SafetyContribution).toSelf().inSingletonScope();
+    bind(CommandContribution).toService(SafetyContribution);
 
     bind(OwnStudioBrandingContribution).toSelf().inSingletonScope();
     bind(FrontendApplicationContribution).toService(OwnStudioBrandingContribution);
