@@ -35,3 +35,49 @@ The same procedure on the board target; the overlay of requirement, simulation a
 - The System Usability Scale questionnaire.
 - Three open questions on the breadth and depth of the Design workbench.
 - Think-aloud notes from one observer.
+
+## Commit plan for step 1
+
+Three rules apply to every commit:
+- Each commit builds and its tests pass.
+- Nothing is pushed. You review in the morning and push yourself.
+- No commit flashes or powers hardware.
+
+A commit that can't reach a green state isn't made; the problem goes into the morning report instead. Builds run in throwaway copies in the scratchpad, so your Core checkouts are never modified.
+
+### Repository 1: `~/code/examples`, new branch `mission/buck-voltage-mode`
+
+The branch starts from local `main`. It holds the mission in `TWIST/DC_DC/buck_voltage_mode/mission/`. Your fork, `luizvilla/examples`, is the remote to push to later (Q47). Each commit message is shown in bold.
+
+| # | Commit message | What it holds | Done when |
+|---|---|---|---|
+| E1 | **mission: copy the buck voltage-mode example as the mission firmware** | `firmware/main.cpp`, `app.ini`, unchanged, as the baseline | Builds with PlatformIO against a throwaway Core copy |
+| E2 | **mission: move the control law into a hardware-free control.cpp** | `control.cpp/.h` (PI, measurements in, duty out); `main.cpp` calls it; behaviour unchanged | Builds; `control.cpp` compiles on the PC with no OwnTech or Zephyr headers |
+| E3 | **mission: L0 tests for the control law** | Tests on the PC: reference tracking, saturation at the bounds, reset | Tests pass with g++ |
+| E4 | **mission: declare data objects in YAML and generate the C** | `data_objects.yaml`, the generator script, generated ThingSet declarations, generator tests | Generator tests pass; output matches Core4's `user_data_objects` style |
+| E5 | **mission: replace the serial menu with ThingSet** | `app.conf` and `app.overlay` from Core4; the communication task removed | Builds against a throwaway copy of the Core4 ThingSet branch |
+| E6 | **mission: Twist buck plant model with model tests** | `plant/twist_buck.pulsim` (33 µH, 33 µF, 200 kHz); `design/sizing.py` as the analytic reference; model tests (DC gain, ripple, LC resonance against the analytic values) | Model tests pass in Pulsim 2.0.0 |
+| E7 | **mission: L1 step-response test of control.cpp in Pulsim** | `control.cpp` built as a C-Block, closed loop on the plant model; one test case with numeric criteria (overshoot, settling time); a test record | The L1 test runs and files a record. A failing verdict is fine if the record is correct |
+| E8 | **mission: requirements and mission description** | `requirements.yaml` linked to the E7 test case; `mission.yaml` (steps, board pack, envelope with HIGH ≤ 60 V); README | Every requirement links to at least one test case |
+
+### Repository 2: `~/code/Theia`, new branch `step-1/app-skeleton`
+
+The app lives in `app/`. `npm install` and the first build are slow, so they start in the background early, while the mission commits proceed.
+
+| # | Commit message | What it holds | Done when |
+|---|---|---|---|
+| T1 | **app: scaffold the OwnStudio Theia application** | Theia IDE template at the current release, pinned versions, `app/JOURNAL.md` of build quirks (modular's journal reused) | Builds and starts on Linux (Electron) |
+| T2 | **app: OwnStudio branding and a quiet default layout** | Name, window title; generic IDE views hidden by default; expert-mode toggle stub | Starts on a blank window titled OwnStudio |
+| T3 | **app: workbench bar Home · Design · Code · Lab** | Bottom bar, Ctrl+1…4, one placeholder view per workbench | Switching works; each workbench remembers its layout |
+| T4 | **app: Home shows the five converter blocks** | Static five-block diagram read from the mission's `mission.yaml` | Opening the mission folder shows its blocks |
+| T5 | **docs: step 1 morning report** | What works, what failed and why, what waits for Luiz; plan updated | Report written |
+
+### Order through the night
+
+E1 → E2 → E3 run first, because they prove the core idea (the control law runs off-board). T1's install starts in the background during them. Then E4 → E5 → E6 → E7 → E8, then T2 → T3 → T4, and T5 last. If one line of work blocks, the other continues.
+
+### Deferred from step 1
+
+- The Windows installer: there's no Windows machine here.
+- Comparing the plant model with the bench: it needs the Twist powered.
+- Any push to a remote.
