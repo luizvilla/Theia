@@ -27,6 +27,8 @@ Home with Specification, Build and Verification layers on the five-block diagram
 
 ## Step 3: Design, Code and Lab on the simulator target
 
+**Status (2026-11-07):** done on the simulator; the bench runs wait for Luiz, and the buck mission's undershoot requirement waits for his decision (#11). See the [step 3 report](step-3-report.md).
+
 Requirements of the mission; L and C sizing compared with the Twist's values; PI tuning on a Bode plot; editing the control function in Code with AI help; the step-test procedure running on the simulator target and filing a test record.
 
 ## Step 4: bench and study
@@ -276,3 +278,13 @@ Kept up to date as the work advances. Where a commit departs from the plan above
 | E13c | examples | `ff3defb` | mission: rebuild the pre-built firmware with the electrolytic connected | Flashed on the Twist; L2 link 6/6 pass |
 | E14 | examples | `d98c8dc` | mission: bench check of the plant model (BENCH-MOD-01) | Tested with a fake board; waits for Luiz at the bench |
 | T14 | Theia | `3c0c91b` | app: control center in the Lab | Also fixes a step 2 bug: Home and Lab were empty after switching workbench and back |
+| — | Theia | `760e826` | docs: step 3 commits so far | |
+| E15 | examples | `29e5072` | mission: sizing from the requirements | Adds the C needed for REQ-UNDERSHOOT and the control period it implies (about 23 µs) |
+| E16 | examples | `962627a` | mission: control design on a Bode plot | Plant formula within 0.1 dB and 13° of Pulsim's switched model up to 10 kHz |
+| T15 | Theia | `6557fec` | app: Design workbench | Runs the mission's Python through the bridge's new `design` method |
+| T16 | Theia | `159db44` | lab: targets for procedures | Includes the procedure runner and its JSON-lines protocol |
+| E17 | examples | `c9de0e0` | mission: step-response and reference-step procedures on both targets | `run_l1.py` removed; same verdicts. Adds BUCK-REF-01, which also runs on the board |
+| — | Theia | `8e501cc` | lab: a catalogue test may list several levels | **Not planned.** Needed by BUCK-REF-01 (L1 and L2) |
+| T17 | Theia | `22b9e91` | app: procedures in the Lab | Checked: BUCK-STEP-01 from the app; the power confirmation on the board, cancelled |
+| T18 | Theia | `a115ea3` | app: the mission agent in Code | No key: tested through its tools' unit tests and the chat's agent list only |
+| T19 | Theia | this commit | docs: step 3 report | |
