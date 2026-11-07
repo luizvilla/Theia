@@ -1,0 +1,17 @@
+{
+  "private": true,
+  "name": "ownstudio",
+  "version": "0.1.0",
+  "license": "LGPL-2.1-only",
+  "engines": {
+    "node": ">=20"
+  },
+  "workspaces": [
+    "packages/*",
+    "applications/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspace=@ownstudio/core && npm run build --workspace=ownstudio-electron",
+    "start": "npm run start --workspace=ownstudio-electron"
+  }
+}

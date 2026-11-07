@@ -1,0 +1,45 @@
+{
+  "private": true,
+  "name": "ownstudio-electron",
+  "version": "0.1.0",
+  "license": "LGPL-2.1-only",
+  "main": "lib/backend/electron-main.js",
+  "theia": {
+    "target": "electron",
+    "frontend": {
+      "config": {
+        "applicationName": "OwnStudio",
+        "defaultTheme": "ownstudio-light",
+        "defaultIconTheme": "theia-file-icons",
+        "preferences": {
+          "toolbar.showToolbar": false
+        }
+      }
+    }
+  },
+  "dependencies": {
+    "@ownstudio/core": "0.1.0",
+    "@theia/core": "1.76.0",
+    "@theia/editor": "1.76.0",
+    "@theia/electron": "1.76.0",
+    "@theia/file-search": "1.76.0",
+    "@theia/filesystem": "1.76.0",
+    "@theia/markers": "1.76.0",
+    "@theia/messages": "1.76.0",
+    "@theia/monaco": "1.76.0",
+    "@theia/navigator": "1.76.0",
+    "@theia/output": "1.76.0",
+    "@theia/preferences": "1.76.0",
+    "@theia/process": "1.76.0",
+    "@theia/terminal": "1.76.0",
+    "@theia/workspace": "1.76.0"
+  },
+  "devDependencies": {
+    "@theia/cli": "1.76.0",
+    "electron": "42.8.1"
+  },
+  "scripts": {
+    "build": "theia build --mode development",
+    "start": "env -u ELECTRON_RUN_AS_NODE theia start"
+  }
+}

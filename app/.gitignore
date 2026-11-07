@@ -1,0 +1,9 @@
+node_modules/
+lib/
+*.tsbuildinfo
+applications/electron/src-gen/
+applications/electron/gen-webpack*.js
+applications/electron/webpack.config.js
+applications/electron/.browser_modules/
+applications/electron/plugins/
+dist/
