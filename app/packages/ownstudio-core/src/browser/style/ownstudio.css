@@ -210,3 +210,11 @@ body.theia-dark .ownstudio-diagram .os-block rect { stroke: var(--ownstudio-ligh
 .ownstudio-procedure-log { font-family: var(--theia-code-font-family, monospace); font-size: 12px; white-space: pre-wrap; max-height: 360px; overflow: auto;
     border: 1px solid var(--theia-widget-border, rgba(128,128,128,0.35)); border-radius: 6px; padding: 8px; max-width: 900px; }
 .ownstudio-procedure-ask { border-color: var(--ownstudio-persimmon); max-width: 900px; }
+
+/* Board run and its simulation (Procedure view). Solid vs dashed, not colour alone. */
+.os-trace-board { stroke: var(--ownstudio-green); }
+body.theia-dark .os-trace-board { stroke: var(--ownstudio-yellow); }
+.os-trace-sim { stroke: var(--ownstudio-azure); }
+.os-band { fill: #3BA55D; fill-opacity: 0.16; stroke: #3BA55D; stroke-opacity: 0.45; stroke-dasharray: 2 2; }
+.ownstudio-overlay-table { margin-top: 6px; }
+.ownstudio-overlay-table td, .ownstudio-overlay-table th { padding: 2px 8px; }

@@ -9,7 +9,7 @@ import { PANEL_WIDGET_FACTORY, PanelWidgetOptions } from './panel-widget';
 import { DATA_OBJECTS_WIDGET_ID } from './data-objects-widget';
 import { CONTROL_CENTER_WIDGET_ID, OPEN_CONTROL_CENTER_COMMAND } from './control-center-widget';
 import { PROCEDURE_WIDGET_ID } from './procedure-widget';
-import { ProcedureModel, RUN_PROCEDURE_COMMAND } from './procedure-model';
+import { ProcedureModel, RUN_PROCEDURE_COMMAND, SHOW_RECORD_COMMAND } from './procedure-model';
 import { ProcedureInfo } from '../common/procedure-protocol';
 
 
@@ -26,6 +26,13 @@ export class LabContribution implements CommandContribution {
         registry.registerCommand(OPEN_PANEL_COMMAND, { execute: (path?: string) => this.openPanel(path) });
         registry.registerCommand(RUN_PROCEDURE_COMMAND, {
             execute: (info?: ProcedureInfo, target?: 'simulator' | 'board') => this.runProcedure(info, target),
+        });
+        registry.registerCommand(SHOW_RECORD_COMMAND, {
+            execute: async (path: string, target: 'simulator' | 'board', title?: string) => {
+                this.procedures.showRecord(path, target, title);
+                await this.show(await this.widgets.getOrCreateWidget(PROCEDURE_WIDGET_ID));
+            },
+            isVisible: () => false,
         });
         registry.registerCommand(OPEN_CONTROL_CENTER_COMMAND, { execute: async () => this.show(await this.widgets.getOrCreateWidget(CONTROL_CENTER_WIDGET_ID)) });
         registry.registerCommand(OPEN_DATA_OBJECTS_COMMAND, { execute: async () => this.show(await this.widgets.getOrCreateWidget(DATA_OBJECTS_WIDGET_ID)) });

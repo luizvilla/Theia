@@ -300,7 +300,7 @@ def states(mission: pathlib.Path, records: pathlib.Path | None = None) -> dict:
             cases = [c for r, c in by_case[t["id"]] if r is rec]
             latest = {"date": rec.get("date"), "campaign": rec.get("campaign"), "path": rec.get("path"),
                       "target": rec.get("target"), "board": rec.get("board"), "mission": rec.get("mission"),
-                      "cases": cases}
+                      "twin": rec.get("twin"), "cases": cases}
         tests.append({**t, "state": state, "latest": latest,
                       "finding": {"issue": finding.get("issue"), "cause": finding.get("cause")} if finding else None})
     by_id = {t["id"]: t for t in tests}

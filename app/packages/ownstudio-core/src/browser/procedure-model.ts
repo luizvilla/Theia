@@ -11,6 +11,7 @@ import { MissionService } from './mission-service';
 import { BoardModel } from './board-model';
 
 export const RUN_PROCEDURE_COMMAND = { id: 'ownstudio.procedure.run', category: 'OwnStudio', label: 'Run a Procedure…' };
+export const SHOW_RECORD_COMMAND = { id: 'ownstudio.record.show', category: 'OwnStudio', label: 'Show a Test Record' };
 
 @injectable()
 export class ProcedureClientImpl implements ProcedureClient {
@@ -30,6 +31,8 @@ export interface ProcedureRun {
     ask?: { id: number; kind: 'number' | 'confirm'; question: string };
     records: { path: string; verdict: string }[];
     done?: { status: number; error?: string };
+    /** A record filed earlier, shown again (from the control center): no process runs. */
+    past?: boolean;
 }
 
 /**
@@ -79,6 +82,17 @@ export class ProcedureModel {
                 this.problem = error instanceof Error ? error.message : String(error);
             }
         }
+        this.onDidChangeEmitter.fire();
+    }
+
+    /** Show a record filed earlier, with its waveform and, for a board record, its simulation. */
+    showRecord(path: string, target: 'simulator' | 'board', title = 'Test record'): void {
+        if (this.running) {
+            return;
+        }
+        const info: ProcedureInfo = { path: '', title, targets: [target], tests: [], level: '', power_on: false, doc: '' };
+        this.current = { runId: -2, info, target, started: new Date(), log: [], records: [{ path, verdict: '' }],
+            done: { status: 0 }, past: true };
         this.onDidChangeEmitter.fire();
     }
 

@@ -42,6 +42,8 @@ export interface LatestRun {
     target: string;
     board?: { serial_number: string; commit: string; dirty: boolean; source_hash: string };
     mission?: { commit: string; dirty: boolean };
+    /** The record run with it on the other target (a board run's simulation), relative to the campaign. */
+    twin?: string | null;
     cases: CaseResult[];
 }
 

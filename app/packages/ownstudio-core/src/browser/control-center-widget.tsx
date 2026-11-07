@@ -5,7 +5,9 @@ import { Message } from '@theia/core/shared/@lumino/messaging';
 import { ReactWidget } from '@theia/core/lib/browser/widgets/react-widget';
 import { OpenerService, codicon, open } from '@theia/core/lib/browser';
 import URI from '@theia/core/lib/common/uri';
+import { CommandService } from '@theia/core/lib/common';
 import { MissionService } from './mission-service';
+import { SHOW_RECORD_COMMAND } from './procedure-model';
 import { STATE_LABEL } from '../common/verification';
 import { TestEntry, countStates, formatMeasured, stateInfo } from '../common/test-states';
 
@@ -25,6 +27,7 @@ export class ControlCenterWidget extends ReactWidget {
 
     @inject(MissionService) protected readonly missions: MissionService;
     @inject(OpenerService) protected readonly opener: OpenerService;
+    @inject(CommandService) protected readonly commands: CommandService;
 
     protected tab: string | undefined;
 
@@ -112,6 +115,10 @@ export class ControlCenterWidget extends ReactWidget {
                     <td>{latest?.cases.map(c => <div key={c.id}>{latest.cases.length > 1 && <code>{c.id} </code>}{formatMeasured(c)}</div>)}</td>
                     <td>{latest && <>
                         <a href='#' onClick={e => { e.preventDefault(); this.openPath(`${latest.path}/record.md`); }}>{latest.campaign || 'record'}</a>
+                        {(latest.target === 'board' || latest.target === 'simulator') && <>{' · '}<a href='#'
+                            title={latest.twin ? 'Waveform: the board run and its simulation at the same conditions' : 'Waveform'}
+                            onClick={e => { e.preventDefault(); this.commands.executeCommand(SHOW_RECORD_COMMAND.id, latest.path, latest.target, t.title); }}>
+                            {latest.twin ? 'board and simulation' : 'view'}</a></>}
                         <div className='ownstudio-muted'>{latest.target} · {new Date(latest.date).toLocaleString()}
                             {latest.board ? ` · board ${latest.board.serial_number}` : ''}</div></>}</td>
                     <td>{t.finding && <a href='#' title={t.finding.cause}
