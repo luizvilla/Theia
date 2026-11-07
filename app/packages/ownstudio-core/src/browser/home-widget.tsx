@@ -4,10 +4,8 @@ import { inject, injectable, postConstruct } from '@theia/core/shared/inversify'
 import { Message } from '@theia/core/shared/@lumino/messaging';
 import { ReactWidget } from '@theia/core/lib/browser/widgets/react-widget';
 import { OpenerService, codicon, open } from '@theia/core/lib/browser';
-import URI from '@theia/core/lib/common/uri';
-import { FileService } from '@theia/filesystem/lib/browser/file-service';
-import { WorkspaceService } from '@theia/workspace/lib/browser/workspace-service';
-import { BlockKey, Mission, Port, parseMission, wrap } from './mission';
+import { BlockKey, Mission, Port, wrap } from './mission';
+import { MissionService } from './mission-service';
 import { WORKBENCHES, widgetId } from './workbenches';
 
 type Box = { x: number; y: number; w: number; h: number };
@@ -27,13 +25,8 @@ const BOXES: Record<BlockKey, Box> = { power: POWER, measurement: MEASUREMENT, a
 @injectable()
 export class HomeWidget extends ReactWidget {
 
-    @inject(WorkspaceService) protected readonly workspace: WorkspaceService;
-    @inject(FileService) protected readonly files: FileService;
+    @inject(MissionService) protected readonly missions: MissionService;
     @inject(OpenerService) protected readonly opener: OpenerService;
-
-    protected mission: Mission | undefined;
-    protected root: URI | undefined;
-    protected problem = 'Opening…';
 
     @postConstruct()
     protected init(): void {
@@ -46,8 +39,8 @@ export class HomeWidget extends ReactWidget {
         this.addClass('ownstudio-workbench');
         this.addClass('ownstudio-home');
         this.node.tabIndex = 0;
-        this.workspace.onWorkspaceChanged(() => this.load());
-        this.load();
+        this.missions.onDidChange(() => this.update());
+        this.update();
     }
 
     protected override onActivateRequest(msg: Message): void {
@@ -55,37 +48,19 @@ export class HomeWidget extends ReactWidget {
         this.node.focus();
     }
 
-    protected async load(): Promise<void> {
-        const roots = await this.workspace.roots;
-        this.root = roots[0]?.resource;
-        this.mission = undefined;
-        if (!this.root) {
-            this.problem = 'Open a mission folder (File › Open Folder) to see its converter here.';
-        } else {
-            const uri = this.root.resolve('mission.yaml');
-            try {
-                this.mission = parseMission((await this.files.read(uri)).value);
-            } catch (error) {
-                this.problem = (await this.files.exists(uri))
-                    ? `mission.yaml could not be read: ${error instanceof Error ? error.message : error}`
-                    : 'This folder has no mission.yaml. Open a mission folder to see its converter here.';
-            }
-        }
-        this.update();
-    }
-
     protected openFile(path: string | null | undefined): void {
-        if (path && this.root) {
-            open(this.opener, this.root.resolve(path));
+        const uri = path ? this.missions.resolve(path) : undefined;
+        if (uri) {
+            open(this.opener, uri);
         }
     }
 
     protected render(): React.ReactNode {
-        const m = this.mission;
+        const m = this.missions.mission;
         if (!m) {
             return <div className='ownstudio-workbench-body'>
                 <h1 className='ownstudio-title'>Home</h1>
-                <p className='ownstudio-workbench-purpose'>{this.problem}</p>
+                <p className='ownstudio-workbench-purpose'>{this.missions.problem}</p>
             </div>;
         }
         return <div className='ownstudio-workbench-body ownstudio-home-body'>

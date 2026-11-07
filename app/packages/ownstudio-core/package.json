@@ -2,7 +2,7 @@
   "name": "@ownstudio/core",
   "version": "0.1.0",
   "license": "LGPL-2.1-only",
-  "description": "OwnStudio workbenches, Home and branding",
+  "description": "OwnStudio workbenches, Home, branding and the board link",
   "files": [
     "lib",
     "src",
@@ -10,7 +10,8 @@
   ],
   "theiaExtensions": [
     {
-      "frontend": "lib/browser/ownstudio-frontend-module"
+      "frontend": "lib/browser/ownstudio-frontend-module",
+      "backend": "lib/node/ownstudio-backend-module"
     }
   ],
   "dependencies": {

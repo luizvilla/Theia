@@ -12,8 +12,26 @@ import { WorkbenchContribution } from './workbench-contribution';
 import { WorkbenchWidget } from './workbench-widget';
 import { HomeWidget } from './home-widget';
 import { WORKBENCHES, widgetId } from './workbenches';
+import { ServiceConnectionProvider } from '@theia/core/lib/browser/messaging/service-connection-provider';
+import { PreferenceContribution } from '@theia/core/lib/common/preferences';
+import { BOARD_SERVICE_PATH, BoardService } from '../common/board-protocol';
+import { MissionService } from './mission-service';
+import { BoardClientImpl, BoardModel } from './board-model';
+import { BoardContribution, BoardPreferenceContribution } from './board-contribution';
 
 export default new ContainerModule(bind => {
+    bind(MissionService).toSelf().inSingletonScope();
+
+    bind(BoardClientImpl).toSelf().inSingletonScope();
+    bind(BoardService).toDynamicValue(ctx =>
+        ServiceConnectionProvider.createProxy<BoardService>(ctx.container, BOARD_SERVICE_PATH, ctx.container.get(BoardClientImpl))
+    ).inSingletonScope();
+    bind(BoardModel).toSelf().inSingletonScope();
+    bind(BoardContribution).toSelf().inSingletonScope();
+    bind(CommandContribution).toService(BoardContribution);
+    bind(FrontendApplicationContribution).toService(BoardContribution);
+    bind(PreferenceContribution).toConstantValue(BoardPreferenceContribution);
+
     bind(OwnStudioBrandingContribution).toSelf().inSingletonScope();
     bind(FrontendApplicationContribution).toService(OwnStudioBrandingContribution);
 

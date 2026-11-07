@@ -14,7 +14,7 @@ export type Target = 'simulator' | 'board';
  * The workbench bar: Home · Design · Code · Lab along the bottom of the
  * window (as DaVinci Resolve's page bar), Ctrl+1…4, one Theia perspective
  * per workbench so each keeps its own layout. Also shows the target the Lab
- * runs on and the board connection, always visible on the right.
+ * runs on, always visible on the right (the board entry is BoardContribution's).
  */
 @injectable()
 export class WorkbenchContribution implements PerspectiveContribution, CommandContribution,
@@ -119,12 +119,6 @@ export class WorkbenchContribution implements PerspectiveContribution, CommandCo
             priority: 1000,
             command: 'ownstudio.target.toggle',
             tooltip: 'Where the Lab runs the firmware. Click to switch.',
-        });
-        this.statusBar.setElement('ownstudio.board', {
-            text: '$(debug-disconnect) No board',
-            alignment: StatusBarAlignment.RIGHT,
-            priority: 999,
-            tooltip: 'Board detection comes in step 2.',
         });
     }
 }
