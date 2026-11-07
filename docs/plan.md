@@ -352,4 +352,12 @@ The step 3 rules still apply, and one is stricter: **nothing switches the conver
 | E20 | examples | `1091ce1` | mission: tests name the blocks they exercise | `board_blocks` for sensors and drivers |
 | T24 | Theia | `6646896` | app: mission steps and the study log | Steps in a side panel opened on demand, because of #13 (switch lag, predates step 4) |
 | T25 | Theia | `5e61195` | docs: dry-run kit for the PhD students | |
-| T26 | Theia | this commit | docs: step 4 report | |
+| T26 | Theia | `4985fdd` | docs: step 4 report | |
+| — | examples | `0e1ac86` | mission: BUCK-REF-01 judges settling on a 1 ms average, on both targets | **After the bench session with Luiz.** Board samples scatter by 130 mV |
+| — | examples | (findings) | mission: findings from the first bench run (#14 sensors, #15 supply current) | |
+| — | examples | `e64f9db` | mission: the load step is 1 A -> 1.5 A (Luiz's decision on #11) | #11 closed; the example PI now passes |
+| — | Pulsim | `bac240ee` (local) | feat(solver): exact gate edges on the fixed-step engine (edge_fn) | Luiz's decision on #12; lgili/Pulsim, not pushed |
+| — | examples | `c28c89d` | mission: exact PWM edges in the simulator when Pulsim has them (#12) | |
+| — | Theia | `1634d34` | app: switch workbenches without Theia perspectives (#13) | #13 closed |
+| — | Theia | `f459d4a` | app: the board run in the control center, and the simulation over the measurement | First real overlay screenshot |
+| — | Theia | this commit | docs: step 4 report, the bench session | |

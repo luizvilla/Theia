@@ -14,6 +14,45 @@ Four things wait for you, in the "Waiting for you" list below. The most useful i
 | --- | --- |
 | ![Steps](images/step-4/mission-steps-consent.png) | ![Questionnaire](images/step-4/questionnaire.png) |
 
+## Update, the same evening: the bench session and your decisions
+
+Luiz ran the bench with me (30 V limited to 1 A, 33 Ω on each leg, a meter and a current clamp), then decided #11 and #12. Then he left, and I went on without power.
+
+![The first real board run with its simulation](images/step-4/overlay-real-board.png)
+
+**At the bench:**
+- **Link check:** 8/8 pass on the real board, the scope included.
+- **BUCK-REF-01 on the board** passes at 10 V and 12 V (on the board's own sensor). Its simulation, at the measured 29.3 V and 33 Ω, follows it closely: window means agree within 20–30 mV through the whole response.
+  - **First run:** the settling read 81 ms on the board against 31 ms in simulation. Single scope samples scatter by about ±0.3 V (130 mV standard deviation), so the "last sample outside ±2 %" rule latched onto noise.
+  - **Fix:** settling is now judged on a 1 ms moving average, on both targets. Clean rerun: 31.4 ms board, 27.0 ms simulation.
+- **BENCH-MOD-01:**
+  - **Plant model:** good. The board needs 2–3 % more duty than the lossless model at 5, 8 and 12 V.
+  - **Sensors are off** ([#14](https://github.com/luizvilla/Theia/issues/14)): V1 has about +3 % gain and −0.4 V offset, so LOW1 really sits at 5.31 V for a 5 V reference (BENCH-MOD-01.a5 fails). V2 reads 2.3–3.1 V low, VHIGH 0.5 V low.
+  - **The supply current case** ([#15](https://github.com/luizvilla/Theia/issues/15)) is inconsistent: the 12 V reading is below what the loads alone take, so the clamp reading is unreliable at these currents. The feeder (auxiliary supply) also isn't modelled. It needs a meter in series and an idle reading. That would also give the auxiliary supply block its first test.
+
+**Your decisions, done:**
+- **#11, the load step halved to 1 A → 1.5 A:** closed.
+  - Requirements, procedure (the loads now derive from the requirement), sizing and texts follow. BUCK-STEP-01 passes 4/4: the dip is 11.65 V, 11.4 V allowed.
+  - Sizing no longer asks for a faster control rate: the filter alone keeps the dip to 0.37 V.
+  - **Consequence for you:** with the example's PI the mission now has **no failing test** for the student to fix. Step 4 of the mission ("improve the control law") is now about margins, not a failure. If you want a failure to fix, options are: start the mission from a deliberately slow PI, tighten REQ-SETTLING, or keep it as an open-ended tuning step.
+- **#12, exact PWM edges in Pulsim:** fixed, **locally**.
+  - Branch `fix/exact-pwm-edges` of lgili/Pulsim in `/data/ownstudio/pulsim`, commit `bac240ee`, version `2.0.0+exactedges`. `simulate(edge_fn=...)` splits a step at its gate edges.
+  - In open loop, dV/dD now equals V_in, against one 0.5 % quantum before. The closed-loop staircase is gone. About 1.8× slower. Pulsim's own suite is unchanged (1535 passed), plus 5 new tests.
+  - Installed in the mission venv. The harness uses it when present and falls back on Pulsim 2.0.0.
+  - **Not pushed:** Pulsim isn't your repository. Fork it to luizvilla and open a PR to lgili/Pulsim?
+- **#13, the workbench switch lag:** fixed and closed. The bar switches workbenches without Theia's perspectives, so every switch lands. The Mission steps panel now stays open.
+
+**Test totals now:**
+- mission catalogue, 30 tests: 26 pass, 2 failing with a known issue (BENCH-MOD-01 #14, LINK all pass, BUCK-STEP all pass), 1 information only, 1 blocked (BUCK-STEP-02, needs a switched load);
+- Home: Measurement and Driver have board evidence now;
+- unit tests: mission 60, Python 60, TypeScript 48, Pulsim 1535 + 5.
+
+**Still waiting for you:**
+1. Push Pulsim's fix (fork + PR), or keep it local.
+2. The mission's challenge, now that the example PI passes (#11 consequence above).
+3. A short bench session for #15: idle current, then the current with a meter in series. #14's calibration, in Core or in the mission.
+4. The dry run (#13 no longer blocks it), the open questions, the consent sheet/DPO, and an AI key.
+
 ## What works
 
 - **Waveforms from the board.**
