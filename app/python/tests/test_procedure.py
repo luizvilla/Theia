@@ -9,7 +9,8 @@ import textwrap
 import unittest
 
 from ownstudio_lab import procedure as proc
-from ownstudio_lab.target import BoardTarget, TargetError, load_harness
+from ownstudio_lab.fakes import fake_board_target
+from ownstudio_lab.target import BoardTarget, SimTarget, TargetError, load_harness
 
 HARNESS = '''
 class Harness:
@@ -144,9 +145,66 @@ class Board_(Fixture):
         rec = json.loads((fake.records[0][0] / "record.json").read_text())
         self.assertEqual(rec["board"]["serial_number"], "S1")
 
-    def test_board_cannot_capture(self):
+    def test_firmware_without_scope_cannot_arm(self):
         with self.assertRaises(TargetError):
-            BoardTarget(Board(), FakeLink()).capture()
+            BoardTarget(Board(), FakeLink(), sleep=lambda s: None).arm()
+
+
+SCOPE_PROCEDURE = '''
+PROCEDURE = {"title": "Scope", "targets": ["simulator", "board"],
+             "power_on": {"group": "Converter", "name": "Mode", "value": 1}}
+def run(target, ctx):
+    target.update("Converter", {"wVoltageRef_V": 10.0, "Mode": 1})
+    target.wait(0.1)
+    target.arm()
+    target.update("Converter", {"wVoltageRef_V": 12.0})
+    target.wait(0.1)
+    ctx.wave = target.capture()
+    ctx.record("scope", "SCOPE", "L1", [{"id": "T1", "title": "t", "criterion": "c", "verdict": "INFO"}])
+'''
+
+
+class Waveforms(Fixture):
+    """The same procedure gets its waveform the same way from the simulator and a board with a scope."""
+
+    def run_on(self, kind):
+        (self.m / "scope.py").write_text(SCOPE_PROCEDURE)
+        harness = load_harness(self.m)
+        target = fake_board_target(harness) if kind == "board" else SimTarget(harness)
+        seen = {}
+        original = proc.Context.record
+
+        def keep(ctx, *args, **kwargs):
+            seen["wave"] = ctx.wave
+            return original(ctx, *args, **kwargs)
+        proc.Context.record = keep
+        try:
+            proc.run_procedure(self.m, self.m / "scope.py", kind, FakeIO([]), allow_power=True, target=target)
+        finally:
+            proc.Context.record = original
+        return seen["wave"], target
+
+    def test_board_capture_is_aligned_on_the_trigger(self):
+        wave, target = self.run_on("board")
+        t, ref = wave["t"], wave["wVoltageRef_V"]
+        self.assertEqual(len(t), 1024)
+        self.assertAlmostEqual(t[205], 0.0)
+        self.assertTrue((ref[t < 0] == 10.0).all() and (ref[t >= 0] == 12.0).all())
+        self.assertEqual(wave["t_trigger"], 0.0)
+        self.assertGreater(wave["rV1Low_V"][-1], 11.5)
+        self.assertEqual(target.link.writes[-1], ("Converter", {"Mode": 0}))    # switched off at the end
+
+    def test_simulator_marks_the_same_trigger(self):
+        wave, _ = self.run_on("simulator")
+        self.assertAlmostEqual(wave["t_trigger"], 0.1, places=6)
+        self.assertEqual(wave["source"], "simulator")
+
+    def test_capture_without_trigger_times_out(self):
+        harness = load_harness(self.m)
+        target = fake_board_target(harness)
+        target.arm()
+        with self.assertRaises(TargetError):
+            target.capture(timeout=0.05)
 
 
 class Json(unittest.TestCase):
