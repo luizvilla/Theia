@@ -47,6 +47,18 @@ class Methods(Fixture):
             self.assertIn("not a design script", self.call("design", mission=tmp, script="../x")["error"])
             self.assertIn("no design/loop.py", self.call("design", mission=tmp, script="loop")["error"])
 
+    def test_procedures_are_listed_without_running_them(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = pathlib.Path(tmp) / "tests" / "procedures"
+            folder.mkdir(parents=True)
+            (folder / "step.py").write_text('"""Step.\n\nMore."""\nraise SystemExit("never run")\n'
+                                            'PROCEDURE = {"title": "Step", "targets": ["simulator"], "tests": ["T1"],'
+                                            ' "power_on": {"group": "C", "name": "M", "value": 1}}\n')
+            (folder / "helper.py").write_text("X = 1\n")
+            found = self.call("procedures", mission=tmp)["result"]
+            self.assertEqual(found, [{"path": "tests/procedures/step.py", "title": "Step", "targets": ["simulator"],
+                                      "tests": ["T1"], "level": "", "power_on": True, "doc": "Step."}])
+
     def test_tests_gives_states(self):
         with tempfile.TemporaryDirectory() as tmp:
             m = pathlib.Path(tmp)

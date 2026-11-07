@@ -12,6 +12,7 @@ import { BoardModel } from './board-model';
 import { boardName } from '../common/board-protocol';
 import { countStates, stateInfo } from '../common/test-states';
 import { OPEN_CONTROL_CENTER_COMMAND } from './control-center-widget';
+import { ProcedureModel, RUN_PROCEDURE_COMMAND } from './procedure-model';
 
 export const OPEN_PANEL_COMMAND = { id: 'ownstudio.panel.open', category: 'OwnStudio', label: 'Open a Panel…' };
 export const OPEN_DATA_OBJECTS_COMMAND = { id: 'ownstudio.dataObjects.open', category: 'OwnStudio', label: 'Open the Data Object Table' };
@@ -24,6 +25,7 @@ export class LabWidget extends ReactWidget {
     @inject(BoardModel) protected readonly board: BoardModel;
     @inject(FileService) protected readonly files: FileService;
     @inject(CommandService) protected readonly commands: CommandService;
+    @inject(ProcedureModel) protected readonly procedures: ProcedureModel;
 
     protected panels: string[] = [];
 
@@ -40,6 +42,7 @@ export class LabWidget extends ReactWidget {
         this.missions.onDidChange(() => this.findPanels());
         this.missions.onDidChangeFiles(uris => uris.some(u => u.path.toString().includes('/panels/')) && this.findPanels());
         this.board.onDidChange(() => this.update());
+        this.procedures.onDidChange(() => this.update());
         this.findPanels();
     }
 
@@ -78,6 +81,23 @@ export class LabWidget extends ReactWidget {
                 <button className='theia-button secondary' onClick={() => this.commands.executeCommand(OPEN_DATA_OBJECTS_COMMAND.id)}>
                     <span className={codicon('symbol-field')} /> Data object table</button>
             </div>
+            <h2 className='ownstudio-emphasis'>Procedures</h2>
+            {this.procedures.problem && <p className='ownstudio-problem'>{this.procedures.problem}</p>}
+            {!this.procedures.procedures.length && <p className='ownstudio-muted'>This mission has no procedures (tests/procedures/*.py).</p>}
+            {this.procedures.procedures.map(p => <div key={p.path} className='ownstudio-card ownstudio-procedure-card'>
+                <div className='ownstudio-card-title'>{p.title}
+                    {p.power_on && <span className='ownstudio-muted' title='Switches the converter on: on the board it asks first'>
+                        <span className={codicon('zap')} /> switches power on</span>}</div>
+                <div className='ownstudio-muted'>{p.doc}</div>
+                <div className='ownstudio-muted'>Tests {p.tests.join(', ')} · <code>{p.path}</code></div>
+                <div className='ownstudio-button-row'>
+                    {p.targets.map(t => <button key={t} className={`theia-button${t === 'board' ? ' secondary' : ''}`}
+                        disabled={this.procedures.running || (t === 'board' && !link)}
+                        title={t === 'board' && !link ? 'No board linked' : `Run on the ${t}`}
+                        onClick={() => this.commands.executeCommand(RUN_PROCEDURE_COMMAND.id, p, t)}>
+                        <span className={codicon(t === 'board' ? 'circuit-board' : 'play')} /> Run on the {t}</button>)}
+                </div>
+            </div>)}
             <h2 className='ownstudio-emphasis'>Tests</h2>
             <p>{this.missions.tests
                 ? countStates(this.missions.tests.tests).map(s => `${stateInfo(s.id).word}: ${s.count}`).join(' · ')
@@ -87,8 +107,7 @@ export class LabWidget extends ReactWidget {
                     <span className={codicon('checklist')} /> Control center</button>
             </div>
             <h2 className='ownstudio-emphasis'>Coming next</h2>
-            <ul><li>Procedures: the L1 test on the simulator and the L2 test on the bench, filing test records</li>
-                <li>Simulation and bench overlay</li></ul>
+            <ul><li>The firmware scope: waveforms from the board, and the simulation and bench overlay (step 4)</li></ul>
         </div>;
     }
 }

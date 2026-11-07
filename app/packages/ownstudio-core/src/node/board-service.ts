@@ -9,6 +9,7 @@ import {
     BoardClient, BoardInfo, BoardService, BoardStatus, LinkInfo, MissionIdentity
 } from '../common/board-protocol';
 import { TestStates } from '../common/test-states';
+import { ProcedureInfo } from '../common/procedure-protocol';
 
 interface Pending { resolve: (value: unknown) => void; reject: (error: Error) => void; }
 
@@ -54,6 +55,9 @@ export class BoardServiceImpl implements BoardService {
     identity(missionPath: string): Promise<MissionIdentity> { return this.call('identity', { mission: missionPath }) as Promise<MissionIdentity>; }
     design(missionPath: string, script: string, args: (string | number)[]): Promise<unknown> {
         return this.call('design', { mission: missionPath, script, args });
+    }
+    procedures(missionPath: string): Promise<ProcedureInfo[]> {
+        return this.call('procedures', { mission: missionPath }) as Promise<ProcedureInfo[]>;
     }
     tests(missionPath: string): Promise<TestStates> { return this.call('tests', { mission: missionPath }) as Promise<TestStates>; }
 

@@ -3,6 +3,7 @@
 // forwards each call to the Python bridge (app/python/ownstudio_lab/bridge.py).
 
 import { TestStates } from './test-states';
+import { ProcedureInfo } from './procedure-protocol';
 
 export const BOARD_SERVICE_PATH = '/services/ownstudio-board';
 export const BoardService = Symbol('BoardService');
@@ -59,6 +60,8 @@ export interface BoardService {
     tests(missionPath: string): Promise<TestStates>;
     /** Run the mission's design/<script>.py --json with args; its JSON output. */
     design(missionPath: string, script: string, args: (string | number)[]): Promise<unknown>;
+    /** The mission's procedures (tests/procedures/*.py), read without running them. */
+    procedures(missionPath: string): Promise<ProcedureInfo[]>;
     /** The installed board pack's board.yaml, or undefined if no pack has that name. */
     boardPack(name: string): Promise<{ path: string; text: string } | undefined>;
 }

@@ -16,6 +16,7 @@ update {group, values}        write {name: value} into a group
 identity {mission}            the mission folder's source hash and pre-built manifest
 tests {mission}                where the mission's validation stands (ownstudio_lab.testing.states)
 design {mission, script, args} run design/<script>.py --json [args] in the mission; its JSON output
+procedures {mission}           the procedures in tests/procedures/, read from their PROCEDURE (not run)
 flash {manifest, serial_number?, mcumgr?}
                               close the link, flash, then link again once the new
                               firmware answers ThingSet (it takes a few seconds to boot)
@@ -128,6 +129,31 @@ class Bridge:
             raise BridgeError(f"design/{script}.py: {(result.stderr or result.stdout).strip().splitlines()[-1:]}")
         return json.loads(result.stdout)
 
+    def procedures(self, mission):
+        import ast
+        folder = pathlib.Path(mission) / "tests" / "procedures"
+        found = []
+        for path in sorted(folder.glob("*.py")) if folder.is_dir() else []:
+            try:
+                tree = ast.parse(path.read_text())
+            except SyntaxError as err:
+                found.append({"path": f"tests/procedures/{path.name}", "title": path.stem, "problem": f"syntax error: {err}"})
+                continue
+            meta = None
+            for node in tree.body:
+                if isinstance(node, ast.Assign) and any(getattr(t, "id", None) == "PROCEDURE" for t in node.targets):
+                    try:
+                        meta = ast.literal_eval(node.value)
+                    except ValueError:
+                        meta = None
+            if not isinstance(meta, dict):
+                continue
+            found.append({"path": f"tests/procedures/{path.name}", "title": meta.get("title", path.stem),
+                          "targets": meta.get("targets", []), "tests": meta.get("tests", []),
+                          "level": meta.get("level", ""), "power_on": bool(meta.get("power_on")),
+                          "doc": (ast.get_docstring(tree) or "").split("\n\n")[0]})
+        return found
+
     def flash(self, manifest, serial_number=None, mcumgr=None):
         self.disconnect()
         try:
@@ -160,7 +186,7 @@ class Bridge:
     def handle(self, request):
         method = request.get("method")
         params = request.get("params") or {}
-        if method not in ("status", "connect", "disconnect", "get", "update", "identity", "tests", "design", "flash"):
+        if method not in ("status", "connect", "disconnect", "get", "update", "identity", "tests", "design", "procedures", "flash"):
             return {"id": request.get("id"), "error": f"unknown method {method!r}"}
         try:
             result = getattr(self, method)(**params)

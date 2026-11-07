@@ -101,6 +101,22 @@ export class BoardModel {
         }
     }
 
+    /**
+     * Give the board's port to another process (a procedure on the board):
+     * close the link and stop auto-connecting until the returned function is called.
+     */
+    async release(): Promise<() => Promise<void>> {
+        this.busy = true;
+        this.link = undefined;
+        await this.service.disconnect();
+        this.onDidChangeEmitter.fire();
+        return async () => {
+            this.busy = false;
+            this.failed.clear();
+            await this.poll();
+        };
+    }
+
     async read(path: string): Promise<unknown> {
         return this.service.get(path);
     }

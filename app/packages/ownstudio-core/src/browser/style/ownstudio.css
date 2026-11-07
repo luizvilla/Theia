@@ -204,3 +204,9 @@ body.theia-dark .ownstudio-diagram .os-block rect { stroke: var(--ownstudio-ligh
 .ownstudio-bode .os-crossover { stroke: #2F9E60; stroke-dasharray: 5 3; }
 .os-swatch-resonance { background: var(--ownstudio-persimmon); border-color: var(--ownstudio-persimmon); }
 .os-swatch-crossover { background: #2F9E60; border-color: #2F9E60; }
+
+/* Procedures */
+.ownstudio-procedure-card { max-width: 900px; }
+.ownstudio-procedure-log { font-family: var(--theia-code-font-family, monospace); font-size: 12px; white-space: pre-wrap; max-height: 360px; overflow: auto;
+    border: 1px solid var(--theia-widget-border, rgba(128,128,128,0.35)); border-radius: 6px; padding: 8px; max-width: 900px; }
+.ownstudio-procedure-ask { border-color: var(--ownstudio-persimmon); max-width: 900px; }

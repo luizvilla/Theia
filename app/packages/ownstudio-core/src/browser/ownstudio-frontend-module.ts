@@ -25,6 +25,9 @@ import { PANEL_WIDGET_FACTORY, PanelWidget, PanelWidgetOptions } from './panel-w
 import { DATA_OBJECTS_WIDGET_ID, DataObjectsWidget } from './data-objects-widget';
 import { LabWidget } from './lab-widget';
 import { DesignWidget } from './design-widget';
+import { PROCEDURE_SERVICE_PATH, ProcedureService } from '../common/procedure-protocol';
+import { ProcedureClientImpl, ProcedureModel } from './procedure-model';
+import { PROCEDURE_WIDGET_ID, ProcedureWidget } from './procedure-widget';
 import { CONTROL_CENTER_WIDGET_ID, ControlCenterWidget } from './control-center-widget';
 import { LabContribution } from './lab-contribution';
 
@@ -36,6 +39,16 @@ export default new ContainerModule(bind => {
         ServiceConnectionProvider.createProxy<BoardService>(ctx.container, BOARD_SERVICE_PATH, ctx.container.get(BoardClientImpl))
     ).inSingletonScope();
     bind(BoardModel).toSelf().inSingletonScope();
+    bind(ProcedureClientImpl).toSelf().inSingletonScope();
+    bind(ProcedureService).toDynamicValue(ctx =>
+        ServiceConnectionProvider.createProxy<ProcedureService>(ctx.container, PROCEDURE_SERVICE_PATH, ctx.container.get(ProcedureClientImpl))
+    ).inSingletonScope();
+    bind(ProcedureModel).toSelf().inSingletonScope();
+    bind(ProcedureWidget).toSelf();
+    bind(WidgetFactory).toDynamicValue(ctx => ({
+        id: PROCEDURE_WIDGET_ID,
+        createWidget: () => ctx.container.get(ProcedureWidget),
+    })).inSingletonScope();
     bind(BoardContribution).toSelf().inSingletonScope();
     bind(CommandContribution).toService(BoardContribution);
     bind(FrontendApplicationContribution).toService(BoardContribution);
