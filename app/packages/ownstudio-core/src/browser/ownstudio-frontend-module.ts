@@ -4,7 +4,7 @@ import '../../src/browser/style/ownstudio.css';
 import { ContainerModule } from '@theia/core/shared/inversify';
 import { CommandContribution } from '@theia/core/lib/common';
 import {
-    FrontendApplicationContribution, KeybindingContribution, PerspectiveContribution, WidgetFactory
+    FrontendApplicationContribution, KeybindingContribution, WidgetFactory
 } from '@theia/core/lib/browser';
 import { OwnStudioBrandingContribution } from './ownstudio-branding-contribution';
 import { ExpertModeContribution } from './expert-mode-contribution';
@@ -121,7 +121,7 @@ export default new ContainerModule(bind => {
     bind(FrontendApplicationContribution).toService(ExpertModeContribution);
 
     bind(WorkbenchContribution).toSelf().inSingletonScope();
-    for (const service of [PerspectiveContribution, CommandContribution, KeybindingContribution, FrontendApplicationContribution]) {
+    for (const service of [CommandContribution, KeybindingContribution, FrontendApplicationContribution]) {
         bind(service).toService(WorkbenchContribution);
     }
 

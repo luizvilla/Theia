@@ -10,10 +10,9 @@ import { MissionService } from './mission-service';
 import { StudyModel } from './study-model';
 
 /**
- * The mission steps: in the right sidebar, opened on demand, and always named in
- * the status bar ("Step 3/5: ..."), which opens them. The sidebar is not kept
- * open across workbench switches: in Theia 1.76 that makes a switch finish one
- * switch late (measured in step 4), and simple mode collapses side panels anyway.
+ * The mission steps: in the right sidebar, opened on demand (or from the status
+ * bar, which always names the current step). Once open, they stay open across
+ * workbench switches.
  */
 @injectable()
 export class StudyContribution implements CommandContribution, FrontendApplicationContribution {

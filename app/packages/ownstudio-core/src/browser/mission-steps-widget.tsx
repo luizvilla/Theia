@@ -2,7 +2,7 @@
 import * as React from '@theia/core/shared/react';
 import { inject, injectable, postConstruct } from '@theia/core/shared/inversify';
 import { ReactWidget } from '@theia/core/lib/browser/widgets/react-widget';
-import { ApplicationShell, OpenerService, codicon, open } from '@theia/core/lib/browser';
+import { OpenerService, codicon, open } from '@theia/core/lib/browser';
 import { CommandService } from '@theia/core/lib/common';
 import { MissionService } from './mission-service';
 import { StudyModel } from './study-model';
@@ -25,7 +25,6 @@ export class MissionStepsWidget extends ReactWidget {
     @inject(StudyModel) protected readonly study: StudyModel;
     @inject(CommandService) protected readonly commands: CommandService;
     @inject(OpenerService) protected readonly opener: OpenerService;
-    @inject(ApplicationShell) protected readonly shell: ApplicationShell;
 
     protected code = '';
     protected agreed = false;
@@ -46,16 +45,9 @@ export class MissionStepsWidget extends ReactWidget {
 
     protected async startStep(step: MissionStep): Promise<void> {
         await this.study.start(step.id);
-        // Close this panel before switching: in Theia 1.76 a workbench switch that has to
-        // collapse an open side panel finishes one switch late. (Bounded wait, in case the
-        // collapse never reports back.)
-        if (this.shell.isExpanded('right')) {
-            await Promise.race([this.shell.collapsePanel('right'), new Promise(r => setTimeout(r, 500))]);
-        }
         const bench = WORKBENCHES.find(w => w.id === step.workbench);
         if (bench) {
-            // Not awaited: a perspective switch can report its end much later than it shows.
-            this.commands.executeCommand(commandId(bench));
+            await this.commands.executeCommand(commandId(bench));
         }
         const uri = step.opens ? this.missions.resolve(step.opens) : undefined;
         if (uri) {

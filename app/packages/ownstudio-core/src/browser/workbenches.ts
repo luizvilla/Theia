@@ -3,7 +3,7 @@
 // three workbenches are views of the same converter project (SPEC §3).
 
 export interface Workbench {
-    /** Perspective id and widget id share this suffix. */
+    /** Widget and command ids share this suffix. */
     id: 'home' | 'design' | 'code' | 'lab';
     label: string;
     /** Codicon shown in the workbench bar. */
@@ -38,6 +38,5 @@ export const WORKBENCHES: Workbench[] = [
     },
 ];
 
-export const perspectiveId = (w: Workbench) => `ownstudio.perspective.${w.id}`;
 export const widgetId = (w: Workbench) => `ownstudio.workbench.${w.id}`;
 export const commandId = (w: Workbench) => `ownstudio.workbench.open.${w.id}`;

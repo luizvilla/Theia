@@ -3,59 +3,46 @@ import { inject, injectable } from '@theia/core/shared/inversify';
 import { CommandContribution, CommandRegistry } from '@theia/core/lib/common';
 import {
     ApplicationShell, FrontendApplication, FrontendApplicationContribution, KeybindingContribution, KeybindingRegistry,
-    PerspectiveContribution, PerspectiveService, StatusBar, StatusBarAlignment, WidgetManager
+    StatusBar, StatusBarAlignment, WidgetManager
 } from '@theia/core/lib/browser';
-import { WORKBENCHES, Workbench, commandId, perspectiveId, widgetId } from './workbenches';
+import { WORKBENCHES, Workbench, commandId, widgetId } from './workbenches';
 import { ExpertModeContribution } from './expert-mode-contribution';
+import { MISSION_STEPS_WIDGET_ID } from './mission-steps-widget';
 
 export type Target = 'simulator' | 'board';
 
+/** Theia's explorer view container: the Code workbench shows it on the left. */
+const EXPLORER_ID = 'explorer-view-container';
+
 /**
  * The workbench bar: Home · Design · Code · Lab along the bottom of the
- * window (as DaVinci Resolve's page bar), Ctrl+1…4, one Theia perspective
- * per workbench so each keeps its own layout. Also shows the target the Lab
- * runs on, always visible on the right (the board entry is BoardContribution's).
+ * window (as DaVinci Resolve's page bar), Ctrl+1…4. Also shows the target the
+ * Lab runs on, always visible on the right (the board entry is BoardContribution's).
+ *
+ * A workbench switch shows that workbench's view in the main area (editors stay
+ * open across workbenches, as Eclipse's editor area) and, in simple mode,
+ * collapses the side panels it does not use. It does not go through Theia's
+ * perspectives: in Theia 1.76 a perspective switch awaits side-panel animations
+ * that resolve only at the next switch, so the workbench appeared one switch
+ * late with a fresh profile (luizvilla/Theia#13). Switches are queued, so quick
+ * clicks land in order.
  */
 @injectable()
-export class WorkbenchContribution implements PerspectiveContribution, CommandContribution,
-    KeybindingContribution, FrontendApplicationContribution {
+export class WorkbenchContribution implements CommandContribution, KeybindingContribution, FrontendApplicationContribution {
 
-    @inject(PerspectiveService) protected readonly perspectives: PerspectiveService;
     @inject(StatusBar) protected readonly statusBar: StatusBar;
     @inject(ApplicationShell) protected readonly shell: ApplicationShell;
     @inject(WidgetManager) protected readonly widgets: WidgetManager;
     @inject(ExpertModeContribution) protected readonly expertMode: ExpertModeContribution;
 
     protected target: Target = 'simulator';
-
-    registerPerspectives(service: PerspectiveService): void {
-        for (const w of WORKBENCHES) {
-            const placements = new Map<string, 'main' | 'left' | 'right' | 'bottom'>([[widgetId(w), 'main']]);
-            if (w.id === 'code') {
-                placements.set('explorer-view-container', 'left');
-            }
-            service.registerPerspective({
-                id: perspectiveId(w),
-                label: `OwnStudio: ${w.label}`,
-                viewPlacements: placements,
-                primaryViews: { main: widgetId(w) },
-                // No chromeOptions.collapseAreas: in Theia 1.76 the switch awaits
-                // collapsePanel() for each area, and collapsing an area that is
-                // already collapsed only resolves at the next switch, so the
-                // workbench appeared one switch late. Collapsing happens in
-                // showOnly() instead, without waiting.
-                //
-                // The main area is shared by all perspectives (as Eclipse's editor area):
-                // show only this workbench's view there; editors stay open across workbenches.
-                onActivate: () => { this.showOnly(w); },
-            });
-        }
-    }
+    protected active: Workbench | undefined;
+    protected queue: Promise<void> = Promise.resolve();
 
     registerCommands(registry: CommandRegistry): void {
         for (const w of WORKBENCHES) {
             registry.registerCommand({ id: commandId(w), category: 'OwnStudio', label: `Open ${w.label}` },
-                { execute: () => this.perspectives.switchPerspective(perspectiveId(w)) });
+                { execute: () => this.switchTo(w) });
         }
         registry.registerCommand({ id: 'ownstudio.target.toggle', category: 'OwnStudio', label: 'Switch Target (Simulator / Board)' },
             { execute: () => { this.target = this.target === 'simulator' ? 'board' : 'simulator'; this.renderBar(); } });
@@ -68,18 +55,21 @@ export class WorkbenchContribution implements PerspectiveContribution, CommandCo
     }
 
     async onDidInitializeLayout(_app: FrontendApplication): Promise<void> {
-        this.perspectives.onDidChangePerspective(id => this.renderBar(id));
-        if (!this.byPerspective(this.perspectives.getActivePerspectiveId())) {
-            await this.perspectives.switchPerspective(perspectiveId(WORKBENCHES[0]));
-        }
-        this.renderBar(this.perspectives.getActivePerspectiveId());
+        await this.switchTo(WORKBENCHES[0]);
     }
 
-    protected byPerspective(id: string): Workbench | undefined {
-        return WORKBENCHES.find(w => perspectiveId(w) === id);
+    /** Show a workbench. The bar changes at once; the main area follows, switches in order. */
+    switchTo(target: Workbench): Promise<void> {
+        this.active = target;
+        this.renderBar();
+        this.queue = this.queue.catch(() => undefined).then(() => this.showOnly(target));
+        return this.queue;
     }
 
     protected async showOnly(target: Workbench): Promise<void> {
+        if (this.active !== target) {
+            return;     // a later switch is queued: skip this one
+        }
         for (const w of WORKBENCHES) {
             if (w !== target) {
                 this.widgets.tryGetWidget(widgetId(w))?.close();
@@ -90,20 +80,31 @@ export class WorkbenchContribution implements PerspectiveContribution, CommandCo
             await this.shell.addWidget(widget, { area: 'main' });
         }
         await this.shell.activateWidget(widget.id);
+        if (target.id === 'code') {
+            const explorer = await this.widgets.getOrCreateWidget(EXPLORER_ID).catch(() => undefined);
+            if (explorer && !explorer.isAttached) {
+                await this.shell.addWidget(explorer, { area: 'left' });
+            }
+            if (explorer) {
+                this.shell.expandPanel('left');
+            }
+        }
         if (!this.expertMode.isExpert) {
-            const collapse = target.id === 'code' ? ['right', 'bottom'] as const : ['left', 'right', 'bottom'] as const;
+            // The mission steps are the student's guide: if they are open on the right, they stay.
+            const keepRight = this.shell.getWidgets('right').some(w => w.id === MISSION_STEPS_WIDGET_ID && w.isVisible);
+            const collapse = (target.id === 'code' ? ['right', 'bottom'] as const : ['left', 'right', 'bottom'] as const)
+                .filter(area => !(area === 'right' && keepRight));
             for (const area of collapse) {
                 if (this.shell.isExpanded(area)) {
-                    this.shell.collapsePanel(area); // not awaited, see registerPerspectives
+                    this.shell.collapsePanel(area); // not awaited: it can resolve only later
                 }
             }
         }
     }
 
-    protected renderBar(activeId: string = this.perspectives.getActivePerspectiveId()): void {
-        const active = this.byPerspective(activeId);
+    protected renderBar(): void {
         WORKBENCHES.forEach((w, i) => {
-            const on = w === active;
+            const on = w === this.active;
             this.statusBar.setElement(`ownstudio.bar.${w.id}`, {
                 text: `$(${w.icon}) ${w.label}`,
                 alignment: StatusBarAlignment.LEFT,
