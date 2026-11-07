@@ -24,6 +24,7 @@ import { LiveValues } from './live-values';
 import { PANEL_WIDGET_FACTORY, PanelWidget, PanelWidgetOptions } from './panel-widget';
 import { DATA_OBJECTS_WIDGET_ID, DataObjectsWidget } from './data-objects-widget';
 import { LabWidget } from './lab-widget';
+import { DesignWidget } from './design-widget';
 import { CONTROL_CENTER_WIDGET_ID, ControlCenterWidget } from './control-center-widget';
 import { LabContribution } from './lab-contribution';
 
@@ -92,7 +93,12 @@ export default new ContainerModule(bind => {
         id: widgetId(WORKBENCHES.find(wb => wb.id === 'lab')!),
         createWidget: () => ctx.container.get(LabWidget),
     })).inSingletonScope();
-    for (const w of WORKBENCHES.filter(wb => wb.id !== 'home' && wb.id !== 'lab')) {
+    bind(DesignWidget).toSelf();
+    bind(WidgetFactory).toDynamicValue(ctx => ({
+        id: widgetId(WORKBENCHES.find(wb => wb.id === 'design')!),
+        createWidget: () => ctx.container.get(DesignWidget),
+    })).inSingletonScope();
+    for (const w of WORKBENCHES.filter(wb => wb.id !== 'home' && wb.id !== 'lab' && wb.id !== 'design')) {
         bind(WidgetFactory).toDynamicValue(ctx => ({
             id: widgetId(w),
             createWidget: () => ctx.container.get(WorkbenchWidget).configure(w),

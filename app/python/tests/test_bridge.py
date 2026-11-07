@@ -37,6 +37,16 @@ class Methods(Fixture):
         with tempfile.TemporaryDirectory() as tmp:
             self.assertIn("no tests/catalogue.yaml", self.call("tests", mission=tmp)["error"])
 
+    def test_design_runs_a_mission_script(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            (pathlib.Path(tmp) / "design").mkdir()
+            (pathlib.Path(tmp) / "design" / "sizing.py").write_text(
+                "import json, sys\nprint(json.dumps({'args': sys.argv[1:]}))\n")
+            self.assertEqual(self.call("design", mission=tmp, script="sizing", args=["--x", 1])["result"],
+                             {"args": ["--json", "--x", "1"]})
+            self.assertIn("not a design script", self.call("design", mission=tmp, script="../x")["error"])
+            self.assertIn("no design/loop.py", self.call("design", mission=tmp, script="loop")["error"])
+
     def test_tests_gives_states(self):
         with tempfile.TemporaryDirectory() as tmp:
             m = pathlib.Path(tmp)

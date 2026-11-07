@@ -57,6 +57,8 @@ export interface BoardService {
     flash(manifestPath: string, serialNumber?: string): Promise<BoardInfo>;
     /** Where the mission's validation stands (ownstudio_lab.testing). Rejects without tests/catalogue.yaml. */
     tests(missionPath: string): Promise<TestStates>;
+    /** Run the mission's design/<script>.py --json with args; its JSON output. */
+    design(missionPath: string, script: string, args: (string | number)[]): Promise<unknown>;
     /** The installed board pack's board.yaml, or undefined if no pack has that name. */
     boardPack(name: string): Promise<{ path: string; text: string } | undefined>;
 }

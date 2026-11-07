@@ -52,6 +52,9 @@ export class BoardServiceImpl implements BoardService {
     get(path: string): Promise<unknown> { return this.call('get', { path }); }
     async update(group: string, values: Record<string, unknown>): Promise<void> { await this.call('update', { group, values }); }
     identity(missionPath: string): Promise<MissionIdentity> { return this.call('identity', { mission: missionPath }) as Promise<MissionIdentity>; }
+    design(missionPath: string, script: string, args: (string | number)[]): Promise<unknown> {
+        return this.call('design', { mission: missionPath, script, args });
+    }
     tests(missionPath: string): Promise<TestStates> { return this.call('tests', { mission: missionPath }) as Promise<TestStates>; }
 
     flash(manifestPath: string, serialNumber?: string): Promise<BoardInfo> {
