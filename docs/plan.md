@@ -262,3 +262,17 @@ E13 checks this in simulation before the Design work, and the answer goes to Lui
 - The firmware scope and the L2 step test on the board (step 4).
 - Live panels on the simulator target: the simulator runs slower than real time, so a panel would show simulated time. After the procedures work.
 - The Windows installer (#5).
+
+### Commits as made (step 3)
+
+Kept up to date as the work advances. Where a commit departs from the plan above, the reason is given.
+
+| Plan | Repo | Commit | Message | Note |
+|---|---|---|---|---|
+| P3 | Theia | `168fa41` | docs: commit plan for step 3 | |
+| T13 | Theia | `bf49e59` | lab: test catalogue, campaigns, findings and control center | |
+| E13 | examples | `6471c19` | mission: test catalogue and findings register | The feasibility check moved to the next commit, once the plant model had the right capacitors |
+| E13b | examples | `7b831d2` | mission: the real LOW-side capacitors in the plant model | **Not planned.** Luiz pointed to the switchable electrolytic; the schematic shows the model's 33 µF parts are on the HIGH side. LOW: 3 × 4.7 µF ceramics + 47 µF electrolytic (ESR 0.70 Ω). The firmware now connects the electrolytic. Includes the feasibility study: best undershoot 5.67 % at 100 µs, 4.92 % at 20 µs; issue [#11](https://github.com/luizvilla/Theia/issues/11) |
+| E13c | examples | `ff3defb` | mission: rebuild the pre-built firmware with the electrolytic connected | Flashed on the Twist; L2 link 6/6 pass |
+| E14 | examples | `d98c8dc` | mission: bench check of the plant model (BENCH-MOD-01) | Tested with a fake board; waits for Luiz at the bench |
+| T14 | Theia | `3c0c91b` | app: control center in the Lab | Also fixes a step 2 bug: Home and Lab were empty after switching workbench and back |
