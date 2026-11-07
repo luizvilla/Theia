@@ -2,7 +2,7 @@
 
 OwnStudio is a specification-in-progress for a Theia-based application that carries a power converter from idea to validated prototype in one place, through three workbenches: **Design**, **Code** and **Lab**.
 
-Nothing here is implemented yet. The repository currently holds the specification as it is being decided:
+Nothing here is implemented yet. **Start with [SPEC.md](SPEC.md)**, the consolidated specification. The supporting records:
 
 - [docs/overview.md](docs/overview.md): the decided structure, drawn.
 - [GLOSSARY.md](GLOSSARY.md): the project's vocabulary.
