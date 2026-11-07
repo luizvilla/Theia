@@ -215,6 +215,7 @@ body.theia-dark .ownstudio-diagram .os-block rect { stroke: var(--ownstudio-ligh
 .os-trace-board { stroke: var(--ownstudio-green); }
 body.theia-dark .os-trace-board { stroke: var(--ownstudio-yellow); }
 .os-trace-sim { stroke: var(--ownstudio-azure); }
+.os-trace-under { stroke-opacity: 0.55; }
 .os-band { fill: #3BA55D; fill-opacity: 0.16; stroke: #3BA55D; stroke-opacity: 0.45; stroke-dasharray: 2 2; }
 .ownstudio-overlay-table { margin-top: 6px; }
 .ownstudio-overlay-table td, .ownstudio-overlay-table th { padding: 2px 8px; }

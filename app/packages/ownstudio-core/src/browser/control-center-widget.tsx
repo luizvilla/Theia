@@ -119,6 +119,10 @@ export class ControlCenterWidget extends ReactWidget {
                             title={latest.twin ? 'Waveform: the board run and its simulation at the same conditions' : 'Waveform'}
                             onClick={e => { e.preventDefault(); this.commands.executeCommand(SHOW_RECORD_COMMAND.id, latest.path, latest.target, t.title); }}>
                             {latest.twin ? 'board and simulation' : 'view'}</a></>}
+                        {latest.target !== 'board' && t.targets?.board && <>{' · '}<a href='#'
+                            title='The newest board run, with its simulation at the same conditions'
+                            onClick={e => { e.preventDefault(); this.commands.executeCommand(SHOW_RECORD_COMMAND.id, t.targets!.board.path, 'board', t.title); }}>
+                            board run</a></>}
                         <div className='ownstudio-muted'>{latest.target} · {new Date(latest.date).toLocaleString()}
                             {latest.board ? ` · board ${latest.board.serial_number}` : ''}</div></>}</td>
                     <td>{t.finding && <a href='#' title={t.finding.cause}

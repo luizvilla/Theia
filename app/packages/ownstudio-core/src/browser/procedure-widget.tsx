@@ -224,8 +224,9 @@ export class ProcedureWidget extends ReactWidget {
                 <text x={left - 4} y={y(v) + 3} textAnchor='end' className='os-axis'>{v.toFixed(2)} V</text></g>)}
             {ticksT.map((t, i) => <text key={t} x={x(t)} y={H - 6} className='os-axis'
                 textAnchor={i === 0 ? 'start' : i === ticksT.length - 1 ? 'end' : 'middle'}>{(t * 1e3).toFixed(1)} ms</text>)}
-            {s && s.t.length > 1 && <polyline fill='none' className='os-trace-sim' strokeWidth='1.4' strokeDasharray='5 3' points={line(s)} />}
-            <polyline fill='none' className='os-trace-board' strokeWidth='1.4' points={line(w)} />
+            {/* The measurement first, the simulation on top: a board's sample noise would hide it. */}
+            <polyline fill='none' className={sim ? 'os-trace-board os-trace-under' : 'os-trace-board'} strokeWidth='1.2' points={line(w)} />
+            {s && s.t.length > 1 && <polyline fill='none' className='os-trace-sim' strokeWidth='2' strokeDasharray='6 3' points={line(s)} />}
             <text x={left + 4} y={14} className='os-axis os-plot-title'>{label}</text>
         </svg>;
     }
