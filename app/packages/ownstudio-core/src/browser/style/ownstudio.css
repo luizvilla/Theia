@@ -37,3 +37,16 @@ body {
 
 .ownstudio-title { font-family: var(--ownstudio-title-font); letter-spacing: 0.02em; }
 .ownstudio-emphasis { font-family: var(--ownstudio-emphasis-font); }
+
+/* Workbench bar: the active workbench is marked in light yellow, as the brand's accent. */
+#theia-statusBar .ownstudio-bar-item { padding: 0 10px; font-family: var(--ownstudio-title-font); letter-spacing: 0.03em; }
+#theia-statusBar .ownstudio-bar-active { background: var(--ownstudio-yellow); color: var(--ownstudio-black) !important; }
+#theia-statusBar .ownstudio-bar-active * { color: var(--ownstudio-black) !important; }
+
+/* Workbench placeholder views */
+.ownstudio-workbench-body { padding: 32px 48px; max-width: 760px; }
+.ownstudio-workbench-body h1 { font-size: 32px; font-weight: 400; margin: 0 0 8px; color: var(--ownstudio-green); }
+body.theia-dark .ownstudio-workbench-body h1 { color: var(--ownstudio-yellow); }
+.ownstudio-workbench-purpose { font-size: 16px; line-height: 1.5; }
+.ownstudio-workbench-body h2 { font-size: 15px; font-weight: 500; margin-top: 24px; }
+.ownstudio-workbench:focus { outline: none; }

@@ -45,3 +45,23 @@ This still applies (modular journal). The `start` script runs `env -u ELECTRON_R
 ### Screenshots without a person at the screen
 
 Start Electron with `--remote-debugging-port=<port>`, then use the Chrome DevTools Protocol (`Page.captureScreenshot`) to capture the page. No virtual display (Xvfb) is installed on this machine, so the window opens on the real display.
+
+### A perspective appears one switch late if its view doesn't take focus
+
+The first activation of a perspective calls `shell.activateWidget()` for its views. That call waits until the widget holds keyboard focus. A `ReactWidget` with nothing focusable never does, so the switch finished only when the next switch started: the bar and the main area showed the previous workbench. **Fix:** workbench views set `tabIndex = 0` and focus their node in `onActivateRequest`. Any view placed by a perspective must do the same.
+
+### `chromeOptions.collapseAreas` can also stall a switch
+
+`applyViewPlacements` awaits `shell.collapsePanel(area)` for every area listed. This was removed while looking for the bug above and wasn't proven to be a cause on its own. The workbenches now collapse their areas themselves, without awaiting, and skip it in expert mode.
+
+### The main area is shared by all perspectives
+
+As with Eclipse's editor area, a perspective's saved layout doesn't hide the main-area widgets of the others. The workbench views are therefore closed and opened explicitly on each switch. Editors stay open across workbenches.
+
+### Theia relaunches its Electron main process
+
+The process that `timeout` or a shell starts is not the one that stays alive. The app relaunches itself, detached, with its arguments reordered. Testing tools must find the processes by binary path plus a unique argument (here, the debug port) and stop them explicitly. A profile left running holds the single-instance lock, and the next start quietly hands over to it and exits.
+
+### Testing a background window
+
+Chromium throttles hidden windows. Run tests with `--disable-backgrounding-occluded-windows --disable-renderer-backgrounding --disable-background-timer-throttling`, and use a throwaway `--user-data-dir` to test first-run behaviour.

@@ -1,11 +1,16 @@
 // SPDX-License-Identifier: LGPL-2.1-only
-// OwnStudio frontend module: branding, expert mode, and (next steps) the workbenches and Home.
+// OwnStudio frontend module: branding, expert mode, the workbench bar and the workbench views.
 import '../../src/browser/style/ownstudio.css';
 import { ContainerModule } from '@theia/core/shared/inversify';
 import { CommandContribution } from '@theia/core/lib/common';
-import { FrontendApplicationContribution } from '@theia/core/lib/browser';
+import {
+    FrontendApplicationContribution, KeybindingContribution, PerspectiveContribution, WidgetFactory
+} from '@theia/core/lib/browser';
 import { OwnStudioBrandingContribution } from './ownstudio-branding-contribution';
 import { ExpertModeContribution } from './expert-mode-contribution';
+import { WorkbenchContribution } from './workbench-contribution';
+import { WorkbenchWidget } from './workbench-widget';
+import { WORKBENCHES, widgetId } from './workbenches';
 
 export default new ContainerModule(bind => {
     bind(OwnStudioBrandingContribution).toSelf().inSingletonScope();
@@ -14,4 +19,17 @@ export default new ContainerModule(bind => {
     bind(ExpertModeContribution).toSelf().inSingletonScope();
     bind(CommandContribution).toService(ExpertModeContribution);
     bind(FrontendApplicationContribution).toService(ExpertModeContribution);
+
+    bind(WorkbenchContribution).toSelf().inSingletonScope();
+    for (const service of [PerspectiveContribution, CommandContribution, KeybindingContribution, FrontendApplicationContribution]) {
+        bind(service).toService(WorkbenchContribution);
+    }
+
+    bind(WorkbenchWidget).toSelf();
+    for (const w of WORKBENCHES) {
+        bind(WidgetFactory).toDynamicValue(ctx => ({
+            id: widgetId(w),
+            createWidget: () => ctx.container.get(WorkbenchWidget).configure(w),
+        })).inSingletonScope();
+    }
 });
