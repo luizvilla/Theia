@@ -103,3 +103,44 @@ E1 → E2 → E3 run first, because they prove the core idea (the control law ru
 - The Windows installer: there's no Windows machine here.
 - Comparing the plant model with the bench: it needs the Twist powered.
 - Any push to a remote.
+
+## Commit plan for step 2
+
+**Change since the first plan (2026-11-07):** Luiz connected an unpowered Twist to this computer. Its USB port powers the Spin, but nothing powers the converter's ports. So the board can be flashed and the ThingSet link tested for real. Measurements read zero or noise, which is fine for a link test.
+
+The step 1 rules still apply, plus three for the board:
+- Flashing this Twist is allowed. Its current firmware (a test firmware that names itself `DUT_TWT_1_4_1`) is overwritten by the first flash.
+- No automated test or tool sets the converter's mode to power. Tests write only the reference and the idle mode.
+- Every write goes to the board found by its USB serial number, never to "the first OwnTech port".
+
+### Two choices made for this step
+
+- **One Python package owns the board.** `app/python/ownstudio_lab` holds the ThingSet client, the flasher and a small bridge process. The app's backend talks to the bridge over JSON lines on stdin and stdout. Procedures need Python anyway (ADR 0014), and only one process can hold a serial port. So one implementation in Python beats a second one inside Electron, which would also bring a native serial module to rebuild for every Electron release.
+- **Build identity = git commit + dirty flag + source hash.** A binary can't contain its own hash. So the firmware reports a hash of its sources (`firmware/` and `data_objects.yaml`), and the binary's SHA-256 goes in a manifest next to it. The manifest links the two. The spec's "binary hash" stays in the manifest and the test records.
+
+### Branches
+
+- `~/code/examples`: `mission/buck-voltage-mode` continues (E9 onwards).
+- `~/code/Theia`: new branch `step-2/home-and-board`, from `step-1/app-skeleton`, in the `/data/ownstudio/Theia` worktree.
+
+### Order
+
+| # | Repo | Commit message | What it holds | Done when |
+|---|---|---|---|---|
+| P2 | Theia | **docs: commit plan for step 2** | This section | — |
+| E9 | examples | **mission: build identity in the firmware** | `tools/build_identity.py` writes `build_identity.h` (commit, dirty, source hash) into the throwaway Core copy; data objects group `Build`; a fallback when built outside the tools | Tests pass; firmware builds; the source hash is the same across two builds |
+| E10 | examples | **mission: pre-built firmware binary** | `bin/firmware.mcuboot.bin` and `bin/manifest.json` (SHA-256, commit, source hash, Core commit, board), written by `tools/build_firmware.sh --release` | Manifest test passes |
+| T6 | Theia | **lab: Python ThingSet client and flasher** | `app/python/ownstudio_lab`: board discovery by USB serial number and interface, ThingSet text mode over the shell, flashing through MCUboot with `mcumgr` (checks the manifest hash first), tests against a fake serial port | Tests pass; **the Twist is flashed with the E10 binary and reports the matching identity over ThingSet** |
+| E11 | examples | **mission: L2 link test on the board** | `tests/l2/test_link.py`: identity matches the manifest, every data object in the YAML is on the board with its type, reference write and readback, mode stays idle. Skipped when no board is connected | Passes on the unpowered Twist |
+| T7 | Theia | **app: board link and firmware identity** | Backend starts the bridge; status bar shows "Twist 1.4.x · firmware matches / differs / no ThingSet"; command "Flash the mission firmware" | Screenshot on the real board; flashing from the app works |
+| T8 | Theia | **app: Twist board pack** | `boardpacks/twist/board.yaml` (draft of the description meant for the TWIST repo, ADR 0017: port ratings, components, bridge-block isolation, protection chains, each value with its source) and its loader | Loader tests pass |
+| T9 | Theia | **app: Home's Specification, Build and Verification layers** | Requirements on ports and blocks; Verification colours from the test records in `records/`; Build shows the board status | Screenshots of the three layers; with the step 1 L1 record, REQ-UNDERSHOOT is red and the others blue |
+| T10 | Theia | **app: safety panel** | Envelope table (edits `mission.yaml`), check against board ratings, isolation switch per bridge block, protection checklist showing gaps | Check tests pass; screenshot |
+| E12 | examples | **mission: buck panel** | `panels/buck.panel.json` in modular's dashboard format | Opens in T11 |
+| T11 | Theia | **app: data object table and the first panel** | Live data object table; panel widgets gauge, number, setpoint, button and plot, reading the matching subset of modular's format (ADR 0024) | On the real board, the table and panel show live values, and the setpoint writes the reference |
+| T12 | Theia | **docs: step 2 report** | What works, what failed, what waits for Luiz | Report written |
+
+### Still deferred
+
+- The Windows installer.
+- Everything that needs the converter powered: the bench comparison and L2 tests with power.
