@@ -2,17 +2,23 @@
 """Run a mission procedure on a target and file its test record in a new campaign.
 
     python -m ownstudio_lab.procedure MISSION tests/procedures/step_response.py \\
-        --target simulator|board [--board SERIAL] [--allow-power] [--campaign DIR] [--json]
+        --target simulator|board [--board SERIAL] [--allow-power] [--twin] [--campaign DIR] [--json]
 
 A procedure is a Python file with
 
     PROCEDURE = {"title": "...", "targets": ["simulator", "board"],
-                 "power_on": {"group": "Converter", "name": "Mode", "value": 1}}   # if it switches power on
+                 "power_on": {"group": "Converter", "name": "Mode", "value": 1},  # if it switches power on
+                 "twin": {"v_in": "v_high_V", "load_ohm": "load_ohm"}}           # simulator option <- condition
     def run(target, ctx): ...
 
 ctx.log(text), ctx.ask_number(question), ctx.confirm(question), ctx.options, and
-ctx.record(name, procedure, level, cases, inputs=..., versions=..., operator=..., files=...)
+ctx.record(name, procedure, level, cases, inputs=..., versions=..., operator=..., conditions=..., files=...)
 which writes the record into the campaign, stamped with the target's identity.
+
+With --twin, a board run brings its simulation: the runner runs the procedure
+again on the simulator, at the conditions the board run recorded (mapped to
+the harness's options by PROCEDURE["twin"]), in the same campaign, and links
+each board record to its simulator record ("twin" in record.json).
 
 On the board, a procedure that switches power on runs only with --allow-power
 (OwnStudio passes it after the user confirms, each time; ADR 0010), and the
@@ -46,6 +52,7 @@ class Context:
         self._campaign = campaign
         self.io = io or ConsoleIO()
         self.records = []
+        self.conditions = []
 
     @property
     def campaign(self) -> pathlib.Path:
@@ -62,7 +69,8 @@ class Context:
     def confirm(self, question) -> bool:
         return bool(self.io.ask("confirm", question))
 
-    def record(self, name, procedure, level, cases, inputs=None, versions=None, operator=None, files=None) -> bool:
+    def record(self, name, procedure, level, cases, inputs=None, versions=None, operator=None, files=None,
+               conditions=None) -> bool:
         out = self.campaign / name
         out.mkdir(parents=True, exist_ok=True)
         for filename, content in (files or {}).items():
@@ -73,9 +81,10 @@ class Context:
         if self.target.kind == "simulator" and identity:
             versions.update({k: str(v) for k, v in identity.items()})
         passed = testing.write_record(out, procedure, level, self.target.kind, cases, self.mission,
-                                      inputs, versions, board, operator)
+                                      inputs, versions, board, operator, conditions)
         verdict = json.loads((out / "record.json").read_text())["verdict"]
         self.records.append((out, verdict))
+        self.conditions.append(dict(conditions or {}))
         self.io.record(out, verdict)
         return passed
 
@@ -156,9 +165,24 @@ def power_guard(power_on, allowed):
     return guard
 
 
+def twin_options(meta, conditions):
+    """Simulator options for a board run's twin: PROCEDURE["twin"] maps option -> condition name."""
+    return {option: conditions[name] for option, name in (meta.get("twin") or {}).items() if name in conditions}
+
+
+def link_twins(board_records, sim_records, campaign):
+    """Write "twin" into each pair of record.json files, as the other record's path in the campaign."""
+    for (board_path, _), (sim_path, _) in zip(board_records, sim_records):
+        for path, other in ((board_path, sim_path), (sim_path, board_path)):
+            rec = json.loads((path / "record.json").read_text())
+            rec["twin"] = str(other.relative_to(campaign))
+            (path / "record.json").write_text(json.dumps(rec, indent=2) + "\n")
+
+
 def run_procedure(mission, path, target_kind, io, board=None, allow_power=False, campaign=None, options=None,
-                  target=None) -> int:
-    """0: every record passed; 1: a record failed; 2: the procedure could not run."""
+                  target=None, twin=False, twin_target=None) -> int:
+    """0: every record passed; 1: a record failed; 2: the procedure could not run.
+    twin: after a board run, run the procedure on the simulator at the same conditions."""
     module = load_procedure(path)
     meta = module.PROCEDURE
     if target_kind not in meta.get("targets", []):
@@ -178,7 +202,33 @@ def run_procedure(mission, path, target_kind, io, board=None, allow_power=False,
             except Exception:  # noqa: BLE001 - best effort, the board may be gone
                 pass
         target.close()
-    return 1 if any(v == "FAIL" for _, v in ctx.records) else 0
+    status = 1 if any(v == "FAIL" for _, v in ctx.records) else 0
+    if twin and target_kind == "board" and ctx.records:
+        run_twin(mission, module, ctx, io, twin_target)
+    return status
+
+
+def run_twin(mission, module, board_ctx, io, sim_target=None):
+    """The board run's simulation: same procedure, same campaign, the board's conditions."""
+    meta = module.PROCEDURE
+    if "simulator" not in meta.get("targets", []):
+        io.log("No simulation: this procedure does not run on the simulator.")
+        return
+    conditions = next((c for c in board_ctx.conditions if c), {})
+    options = twin_options(meta, conditions)
+    shown = ", ".join(f"{k} = {v:g}" if isinstance(v, (int, float)) else f"{k} = {v}" for k, v in options.items())
+    io.log(f"Simulation of this run, at the board's conditions ({shown or 'the simulator defaults'})…")
+    try:
+        target = sim_target or open_target("simulator", mission, **options)
+        ctx = Context(mission, target, board_ctx.campaign, io, dict(board_ctx.options, **options))
+        try:
+            module.run(target, ctx)
+        finally:
+            target.close()
+    except Exception as err:  # noqa: BLE001 - the board run stands; its twin is a bonus
+        io.log(f"The simulation could not run: {type(err).__name__}: {err}")
+        return
+    link_twins(board_ctx.records, ctx.records, board_ctx.campaign)
 
 
 def main(argv=None) -> int:
@@ -188,6 +238,7 @@ def main(argv=None) -> int:
     parser.add_argument("--target", choices=["simulator", "board"], default="simulator")
     parser.add_argument("--board", help="USB serial number of the board")
     parser.add_argument("--allow-power", action="store_true")
+    parser.add_argument("--twin", action="store_true", help="after a board run, the same procedure on the simulator")
     parser.add_argument("--campaign", type=pathlib.Path)
     parser.add_argument("--option", action="append", default=[], metavar="NAME=VALUE",
                         help="passed to the procedure as ctx.options (numbers parsed)")
@@ -204,7 +255,8 @@ def main(argv=None) -> int:
         except ValueError:
             options[name] = value
     try:
-        status = run_procedure(mission, path, args.target, io, args.board, args.allow_power, args.campaign, options)
+        status = run_procedure(mission, path, args.target, io, args.board, args.allow_power, args.campaign, options,
+                               twin=args.twin)
         io.done(status)
         return status
     except (ProcedureError, TargetError) as err:

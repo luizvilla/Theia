@@ -207,6 +207,43 @@ class Waveforms(Fixture):
             target.capture(timeout=0.05)
 
 
+TWIN_PROCEDURE = '''
+PROCEDURE = {"title": "Twin", "targets": ["simulator", "board"],
+             "power_on": {"group": "Converter", "name": "Mode", "value": 1},
+             "twin": {"tau": "tau_s"}}
+def run(target, ctx):
+    target.update("Converter", {"wVoltageRef_V": 10.0, "Mode": 1})
+    target.wait(0.02)
+    v = target.get("Measurements")["rV1Low_V"]
+    tau = 0.05 if target.kind == "board" else target.harness.tau
+    ctx.record(f"twin-{target.kind}", "TWIN", "L1", [{"id": "T1", "title": "t", "criterion": "c", "measured": v,
+               "expected": 10.0, "unit": "V", "passed": True}], conditions={"tau_s": tau})
+'''
+
+
+class Twin(Fixture):
+    def test_board_run_brings_its_simulation_at_the_same_conditions(self):
+        (self.m / "twin.py").write_text(TWIN_PROCEDURE)
+        target = fake_board_target(load_harness(self.m))
+        fake = FakeIO([])
+        status = proc.run_procedure(self.m, self.m / "twin.py", "board", fake, allow_power=True, target=target, twin=True)
+        self.assertEqual(status, 0)
+        (board_path, _), (sim_path, _) = fake.records
+        self.assertEqual(board_path.parent, sim_path.parent)                  # one campaign
+        board, sim = (json.loads((p / "record.json").read_text()) for p in (board_path, sim_path))
+        self.assertEqual((board["target"], sim["target"]), ("board", "simulator"))
+        self.assertEqual((board["twin"], sim["twin"]), (sim_path.name, board_path.name))
+        self.assertEqual(sim["conditions"], {"tau_s": 0.05})                 # the board's conditions
+        self.assertIn("Conditions: tau_s = 0.05", (board_path / "record.md").read_text())
+
+    def test_no_twin_without_the_flag(self):
+        (self.m / "twin.py").write_text(TWIN_PROCEDURE)
+        fake = FakeIO([])
+        proc.run_procedure(self.m, self.m / "twin.py", "board", fake, allow_power=True,
+                           target=fake_board_target(load_harness(self.m)))
+        self.assertEqual(len(fake.records), 1)
+
+
 class Json(unittest.TestCase):
     def test_ask_and_answer(self):
         out = io.StringIO()

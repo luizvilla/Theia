@@ -172,13 +172,15 @@ def case_verdict(case: dict) -> str:
 def write_record(out: pathlib.Path, procedure: str, level: str, target: str, cases: list[dict],
                  mission: pathlib.Path, inputs: dict[str, pathlib.Path] | None = None,
                  versions: dict[str, str] | None = None, board: dict | None = None,
-                 operator: dict | None = None) -> bool:
+                 operator: dict | None = None, conditions: dict | None = None) -> bool:
     """Write record.json and record.md. Returns True unless a case fails.
 
     cases: [{id, title, criterion, measured, expected, unit, passed}] or, for a case
     that only informs or could not run, verdict: INFO / BLOCKED (with a reason).
     board: serial number and the build identity it reports (board target).
-    operator: values typed in by the operator at the bench (multimeter readings...)."""
+    operator: values typed in by the operator at the bench (multimeter readings...).
+    conditions: what the run was done at, named with their unit (v_high_V, load_ohm...):
+    a board run's simulation twin is run at the same conditions."""
     out.mkdir(parents=True, exist_ok=True)
     verdicts = [case_verdict(c) for c in cases]
     verdict = "FAIL" if "FAIL" in verdicts else "BLOCKED" if "BLOCKED" in verdicts else "PASS"
@@ -195,6 +197,8 @@ def write_record(out: pathlib.Path, procedure: str, level: str, target: str, cas
         record["board"] = board
     if operator is not None:
         record["operator"] = operator
+    if conditions:
+        record["conditions"] = conditions
     (out / "record.json").write_text(json.dumps(record, indent=2) + "\n")
     lines = [f"# Test record: {procedure}", "",
              f"- Verdict: **{verdict}**",
@@ -205,6 +209,8 @@ def write_record(out: pathlib.Path, procedure: str, level: str, target: str, cas
     if board is not None:
         lines.append(f"- Board `{board.get('serial_number')}` running commit `{str(board.get('commit'))[:12]}`"
                      f"{' (dirty)' if board.get('dirty') else ''}, sources `{board.get('source_hash')}`")
+    if conditions:
+        lines.append("- Conditions: " + ", ".join(f"{k} = {_show(v)}" for k, v in conditions.items()))
     if operator:
         lines.append("- Entered by the operator: " + ", ".join(f"{k} = {_show(v)}" for k, v in operator.items()))
     lines += ["",

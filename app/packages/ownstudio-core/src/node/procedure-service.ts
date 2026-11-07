@@ -29,6 +29,10 @@ export class ProcedureServiceImpl implements ProcedureService {
         if (o.allowPower) {
             args.push('--allow-power');
         }
+        if (o.target === 'board') {
+            // A board run brings its simulation, at the conditions it recorded.
+            args.push('--twin');
+        }
         const child = spawn(python, args, { cwd: o.mission, env: { ...process.env, PYTHONUNBUFFERED: '1' } });
         this.runs.set(runId, child);
         let done = false;
