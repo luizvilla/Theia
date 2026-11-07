@@ -162,3 +162,5 @@ Kept up to date as the work advances. Where a commit departs from the plan above
 | T7 | Theia | `06fa95a` | app: board link and firmware identity | Includes the bridge process in `ownstudio_lab` and `MissionService` |
 | T8 | Theia | `13ed8a8` | app: Twist board pack | Adds TypeScript unit tests (`npm test`) |
 | E11b | examples | `44a4a89` | mission: test records go to records/ | **Not planned.** Needed by T9: Home reads `records/<test>/record.json` |
+| — | Theia | `9bad82e` | docs: record the step 2 commits made so far | This table |
+| T9 | Theia | `aa114a0` | app: Home's Specification, Build and Verification layers | Screenshots in `docs/images/step-2/` |
