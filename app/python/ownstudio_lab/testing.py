@@ -70,8 +70,10 @@ def load_catalogue(mission: pathlib.Path) -> dict:
                 problems.append(f"{tid}: missing '{key}'")
         if t.get("tab") not in tab_ids:
             problems.append(f"{tid}: tab '{t.get('tab')}' is not declared")
-        if t.get("level") not in LEVELS:
-            problems.append(f"{tid}: level '{t.get('level')}' is not one of {', '.join(LEVELS)}")
+        levels = t.get("level") if isinstance(t.get("level"), list) else [t.get("level")]
+        for level in levels:
+            if level not in LEVELS:
+                problems.append(f"{tid}: level '{level}' is not one of {', '.join(LEVELS)}")
         if t.get("status") not in STATUSES:
             problems.append(f"{tid}: status '{t.get('status')}' is not one of {', '.join(STATUSES)}")
         targets = t.get("target") if isinstance(t.get("target"), list) else [t.get("target")]
@@ -363,6 +365,10 @@ vertical-align:top;font-size:14px}th{font-size:12px;text-transform:uppercase;let
 """
 
 
+def _join(value) -> str:
+    return ", ".join(value) if isinstance(value, list) else str(value)
+
+
 def control_center_html(mission: pathlib.Path, data: dict, title: str | None = None) -> str:
     e = html.escape
     title = title or f"Control center: {mission.name}"
@@ -395,7 +401,7 @@ def control_center_html(mission: pathlib.Path, data: dict, title: str | None = N
             extra = f'<br><small>Blocked by: {e(t["blocked_by"])}</small>' if t.get("blocked_by") else ""
             rows.append(
                 f'<tr><td class="st {t["state"]}">{icon} {word}</td><td><code>{e(t["id"])}</code></td>'
-                f'<td>{e(t["title"])}<br><small>{e(str(t["level"]))} · {e(", ".join(t["requirements"]) if t.get("requirements") else "no requirement")}</small>{extra}</td>'
+                f'<td>{e(t["title"])}<br><small>{e(_join(t["level"]))} · {e(_join(t["target"]))} · {e(", ".join(t["requirements"]) if t.get("requirements") else "no requirement")}</small>{extra}</td>'
                 f'<td>{e(t["criterion"])}</td><td>{measured}</td><td>{where}</td><td>{issue}</td></tr>')
         sections.append(
             f'<section id="{e(tab["id"])}" {"" if i == 0 else "hidden"}><p class="question">{e(tab.get("question", ""))}</p>'

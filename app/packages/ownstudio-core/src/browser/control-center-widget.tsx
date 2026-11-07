@@ -105,7 +105,7 @@ export class ControlCenterWidget extends ReactWidget {
                 return <tr key={t.id}>
                     <td className={`ownstudio-cc-state os-test-${t.state}`}>{info.icon} {info.word}</td>
                     <td><code>{t.id}</code></td>
-                    <td>{t.title}<div className='ownstudio-muted'>{t.level} · {Array.isArray(t.target) ? t.target.join(', ') : t.target}
+                    <td>{t.title}<div className='ownstudio-muted'>{Array.isArray(t.level) ? t.level.join(', ') : t.level} · {Array.isArray(t.target) ? t.target.join(', ') : t.target}
                         {t.requirements?.length ? ` · ${t.requirements.join(', ')}` : ''}</div>
                         {t.blocked_by && <div className='ownstudio-muted'>Blocked by: {t.blocked_by}</div>}</td>
                     <td>{t.criterion}</td>

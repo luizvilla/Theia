@@ -48,7 +48,7 @@ export interface LatestRun {
 export interface TestEntry {
     id: string;
     tab: string;
-    level: string;
+    level: string | string[];
     title: string;
     criterion: string;
     status: 'implemented' | 'partial' | 'planned' | 'blocked';
