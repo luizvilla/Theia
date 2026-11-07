@@ -10,6 +10,7 @@ import { OwnStudioBrandingContribution } from './ownstudio-branding-contribution
 import { ExpertModeContribution } from './expert-mode-contribution';
 import { WorkbenchContribution } from './workbench-contribution';
 import { WorkbenchWidget } from './workbench-widget';
+import { HomeWidget } from './home-widget';
 import { WORKBENCHES, widgetId } from './workbenches';
 
 export default new ContainerModule(bind => {
@@ -26,7 +27,12 @@ export default new ContainerModule(bind => {
     }
 
     bind(WorkbenchWidget).toSelf();
-    for (const w of WORKBENCHES) {
+    bind(HomeWidget).toSelf().inSingletonScope();
+    bind(WidgetFactory).toDynamicValue(ctx => ({
+        id: widgetId(WORKBENCHES[0]),
+        createWidget: () => ctx.container.get(HomeWidget),
+    })).inSingletonScope();
+    for (const w of WORKBENCHES.filter(wb => wb.id !== 'home')) {
         bind(WidgetFactory).toDynamicValue(ctx => ({
             id: widgetId(w),
             createWidget: () => ctx.container.get(WorkbenchWidget).configure(w),

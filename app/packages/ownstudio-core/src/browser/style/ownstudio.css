@@ -50,3 +50,30 @@ body.theia-dark .ownstudio-workbench-body h1 { color: var(--ownstudio-yellow); }
 .ownstudio-workbench-purpose { font-size: 16px; line-height: 1.5; }
 .ownstudio-workbench-body h2 { font-size: 15px; font-weight: 500; margin-top: 24px; }
 .ownstudio-workbench:focus { outline: none; }
+
+/* Home */
+.ownstudio-home-body { max-width: 900px; }
+.ownstudio-mission-title { font-size: 26px; font-weight: 500; margin: 0 0 6px; }
+.ownstudio-layer-tabs { display: flex; gap: 8px; align-items: center; margin: 12px 0 8px; }
+.ownstudio-layer { padding: 3px 12px; border-radius: 12px; border: 1px solid var(--theia-foreground); opacity: 0.45; font-size: 12px; }
+.ownstudio-layer-active { opacity: 1; background: var(--ownstudio-green); color: #FFFFFF; border-color: var(--ownstudio-green); }
+.ownstudio-board { margin-left: auto; font-size: 12px; opacity: 0.7; }
+.ownstudio-diagram { width: 100%; height: auto; display: block; }
+.ownstudio-diagram text { fill: var(--theia-foreground); font-family: var(--theia-ui-font-family); }
+.ownstudio-diagram .os-name { font-size: 14px; font-weight: 700; }
+.ownstudio-diagram .os-summary { font-size: 11px; opacity: 0.8; }
+.ownstudio-diagram .os-label { font-size: 11px; opacity: 0.65; }
+.ownstudio-diagram .os-port { font-size: 11px; font-weight: 700; }
+.ownstudio-diagram .os-envelope { font-size: 11px; font-weight: 700; fill: var(--ownstudio-persimmon) !important; }
+.ownstudio-diagram .os-block rect { fill: var(--theia-editor-background); stroke: var(--ownstudio-green); stroke-width: 2; }
+body.theia-dark .ownstudio-diagram .os-block rect { stroke: var(--ownstudio-light-azure); }
+.ownstudio-diagram .os-env rect { fill: none; stroke: var(--theia-foreground); stroke-opacity: 0.35; stroke-dasharray: 4 3; }
+.ownstudio-diagram .os-bridge { fill: var(--ownstudio-green); fill-opacity: 0.08; stroke: var(--ownstudio-green); stroke-opacity: 0.5; }
+.ownstudio-diagram .os-bridge-name { font-size: 13px; font-weight: 700; }
+.ownstudio-diagram path { fill: none; stroke: var(--theia-foreground); stroke-opacity: 0.55; stroke-width: 1.25; }
+.ownstudio-diagram .os-energy path { stroke-width: 2.5; }
+.ownstudio-diagram .os-aux path { stroke-dasharray: 4 4; }
+.ownstudio-diagram .os-arrowhead { fill: var(--theia-foreground); fill-opacity: 0.55; stroke: none; }
+.ownstudio-diagram .os-clickable { cursor: pointer; }
+.ownstudio-diagram .os-clickable:hover rect { stroke: var(--ownstudio-yellow); stroke-width: 3; }
+.ownstudio-home-note { font-size: 12px; opacity: 0.7; }
