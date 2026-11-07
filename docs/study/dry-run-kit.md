@@ -2,12 +2,11 @@
 
 The dry run tests the study before students see it: the mission, the app, the timing, the questionnaire and the facilitators. It is not data for the study. What it finds is fixed before the student session.
 
-**Waiting for Luiz before the dry run:**
-- the decision on [#11](https://github.com/luizvilla/Theia/issues/11), since the mission's step 4 depends on it;
-- a fix for the workbench switch lag ([#13](https://github.com/luizvilla/Theia/issues/13));
-- one bench session (BENCH-MOD-01, BUCK-REF-01 on the board), so step 5 has been done once on the real Twist;
-- whether the consent sheet needs the university's data protection officer (DPO) for the student session; a French translation;
+**Before the trial runs (Luiz runs them with PhD students, in English, no translation):**
+- the mission's challenge: what the starting controller fails, now that the example PI passes the halved load step (#11);
 - the three open questions, which are drafts.
+
+The workbench switch lag (#13) is fixed, and step 5 has been done once on the real Twist.
 
 ## 1. Who and what
 

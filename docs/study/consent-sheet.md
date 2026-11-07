@@ -1,6 +1,6 @@
 # OwnStudio study: information and consent
 
-**Draft for the dry run.** Before the student session, check with the university's data protection officer (DPO) whether this needs their review, and translate into French.
+**For the trial runs with PhD students, in English.** Before the student session, check with the university's data protection officer (DPO) whether this needs their review.
 
 ## What this is
 
