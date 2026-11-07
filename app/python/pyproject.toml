@@ -1,0 +1,14 @@
+[project]
+name = "ownstudio-lab"
+version = "0.1.0"
+description = "OwnStudio's link to OwnTech boards: discovery, flashing, ThingSet"
+license = {text = "LGPL-2.1"}
+requires-python = ">=3.10"
+dependencies = ["pyserial==3.5"]
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["ownstudio_lab"]
