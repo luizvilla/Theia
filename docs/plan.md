@@ -67,10 +67,30 @@ The app lives in `app/`. `npm install` and the first build are slow, so they sta
 | # | Commit message | What it holds | Done when |
 |---|---|---|---|
 | T1 | **app: scaffold the OwnStudio Theia application** | Theia IDE template at the current release, pinned versions, `app/JOURNAL.md` of build quirks (modular's journal reused) | Builds and starts on Linux (Electron) |
-| T2 | **app: OwnStudio branding and a quiet default layout** | Name, window title; generic IDE views hidden by default; expert-mode toggle stub | Starts on a blank window titled OwnStudio |
+| T2 | **app: OwnStudio branding and a quiet default layout** | OwnTech brand guidelines applied (see below); name, window title, logomark as app and window icon; generic IDE views hidden by default; expert-mode toggle stub | Starts on a window titled OwnStudio in OwnTech colours and fonts, in light and dark themes |
 | T3 | **app: workbench bar Home · Design · Code · Lab** | Bottom bar, Ctrl+1…4, one placeholder view per workbench | Switching works; each workbench remembers its layout |
 | T4 | **app: Home shows the five converter blocks** | Static five-block diagram read from the mission's `mission.yaml` | Opening the mission folder shows its blocks |
 | T5 | **docs: step 1 morning report** | What works, what failed and why, what waits for Luiz; plan updated | Report written |
+
+### T2 branding: what is taken from OwnTech's brand guidelines
+
+Source: `/data/partage/OwnTech Technologies/Charte graphique` (`charte_owntech.pdf`, 19 pages, plus `assets/`). Files are copied into `app/branding/`; the shared folder is never modified.
+
+| Element | Guideline | Use in OwnStudio |
+|---|---|---|
+| Main colours | Brunswick green `#234D45`, light yellow `#F9F77F`, black `#000000` for text | Green: title bar, workbench bar, primary buttons. Yellow: the active workbench and focus |
+| Secondary colours | Azure `#6C8AFF`, light azure `#B6C9F8`, persimmon `#FF6112` | Azure: links and selection. Persimmon: warnings and safety (the red overlay of the Specification layer), so trips stand out |
+| Proportions | One main colour, the others in 40/30/20/10 | Green 40, neutral surfaces 30, azure 20, yellow and persimmon 10 together |
+| Title font | VG5000 ("modular, playful, technical") | Workbench names and Home titles only |
+| Emphasis font | Ronzino | Mission titles and landing-page highlights |
+| Body font | Atkinson Hyperlegible (designed for readers with low vision) | All interface text. Code stays in a monospace font |
+| Logo | `assets/logos/svg/` (logomark, full logo in black, white, yellow) | Logomark as app icon, window icon and landing-page header |
+| Icons | Line icons in `assets/icono/svg/` | Workbench bar icons where a matching one exists; otherwise Theia's codicons |
+| Favicons | `assets/favicons/` | Installer and desktop-entry icons at the sizes provided |
+
+Two checks before anything is pushed:
+- **Font licences.** The folder holds no licence files. Atkinson Hyperlegible is published under the SIL Open Font License. VG5000 and Ronzino are believed to be OFL too (Velvetyne and Collletttivo), but this must be confirmed and the licence texts added next to the fonts.
+- **Logos are trademarks, not LGPL.** They go in `app/branding/` with a note that the LGPL-2.1 licence of the code does not cover them.
 
 ### Order through the night
 
