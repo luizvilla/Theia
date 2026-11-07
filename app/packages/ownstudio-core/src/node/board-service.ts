@@ -8,6 +8,7 @@ import { BackendApplicationPath } from '@theia/core/lib/node/backend-application
 import {
     BoardClient, BoardInfo, BoardService, BoardStatus, LinkInfo, MissionIdentity
 } from '../common/board-protocol';
+import { TestStates } from '../common/test-states';
 
 interface Pending { resolve: (value: unknown) => void; reject: (error: Error) => void; }
 
@@ -51,6 +52,7 @@ export class BoardServiceImpl implements BoardService {
     get(path: string): Promise<unknown> { return this.call('get', { path }); }
     async update(group: string, values: Record<string, unknown>): Promise<void> { await this.call('update', { group, values }); }
     identity(missionPath: string): Promise<MissionIdentity> { return this.call('identity', { mission: missionPath }) as Promise<MissionIdentity>; }
+    tests(missionPath: string): Promise<TestStates> { return this.call('tests', { mission: missionPath }) as Promise<TestStates>; }
 
     flash(manifestPath: string, serialNumber?: string): Promise<BoardInfo> {
         const params: Record<string, unknown> = { manifest: manifestPath, serial_number: serialNumber ?? null };

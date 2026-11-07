@@ -2,6 +2,8 @@
 // The board link between the OwnStudio frontend and backend. The backend
 // forwards each call to the Python bridge (app/python/ownstudio_lab/bridge.py).
 
+import { TestStates } from './test-states';
+
 export const BOARD_SERVICE_PATH = '/services/ownstudio-board';
 export const BoardService = Symbol('BoardService');
 
@@ -53,6 +55,8 @@ export interface BoardService {
     /** missionPath and manifestPath are file-system paths. */
     identity(missionPath: string): Promise<MissionIdentity>;
     flash(manifestPath: string, serialNumber?: string): Promise<BoardInfo>;
+    /** Where the mission's validation stands (ownstudio_lab.testing). Rejects without tests/catalogue.yaml. */
+    tests(missionPath: string): Promise<TestStates>;
     /** The installed board pack's board.yaml, or undefined if no pack has that name. */
     boardPack(name: string): Promise<{ path: string; text: string } | undefined>;
 }

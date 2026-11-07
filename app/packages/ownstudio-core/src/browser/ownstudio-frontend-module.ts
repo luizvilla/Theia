@@ -24,6 +24,7 @@ import { LiveValues } from './live-values';
 import { PANEL_WIDGET_FACTORY, PanelWidget, PanelWidgetOptions } from './panel-widget';
 import { DATA_OBJECTS_WIDGET_ID, DataObjectsWidget } from './data-objects-widget';
 import { LabWidget } from './lab-widget';
+import { CONTROL_CENTER_WIDGET_ID, ControlCenterWidget } from './control-center-widget';
 import { LabContribution } from './lab-contribution';
 
 export default new ContainerModule(bind => {
@@ -58,7 +59,12 @@ export default new ContainerModule(bind => {
         id: DATA_OBJECTS_WIDGET_ID,
         createWidget: () => ctx.container.get(DataObjectsWidget),
     })).inSingletonScope();
-    bind(LabWidget).toSelf().inSingletonScope();
+    bind(ControlCenterWidget).toSelf();
+    bind(WidgetFactory).toDynamicValue(ctx => ({
+        id: CONTROL_CENTER_WIDGET_ID,
+        createWidget: () => ctx.container.get(ControlCenterWidget),
+    })).inSingletonScope();
+    bind(LabWidget).toSelf();
     bind(LabContribution).toSelf().inSingletonScope();
     bind(CommandContribution).toService(LabContribution);
 
@@ -75,7 +81,9 @@ export default new ContainerModule(bind => {
     }
 
     bind(WorkbenchWidget).toSelf();
-    bind(HomeWidget).toSelf().inSingletonScope();
+    // Not singletons: switching workbench closes (disposes) the others, and a
+    // disposed React widget cannot render again. The factory makes a new one.
+    bind(HomeWidget).toSelf();
     bind(WidgetFactory).toDynamicValue(ctx => ({
         id: widgetId(WORKBENCHES[0]),
         createWidget: () => ctx.container.get(HomeWidget),

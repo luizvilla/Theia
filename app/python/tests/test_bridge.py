@@ -33,6 +33,22 @@ class Fixture(unittest.TestCase):
 
 
 class Methods(Fixture):
+    def test_tests_needs_a_catalogue(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self.assertIn("no tests/catalogue.yaml", self.call("tests", mission=tmp)["error"])
+
+    def test_tests_gives_states(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            m = pathlib.Path(tmp)
+            (m / "tests").mkdir()
+            (m / "tests" / "catalogue.yaml").write_text(
+                "tabs: [{id: a, title: A}]\ntests:\n  - {id: T1, tab: a, level: L0, title: t, criterion: c, "
+                "status: implemented, target: pc, requirements: [R1]}\n")
+            (m / "requirements.yaml").write_text("requirements:\n  - {id: R1, title: R, verified_by: [T1]}\n")
+            result = self.call("tests", mission=tmp)["result"]
+            self.assertEqual((result["tests"][0]["state"], result["requirements"][0]["state"]), ("not_run", "untested"))
+
+
     def test_status_lists_boards(self):
         answer = self.call("status")
         self.assertEqual(answer["id"], 7)

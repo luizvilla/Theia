@@ -7,6 +7,7 @@ import { MissionService } from './mission-service';
 import { OPEN_DATA_OBJECTS_COMMAND, OPEN_PANEL_COMMAND } from './lab-widget';
 import { PANEL_WIDGET_FACTORY, PanelWidgetOptions } from './panel-widget';
 import { DATA_OBJECTS_WIDGET_ID } from './data-objects-widget';
+import { CONTROL_CENTER_WIDGET_ID, OPEN_CONTROL_CENTER_COMMAND } from './control-center-widget';
 
 @injectable()
 export class LabContribution implements CommandContribution {
@@ -18,6 +19,7 @@ export class LabContribution implements CommandContribution {
 
     registerCommands(registry: CommandRegistry): void {
         registry.registerCommand(OPEN_PANEL_COMMAND, { execute: (path?: string) => this.openPanel(path) });
+        registry.registerCommand(OPEN_CONTROL_CENTER_COMMAND, { execute: async () => this.show(await this.widgets.getOrCreateWidget(CONTROL_CENTER_WIDGET_ID)) });
         registry.registerCommand(OPEN_DATA_OBJECTS_COMMAND, { execute: async () => this.show(await this.widgets.getOrCreateWidget(DATA_OBJECTS_WIDGET_ID)) });
     }
 

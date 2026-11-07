@@ -10,6 +10,8 @@ import { WORKBENCHES, widgetId } from './workbenches';
 import { MissionService } from './mission-service';
 import { BoardModel } from './board-model';
 import { boardName } from '../common/board-protocol';
+import { countStates, stateInfo } from '../common/test-states';
+import { OPEN_CONTROL_CENTER_COMMAND } from './control-center-widget';
 
 export const OPEN_PANEL_COMMAND = { id: 'ownstudio.panel.open', category: 'OwnStudio', label: 'Open a Panel…' };
 export const OPEN_DATA_OBJECTS_COMMAND = { id: 'ownstudio.dataObjects.open', category: 'OwnStudio', label: 'Open the Data Object Table' };
@@ -75,6 +77,14 @@ export class LabWidget extends ReactWidget {
                     <span className={codicon('dashboard')} /> {p.replace(/\.panel\.json$/, '')}</button>)}
                 <button className='theia-button secondary' onClick={() => this.commands.executeCommand(OPEN_DATA_OBJECTS_COMMAND.id)}>
                     <span className={codicon('symbol-field')} /> Data object table</button>
+            </div>
+            <h2 className='ownstudio-emphasis'>Tests</h2>
+            <p>{this.missions.tests
+                ? countStates(this.missions.tests.tests).map(s => `${stateInfo(s.id).word}: ${s.count}`).join(' · ')
+                : this.missions.testsProblem ?? 'Reading the test catalogue…'}</p>
+            <div className='ownstudio-button-row'>
+                <button className='theia-button' onClick={() => this.commands.executeCommand(OPEN_CONTROL_CENTER_COMMAND.id)}>
+                    <span className={codicon('checklist')} /> Control center</button>
             </div>
             <h2 className='ownstudio-emphasis'>Coming next</h2>
             <ul><li>Procedures: the L1 test on the simulator and the L2 test on the bench, filing test records</li>

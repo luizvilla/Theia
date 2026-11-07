@@ -7,7 +7,8 @@ import { WorkspaceService } from '@theia/workspace/lib/browser/workspace-service
 import { Mission, parseMission } from './mission';
 import { BoardPack, parseBoardPack } from '../common/board-pack';
 import { BoardService } from '../common/board-protocol';
-import { Requirement, TestRecord, parseRecord, parseRequirements } from '../common/verification';
+import { Requirement, parseRequirements } from '../common/verification';
+import { TestStates } from '../common/test-states';
 
 export const RECORDS_FOLDER = 'records';
 
@@ -32,8 +33,9 @@ export class MissionService {
     boardProblem: string | undefined;
     requirements: Requirement[] = [];
     requirementsProblem: string | undefined;
-    /** Test records found in records/, newest first. */
-    records: TestRecord[] = [];
+    /** Where the validation stands (tests/catalogue.yaml, records/, tests/findings.yaml). */
+    tests: TestStates | undefined;
+    testsProblem: string | undefined;
 
     protected readonly onDidChangeEmitter = new Emitter<void>();
     /** mission.yaml or the workspace changed. */
@@ -55,7 +57,8 @@ export class MissionService {
                 const requirements = this.mission?.requirements ? this.root.resolve(this.mission.requirements) : undefined;
                 if (event.contains(this.root.resolve('mission.yaml'))) {
                     this.load();
-                } else if (inside.some(uri => this.root!.resolve(RECORDS_FOLDER).isEqualOrParent(uri) || (requirements && requirements.isEqual(uri)))) {
+                } else if (inside.some(uri => this.root!.resolve(RECORDS_FOLDER).isEqualOrParent(uri)
+                    || this.root!.resolve('tests').isEqualOrParent(uri) || (requirements && requirements.isEqual(uri)))) {
                     this.loadVerification().then(() => this.onDidChangeEmitter.fire());
                 }
             }
@@ -76,7 +79,8 @@ export class MissionService {
         this.boardProblem = undefined;
         this.requirements = [];
         this.requirementsProblem = undefined;
-        this.records = [];
+        this.tests = undefined;
+        this.testsProblem = undefined;
         if (!this.root) {
             this.problem = 'Open a mission folder (File › Open Folder) to see its converter here.';
         } else {
@@ -109,22 +113,31 @@ export class MissionService {
                 this.requirementsProblem = error instanceof Error ? error.message : String(error);
             }
         }
-        const records: TestRecord[] = [];
+        // The test states come from the Python bridge, which may be starting or busy with
+        // the board: don't hold the mission back for them.
+        this.loadTests(root).then(() => this.onDidChangeEmitter.fire());
+    }
+
+    /** Ask ownstudio_lab.testing (through the bridge). The bridge may still be starting: try again once. */
+    protected async loadTests(root: URI, retry = true): Promise<void> {
         try {
-            const folder = await this.files.resolve(root.resolve(RECORDS_FOLDER));
-            for (const child of folder.children ?? []) {
-                const file = child.resource.resolve('record.json');
-                if (child.isDirectory && await this.files.exists(file)) {
-                    const record = parseRecord((await this.files.read(file)).value, `${RECORDS_FOLDER}/${child.name}`);
-                    if (record) {
-                        records.push(record);
-                    }
-                }
+            this.tests = await this.boards.tests(root.path.fsPath());
+            this.testsProblem = undefined;
+        } catch (error) {
+            this.tests = undefined;
+            this.testsProblem = error instanceof Error ? error.message : String(error);
+            if (retry) {
+                setTimeout(() => this.root === root && this.loadTests(root, false).then(() => this.onDidChangeEmitter.fire()), 3000);
             }
-        } catch {
-            // no records/ yet
         }
-        this.records = records.sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
+    }
+
+    /** Recompute the test states now (after a procedure ran, or from the control center). */
+    async refreshTests(): Promise<void> {
+        if (this.root) {
+            await this.loadTests(this.root, false);
+            this.onDidChangeEmitter.fire();
+        }
     }
 
     protected async loadBoard(name: string): Promise<void> {

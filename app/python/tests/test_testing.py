@@ -110,6 +110,14 @@ class StatesTest(Fixture):
         ready = {f["issue"][-1]: f["ready_to_close"] for f in data["findings"]}
         self.assertEqual(ready, {"7": False, "8": True})
 
+    def test_simulation_and_bench_disagree(self):
+        (self.m / "requirements.yaml").write_text("requirements:\n  - {id: REQ-A, title: A, verified_by: [T-PASS, T-BENCH]}\n")
+        (self.m / "tests" / "catalogue.yaml").write_text(CATALOGUE.replace("requirements: [REQ-C]", "requirements: [REQ-A]")
+                                                         .replace("requirements: [REQ-D]", "requirements: [REQ-A]"))
+        self.record("a/l1", [case("T-PASS")])
+        self.record("b/bench", [case("T-BENCH", False)], target="board")
+        self.assertEqual(testing.states(self.m)["requirements"][0]["state"], "disagree")
+
     def test_newest_record_wins(self):
         self.record("old/l1", [case("T-FAIL", False)], date="2026-11-07T10:00:00+00:00")
         self.record("new/l1", [case("T-FAIL", True)], date="2026-11-07T12:00:00+00:00")

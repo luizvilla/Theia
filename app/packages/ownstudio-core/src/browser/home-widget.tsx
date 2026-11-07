@@ -10,7 +10,9 @@ import { MissionService } from './mission-service';
 import { BoardModel } from './board-model';
 import { boardName } from '../common/board-protocol';
 import { BRIDGE_BLOCKS, BridgeBlock, revisionOf } from '../common/board-pack';
-import { Requirement, RequirementState, STATE_LABEL, TargetResult, Verification, verify } from '../common/verification';
+import { Requirement, RequirementState, STATE_LABEL } from '../common/verification';
+import { RequirementResult, formatMeasured, stateInfo } from '../common/test-states';
+import { OPEN_CONTROL_CENTER_COMMAND } from './control-center-widget';
 
 export type Layer = 'specification' | 'build' | 'verification';
 const LAYERS: { id: Layer; label: string; question: string }[] = [
@@ -18,7 +20,8 @@ const LAYERS: { id: Layer; label: string; question: string }[] = [
     { id: 'build', label: 'Build', question: 'What is it?' },
     { id: 'verification', label: 'Verification', question: 'What has been shown?' },
 ];
-const STATES: RequirementState[] = ['no-case', 'untested', 'sim-pass', 'bench-pass', 'fail', 'disagree'];
+const STATES: RequirementState[] = ['no-case', 'untested', 'sim-pass', 'bench-pass', 'fail', 'known', 'disagree'];
+type Verifications = Map<string, RequirementResult>;
 import { WORKBENCHES, widgetId } from './workbenches';
 
 type Box = { x: number; y: number; w: number; h: number };
@@ -38,7 +41,7 @@ const BOXES: Record<BlockKey, Box> = { power: POWER, measurement: MEASUREMENT, a
  * Home: the opened mission's converter as its five blocks, with three layers
  * borrowed from the V-model (SPEC §5): Specification (requirements, safety in
  * red), Build (blocks, board, firmware), Verification (each requirement
- * coloured by its latest test records).
+ * coloured from the test states of ownstudio_lab.testing).
  */
 @injectable()
 export class HomeWidget extends ReactWidget {
@@ -66,6 +69,11 @@ export class HomeWidget extends ReactWidget {
         this.update();
     }
 
+    protected override onAfterShow(msg: Message): void {
+        super.onAfterShow(msg);
+        this.update();
+    }
+
     protected override onActivateRequest(msg: Message): void {
         super.onActivateRequest(msg);
         this.node.focus();
@@ -83,8 +91,8 @@ export class HomeWidget extends ReactWidget {
         }
     }
 
-    protected verifications(): Map<string, Verification> {
-        return new Map(this.missions.requirements.map(r => [r.id, verify(r, this.missions.records)]));
+    protected verifications(): Verifications {
+        return new Map((this.missions.tests?.requirements ?? []).map(r => [r.id, r]));
     }
 
     protected render(): React.ReactNode {
@@ -124,7 +132,7 @@ export class HomeWidget extends ReactWidget {
         switch (this.layer) {
             case 'specification': return 'Red: the safety envelope at each port (indicative, not certification). Badges count the requirements on each port.';
             case 'build': return 'Click a block to open its file. Bridge blocks show whether they carry the isolation barrier (from the board pack).';
-            default: return "Each requirement takes the colour of its latest test records, in simulation and on the bench.";
+            default: return "Each requirement takes the colour of its tests' latest records, in simulation and on the bench. The control center in the Lab shows every test.";
         }
     }
 
@@ -192,40 +200,37 @@ export class HomeWidget extends ReactWidget {
         </>;
     }
 
-    protected renderVerification(verifications: Map<string, Verification>): React.ReactNode {
+    protected renderVerification(verifications: Verifications): React.ReactNode {
         const reqs = this.missions.requirements;
+        const tests = new Map((this.missions.tests?.tests ?? []).map(t => [t.id, t]));
         return <>
             <h2>Requirements</h2>
+            {this.missions.testsProblem && <p className='ownstudio-problem'>Test states unavailable: {this.missions.testsProblem}</p>}
             {reqs.map(r => {
-                const v = verifications.get(r.id)!;
+                const state = verifications.get(r.id)?.state ?? 'untested';
                 return <div key={r.id} className='ownstudio-card'>
                     <div className='ownstudio-card-title'>
-                        <span className={`ownstudio-swatch os-state-${v.state}`} title={STATE_LABEL[v.state]} />
-                        <code>{r.id}</code> {STATE_LABEL[v.state]}
+                        <span className={`ownstudio-swatch os-state-${state}`} title={STATE_LABEL[state]} />
+                        <code>{r.id}</code> {STATE_LABEL[state]}
                     </div>
-                    {this.renderResult('Simulation', v.simulator)}
-                    {this.renderResult('Bench', v.board)}
+                    {r.verified_by.map(id => {
+                        const t = tests.get(id);
+                        if (!t) {
+                            return <div key={id} className='ownstudio-problem'>{id}: not in the test catalogue</div>;
+                        }
+                        const info = stateInfo(t.state);
+                        const cases = t.latest?.cases ?? [];
+                        return <div key={id} className={`os-test-${t.state}`}>
+                            <span className='ownstudio-test-state'>{info.icon} {info.word}</span> <code>{id}</code>
+                            {cases.length > 0 && <> · {cases.map(c => formatMeasured(c)).join(', ')} ({t.criterion}, {t.latest!.target})</>}
+                            {t.finding && <> · <a href={t.finding.issue} target='_blank' rel='noreferrer'>{t.finding.issue.split('/').pop()}</a></>}
+                        </div>;
+                    })}
                 </div>;
             })}
-            <h2>Test records</h2>
-            {!this.missions.records.length && <p className='ownstudio-muted'>No records yet: run a test procedure.</p>}
-            <ul className='ownstudio-records'>
-                {this.missions.records.map(rec => <li key={rec.folder}>
-                    <a href='#' onClick={e => { e.preventDefault(); this.openFile(`${rec.folder}/record.md`); }}>{rec.procedure}</a>
-                    <span className={`ownstudio-verdict ownstudio-verdict-${rec.verdict.toLowerCase()}`}>{rec.verdict}</span>
-                    <div className='ownstudio-muted'>{rec.level} · {rec.target} · {new Date(rec.date).toLocaleString()}</div>
-                </li>)}
-            </ul>
+            <p><button className='theia-button' onClick={() => this.commands.executeCommand(OPEN_CONTROL_CENTER_COMMAND.id)}>
+                <span className={codicon('checklist')} /> Open the control center</button></p>
         </>;
-    }
-
-    protected renderResult(label: string, result: TargetResult | undefined): React.ReactNode {
-        if (!result) {
-            return <div className='ownstudio-muted'>{label}: no record</div>;
-        }
-        return result.cases.map(c => <div key={label + c.id} className={c.passed ? '' : 'ownstudio-problem'}>
-            {label}: {typeof c.measured === 'number' ? c.measured.toPrecision(4) : c.measured} {c.unit} ({c.criterion}) — {c.passed ? 'pass' : 'fail'}
-        </div>);
     }
 
     protected renderLegend(): React.ReactNode {
@@ -234,7 +239,7 @@ export class HomeWidget extends ReactWidget {
         </div>;
     }
 
-    protected renderDiagram(m: Mission, verifications: Map<string, Verification>): React.ReactNode {
+    protected renderDiagram(m: Mission, verifications: Verifications): React.ReactNode {
         const ports = Object.entries(m.ports);
         const inPort = ports.find(([, p]) => p.direction === 'in') ?? ports[0];
         const outPort = ports.find(([, p]) => p.direction === 'out');
@@ -298,7 +303,7 @@ export class HomeWidget extends ReactWidget {
         });
     }
 
-    protected renderBadges(name: string, box: Box, verifications: Map<string, Verification>): React.ReactNode {
+    protected renderBadges(name: string, box: Box, verifications: Verifications): React.ReactNode {
         const reqs: Requirement[] = this.missions.requirements.filter(r => r.port === name);
         if (!reqs.length || this.layer === 'build') {
             return undefined;
@@ -322,7 +327,7 @@ export class HomeWidget extends ReactWidget {
     }
 
     protected renderPort(m: Mission, name: string, port: Port, box: Box, labelX: number,
-        verifications: Map<string, Verification>): React.ReactNode {
+        verifications: Verifications): React.ReactNode {
         const env = this.layer === 'specification' ? m.envelope[name] : undefined;
         const limits = env ? [env.v_max_V !== undefined ? `≤ ${env.v_max_V} V` : '', env.i_max_A !== undefined ? `≤ ${env.i_max_A} A` : '']
             .filter(Boolean).join(' · ') : '';

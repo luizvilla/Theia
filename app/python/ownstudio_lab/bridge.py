@@ -14,6 +14,7 @@ disconnect
 get {path}                    read a path
 update {group, values}        write {name: value} into a group
 identity {mission}            the mission folder's source hash and pre-built manifest
+tests {mission}                where the mission's validation stands (ownstudio_lab.testing.states)
 flash {manifest, serial_number?, mcumgr?}
                               close the link, flash, then link again once the new
                               firmware answers ThingSet (it takes a few seconds to boot)
@@ -25,6 +26,7 @@ import sys
 import time
 
 from . import flash as flashing
+from . import testing
 from .boards import find_boards
 from .thingset import ThingSetError, find_thingset_port
 
@@ -102,6 +104,15 @@ class Bridge:
         prebuilt = json.loads(manifest_path.read_text()) if manifest_path.is_file() else None
         return {"sources": sources, "prebuilt": prebuilt}
 
+    def tests(self, mission):
+        mission = pathlib.Path(mission)
+        if not (mission / "tests" / "catalogue.yaml").is_file():
+            raise BridgeError("this mission has no tests/catalogue.yaml")
+        try:
+            return testing.states(mission)
+        except testing.CatalogueError as err:
+            raise BridgeError(f"tests/catalogue.yaml: {err}") from err
+
     def flash(self, manifest, serial_number=None, mcumgr=None):
         self.disconnect()
         try:
@@ -134,7 +145,7 @@ class Bridge:
     def handle(self, request):
         method = request.get("method")
         params = request.get("params") or {}
-        if method not in ("status", "connect", "disconnect", "get", "update", "identity", "flash"):
+        if method not in ("status", "connect", "disconnect", "get", "update", "identity", "tests", "flash"):
             return {"id": request.get("id"), "error": f"unknown method {method!r}"}
         try:
             result = getattr(self, method)(**params)

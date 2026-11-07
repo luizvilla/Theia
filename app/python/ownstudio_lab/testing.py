@@ -323,16 +323,20 @@ def _requirement_state(req: dict, tests: dict) -> dict:
     if not linked:
         return {"state": "no-case", "tests": []}
     names = [t["id"] for t in linked]
-    st = [t["state"] for t in linked]
-    if "fail" in st:
-        return {"state": "fail", "tests": names}
-    if "known" in st:
-        return {"state": "known", "tests": names}
-    passed = [t for t in linked if t["state"] == "pass"]
-    if not passed:
-        return {"state": "untested", "tests": names}
-    targets = {t["latest"]["target"] for t in passed}
-    return {"state": "bench-pass" if "board" in targets else "sim-pass", "tests": names}
+    passed = {t["latest"]["target"] for t in linked if t["state"] == "pass"}
+    failed = {t["latest"]["target"] for t in linked if t["state"] in ("fail", "known")}
+    states_ = [t["state"] for t in linked]
+    if passed and failed and passed != failed and (passed - failed) and (failed - passed):
+        state = "disagree"     # passes on one target, fails on the other
+    elif "fail" in states_:
+        state = "fail"
+    elif "known" in states_:
+        state = "known"
+    elif not passed:
+        state = "untested"
+    else:
+        state = "bench-pass" if "board" in passed else "sim-pass"
+    return {"state": state, "tests": names}
 
 
 # Control center ------------------------------------------------------------

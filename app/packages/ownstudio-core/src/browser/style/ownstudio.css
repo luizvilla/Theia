@@ -172,3 +172,17 @@ body.theia-dark .ownstudio-diagram .os-block rect { stroke: var(--ownstudio-ligh
 .ownstudio-data-table td { vertical-align: top; }
 .ownstudio-live-value { font-variant-numeric: tabular-nums; font-weight: 700; }
 .ownstudio-same-title > div > .ownstudio-item-title { display: none; }
+
+/* Control center (Core2's test states). Each state has an icon and a word as well as a colour. */
+.os-state-known { --os-state: #E8913A; }
+.os-test-fail { color: #E5484D; }
+.os-test-known { color: #E8913A; }
+.os-test-pass { color: #2F9E60; }
+.os-test-blocked_run, .os-test-blocked, .os-test-planned, .os-test-not_run, .os-test-info { color: var(--theia-descriptionForeground, #8A8F98); }
+.ownstudio-test-state { font-weight: 700; }
+.ownstudio-cc-summary { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 12px; }
+.ownstudio-cc-chip { border: 1px solid var(--theia-widget-border, rgba(128,128,128,0.35)); border-radius: 6px; padding: 2px 8px; font-size: 12px; font-weight: 700; }
+.ownstudio-cc-table { width: 100%; }
+.ownstudio-cc-table td { vertical-align: top; }
+.ownstudio-cc-state { white-space: nowrap; font-weight: 700; }
+.ownstudio-cc-table td code { white-space: nowrap; }
