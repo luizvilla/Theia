@@ -166,3 +166,13 @@ Answer to Luiz's Q38 follow-up: Core2 needs no plumbing because its control logi
 | Q64 | Bottom workbench bar Home · Design · Code · Lab, Ctrl+1…4, per-workbench layout, target and board status? | Yes. | Yes. | this log |
 | Q65 | Reuse modular's dashboard format and widgets? | Yes. | Yes, but asked whether it would import easily, given modular is built on Freeboard and Node.js. **Answer: no, not as is.** | [ADR 0024](adr/0024-panels-rebuilt-natively-modular-format-subset.md) |
 | Q66 | App updates by new installer; missions and board packs by git? | Yes. | Yes, keep it simple for now. | this log |
+
+## Round 10 (2026-11-07)
+
+| # | Question | Recommendation | Answer | Recorded in |
+|---|---|---|---|---|
+| Q67 | Keep a separate hardware-free `control.cpp` (needed to compile the control law on the PC for Pulsim), plus `app.ini`, `app.conf`, `app.overlay`? | Yes. | Yes. | [SPEC](../SPEC.md#9-missions-and-the-landing-page) |
+| Q68 | Is LAAS ZRR? Does a university AI service offer an API? | Luiz checks both. | LAAS is ZRR, which is not a problem at this stage. Assume no university API for now. Luiz also wants to connect Claude. | [ADR 0023](adr/0023-ai-endpoint-order.md) |
+| Q69 | Wrap up into one SPEC.md and a shareable page? | Yes. | Yes. | [SPEC](../SPEC.md) |
+
+The design tree is fully visited. Open items are listed in [SPEC §15](../SPEC.md#15-open-items).

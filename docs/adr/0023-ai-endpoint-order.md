@@ -3,3 +3,9 @@
 OwnStudio's AI settings accept any OpenAI-compatible endpoint, so that the agent can use, in order of preference: (1) an AI service made available by the University of Toulouse or the CNRS, (2) a student's or researcher's own API key, (3) a local model on the laptop, shown as limited. Luiz does not share his own key. The AI is optional: every mission can be completed without it.
 
 The University of Toulouse's charter on generative AI (11 June 2025) points to sovereign services, isdm-chat (CROCC) and Ragarenn (University of Rennes), for sensitive data. It also states that generating code in laboratories classified ZRR (restricted-access zones) requires sovereign solutions that meet data-protection requirements. This may apply to PhD students working at LAAS-CNRS. No University of Toulouse service open to students with an API was found online (2026-11-07). Availability must be confirmed with the university's IT services.
+
+## Update (round 10)
+
+- Besides OpenAI-compatible endpoints, the "own key" option includes Anthropic's API directly, so Claude can be connected (Luiz's request). Theia AI ships an Anthropic provider.
+- LAAS is classified ZRR. This does not constrain the current stage of development. It will matter before PhD students use the agent on restricted work.
+- Until the university confirms an API, the skeleton is built against "own key" and "local model".
