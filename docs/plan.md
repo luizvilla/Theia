@@ -171,3 +171,94 @@ Kept up to date as the work advances. Where a commit departs from the plan above
 | E12 | examples | `0bfb758` | mission: buck panel | With a test that panels use only declared data objects |
 | T11 | Theia | `99ba4cd` | app: data object table and the first panel | Also replaces the Lab placeholder. Plots drawn in SVG, not uPlot |
 | T12 | Theia | this commit | docs: step 2 report | |
+
+## Commit plan for step 3
+
+**Context (2026-11-07):** steps 1 and 2 are pushed to `luizvilla/Theia` and `luizvilla/examples`, and the open items are issues [#1–#10](https://github.com/luizvilla/Theia/issues). The Twist (a 1.4.3) is now on the bench: 30 V in from a 1 A-limited supply and 33 Ω on each leg. It regulated 5 V and 12 V on the mission firmware. With 33 Ω loads there is no load step on the bench.
+
+Step 3 starts with what Luiz asked for after that first powered run: **register every test the way Core2 does**, with a catalogue, campaigns, a findings register and a control center showing what has passed, failed or found an issue. Design, Code and the simulator target follow.
+
+### Rules
+
+The step 1 and 2 rules still apply (every commit builds and passes its tests; writes go to the board found by its USB serial number), with these changes:
+- **Pushing is allowed** to `luizvilla/Theia` and to `luizvilla/examples` (the mission branch).
+- **Switching the converter on is allowed only with Luiz at the bench**, one run at a time, with the supply limited (today 30 V, 1 A). Automated tests and the AI agent still never set the power mode.
+- Issues found by tests are filed on `luizvilla/Theia` and listed in the findings register.
+
+### How a test is registered
+
+```mermaid
+flowchart LR
+  C["tests/catalogue.yaml<br/>every test case, once:<br/>level, tab, criteria,<br/>conditions, requirements, status"] --> P
+  P["procedure<br/>(L0, L1 on the simulator,<br/>L2 or bench on the board)"] --> R["records/&lt;date&gt;_&lt;commit&gt;_&lt;time&gt;/<br/>one campaign, never overwritten,<br/>stamped with build identity<br/>and board serial"]
+  F["tests/findings.yaml<br/>failing criteria → GitHub issue"] --> S
+  R --> S["state of each test<br/>(Core2's states)"]
+  C --> S
+  S --> CC["control center<br/>Lab view in the app,<br/>control-center.html outside it"]
+  S --> H["Home, Verification layer"]
+```
+
+The states are Core2's, worst first: **failing**, **failing (known)** (a failure listed in the findings register, with its issue), **blocked in last run**, **passed**, **run (information only)**, **not run yet**, **blocked**, **not implemented**. A finding whose criteria all pass is shown as ready to close. Colour is never the only cue: each state has an icon and a word.
+
+Two differences from Core2:
+- **YAML, not JSON**, like every other mission file.
+- **The catalogue defines test cases; `requirements.yaml` keeps linking requirements to them.** A consistency test checks both directions.
+
+### Three choices made for this step
+
+- **The test tooling is shared, in `ownstudio_lab.testing`**, not copied into each mission: the catalogue loader, campaign record writer, findings register, state computation and control center. The app's Home and control center call the same Python through the bridge, so the states are computed in one place (step 2 computed them in TypeScript; that code goes). The cost: a mission's tests need `ownstudio_lab` installed. Until it is on PyPI, `requirements.txt` installs it from `luizvilla/Theia`.
+- **Procedures talk to a target, not to a board.** A target has `get`, `update`, `wait(seconds)` and `capture()`. The board target uses ThingSet in real time. The simulator target runs the plant model with `control.cpp` and a small per-mission harness that plays `main.cpp`'s role (mode, reference, measurements), so the same data object names work on both. On the simulator, `wait` advances simulated time and `capture` returns the full waveform. On the board, fast waveforms need the firmware scope, which is step 4.
+- **Design runs the mission's own Python files** (`design/sizing.py`, `design/loop.py`) with `--json`, and the app only draws the results. Students can read and change the calculations. The PI gains stay as two constants in `control.cpp`; "Apply" in Design changes those two numbers in the text, the way the safety panel edits the envelope.
+
+### A risk to check first: can the buck mission be solved by control at all?
+
+The output filter's characteristic impedance is √(L/C) = √(33 µH / 33 µF) ≈ 1 Ω. So a 1 A load step makes an LC dip of about 1 V, which is 8 % of 12 V, before any controller can react. The dip reaches its minimum about a quarter of a resonance period after the step: 50 µs at 4.8 kHz. The controller runs every 100 µs, so it acts after that minimum. The step 1 L1 run measured 7.4 %, close to the bare LC dip. **If this holds, no PI tuning at 100 µs meets the 5 % undershoot requirement**, and students would be asked to solve an impossible problem.
+
+The answer depends on two things not yet known:
+- **The real output capacitance.** In `PowerLeg.kicad_sch`, the two 33 µF parts are electrolytics (CP_Elec 10×10.5), there are nine 4.7 µF ceramics, and there is the Q5-switched electrolytic (#3). Which of these are on LOW1 changes √(L/C).
+- **How fast the control task can run.** At 20 µs or faster, the controller could act within the first quarter period.
+
+E13 checks this in simulation before the Design work, and the answer goes to Luiz. The possible outcomes are:
+- the requirement holds (with the real capacitance, or a faster control task, which is then itself a lesson);
+- the step changes (0.5 A);
+- the requirement changes.
+
+### Branches
+
+- `~/code/examples`: `mission/buck-voltage-mode` continues (E13 onwards).
+- `~/code/Theia`: new branch `step-3/design-code-lab`, from `step-2/home-and-board`, in the `/data/ownstudio/Theia` worktree.
+
+### Order
+
+| # | Repo | Commit message | What it holds | Done when |
+|---|---|---|---|---|
+| P3 | Theia | **docs: commit plan for step 3** | This section | — |
+| **A. Registering tests** | | | | |
+| T13 | Theia | **lab: test catalogue, campaigns, findings and control center** | `ownstudio_lab.testing`: catalogue schema and loader, campaign record writer (`records/<date>_<commit>_<time>/`, build identity and board serial), findings register, Core2's states, `control_center` writing HTML and `--json` | Tests pass, including a fixture mission with every state |
+| E13 | examples | **mission: test catalogue and findings register** | `tests/catalogue.yaml` with every existing case (model tests, L0, L1 BUCK-STEP-01a–d, L2 LINK-01–06) and the bench case as planned; `tests/findings.yaml`; runners write campaigns through `ownstudio_lab.testing`; `run_all.sh` ends with the control center; consistency test against `requirements.yaml`. Also the **feasibility check** above: L1 runs with a stiff PI at 100 µs and at 20 µs, and with the capacitance variants | Every case appears in `control-center.html`; feasibility result written in the step 3 log and sent to Luiz |
+| E14 | examples | **mission: bench check of the plant model (BENCH-MOD-01)** | An operator procedure for the bench: 30 V in, 33 Ω on each leg, references 5, 8 and 12 V. Reads the board, asks the operator for the multimeter voltages on LOW1 and LOW2 and the supply current, compares with the plant model at the same conditions (duty, output, input current). Sensor readings against the meter are information only | Run with Luiz at the bench; campaign filed; the sensor offsets become a finding with its issue |
+| T14 | Theia | **app: control center in the Lab** | Lab view: one tab per catalogue tab, each test with its state, latest campaign, record and issue links; Home's Verification layer reads the same states through the bridge | Screenshot with the real campaigns: L1 undershoot failing, bench run passed or failing (known) |
+| **B. Design** | | | | |
+| E15 | examples | **mission: sizing from the requirements** | `design/sizing.py` sizes L from the ripple current and C from the ripple and the undershoot (√(L/C) against the allowed dip), compares with the Twist's values, `--json` | Tests against hand calculations pass |
+| E16 | examples | **mission: control design on a Bode plot** | `design/loop.py`: buck small-signal G(s) with the board-pack values, the discrete PI with sampling and one-period delay, loop gain, margins, `--json`; cross-checked against Pulsim's AC sweep of the plant model (`pulsim.run_ac_sweep`) | Analytic and Pulsim gain within a stated tolerance below 10 kHz; margins of the current PI reported |
+| T15 | Theia | **app: Design workbench** | Requirements view (edits values in `requirements.yaml`, comments kept); Sizing view (inputs, result, Twist's value next to it); Loop view (Bode plot in SVG, margins, Kp and Ti inputs, "Apply to control.cpp") | Screenshots; applying gains changes only the two constants |
+| **C. Simulator target and procedures** | | | | |
+| T16 | Theia | **lab: targets for procedures** | `ownstudio_lab.target`: the `Target` interface, the board target over ThingSet, the simulator target loading the mission's plant, `control.cpp` and harness | One script runs unchanged on the fake board and the simulator |
+| E17 | examples | **mission: step-response procedure on both targets** | `tests/sim_harness.py`; `tests/procedures/step_response.py` replaces `tests/l1/run_l1.py`: load step (simulator only, as the bench has fixed loads) and reference step 10 → 12 V (both targets); files a campaign | BUCK-STEP-01 on the simulator gives the same verdicts as step 1 |
+| T17 | Theia | **app: procedures in the Lab** | Procedures listed from the catalogue; run on Simulator or Board (a procedure that switches power asks for confirmation each time, ADR 0010); live log; waveform plot from the record; control center refreshes | Screenshot of BUCK-STEP-01 run on the simulator from the app |
+| **D. Code with AI** | | | | |
+| T18 | Theia | **app: the mission agent in Code** | Theia AI with the Anthropic and OpenAI-compatible providers (ADR 0023); an OwnStudio agent given the mission's files, requirements and latest campaign; tools: read files, propose edits to `control.cpp` as a diff the student accepts, run L0 and the simulator procedure. No tool to flash, switch power or edit the envelope (ADR 0010) | Tool tests pass against a scripted model; with a real key, asked to fix BUCK-STEP-01b, the agent proposes a change and runs the procedure |
+| **E. End** | | | | |
+| T19 | Theia | **docs: step 3 report and a walk-through** | The mission done as a student would: requirements, sizing, Bode, PI applied, procedure on the simulator, record in the control center | Report written, with screenshots |
+
+### Questions for Luiz (work starts without them)
+
+1. **The output capacitance of LOW1:** which capacitors in `PowerLeg.kicad_sch` are on LOW1, and is the Q5 electrolytic switched in for buck mode? This changes the feasibility check and #1, #3.
+2. **An API key for T18's live check**, or a local model. Without one, T18 is tested with a scripted model only.
+3. **A bench session for E14** (about 15 minutes, with a multimeter), whenever suits you.
+
+### Still deferred
+
+- The firmware scope and the L2 step test on the board (step 4).
+- Live panels on the simulator target: the simulator runs slower than real time, so a panel would show simulated time. After the procedures work.
+- The Windows installer (#5).
