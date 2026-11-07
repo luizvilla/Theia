@@ -287,4 +287,54 @@ Kept up to date as the work advances. Where a commit departs from the plan above
 | — | Theia | `8e501cc` | lab: a catalogue test may list several levels | **Not planned.** Needed by BUCK-REF-01 (L1 and L2) |
 | T17 | Theia | `22b9e91` | app: procedures in the Lab | Checked: BUCK-STEP-01 from the app; the power confirmation on the board, cancelled |
 | T18 | Theia | `a115ea3` | app: the mission agent in Code | No key: tested through its tools' unit tests and the chat's agent list only |
-| T19 | Theia | this commit | docs: step 3 report | |
+| T19 | Theia | `fc42147` | docs: step 3 report | |
+
+## Commit plan for step 4
+
+**Context (2026-11-07):** step 3 is pushed. Luiz is away: step 4 is done without him, and everything that needs him (the bench, the decision on [#11](https://github.com/luizvilla/Theia/issues/11), the dry run with PhD students) is prepared, tested on fakes and on the idle board, and left in the report's "Waiting for you" list.
+
+### Rules
+
+The step 3 rules still apply, and one is stricter: **nothing switches the converter on in step 4.** Flashing the Twist and reading it while idle are allowed. Board procedures that switch power are tested against a fake board only.
+
+### Four choices made for this step
+
+- **The board's waveforms come from a firmware scope read over ThingSet.**
+  - It uses OwnTech's ScopeMimicry, as the `scope_simple_example` does, with five channels (LOW1 voltage and current, HIGH voltage, duty, reference) and 1024 samples at the 100 µs control period: a 102 ms window with 20 % before the trigger.
+  - A new `Scope` group arms it. It triggers on the next write to `Converter` (a reference step or a start), or at once. The computer reads it 64 values at a time.
+  - No second protocol, and the ThingSet port stays the only link. The cost: about 4 s to read a capture.
+- **A board run brings its simulation along.** After a procedure runs on the board, the runner runs it again on the simulator at the conditions the board run recorded (HIGH voltage measured, load stated by the operator) and files both in the same campaign. The Lab overlays requirement, simulation and measurement on one plot, case by case.
+- **Tests name the blocks they exercise.** The catalogue gains `blocks:` (power, measurement, controller, …). Home's Verification layer colours each block by the worst state of its tests and says whether its evidence comes from the simulator only or from the board.
+- **The study log is the app's mission steps.** Home lists `mission.yaml`'s steps; the student opens each one and marks it done. With consent, and only then, the app logs the start and end of each step to a local file outside the mission folder, then asks the System Usability Scale and the three open questions. Nothing leaves the computer.
+
+### Branches
+
+- `~/code/examples`: `mission/buck-voltage-mode` continues (E18 onwards).
+- `~/code/Theia`: new branch `step-4/bench-and-study`, from `step-3/design-code-lab`.
+
+### Order
+
+| # | Repo | Commit message | What it holds | Done when |
+|---|---|---|---|---|
+| P4 | Theia | **docs: commit plan for step 4** | This section | — |
+| **A. Waveforms from the board** | | | | |
+| E18 | examples | **mission: firmware scope over ThingSet** | The generator learns float arrays and group callbacks; a `Scope` group; ScopeMimicry in `main.cpp`; LINK-07 (scope capture on the idle board) in the L2 link test; pre-built firmware rebuilt | Flashed; LINK-01–07 pass on the idle Twist |
+| T20 | Theia | **lab: waveforms from the board** | `target.arm()` and `BoardTarget.capture()` through the scope; the simulator target marks the same trigger; the fake board has a scope | One procedure gets the same waveform keys from the fake board and the simulator |
+| E19 | examples | **mission: the reference step measured from the waveform** | BUCK-REF-01 arms the capture before the 10 V → 12 V step; settling time from the waveform on both targets; waveforms filed | BUCK-REF-01c is no longer blocked on the board (tested on the fake board) |
+| **B. Simulation next to the measurement** | | | | |
+| T21 | Theia | **lab: a board run brings its simulation** | `--twin`: the runner reruns the procedure on the simulator with the board run's conditions and links the two records | Fake board run gives two linked records in one campaign |
+| T22 | Theia | **app: requirement, simulation and measurement on one plot** | The Lab's record view overlays the requirement band, the simulation and the measurement, with a table of each case on both targets | Screenshot with a fake board run, labelled as such |
+| **C. Verification layer** | | | | |
+| E20 | examples | **mission: tests name their blocks** | `blocks:` in the catalogue; consistency test against `mission.yaml` | Tests pass |
+| T23 | Theia | **app: the Verification layer colours the blocks** | `ownstudio_lab.testing` gives a state per block and its evidence (simulator, board); Home colours the blocks, with icon and word | Screenshot |
+| **D. Study** | | | | |
+| T24 | Theia | **app: mission steps and the study log** | Home's mission steps; consent; local log of step times; SUS and the three open questions; export | Unit tests; screenshot of a logged walk-through |
+| T25 | Theia | **docs: dry-run kit for the PhD students** | Protocol, facilitator script, observer sheet, consent text, what to change after the dry run | Written |
+| **E. End** | | | | |
+| T26 | Theia | **docs: step 4 report** | What was done, what waits for Luiz, how to run the bench session | Report written, with screenshots |
+
+### Commits as made (step 4)
+
+| Plan | Repo | Commit | Message | Note |
+|---|---|---|---|---|
+| P4 | Theia | this commit | docs: commit plan for step 4 | |
