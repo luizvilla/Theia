@@ -53,6 +53,8 @@ export interface BoardService {
     /** missionPath and manifestPath are file-system paths. */
     identity(missionPath: string): Promise<MissionIdentity>;
     flash(manifestPath: string, serialNumber?: string): Promise<BoardInfo>;
+    /** The installed board pack's board.yaml, or undefined if no pack has that name. */
+    boardPack(name: string): Promise<{ path: string; text: string } | undefined>;
 }
 
 /** How the firmware on the linked board relates to the open mission. */

@@ -1,0 +1,141 @@
+# Twist board description, format 1.
+#
+# DRAFT, written by OwnStudio's step 2 from the sources below. It is meant to
+# move to the TWIST hardware repository (ADR 0017), where the hardware team
+# settles the values marked "check". The devicetree in OwnTech Core keeps
+# what the firmware needs (sensors, gains, default thresholds); this file
+# keeps the rest. Every value names its source.
+
+format: 1
+board: twist
+title: Twist
+maker: OwnTech
+summary: Non-isolated, bidirectional, two-leg DC/DC and DC/AC converter, 300 W
+
+sources:
+  datasheet:  "TWIST repository, docs/Datasheet_Twist_v1.4.pdf (rev 1)"
+  readme:     "TWIST repository, README.md"
+  schematic:  "TWIST repository, KiCAD_files (V1.4.3, commit 45b4f0b)"
+  devicetree: "OwnTech Core, zephyr/boards/shields/twist/twist_v1_4_2.overlay (commit 8111a0d)"
+
+# Shield revisions OwnTech Core knows, and the USB product name each firmware
+# build reports (CONFIG_USB_DEVICE_PRODUCT in the shield's .conf).
+revisions:
+  - {version: "1.4.1", core_shield: twist_v1_4_1, usb_product: TWIST_V1_4_1}
+  - {version: "1.4.2", core_shield: twist_v1_4_2, usb_product: TWIST_V1_4_2}
+
+# Board ratings: the upper bound of any mission's safety envelope. They can't
+# be edited in OwnStudio.
+ports:
+  HIGH:
+    side: high
+    kinds: [DC]
+    v_min_V:     {value: 12,  source: "datasheet p3, high-side ratings"}
+    v_max_V:     {value: 100, source: "datasheet p3, high-side ratings; README says 10-100 V", check: "datasheet p1 text says 110 V"}
+    v_abs_max_V: {value: 120, source: "datasheet p3, absolute maximum ratings"}
+    i_max_A:     {value: 8,   source: "datasheet p3, high-side fuse 8 A"}
+  LOW1:
+    side: low
+    kinds: [DC, AC]
+    v_min_V:     {value: 12, source: "datasheet p3, low-side ratings"}
+    v_max_V:     {value: 72, source: "datasheet p3, low-side ratings"}
+    v_abs_max_V: {value: 90, source: "datasheet p3, absolute maximum ratings"}
+    i_max_A:     {value: 8,  source: "datasheet p3, peak current per channel"}
+  LOW2:
+    side: low
+    kinds: [DC, AC]
+    v_min_V:     {value: 12, source: "datasheet p3, low-side ratings"}
+    v_max_V:     {value: 72, source: "datasheet p3, low-side ratings"}
+    v_abs_max_V: {value: 90, source: "datasheet p3, absolute maximum ratings"}
+    i_max_A:     {value: 8,  source: "datasheet p3, peak current per channel"}
+
+power:
+  rated_power_W:        {value: 300,     source: "datasheet p3, power output"}
+  legs:                 {value: 2,       source: "datasheet p1, 2 phase design"}
+  inductance_H:         {value: 33.0e-6, per: leg, source: "schematic PowerLeg.kicad_sch, L 33 uH"}
+  capacitance_F:        {value: 33.0e-6, per: leg, source: "schematic PowerLeg.kicad_sch, 33 uF", check: "which capacitor this is; the LOW-side electrolytic switched by Q5 is not counted"}
+  switching_frequency_Hz: {value: 200000, source: "datasheet p3, switching characteristics"}
+  dead_time_s:          {value: 200.0e-9, source: "datasheet p3, selectable dead time set by 20 kOhm resistors (gate driver)", check: "Core's HRTIM adds 100 ns (devicetree default-dead-time); the longer one should apply"}
+  switches:             {value: IPD200N15N3, source: "schematic PowerLeg.kicad_sch (150 V MOSFET)"}
+  low_side_electrolytic: {value: "switched in by Q5; on in DC-DC modes", source: "datasheet p10, modes of operation", check: "whether Core turns it on (NGND switch?)"}
+
+# Bridge blocks: whether each one carries the isolation barrier between the
+# power side and the controller side.
+blocks:
+  measurement:
+    isolated: true
+    parts: "AMC1311 and AMC1100 isolation amplifiers (voltages), ACS730 Hall sensors (currents)"
+    source: "datasheet p6, measurement chain; schematic High_side and PowerLeg sheets"
+  driver:
+    isolated: true
+    parts: "UCC21520 and UCC21222 isolated gate drivers"
+    source: "schematic PowerLeg.kicad_sch"
+  aps:
+    isolated: true
+    parts: "NCP12700 flyback controller, PA2467NL transformer, FODM217A optocoupler feedback"
+    source: "schematic Feeder.kicad_sch"
+
+# Protection chains: what detects a limit and what acts. A firmware chain
+# acts only if the firmware enables it; its threshold is set by the firmware
+# (devicetree value = Core's default).
+protection_chains:
+  - id: fuse-high
+    title: High-side fuse
+    kind: passive
+    ports: [HIGH]
+    quantity: current
+    trips_above_A: {value: 8, source: "datasheet p3, high-side fuse", check: "the schematic Power.kicad_sch marks a 10A fuse"}
+    action: Opens the HIGH circuit (replace the fuse)
+  - id: fuse-low
+    title: Low-side fuse
+    kind: passive
+    ports: [LOW1, LOW2]
+    quantity: current
+    trips_above_A: {value: 8, source: "datasheet p3, low-side fuse", check: "one fuse for both legs, or one per leg"}
+    action: Opens the LOW circuit (replace the fuse)
+  - id: fw-v-high
+    title: High-side voltage trip
+    kind: firmware
+    ports: [HIGH]
+    quantity: voltage
+    trips_above_V: {value: 100, source: "devicetree V_HIGH_TD threshold-high"}
+    action: PWM off
+    sensor: V_HIGH
+  - id: fw-v-low
+    title: Low-side voltage trip
+    kind: firmware
+    ports: [LOW1, LOW2]
+    quantity: voltage
+    trips_above_V: {value: 70, source: "devicetree V1_LOW_TD and V2_LOW_TD threshold-high"}
+    action: PWM off
+    sensor: V1_LOW, V2_LOW
+  - id: fw-i-high
+    title: High-side current trip
+    kind: firmware
+    ports: [HIGH]
+    quantity: current
+    trips_above_A: {value: 7, source: "devicetree I_HIGH_TD threshold-high"}
+    action: PWM off
+    sensor: I_HIGH
+  - id: fw-i-low
+    title: Low-side current trip
+    kind: firmware
+    ports: [LOW1, LOW2]
+    quantity: current
+    trips_above_A: {value: 7, source: "devicetree I1_LOW_TD and I2_LOW_TD threshold-high"}
+    action: PWM off
+    sensor: I1_LOW, I2_LOW
+  - id: fw-temperature
+    title: Heatsink temperature trip
+    kind: firmware
+    ports: []
+    quantity: temperature
+    trips_above_degC: {value: 70, source: "devicetree TEMP_SENSOR_1_TD and TEMP_SENSOR_2_TD threshold-high"}
+    action: PWM off
+    sensor: TEMP_SENSOR_1, TEMP_SENSOR_2
+
+# Firmware chains act only when the firmware calls Core's Safety API. OwnStudio
+# looks for this call in the mission's firmware sources.
+firmware_safety:
+  enable_call: "safety.enableSafetyApi"
+  api: "OwnTech Core SafetyAPI.h (safety.initShield, setChannelThresholdMax, enableSafetyApi)"

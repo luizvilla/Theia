@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: LGPL-2.1-only
 import { injectable } from '@theia/core/shared/inversify';
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process';
+import * as fs from 'fs';
+import * as path from 'path';
 import * as readline from 'readline';
+import { BackendApplicationPath } from '@theia/core/lib/node/backend-application';
 import {
     BoardClient, BoardInfo, BoardService, BoardStatus, LinkInfo, MissionIdentity
 } from '../common/board-protocol';
@@ -55,6 +58,27 @@ export class BoardServiceImpl implements BoardService {
             params.mcumgr = this.mcumgr;
         }
         return this.call('flash', params) as Promise<BoardInfo>;
+    }
+
+    /**
+     * Board packs are looked up in OWNSTUDIO_BOARD_PACKS (a list of folders),
+     * then in the packs shipped with the application.
+     */
+    async boardPack(name: string): Promise<{ path: string; text: string } | undefined> {
+        if (!/^[a-z0-9_-]+$/.test(name)) {
+            return undefined;
+        }
+        const dirs = [...(process.env.OWNSTUDIO_BOARD_PACKS ?? '').split(path.delimiter).filter(Boolean),
+            path.join(BackendApplicationPath, 'boardpacks')];
+        for (const dir of dirs) {
+            const file = path.join(dir, name, 'board.yaml');
+            try {
+                return { path: file, text: await fs.promises.readFile(file, 'utf8') };
+            } catch {
+                continue;
+            }
+        }
+        return undefined;
     }
 
     dispose(): void {

@@ -5,6 +5,8 @@ import URI from '@theia/core/lib/common/uri';
 import { FileService } from '@theia/filesystem/lib/browser/file-service';
 import { WorkspaceService } from '@theia/workspace/lib/browser/workspace-service';
 import { Mission, parseMission } from './mission';
+import { BoardPack, parseBoardPack } from '../common/board-pack';
+import { BoardService } from '../common/board-protocol';
 
 /**
  * The mission open in the window: the workspace root's mission.yaml.
@@ -16,10 +18,15 @@ export class MissionService {
 
     @inject(WorkspaceService) protected readonly workspace: WorkspaceService;
     @inject(FileService) protected readonly files: FileService;
+    @inject(BoardService) protected readonly boards: BoardService;
 
     root: URI | undefined;
     mission: Mission | undefined;
     problem = 'Opening…';
+    /** The board pack the mission names, and where it was read from. */
+    board: BoardPack | undefined;
+    boardSource: string | undefined;
+    boardProblem: string | undefined;
 
     protected readonly onDidChangeEmitter = new Emitter<void>();
     /** mission.yaml or the workspace changed. */
@@ -54,6 +61,9 @@ export class MissionService {
         const roots = await this.workspace.roots;
         this.root = roots[0]?.resource;
         this.mission = undefined;
+        this.board = undefined;
+        this.boardSource = undefined;
+        this.boardProblem = undefined;
         if (!this.root) {
             this.problem = 'Open a mission folder (File › Open Folder) to see its converter here.';
         } else {
@@ -61,6 +71,7 @@ export class MissionService {
             try {
                 this.mission = parseMission((await this.files.read(uri)).value);
                 this.problem = '';
+                await this.loadBoard(this.mission.board.pack);
             } catch (error) {
                 this.problem = (await this.files.exists(uri))
                     ? `mission.yaml could not be read: ${error instanceof Error ? error.message : error}`
@@ -68,5 +79,19 @@ export class MissionService {
             }
         }
         this.onDidChangeEmitter.fire();
+    }
+
+    protected async loadBoard(name: string): Promise<void> {
+        try {
+            const found = await this.boards.boardPack(name);
+            if (!found) {
+                this.boardProblem = `No board pack named '${name}' is installed.`;
+                return;
+            }
+            this.board = parseBoardPack(found.text);
+            this.boardSource = found.path;
+        } catch (error) {
+            this.boardProblem = error instanceof Error ? error.message : String(error);
+        }
     }
 }
