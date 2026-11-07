@@ -35,6 +35,10 @@ import { ProcedureClientImpl, ProcedureModel } from './procedure-model';
 import { PROCEDURE_WIDGET_ID, ProcedureWidget } from './procedure-widget';
 import { CONTROL_CENTER_WIDGET_ID, ControlCenterWidget } from './control-center-widget';
 import { LabContribution } from './lab-contribution';
+import { StudyModel } from './study-model';
+import { MISSION_STEPS_WIDGET_ID, MissionStepsWidget } from './mission-steps-widget';
+import { QUESTIONNAIRE_WIDGET_ID, QuestionnaireWidget } from './questionnaire-widget';
+import { StudyContribution } from './study-contribution';
 
 export default new ContainerModule(bind => {
     bind(MissionService).toSelf().inSingletonScope();
@@ -91,6 +95,20 @@ export default new ContainerModule(bind => {
         id: CONTROL_CENTER_WIDGET_ID,
         createWidget: () => ctx.container.get(ControlCenterWidget),
     })).inSingletonScope();
+    bind(StudyModel).toSelf().inSingletonScope();
+    bind(MissionStepsWidget).toSelf();
+    bind(WidgetFactory).toDynamicValue(ctx => ({
+        id: MISSION_STEPS_WIDGET_ID,
+        createWidget: () => ctx.container.get(MissionStepsWidget),
+    })).inSingletonScope();
+    bind(QuestionnaireWidget).toSelf();
+    bind(WidgetFactory).toDynamicValue(ctx => ({
+        id: QUESTIONNAIRE_WIDGET_ID,
+        createWidget: () => ctx.container.get(QuestionnaireWidget),
+    })).inSingletonScope();
+    bind(StudyContribution).toSelf().inSingletonScope();
+    bind(CommandContribution).toService(StudyContribution);
+    bind(FrontendApplicationContribution).toService(StudyContribution);
     bind(LabWidget).toSelf();
     bind(LabContribution).toSelf().inSingletonScope();
     bind(CommandContribution).toService(LabContribution);

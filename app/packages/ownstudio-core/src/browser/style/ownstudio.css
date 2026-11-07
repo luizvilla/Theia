@@ -230,3 +230,19 @@ body.theia-dark .ownstudio-diagram .os-block-verified.os-state-no-case .os-block
 .ownstudio-diagram .os-state-untested .os-block-badge, .ownstudio-diagram .os-state-no-case .os-block-badge { stroke: #8A8F98; }
 .ownstudio-diagram .os-block-badge-text { font-size: 10px; fill: var(--theia-foreground); }
 .ownstudio-block-row { margin: 4px 0 8px; }
+
+/* Mission steps (right panel) and the study questionnaire. */
+.ownstudio-steps-body { padding: 8px 12px; }
+.ownstudio-steps-list { list-style: none; padding: 0; margin: 8px 0; }
+.ownstudio-step { border-left: 3px solid var(--theia-panel-border, #444); padding: 4px 0 8px 10px; margin-bottom: 6px; }
+.ownstudio-step-current { border-left-color: var(--ownstudio-yellow); }
+.ownstudio-step-done { border-left-color: #2F9E60; opacity: 0.85; }
+.ownstudio-step-mark { display: inline-block; min-width: 18px; font-weight: 700; }
+.ownstudio-step-detail { margin: 4px 0; font-size: 12px; }
+.ownstudio-study summary { cursor: pointer; font-weight: 600; }
+.ownstudio-study label { display: block; margin: 6px 0; }
+.ownstudio-study input.theia-input { width: 8em; margin-left: 6px; }
+.ownstudio-sus td:first-child { max-width: 520px; }
+.ownstudio-sus-choice { text-align: center; }
+.ownstudio-open-question { display: block; margin: 10px 0; max-width: 760px; }
+.ownstudio-open-question textarea { display: block; width: 100%; margin-top: 4px; }

@@ -106,8 +106,9 @@ export class LabWidget extends ReactWidget {
                 <button className='theia-button' onClick={() => this.commands.executeCommand(OPEN_CONTROL_CENTER_COMMAND.id)}>
                     <span className={codicon('checklist')} /> Control center</button>
             </div>
-            <h2 className='ownstudio-emphasis'>Coming next</h2>
-            <ul><li>The firmware scope: waveforms from the board, and the simulation and bench overlay (step 4)</li></ul>
+            <p className='ownstudio-muted'>A run on the board records its waveform with the firmware scope, then runs the
+                same procedure on the simulator at the conditions it measured: open it from the control center to see
+                requirement, simulation and measurement together.</p>
         </div>;
     }
 }

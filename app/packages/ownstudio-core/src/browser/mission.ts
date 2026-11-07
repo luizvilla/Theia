@@ -19,6 +19,18 @@ export interface Mission {
     envelope: Record<string, Envelope>;
     /** Path of the requirements file, relative to the mission. */
     requirements?: string;
+    /** The steps the student follows, in order. */
+    steps?: MissionStep[];
+}
+
+export interface MissionStep {
+    id: string;
+    workbench: 'home' | 'design' | 'code' | 'lab';
+    title: string;
+    detail?: string;
+    /** A file to open, relative to the mission. */
+    opens?: string;
+    target?: 'simulator' | 'board';
 }
 
 /** Parse mission.yaml text; throws with a readable message when a required part is missing. */
