@@ -1,0 +1,39 @@
+/* SPDX-License-Identifier: LGPL-2.1-only */
+/* OwnTech brand fonts and colours for OwnStudio (see branding/README.md). */
+
+@font-face { font-family: 'Atkinson Hyperlegible'; font-weight: 400; font-style: normal;
+    src: url('../../../branding/fonts/Atkinson-Hyperlegible-Regular-102.ttf') format('truetype'); }
+@font-face { font-family: 'Atkinson Hyperlegible'; font-weight: 700; font-style: normal;
+    src: url('../../../branding/fonts/Atkinson-Hyperlegible-Bold-102.ttf') format('truetype'); }
+@font-face { font-family: 'Atkinson Hyperlegible'; font-weight: 400; font-style: italic;
+    src: url('../../../branding/fonts/Atkinson-Hyperlegible-Italic-102.ttf') format('truetype'); }
+@font-face { font-family: 'VG5000'; font-weight: 400;
+    src: url('../../../branding/fonts/VG5000-Regular.otf') format('opentype'); }
+@font-face { font-family: 'Ronzino'; font-weight: 400;
+    src: url('../../../branding/fonts/Ronzino-Regular.otf') format('opentype'); }
+@font-face { font-family: 'Ronzino'; font-weight: 500;
+    src: url('../../../branding/fonts/Ronzino-Medium.otf') format('opentype'); }
+@font-face { font-family: 'Ronzino'; font-weight: 700;
+    src: url('../../../branding/fonts/Ronzino-Bold.otf') format('opentype'); }
+
+:root {
+    /* Brand palette */
+    --ownstudio-green: #234D45;
+    --ownstudio-yellow: #F9F77F;
+    --ownstudio-black: #000000;
+    --ownstudio-azure: #6C8AFF;
+    --ownstudio-light-azure: #B6C9F8;
+    --ownstudio-persimmon: #FF6112;
+    /* Brand fonts */
+    --ownstudio-title-font: 'VG5000', var(--theia-ui-font-family);
+    --ownstudio-emphasis-font: 'Ronzino', var(--theia-ui-font-family);
+}
+
+/* Theia sets the interface font per OS on body (.linux, .windows, .mac, with
+   :lang() variants); !important is what lets the brand font win over all of them. */
+body {
+    --theia-ui-font-family: 'Atkinson Hyperlegible', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+}
+
+.ownstudio-title { font-family: var(--ownstudio-title-font); letter-spacing: 0.02em; }
+.ownstudio-emphasis { font-family: var(--ownstudio-emphasis-font); }

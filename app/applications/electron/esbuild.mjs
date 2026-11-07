@@ -7,6 +7,9 @@ import { nodeOptions } from './gen-esbuild.node.mjs';
 import { electronOptions } from './gen-esbuild.electron.mjs';
 import esbuild from 'esbuild';
 
+// OwnTech's brand fonts VG5000 and Ronzino are OpenType (.otf); inline them like .ttf.
+browserOptions.loader = { ...browserOptions.loader, '.otf': 'dataurl' };
+
 const browserContext = await esbuild.context(browserOptions);
 const nodeContext = await esbuild.context(nodeOptions);
 const electronContext = await esbuild.context(electronOptions);

@@ -9,10 +9,14 @@
     "frontend": {
       "config": {
         "applicationName": "OwnStudio",
-        "defaultTheme": "ownstudio-light",
+        "defaultTheme": {
+          "light": "ownstudio-light",
+          "dark": "ownstudio-dark"
+        },
         "defaultIconTheme": "theia-file-icons",
         "preferences": {
-          "toolbar.showToolbar": false
+          "toolbar.showToolbar": false,
+          "security.workspace.trust.enabled": false
         }
       }
     }
