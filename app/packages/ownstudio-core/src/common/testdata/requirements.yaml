@@ -1,0 +1,5 @@
+# Trimmed copy of the buck mission's requirements.yaml, for tests.
+conditions: &nominal {port_high_V: 40.0}
+requirements:
+  - {id: REQ-VOUT, title: Output voltage, statement: "LOW1 holds 12 V within 2 %.", port: LOW1, value: 12.0, unit: V, conditions: *nominal, verified_by: [BUCK-STEP-01a]}
+  - {id: REQ-UNDERSHOOT, title: Undershoot, statement: "LOW1 never falls more than 5 % below 12 V.", port: LOW1, value: 0.05, unit: fraction, verified_by: [BUCK-STEP-01b]}

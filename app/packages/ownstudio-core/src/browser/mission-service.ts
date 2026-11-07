@@ -7,6 +7,9 @@ import { WorkspaceService } from '@theia/workspace/lib/browser/workspace-service
 import { Mission, parseMission } from './mission';
 import { BoardPack, parseBoardPack } from '../common/board-pack';
 import { BoardService } from '../common/board-protocol';
+import { Requirement, TestRecord, parseRecord, parseRequirements } from '../common/verification';
+
+export const RECORDS_FOLDER = 'records';
 
 /**
  * The mission open in the window: the workspace root's mission.yaml.
@@ -27,6 +30,10 @@ export class MissionService {
     board: BoardPack | undefined;
     boardSource: string | undefined;
     boardProblem: string | undefined;
+    requirements: Requirement[] = [];
+    requirementsProblem: string | undefined;
+    /** Test records found in records/, newest first. */
+    records: TestRecord[] = [];
 
     protected readonly onDidChangeEmitter = new Emitter<void>();
     /** mission.yaml or the workspace changed. */
@@ -45,8 +52,11 @@ export class MissionService {
             const inside = event.changes.map(c => c.resource).filter(uri => this.root!.isEqualOrParent(uri));
             if (inside.length) {
                 this.onDidChangeFilesEmitter.fire(inside);
+                const requirements = this.mission?.requirements ? this.root.resolve(this.mission.requirements) : undefined;
                 if (event.contains(this.root.resolve('mission.yaml'))) {
                     this.load();
+                } else if (inside.some(uri => this.root!.resolve(RECORDS_FOLDER).isEqualOrParent(uri) || (requirements && requirements.isEqual(uri)))) {
+                    this.loadVerification().then(() => this.onDidChangeEmitter.fire());
                 }
             }
         });
@@ -64,6 +74,9 @@ export class MissionService {
         this.board = undefined;
         this.boardSource = undefined;
         this.boardProblem = undefined;
+        this.requirements = [];
+        this.requirementsProblem = undefined;
+        this.records = [];
         if (!this.root) {
             this.problem = 'Open a mission folder (File › Open Folder) to see its converter here.';
         } else {
@@ -72,6 +85,7 @@ export class MissionService {
                 this.mission = parseMission((await this.files.read(uri)).value);
                 this.problem = '';
                 await this.loadBoard(this.mission.board.pack);
+                await this.loadVerification();
             } catch (error) {
                 this.problem = (await this.files.exists(uri))
                     ? `mission.yaml could not be read: ${error instanceof Error ? error.message : error}`
@@ -79,6 +93,38 @@ export class MissionService {
             }
         }
         this.onDidChangeEmitter.fire();
+    }
+
+    protected async loadVerification(): Promise<void> {
+        const root = this.root;
+        if (!root || !this.mission) {
+            return;
+        }
+        this.requirementsProblem = undefined;
+        if (this.mission.requirements) {
+            try {
+                this.requirements = parseRequirements((await this.files.read(root.resolve(this.mission.requirements))).value);
+            } catch (error) {
+                this.requirements = [];
+                this.requirementsProblem = error instanceof Error ? error.message : String(error);
+            }
+        }
+        const records: TestRecord[] = [];
+        try {
+            const folder = await this.files.resolve(root.resolve(RECORDS_FOLDER));
+            for (const child of folder.children ?? []) {
+                const file = child.resource.resolve('record.json');
+                if (child.isDirectory && await this.files.exists(file)) {
+                    const record = parseRecord((await this.files.read(file)).value, `${RECORDS_FOLDER}/${child.name}`);
+                    if (record) {
+                        records.push(record);
+                    }
+                }
+            }
+        } catch {
+            // no records/ yet
+        }
+        this.records = records.sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
     }
 
     protected async loadBoard(name: string): Promise<void> {

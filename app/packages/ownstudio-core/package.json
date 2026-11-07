@@ -31,6 +31,6 @@
   "scripts": {
     "build": "tsc -b",
     "clean": "rimraf lib tsconfig.tsbuildinfo",
-    "test": "tsc -b && node --test \"lib/**/*.spec.js\""
+    "test": "tsc -b && mkdir -p lib/common/testdata && cp src/common/testdata/* lib/common/testdata/ && node --test \"lib/**/*.spec.js\""
   }
 }

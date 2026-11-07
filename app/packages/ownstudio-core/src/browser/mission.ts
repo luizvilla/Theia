@@ -17,6 +17,8 @@ export interface Mission {
     blocks: Record<BlockKey, Block>;
     ports: Record<string, Port>;
     envelope: Record<string, Envelope>;
+    /** Path of the requirements file, relative to the mission. */
+    requirements?: string;
 }
 
 /** Parse mission.yaml text; throws with a readable message when a required part is missing. */

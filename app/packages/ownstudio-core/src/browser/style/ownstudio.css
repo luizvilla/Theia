@@ -53,10 +53,14 @@ body.theia-dark .ownstudio-workbench-body h1 { color: var(--ownstudio-yellow); }
 .ownstudio-workbench:focus { outline: none; }
 
 /* Home */
-.ownstudio-home-body { max-width: 900px; }
+.ownstudio-home-body { max-width: 1400px; }
 .ownstudio-mission-title { font-size: 26px; font-weight: 500; margin: 0 0 6px; }
 .ownstudio-layer-tabs { display: flex; gap: 8px; align-items: center; margin: 12px 0 8px; }
-.ownstudio-layer { padding: 3px 12px; border-radius: 12px; border: 1px solid var(--theia-foreground); opacity: 0.45; font-size: 12px; }
+.ownstudio-layer { padding: 3px 12px; border-radius: 12px; border: 1px solid var(--theia-foreground); opacity: 0.55; font-size: 12px;
+    background: none; color: var(--theia-foreground); font-family: inherit; cursor: pointer; }
+.ownstudio-layer:hover { opacity: 0.9; }
+.ownstudio-layer:focus-visible { outline: 2px solid var(--ownstudio-yellow); outline-offset: 1px; }
+.ownstudio-layer-question { font-size: 12px; opacity: 0.7; margin-left: 4px; }
 .ownstudio-layer-active { opacity: 1; background: var(--ownstudio-green); color: #FFFFFF; border-color: var(--ownstudio-green); }
 .ownstudio-board { margin-left: auto; font-size: 12px; opacity: 0.7; }
 .ownstudio-diagram { width: 100%; height: auto; display: block; }
@@ -78,3 +82,48 @@ body.theia-dark .ownstudio-diagram .os-block rect { stroke: var(--ownstudio-ligh
 .ownstudio-diagram .os-clickable { cursor: pointer; }
 .ownstudio-diagram .os-clickable:hover rect { stroke: var(--ownstudio-yellow); stroke-width: 3; }
 .ownstudio-home-note { font-size: 12px; opacity: 0.7; }
+.ownstudio-home-columns { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
+.ownstudio-home-diagram { flex: 1 1 560px; max-width: 900px; min-width: 0; }
+.ownstudio-home-panel { flex: 1 1 320px; max-width: 460px; min-width: 0; }
+.ownstudio-home-panel h2 { margin: 4px 0 8px; font-size: 14px; font-weight: 700; }
+.ownstudio-home-panel h2:not(:first-child) { margin-top: 20px; }
+.ownstudio-card { border: 1px solid var(--theia-widget-border, rgba(128,128,128,0.35)); border-radius: 6px; padding: 8px 10px; margin-bottom: 8px; font-size: 12px; line-height: 1.45; }
+.ownstudio-card-title { font-weight: 700; font-size: 13px; margin-bottom: 2px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.ownstudio-tag { font-size: 11px; font-weight: 400; padding: 0 6px; border-radius: 8px; border: 1px solid currentColor; opacity: 0.7; }
+.ownstudio-muted { opacity: 0.7; font-size: 12px; }
+.ownstudio-problem { color: #E5484D; }
+.ownstudio-table { border-collapse: collapse; font-size: 12px; margin-bottom: 4px; }
+.ownstudio-table th, .ownstudio-table td { text-align: left; padding: 3px 14px 3px 0; border-bottom: 1px solid var(--theia-widget-border, rgba(128,128,128,0.25)); }
+.ownstudio-table td[title] { text-decoration: underline dotted; text-underline-offset: 3px; cursor: help; }
+.ownstudio-safety-heading, .ownstudio-safety td, .ownstudio-safety th { color: var(--ownstudio-persimmon); }
+.ownstudio-records { list-style: none; padding: 0; margin: 0; font-size: 12px; }
+.ownstudio-records li { margin-bottom: 8px; }
+.ownstudio-records a { color: var(--ownstudio-azure); }
+.ownstudio-verdict { margin-left: 8px; font-size: 11px; font-weight: 700; padding: 0 6px; border-radius: 8px; }
+.ownstudio-verdict-pass { background: #2F9E60; color: #FFFFFF; }
+.ownstudio-verdict-fail { background: #E5484D; color: #FFFFFF; }
+.ownstudio-firmware-matches { color: #2F9E60; }
+.ownstudio-firmware-differs, .ownstudio-firmware-prebuilt, .ownstudio-firmware-unknown { color: var(--ownstudio-persimmon); }
+
+/* Verification colours (SPEC §5). Red for failures stays distinct from the
+   persimmon of safety and warnings. */
+.os-state-untested { --os-state: #8A8F98; }
+.os-state-no-case { --os-state: transparent; }
+.os-state-sim-pass { --os-state: var(--ownstudio-azure); }
+.os-state-bench-pass { --os-state: #2F9E60; }
+.os-state-fail { --os-state: #E5484D; }
+.ownstudio-swatch { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 4px;
+    background: var(--os-state); border: 1px solid var(--os-state); }
+.ownstudio-swatch.os-state-no-case { border: 1px dashed #8A8F98; }
+.ownstudio-swatch.os-state-disagree { background: repeating-linear-gradient(45deg, var(--ownstudio-azure) 0 3px, #E5484D 3px 6px); border-color: #E5484D; }
+.ownstudio-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 11px; opacity: 0.85; margin: 6px 0; }
+.ownstudio-diagram .os-swatch { fill: var(--os-state); stroke: var(--os-state); }
+.ownstudio-diagram .os-swatch.os-state-no-case { stroke: #8A8F98; stroke-dasharray: 3 2; }
+.ownstudio-diagram .os-swatch.os-state-disagree { fill: url(#os-hatch); stroke: #E5484D; }
+.ownstudio-diagram .os-req-badge rect { fill: var(--ownstudio-azure); fill-opacity: 0.2; stroke: var(--ownstudio-azure); }
+.ownstudio-diagram .os-req-badge text { font-size: 11px; font-weight: 700; }
+.ownstudio-diagram .os-isolation rect { stroke-width: 1; }
+.ownstudio-diagram .os-isolated rect { fill: var(--ownstudio-green); stroke: var(--ownstudio-light-azure); }
+.ownstudio-diagram .os-isolated text { fill: #FFFFFF !important; font-size: 10px; font-weight: 700; }
+.ownstudio-diagram .os-not-isolated rect { fill: var(--theia-editor-background); stroke: var(--ownstudio-persimmon); }
+.ownstudio-diagram .os-not-isolated text { fill: var(--ownstudio-persimmon) !important; font-size: 10px; font-weight: 700; }
