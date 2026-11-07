@@ -7,3 +7,4 @@ applications/electron/webpack.config.js
 applications/electron/.browser_modules/
 applications/electron/plugins/
 dist/
+applications/electron/gen-esbuild.*.mjs
