@@ -20,6 +20,11 @@ import { BoardClientImpl, BoardModel } from './board-model';
 import { BoardContribution, BoardPreferenceContribution } from './board-contribution';
 import { SAFETY_WIDGET_ID, SafetyWidget } from './safety-widget';
 import { SafetyContribution } from './safety-contribution';
+import { LiveValues } from './live-values';
+import { PANEL_WIDGET_FACTORY, PanelWidget, PanelWidgetOptions } from './panel-widget';
+import { DATA_OBJECTS_WIDGET_ID, DataObjectsWidget } from './data-objects-widget';
+import { LabWidget } from './lab-widget';
+import { LabContribution } from './lab-contribution';
 
 export default new ContainerModule(bind => {
     bind(MissionService).toSelf().inSingletonScope();
@@ -42,6 +47,21 @@ export default new ContainerModule(bind => {
     bind(SafetyContribution).toSelf().inSingletonScope();
     bind(CommandContribution).toService(SafetyContribution);
 
+    bind(LiveValues).toSelf().inSingletonScope();
+    bind(PanelWidget).toSelf();
+    bind(WidgetFactory).toDynamicValue(ctx => ({
+        id: PANEL_WIDGET_FACTORY,
+        createWidget: (options: PanelWidgetOptions) => ctx.container.get(PanelWidget).configure(options),
+    })).inSingletonScope();
+    bind(DataObjectsWidget).toSelf();
+    bind(WidgetFactory).toDynamicValue(ctx => ({
+        id: DATA_OBJECTS_WIDGET_ID,
+        createWidget: () => ctx.container.get(DataObjectsWidget),
+    })).inSingletonScope();
+    bind(LabWidget).toSelf().inSingletonScope();
+    bind(LabContribution).toSelf().inSingletonScope();
+    bind(CommandContribution).toService(LabContribution);
+
     bind(OwnStudioBrandingContribution).toSelf().inSingletonScope();
     bind(FrontendApplicationContribution).toService(OwnStudioBrandingContribution);
 
@@ -60,7 +80,11 @@ export default new ContainerModule(bind => {
         id: widgetId(WORKBENCHES[0]),
         createWidget: () => ctx.container.get(HomeWidget),
     })).inSingletonScope();
-    for (const w of WORKBENCHES.filter(wb => wb.id !== 'home')) {
+    bind(WidgetFactory).toDynamicValue(ctx => ({
+        id: widgetId(WORKBENCHES.find(wb => wb.id === 'lab')!),
+        createWidget: () => ctx.container.get(LabWidget),
+    })).inSingletonScope();
+    for (const w of WORKBENCHES.filter(wb => wb.id !== 'home' && wb.id !== 'lab')) {
         bind(WidgetFactory).toDynamicValue(ctx => ({
             id: widgetId(w),
             createWidget: () => ctx.container.get(WorkbenchWidget).configure(w),

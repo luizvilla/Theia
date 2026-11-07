@@ -142,3 +142,33 @@ body.theia-dark .ownstudio-diagram .os-block rect { stroke: var(--ownstudio-ligh
 .ownstudio-check-above > div .codicon, .ownstudio-check-inactive > div .codicon { color: var(--ownstudio-persimmon); }
 .ownstudio-check-none > div .codicon, .ownstudio-check-rating > div .codicon { color: #E5484D; }
 .ownstudio-switch input { vertical-align: -2px; }
+
+/* Lab: panels and the data object table */
+.ownstudio-button-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.ownstudio-panel-body { max-width: 1200px; }
+.ownstudio-panel-offline { color: var(--ownstudio-persimmon); }
+.ownstudio-panes { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.ownstudio-pane { border: 1px solid var(--theia-widget-border, rgba(128,128,128,0.35)); border-radius: 8px; padding: 10px 14px; }
+.ownstudio-pane-wide { grid-column: 1 / -1; }
+.ownstudio-pane h2 { margin: 0 0 8px; font-size: 14px; }
+.ownstudio-panel-item { margin-bottom: 12px; }
+.ownstudio-item-title { font-size: 12px; opacity: 0.8; margin-bottom: 2px; }
+.ownstudio-big-value { font-size: 24px; font-family: var(--ownstudio-emphasis-font); font-variant-numeric: tabular-nums; }
+.ownstudio-gauge svg path { fill: none; stroke-linecap: round; }
+.ownstudio-gauge .os-gauge-track { stroke: var(--theia-foreground); stroke-opacity: 0.15; stroke-width: 9; }
+.ownstudio-gauge .os-gauge-bar { stroke: var(--ownstudio-azure); stroke-width: 9; }
+.ownstudio-gauge .os-gauge-alarm { stroke: #E5484D; }
+.ownstudio-gauge text { fill: var(--theia-foreground); font-family: var(--theia-ui-font-family); }
+.ownstudio-gauge .os-gauge-value { font-size: 16px; font-weight: 700; }
+.ownstudio-gauge .os-gauge-units { font-size: 8px; opacity: 0.7; }
+.ownstudio-setpoint-row { display: flex; gap: 6px; align-items: center; }
+.ownstudio-setpoint-row .theia-button { min-width: 32px; margin: 0; }
+.ownstudio-toggle .theia-button { margin: 0; min-width: 72px; }
+.ownstudio-toggle-on { background: var(--ownstudio-persimmon) !important; color: #000000 !important; }
+.ownstudio-plot-svg { width: 100%; height: auto; display: block; }
+.ownstudio-plot .os-plot-grid { stroke: var(--theia-foreground); stroke-opacity: 0.12; }
+.ownstudio-plot .os-plot-label { fill: var(--theia-foreground); fill-opacity: 0.65; font-size: 11px; font-family: var(--theia-ui-font-family); }
+.ownstudio-data-objects-body { max-width: 1200px; }
+.ownstudio-data-table td { vertical-align: top; }
+.ownstudio-live-value { font-variant-numeric: tabular-nums; font-weight: 700; }
+.ownstudio-same-title > div > .ownstudio-item-title { display: none; }

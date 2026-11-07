@@ -1,0 +1,84 @@
+// SPDX-License-Identifier: LGPL-2.1-only
+import * as React from '@theia/core/shared/react';
+import { inject, injectable, postConstruct } from '@theia/core/shared/inversify';
+import { Message } from '@theia/core/shared/@lumino/messaging';
+import { ReactWidget } from '@theia/core/lib/browser/widgets/react-widget';
+import { codicon } from '@theia/core/lib/browser';
+import { CommandService } from '@theia/core/lib/common';
+import { FileService } from '@theia/filesystem/lib/browser/file-service';
+import { WORKBENCHES, widgetId } from './workbenches';
+import { MissionService } from './mission-service';
+import { BoardModel } from './board-model';
+import { boardName } from '../common/board-protocol';
+
+export const OPEN_PANEL_COMMAND = { id: 'ownstudio.panel.open', category: 'OwnStudio', label: 'Open a Panel…' };
+export const OPEN_DATA_OBJECTS_COMMAND = { id: 'ownstudio.dataObjects.open', category: 'OwnStudio', label: 'Open the Data Object Table' };
+
+/** The Lab workbench's main view: the board, the mission's panels, the data objects. */
+@injectable()
+export class LabWidget extends ReactWidget {
+
+    @inject(MissionService) protected readonly missions: MissionService;
+    @inject(BoardModel) protected readonly board: BoardModel;
+    @inject(FileService) protected readonly files: FileService;
+    @inject(CommandService) protected readonly commands: CommandService;
+
+    protected panels: string[] = [];
+
+    @postConstruct()
+    protected init(): void {
+        const lab = WORKBENCHES.find(w => w.id === 'lab')!;
+        this.id = widgetId(lab);
+        this.title.label = lab.label;
+        this.title.caption = lab.purpose;
+        this.title.iconClass = codicon(lab.icon);
+        this.title.closable = false;
+        this.addClass('ownstudio-workbench');
+        this.node.tabIndex = 0;
+        this.missions.onDidChange(() => this.findPanels());
+        this.missions.onDidChangeFiles(uris => uris.some(u => u.path.toString().includes('/panels/')) && this.findPanels());
+        this.board.onDidChange(() => this.update());
+        this.findPanels();
+    }
+
+    protected override onActivateRequest(msg: Message): void {
+        super.onActivateRequest(msg);
+        this.node.focus();
+    }
+
+    protected async findPanels(): Promise<void> {
+        const folder = this.missions.resolve('panels');
+        try {
+            const stat = folder ? await this.files.resolve(folder) : undefined;
+            this.panels = (stat?.children ?? []).filter(c => c.name.endsWith('.panel.json')).map(c => c.name).sort();
+        } catch {
+            this.panels = [];
+        }
+        this.update();
+    }
+
+    protected render(): React.ReactNode {
+        const lab = WORKBENCHES.find(w => w.id === 'lab')!;
+        const { link } = this.board;
+        return <div className='ownstudio-workbench-body'>
+            <h1 className='ownstudio-title'>{lab.label}</h1>
+            <p className='ownstudio-workbench-purpose'>{lab.purpose}</p>
+            <h2 className='ownstudio-emphasis'>Board</h2>
+            <p>{link ? <>{boardName(link.product)} on {link.port}: firmware {this.board.firmware === 'matches' ? 'matches the mission' : 'differs from the mission'}.</>
+                : 'No board linked. Panels and the data object table go live when one is.'}
+                {' '}{this.board.identity?.prebuilt && this.board.firmware !== 'matches' &&
+                    <button className='theia-button secondary' onClick={() => this.commands.executeCommand('ownstudio.board.flash')}>Flash the pre-built firmware</button>}</p>
+            <h2 className='ownstudio-emphasis'>Panels</h2>
+            {!this.panels.length && <p className='ownstudio-muted'>This mission has no panels (panels/*.panel.json).</p>}
+            <div className='ownstudio-button-row'>
+                {this.panels.map(p => <button key={p} className='theia-button' onClick={() => this.commands.executeCommand(OPEN_PANEL_COMMAND.id, `panels/${p}`)}>
+                    <span className={codicon('dashboard')} /> {p.replace(/\.panel\.json$/, '')}</button>)}
+                <button className='theia-button secondary' onClick={() => this.commands.executeCommand(OPEN_DATA_OBJECTS_COMMAND.id)}>
+                    <span className={codicon('symbol-field')} /> Data object table</button>
+            </div>
+            <h2 className='ownstudio-emphasis'>Coming next</h2>
+            <ul><li>Procedures: the L1 test on the simulator and the L2 test on the bench, filing test records</li>
+                <li>Simulation and bench overlay</li></ul>
+        </div>;
+    }
+}
