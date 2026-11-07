@@ -127,6 +127,38 @@ export class ProcedureModel {
         return true;
     }
 
+    /** Run a procedure on the simulator and wait for it (the agent's tool). Never the board. */
+    async runOnSimulator(path: string): Promise<ProcedureRun> {
+        await this.refresh();
+        const info = this.procedures.find(p => p.path === path || p.path.endsWith(`/${path}`));
+        if (!info) {
+            throw new Error(`no procedure ${path}; the mission has ${this.procedures.map(p => p.path).join(', ') || 'none'}`);
+        }
+        if (!info.targets.includes('simulator')) {
+            throw new Error(`${info.path} does not run on the simulator`);
+        }
+        if (this.running) {
+            throw new Error('another procedure is running');
+        }
+        if (!await this.run(info, 'simulator')) {
+            throw new Error(this.problem ?? 'the procedure did not start');
+        }
+        const run = this.current!;
+        await new Promise<void>(resolve => {
+            if (run.done) {
+                resolve();
+                return;
+            }
+            const listener = this.onDidChange(() => {
+                if (run.done) {
+                    listener.dispose();
+                    resolve();
+                }
+            });
+        });
+        return run;
+    }
+
     async answer(value: number | boolean | null): Promise<void> {
         const run = this.current;
         if (run?.ask) {

@@ -23,6 +23,12 @@
   },
   "dependencies": {
     "@ownstudio/core": "0.1.0",
+    "@theia/ai-anthropic": "1.76.0",
+    "@theia/ai-chat": "1.76.0",
+    "@theia/ai-chat-ui": "1.76.0",
+    "@theia/ai-core": "1.76.0",
+    "@theia/ai-ollama": "1.76.0",
+    "@theia/ai-openai": "1.76.0",
     "@theia/core": "1.76.0",
     "@theia/editor": "1.76.0",
     "@theia/electron": "1.76.0",

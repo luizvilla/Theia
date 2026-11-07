@@ -25,6 +25,11 @@ import { PANEL_WIDGET_FACTORY, PanelWidget, PanelWidgetOptions } from './panel-w
 import { DATA_OBJECTS_WIDGET_ID, DataObjectsWidget } from './data-objects-widget';
 import { LabWidget } from './lab-widget';
 import { DesignWidget } from './design-widget';
+import { Agent, bindToolProvider } from '@theia/ai-core';
+import { ChatAgent } from '@theia/ai-chat/lib/common';
+import {
+    LoopMarginsTool, OwnStudioMissionAgent, ProposeControlChangeTool, ReadMissionFileTool, RunOnSimulatorTool, TestStatesTool
+} from './ai/ownstudio-agent';
 import { PROCEDURE_SERVICE_PATH, ProcedureService } from '../common/procedure-protocol';
 import { ProcedureClientImpl, ProcedureModel } from './procedure-model';
 import { PROCEDURE_WIDGET_ID, ProcedureWidget } from './procedure-widget';
@@ -44,6 +49,14 @@ export default new ContainerModule(bind => {
         ServiceConnectionProvider.createProxy<ProcedureService>(ctx.container, PROCEDURE_SERVICE_PATH, ctx.container.get(ProcedureClientImpl))
     ).inSingletonScope();
     bind(ProcedureModel).toSelf().inSingletonScope();
+
+    // The mission agent (SPEC §12): free-level tools only, nothing that reaches the board (ADR 0010).
+    bind(OwnStudioMissionAgent).toSelf().inSingletonScope();
+    bind(Agent).toService(OwnStudioMissionAgent);
+    bind(ChatAgent).toService(OwnStudioMissionAgent);
+    for (const tool of [ReadMissionFileTool, TestStatesTool, LoopMarginsTool, RunOnSimulatorTool, ProposeControlChangeTool]) {
+        bindToolProvider(tool, bind);
+    }
     bind(ProcedureWidget).toSelf();
     bind(WidgetFactory).toDynamicValue(ctx => ({
         id: PROCEDURE_WIDGET_ID,

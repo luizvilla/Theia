@@ -29,7 +29,7 @@ export const WORKBENCHES: Workbench[] = [
     {
         id: 'code', label: 'Code', icon: 'code', keybinding: 'ctrlcmd+3',
         purpose: 'The firmware of the controller block: control.cpp first, the rest in expert mode.',
-        comingNext: ['control.cpp opened beside its data object table', 'Build and flash', 'AI help'],
+        comingNext: ['AI help: the OwnStudio agent in the AI Chat (Ctrl+Alt+I), once AI is enabled in the settings with a key or a local model', 'control.cpp opened beside its data object table', 'Build and flash from the app'],
     },
     {
         id: 'lab', label: 'Lab', icon: 'beaker', keybinding: 'ctrlcmd+4',
