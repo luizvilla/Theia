@@ -33,6 +33,8 @@ Requirements of the mission; L and C sizing compared with the Twist's values; PI
 
 ## Step 4: bench and study
 
+**Status (2026-11-07):** done without Luiz: board waveforms, the twin simulation and its overlay, the Verification layer, the study log and the dry-run kit. The bench runs, the dry run and four decisions wait for him. See the [step 4 report](step-4-report.md).
+
 The same procedure on the board target; the overlay of requirement, simulation and measurement; the Verification layer colouring; a dry run with PhD students before the student session.
 
 ## What the study measures (Q52)
@@ -337,4 +339,17 @@ The step 3 rules still apply, and one is stricter: **nothing switches the conver
 
 | Plan | Repo | Commit | Message | Note |
 |---|---|---|---|---|
-| P4 | Theia | this commit | docs: commit plan for step 4 | |
+| P4 | Theia | `b3d0b6e` | docs: commit plan for step 4 | |
+| E18 | examples | `254d8aa` | mission: firmware scope over ThingSet | Checked on the idle Twist: LINK-07a/b pass |
+| — | examples | `48bdb53` | mission: rebuild the pre-built firmware with the scope | Flashed; LINK-01 to 07b pass |
+| T20 | Theia | `809dd26` | lab: waveforms from the board | Adds `ownstudio_lab.fakes`, a fake board with the scope over the simulator |
+| T21 | Theia | `ed416b2` | lab: a board run brings its simulation | **Moved before E19**, which needs it |
+| E19 | examples | `7f4d142` | mission: the reference step measured from the waveform, on both targets | Also fixes the harness's PWM period index (results depended on segmentation) |
+| — | examples | `ba4bf66` | mission: BUCK-REF-01 cases name the part of the waveform they judge | For T22's bands |
+| — | examples | `03c68a3` | mission: PWM edges by step index in the simulator harness and the study | **Not planned.** #11 rechecked, unchanged; duty quantization filed as #12 |
+| T22 | Theia | `0050cbc` | app: requirement, simulation and measurement on one plot | Screenshot from a fake board, labelled FAKE |
+| T23 | Theia | `47594db` | app: the Verification layer colours the blocks | Also: each test keeps one state per target (a twin simulation hid the board's result) |
+| E20 | examples | `1091ce1` | mission: tests name the blocks they exercise | `board_blocks` for sensors and drivers |
+| T24 | Theia | `6646896` | app: mission steps and the study log | Steps in a side panel opened on demand, because of #13 (switch lag, predates step 4) |
+| T25 | Theia | `5e61195` | docs: dry-run kit for the PhD students | |
+| T26 | Theia | this commit | docs: step 4 report | |
