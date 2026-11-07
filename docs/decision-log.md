@@ -155,3 +155,14 @@ Answer to Luiz's Q38 follow-up: Core2 needs no plumbing because its control logi
 | Q58 | `data_objects.yaml` as source, C generated? | (a). | (a), so a table can be built from the YAML for easier visualisation. | [ADR 0021](adr/0021-data-objects-yaml-generates-c.md) |
 | Q59 | AI provider and who pays? | University key with a cap; AI optional. | Suggests a local AI when a student has no API key, rather than sharing his own key. **Follow-up in round 9.** | — |
 | Q60 | Licence and name? | LGPL-2.1, OwnStudio. | LGPL-2.1, OwnStudio. | [ADR 0022](adr/0022-name-and-licence.md) |
+
+## Round 9 (2026-11-07)
+
+| # | Question | Recommendation | Answer | Recorded in |
+|---|---|---|---|---|
+| Q61 | Where does the AI run without a key? | Lab GPU server, then own key, then local. | Look up whether the University of Toulouse provides an AI to students; that is option 1, then own key, then local. | [ADR 0023](adr/0023-ai-endpoint-order.md) |
+| Q62 | Mission folder layout? | As proposed, with `control_step.cpp`. | No need for `control_step.cpp`; `main.cpp` can hold the firmware. What is needed is `app.ini`, `app.conf`, `app.overlay` for some examples later. **Pushed back in round 10.** | — |
+| Q63 | Converter projects as git repos with automatic checkpoints per mission step? | Yes. | Yes. | this log |
+| Q64 | Bottom workbench bar Home · Design · Code · Lab, Ctrl+1…4, per-workbench layout, target and board status? | Yes. | Yes. | this log |
+| Q65 | Reuse modular's dashboard format and widgets? | Yes. | Yes, but asked whether it would import easily, given modular is built on Freeboard and Node.js. **Answer: no, not as is.** | [ADR 0024](adr/0024-panels-rebuilt-natively-modular-format-subset.md) |
+| Q66 | App updates by new installer; missions and board packs by git? | Yes. | Yes, keep it simple for now. | this log |
