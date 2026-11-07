@@ -11,7 +11,7 @@ import { BoardModel } from './board-model';
 import { boardName } from '../common/board-protocol';
 import { BRIDGE_BLOCKS, BridgeBlock, revisionOf } from '../common/board-pack';
 import { Requirement, RequirementState, STATE_LABEL } from '../common/verification';
-import { RequirementResult, formatMeasured, stateInfo } from '../common/test-states';
+import { BlockResult, RequirementResult, blockCounts, blockInfo, formatMeasured, stateInfo } from '../common/test-states';
 import { OPEN_CONTROL_CENTER_COMMAND } from './control-center-widget';
 
 export type Layer = 'specification' | 'build' | 'verification';
@@ -132,7 +132,9 @@ export class HomeWidget extends ReactWidget {
         switch (this.layer) {
             case 'specification': return 'Red: the safety envelope at each port (indicative, not certification). Badges count the requirements on each port.';
             case 'build': return 'Click a block to open its file. Bridge blocks show whether they carry the isolation barrier (from the board pack).';
-            default: return "Each requirement takes the colour of its tests' latest records, in simulation and on the bench. The control center in the Lab shows every test.";
+            default: return 'Each block takes the worst state of the tests that exercise it; a sensor or driver counts only when '
+                + 'tested on the board. Each requirement takes the colour of its tests, in simulation and on the bench. '
+                + 'The control center in the Lab shows every test.';
         }
     }
 
@@ -203,7 +205,19 @@ export class HomeWidget extends ReactWidget {
     protected renderVerification(verifications: Verifications): React.ReactNode {
         const reqs = this.missions.requirements;
         const tests = new Map((this.missions.tests?.tests ?? []).map(t => [t.id, t]));
+        const blocks = this.missions.tests?.blocks ?? {};
+        const mission = this.missions.mission;
         return <>
+            <h2>Blocks</h2>
+            {mission && (Object.keys(BOXES) as BlockKey[]).map(key => {
+                const b = blocks[key];
+                const info = blockInfo(b);
+                return <div key={key} className='ownstudio-block-row'>
+                    <span className={`ownstudio-swatch os-state-${info.colour}`} />
+                    <b>{mission.blocks[key].title}</b> {info.icon} {info.word}{info.evidence && <span className='ownstudio-muted'> · {info.evidence}</span>}
+                    <div className='ownstudio-muted'>{b && b.tests.length ? blockCounts(b) : 'No test names this block yet.'}</div>
+                </div>;
+            })}
             <h2>Requirements</h2>
             {this.missions.testsProblem && <p className='ownstudio-problem'>Test states unavailable: {this.missions.testsProblem}</p>}
             {reqs.map(r => {
@@ -280,11 +294,28 @@ export class HomeWidget extends ReactWidget {
             {inPort && this.renderPort(m, inPort[0], inPort[1], ENV_IN, 208, verifications)}
             {outPort && this.renderPort(m, outPort[0], outPort[1], ENV_OUT, 552, verifications)}
             {this.renderBox(OUTSIDE, 'Outside world', 'PC, instruments, networks', 'os-env')}
-            {(Object.keys(BOXES) as BlockKey[]).map(key =>
-                this.renderBox(BOXES[key], m.blocks[key].title, m.blocks[key].summary,
+            {(Object.keys(BOXES) as BlockKey[]).map(key => this.layer === 'verification'
+                ? this.renderVerifiedBlock(key, m.blocks[key].title, m.blocks[key].opens ?? undefined)
+                : this.renderBox(BOXES[key], m.blocks[key].title, m.blocks[key].summary,
                     'os-block', m.blocks[key].opens ?? undefined, key))}
             {this.layer === 'build' && this.renderIsolation()}
         </svg>;
+    }
+
+    /** A block in the Verification layer: outlined in its state's colour, its tests by state, a badge in words. */
+    protected renderVerifiedBlock(key: BlockKey, title: string, opens: string | undefined): React.ReactNode {
+        const b: BlockResult | undefined = this.missions.tests?.blocks?.[key];
+        const info = blockInfo(b);
+        const box = BOXES[key];
+        const label = `${info.icon} ${info.word}${info.evidence ? ` · ${info.evidence}` : ''}`;
+        const width = Math.min(box.w - 16, 12 + label.length * 5.6);
+        return <g key={key} className={`os-block-verified os-state-${info.colour}`}>
+            <title>{`${title}: ${info.word}${info.evidence ? ` (${info.evidence})` : ''}\n${b && b.tests.length
+                ? `${blockCounts(b)}\nTests: ${b.tests.join(', ')}` : 'No test names this block in tests/catalogue.yaml.'}`}</title>
+            {this.renderBox(box, title, b && b.tests.length ? blockCounts(b) : 'no test yet', 'os-block', opens, key)}
+            <rect x={box.x + box.w - width - 8} y={box.y - 9} width={width} height='18' rx='9' className='os-block-badge' />
+            <text x={box.x + box.w - width / 2 - 8} y={box.y + 4} textAnchor='middle' className='os-block-badge-text'>{label}</text>
+        </g>;
     }
 
     protected renderIsolation(): React.ReactNode {

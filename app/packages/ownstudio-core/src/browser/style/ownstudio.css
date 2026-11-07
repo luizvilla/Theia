@@ -218,3 +218,15 @@ body.theia-dark .os-trace-board { stroke: var(--ownstudio-yellow); }
 .os-band { fill: #3BA55D; fill-opacity: 0.16; stroke: #3BA55D; stroke-opacity: 0.45; stroke-dasharray: 2 2; }
 .ownstudio-overlay-table { margin-top: 6px; }
 .ownstudio-overlay-table td, .ownstudio-overlay-table th { padding: 2px 8px; }
+
+/* Verification layer: each block outlined in its state's colour, with a badge in words. */
+body .ownstudio-diagram .os-block-verified .os-block rect,
+body.theia-dark .ownstudio-diagram .os-block-verified .os-block rect { stroke: var(--os-state); stroke-width: 3; }
+body .ownstudio-diagram .os-block-verified.os-state-untested .os-block rect,
+body .ownstudio-diagram .os-block-verified.os-state-no-case .os-block rect,
+body.theia-dark .ownstudio-diagram .os-block-verified.os-state-untested .os-block rect,
+body.theia-dark .ownstudio-diagram .os-block-verified.os-state-no-case .os-block rect { stroke: #8A8F98; stroke-dasharray: 5 3; stroke-width: 2; }
+.ownstudio-diagram .os-block-badge { fill: var(--theia-editor-background); stroke: var(--os-state); stroke-width: 1.5; }
+.ownstudio-diagram .os-state-untested .os-block-badge, .ownstudio-diagram .os-state-no-case .os-block-badge { stroke: #8A8F98; }
+.ownstudio-diagram .os-block-badge-text { font-size: 10px; fill: var(--theia-foreground); }
+.ownstudio-block-row { margin: 4px 0 8px; }

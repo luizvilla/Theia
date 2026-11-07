@@ -124,6 +124,57 @@ class StatesTest(Fixture):
         t = next(t for t in testing.states(self.m)["tests"] if t["id"] == "T-FAIL")
         self.assertEqual((t["state"], t["latest"]["campaign"]), ("pass", "new"))
 
+    def test_a_newer_simulation_never_hides_the_board(self):
+        cat = CATALOGUE.replace("target: board, requirements: [REQ-D]", "target: [simulator, board], requirements: [REQ-D]")
+        (self.m / "tests" / "catalogue.yaml").write_text(cat)
+        self.record("c/board", [case("T-BENCH", False)], target="board", date="2026-11-07T10:00:00+00:00")
+        self.record("c/sim", [case("T-BENCH", True)], target="simulator", date="2026-11-07T10:00:05+00:00")
+        data = testing.states(self.m)
+        t = next(t for t in data["tests"] if t["id"] == "T-BENCH")
+        self.assertEqual((t["state"], t["latest"]["target"]), ("fail", "board"))
+        self.assertEqual({k: v["state"] for k, v in t["targets"].items()}, {"board": "fail", "simulator": "pass"})
+        self.assertEqual(next(r for r in data["requirements"] if r["id"] == "REQ-D")["state"], "disagree")
+
+    def test_a_board_pass_counts_even_when_its_simulation_is_newer(self):
+        cat = CATALOGUE.replace("target: board, requirements: [REQ-D]", "target: [simulator, board], requirements: [REQ-D]")
+        (self.m / "tests" / "catalogue.yaml").write_text(cat)
+        self.record("c/board", [case("T-BENCH")], target="board", date="2026-11-07T10:00:00+00:00")
+        self.record("c/sim", [case("T-BENCH")], target="simulator", date="2026-11-07T10:00:05+00:00")
+        data = testing.states(self.m)
+        self.assertEqual(next(r for r in data["requirements"] if r["id"] == "REQ-D")["state"], "bench-pass")
+
+    def test_blocks_take_the_worst_state_of_their_tests_and_say_where_passes_come_from(self):
+        (self.m / "mission.yaml").write_text("blocks: {power: {}, controller: {}, aps: {}}\n")
+        cat = (CATALOGUE.replace("id: T-FAIL,", "id: T-FAIL, blocks: [power],")
+               .replace("id: T-PASS,", "id: T-PASS, blocks: [power, controller],")
+               .replace("id: T-BENCH,", "id: T-BENCH, blocks: [controller],")
+               .replace("id: T-NOTRUN,", "id: T-NOTRUN, blocks: [controller],"))
+        (self.m / "tests" / "catalogue.yaml").write_text(cat)
+        self.record("c/l1", [case("T-FAIL", False), case("T-PASS")])
+        self.record("c/bench", [case("T-BENCH")], target="board")
+        blocks = testing.states(self.m)["blocks"]
+        self.assertEqual(blocks["power"]["state"], "fail")
+        self.assertEqual(blocks["controller"]["state"], "pass")
+        self.assertEqual(blocks["controller"]["counts"], {"pass": 2, "not_run": 1})
+        self.assertEqual(blocks["controller"]["evidence"], ["board", "simulator"])
+        self.assertEqual(blocks["aps"], {"state": "no_test", "tests": [], "counts": {}, "evidence": []})
+
+    def test_a_board_block_counts_only_the_board_result(self):
+        (self.m / "mission.yaml").write_text("blocks: {power: {}, driver: {}}\n")
+        cat = CATALOGUE.replace("id: T-PASS,", "id: T-PASS, blocks: [power], board_blocks: [driver],")
+        (self.m / "tests" / "catalogue.yaml").write_text(cat)
+        self.record("c/l1", [case("T-PASS")])
+        blocks = testing.states(self.m)["blocks"]
+        self.assertEqual((blocks["power"]["state"], blocks["power"]["evidence"]), ("pass", ["simulator"]))
+        self.assertEqual((blocks["driver"]["state"], blocks["driver"]["evidence"]), ("not_run", []))
+
+    def test_a_block_must_be_in_mission_yaml(self):
+        (self.m / "mission.yaml").write_text("blocks: {power: {}}\n")
+        (self.m / "tests" / "catalogue.yaml").write_text(CATALOGUE.replace("id: T-FAIL,", "id: T-FAIL, blocks: [powr],"))
+        with self.assertRaises(testing.CatalogueError) as ctx:
+            testing.load_catalogue(self.m)
+        self.assertIn("block 'powr'", str(ctx.exception))
+
     def test_uncatalogued_cases_are_listed(self):
         self.record("c/l1", [case("NOPE-1")])
         self.assertEqual(testing.states(self.m)["unknown_cases"], ["NOPE-1"])

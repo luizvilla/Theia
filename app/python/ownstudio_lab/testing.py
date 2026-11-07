@@ -52,6 +52,10 @@ def load_catalogue(mission: pathlib.Path) -> dict:
     """Read and check tests/catalogue.yaml. Raises CatalogueError with every problem found."""
     path = mission / "tests" / "catalogue.yaml"
     data = yaml.safe_load(path.read_text()) or {}
+    mission_file = mission / "mission.yaml"
+    mission_blocks = None
+    if mission_file.is_file():
+        mission_blocks = list((yaml.safe_load(mission_file.read_text()) or {}).get("blocks") or {})
     problems = []
     tabs = data.get("tabs") or []
     tab_ids = [t.get("id") for t in tabs]
@@ -82,6 +86,14 @@ def load_catalogue(mission: pathlib.Path) -> dict:
                 problems.append(f"{tid}: target '{target}' is not one of {', '.join(TARGETS)}")
         if t.get("status") == "blocked" and not t.get("blocked_by"):
             problems.append(f"{tid}: blocked, but 'blocked_by' does not say by what")
+        for key in ("blocks", "board_blocks"):
+            blocks = t.get(key, [])
+            if not isinstance(blocks, list) or not all(isinstance(b, str) for b in blocks):
+                problems.append(f"{tid}: {key} must be a list of block names")
+            elif mission_blocks is not None:
+                for b in blocks:
+                    if b not in mission_blocks:
+                        problems.append(f"{tid}: block '{b}' is not in mission.yaml ({', '.join(mission_blocks)})")
     if problems:
         raise CatalogueError("\n".join(problems))
     return {"tabs": tabs, "tests": tests}
@@ -247,14 +259,12 @@ def load_records(records: pathlib.Path) -> list[dict]:
 
 # States --------------------------------------------------------------------
 
-def _test_state(test: dict, results: list[tuple[dict, dict]], findings: list[dict]):
-    """results: (record, case) pairs for this test, newest record first."""
+VERDICT_ORDER = ["fail", "known", "blocked_run", "pass", "info"]
+
+
+def _verdict_state(latest: list[tuple[dict, dict]], findings: list[dict]):
+    """State of one record's cases for a test: (state, finding)."""
     finding = None
-    if not results:
-        state = {"implemented": "not_run", "partial": "not_run", "blocked": "blocked"}.get(test["status"], "planned")
-        return state, None, None
-    newest_date = results[0][0].get("date")
-    latest = [(r, c) for r, c in results if r.get("date") == newest_date]
     verdicts = []
     for _, case in latest:
         v = case_verdict(case)
@@ -264,17 +274,31 @@ def _test_state(test: dict, results: list[tuple[dict, dict]], findings: list[dic
                 finding = finding or f
                 v = "KNOWN"
         verdicts.append(v)
-    if "FAIL" in verdicts:
-        state = "fail"
-    elif "KNOWN" in verdicts:
-        state = "known"
-    elif "BLOCKED" in verdicts:
-        state = "blocked_run"
-    elif "PASS" in verdicts:
-        state = "pass"
-    else:
-        state = "info"
-    return state, latest[0][0], finding
+    for verdict, state in (("FAIL", "fail"), ("KNOWN", "known"), ("BLOCKED", "blocked_run"), ("PASS", "pass")):
+        if verdict in verdicts:
+            return state, finding
+    return "info", finding
+
+
+def _test_state(test: dict, results: list[tuple[dict, dict]], findings: list[dict]):
+    """results: (record, case) pairs for this test, newest record first.
+
+    Each target keeps the state of its own newest record, and the test takes the
+    worst of them (the newest on a tie): a board run's simulation, filed after it,
+    never hides the board's result. Returns (state, record behind it, finding,
+    per-target states)."""
+    if not results:
+        state = {"implemented": "not_run", "partial": "not_run", "blocked": "blocked"}.get(test["status"], "planned")
+        return state, None, None, {}
+    per_target = {}
+    for rank, target in enumerate(dict.fromkeys(r.get("target") for r, _ in results)):
+        mine = [(r, c) for r, c in results if r.get("target") == target]
+        newest = mine[0][0]
+        state, finding = _verdict_state([(r, c) for r, c in mine if r is newest], findings)
+        per_target[target] = {"state": state, "record": newest, "finding": finding, "rank": rank}
+    worst = min(per_target.values(), key=lambda e: (VERDICT_ORDER.index(e["state"]), e["rank"]))
+    finding = worst["finding"] or next((e["finding"] for e in per_target.values() if e["finding"]), None)
+    return worst["state"], worst["record"], finding, per_target
 
 
 def states(mission: pathlib.Path, records: pathlib.Path | None = None) -> dict:
@@ -294,24 +318,27 @@ def states(mission: pathlib.Path, records: pathlib.Path | None = None) -> dict:
             by_case.setdefault(tid, []).append((rec, case))
     tests = []
     for t in catalogue["tests"]:
-        state, rec, finding = _test_state(t, by_case.get(t["id"], []), findings)
+        state, rec, finding, per_target = _test_state(t, by_case.get(t["id"], []), findings)
         latest = None
         if rec is not None:
             cases = [c for r, c in by_case[t["id"]] if r is rec]
             latest = {"date": rec.get("date"), "campaign": rec.get("campaign"), "path": rec.get("path"),
                       "target": rec.get("target"), "board": rec.get("board"), "mission": rec.get("mission"),
                       "twin": rec.get("twin"), "cases": cases}
-        tests.append({**t, "state": state, "latest": latest,
+        targets = {target: {"state": e["state"], "date": e["record"].get("date"), "path": e["record"].get("path")}
+                   for target, e in per_target.items()}
+        tests.append({**t, "state": state, "latest": latest, "targets": targets,
                       "finding": {"issue": finding.get("issue"), "cause": finding.get("cause")} if finding else None})
     by_id = {t["id"]: t for t in tests}
     reqs = yaml.safe_load((mission / "requirements.yaml").read_text())["requirements"]
     requirements = [{"id": r["id"], "title": r.get("title", ""), **_requirement_state(r, by_id)} for r in reqs]
+    blocks = _block_states(mission, tests)
     finding_rows = []
     for f in findings:
         covered = [by_id[_test_of(c, ids)] for c in f.get("criteria") or [] if _test_of(c, ids)]
         ready = f.get("status", "open") == "open" and covered and all(t["state"] == "pass" for t in covered)
         finding_rows.append({**f, "ready_to_close": bool(ready)})
-    return {"tabs": catalogue["tabs"], "tests": tests, "requirements": requirements,
+    return {"tabs": catalogue["tabs"], "tests": tests, "requirements": requirements, "blocks": blocks,
             "findings": finding_rows, "unknown_cases": sorted(stray),
             "campaigns": sorted({r["campaign"] for r in recs if r["campaign"]}, reverse=True)}
 
@@ -324,6 +351,41 @@ def _test_of(case_id: str, ids: set) -> str | None:
     return head if head in ids else None
 
 
+EVIDENCE_ORDER = ["board", "simulator", "pc"]
+
+
+def _block_states(mission: pathlib.Path, tests: list[dict]) -> dict:
+    """Per block of mission.yaml: the worst state of the tests naming it (Core2's order;
+    "no_test" when none does), how many tests are in each state, and where its passes
+    come from (board, simulator, pc).
+
+    A test names a block in `blocks` (exercised on every target) or in `board_blocks`
+    (exercised only on the board: a simulated sensor or driver is ideal). For the
+    latter only the test's board result counts."""
+    mission_file = mission / "mission.yaml"
+    names = list((yaml.safe_load(mission_file.read_text()) or {}).get("blocks") or {}) if mission_file.is_file() else []
+    out = {}
+    for name in names:
+        mine, counts, evidence = [], {}, set()
+        for t in tests:
+            if name in (t.get("blocks") or []):
+                state, targets = t["state"], t.get("targets", {})
+            elif name in (t.get("board_blocks") or []):
+                board = t.get("targets", {}).get("board")
+                targets = {"board": board} if board else {}
+                state = board["state"] if board else {"implemented": "not_run", "partial": "not_run",
+                                                      "blocked": "blocked"}.get(t.get("status"), "planned")
+            else:
+                continue
+            mine.append(t)
+            counts[state] = counts.get(state, 0) + 1
+            evidence |= {target for target, e in targets.items() if e["state"] == "pass"}
+        out[name] = {"state": min(counts, key=STATE_ORDER.index) if counts else "no_test",
+                     "tests": [t["id"] for t in mine], "counts": counts,
+                     "evidence": sorted(evidence, key=lambda x: EVIDENCE_ORDER.index(x) if x in EVIDENCE_ORDER else 9)}
+    return out
+
+
 def _requirement_state(req: dict, tests: dict) -> dict:
     """Same vocabulary as Home's Verification layer:
     no-case, untested, sim-pass, bench-pass, fail, known, disagree."""
@@ -331,8 +393,8 @@ def _requirement_state(req: dict, tests: dict) -> dict:
     if not linked:
         return {"state": "no-case", "tests": []}
     names = [t["id"] for t in linked]
-    passed = {t["latest"]["target"] for t in linked if t["state"] == "pass"}
-    failed = {t["latest"]["target"] for t in linked if t["state"] in ("fail", "known")}
+    passed = {target for t in linked for target, e in t["targets"].items() if e["state"] == "pass"}
+    failed = {target for t in linked for target, e in t["targets"].items() if e["state"] in ("fail", "known")}
     states_ = [t["state"] for t in linked]
     if passed and failed and passed != failed and (passed - failed) and (failed - passed):
         state = "disagree"     # passes on one target, fails on the other
