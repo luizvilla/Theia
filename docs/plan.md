@@ -144,3 +144,21 @@ The step 1 rules still apply, plus three for the board:
 
 - The Windows installer.
 - Everything that needs the converter powered: the bench comparison and L2 tests with power.
+
+### Commits as made
+
+Kept up to date as the work advances. Where a commit departs from the plan above, the reason is given.
+
+| Plan | Repo | Commit | Message | Note |
+|---|---|---|---|---|
+| P2 | Theia | `60e5856` | docs: commit plan for step 2 | |
+| E9 | examples | `300f259` | mission: build identity in the firmware | Also untracks two `__pycache__` files committed in step 1, and force-adds the mission's own `.gitignore` (the repository ignores dotfiles) |
+| E10a | examples | `95e1629` | mission: release tool for the pre-built firmware | E10 split in two: the binary must name a commit that exists, so the tool is committed first and the binary built from that commit |
+| E10b | examples | `7a377ed` | mission: pre-built firmware binary | Built from `95e1629` |
+| T6 | Theia | `9993f3e` | lab: Python ThingSet client and flasher | Flashed the Twist with `7a377ed`'s binary; identity read back over ThingSet |
+| E10c | examples | `e4cb76a` | mission: rename the Control group to Converter | **Not planned.** Found on the board: the mission's `Control` group shadowed OwnTech Core's own `Control` group (CAN). The generator now refuses Core's and the ThingSet SDK's names and ids |
+| E10d | examples | `5175111` | mission: rebuild the pre-built firmware after the group rename | Built from `e4cb76a`, flashed and checked |
+| E11 | examples | `1992ba5` | mission: L2 link test on the board | 6 cases, pass on the unpowered Twist |
+| T7 | Theia | `06fa95a` | app: board link and firmware identity | Includes the bridge process in `ownstudio_lab` and `MissionService` |
+| T8 | Theia | `13ed8a8` | app: Twist board pack | Adds TypeScript unit tests (`npm test`) |
+| E11b | examples | `44a4a89` | mission: test records go to records/ | **Not planned.** Needed by T9: Home reads `records/<test>/record.json` |
