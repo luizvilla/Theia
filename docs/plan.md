@@ -21,6 +21,8 @@ flowchart LR
 
 ## Step 2: Home and board
 
+**Status (2026-11-07):** done, tested on an unpowered Twist. See the [step 2 report](step-2-report.md).
+
 Home with Specification, Build and Verification layers on the five-block diagram; the Twist board pack (board description from the TWIST repo plus the Core devicetree, ADR 0017); the safety panel (envelope table, isolation switches, protection checklist); the ThingSet connection and data object table; build identity check and pre-built binary; one panel derived from modular.
 
 ## Step 3: Design, Code and Lab on the simulator target
@@ -164,3 +166,8 @@ Kept up to date as the work advances. Where a commit departs from the plan above
 | E11b | examples | `44a4a89` | mission: test records go to records/ | **Not planned.** Needed by T9: Home reads `records/<test>/record.json` |
 | — | Theia | `9bad82e` | docs: record the step 2 commits made so far | This table |
 | T9 | Theia | `aa114a0` | app: Home's Specification, Build and Verification layers | Screenshots in `docs/images/step-2/` |
+| — | Theia | `efcaf0f` | docs: step 2 commit table, T9 | |
+| T10 | Theia | `3f3f3fb` | app: safety panel | Finds 3 gaps on the buck mission: the voltage limits are watched only by firmware trips the firmware never enables |
+| E12 | examples | `0bfb758` | mission: buck panel | With a test that panels use only declared data objects |
+| T11 | Theia | `99ba4cd` | app: data object table and the first panel | Also replaces the Lab placeholder. Plots drawn in SVG, not uPlot |
+| T12 | Theia | this commit | docs: step 2 report | |
