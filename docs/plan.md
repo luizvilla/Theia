@@ -386,6 +386,13 @@ As in steps 1–4: every commit builds and passes its tests; work on `/data/owns
 
 **Every commit that changes the window is checked against the storyboards.** The table names the frames each commit implements. A script (`tools/storyboard-shots`, added in U2) drives the app, with a fake board, into the state of each frame and takes a screenshot into `docs/images/step-5/`. The commit is done when its screenshots match their frames, or the difference is written down with its reason. The slice report (U19) puts every frame beside its screenshot.
 
+**The navigation test** (written in U2, rerun by every later commit, Luiz's request). An automated test drives the real app through every combination of: the three workbenches; the three right-bar tabs (Parts, Inspector, AI); both canvas levels (the setup and the inside of the Twist); the three bottom tabs (Canvas, Terminal, Build output); dragging a part from Parts in each workbench; selecting a block, then switching. It runs each combination forward and back, then 500 random clicks. After every click it checks that:
+- the centre still shows the same document at the same place;
+- the canvas kept its level, its selection and its parts (a dropped part is there, once);
+- the inspector shows what is selected;
+- the highlighted icons match what is shown;
+- the switch landed within 200 ms (the lesson of #13, where perspectives landed one switch late).
+
 ### Choices I would make in this slice (for Luiz's review)
 
 | # | Choice | Why |
@@ -414,7 +421,7 @@ As in steps 1–4: every commit builds and passes its tests; work on `/data/owns
 |---|---|---|---|---|---|
 | **A. The shell** | | | | | |
 | U1 | Theia | app: the plugin system, with C++, Python and git extensions | `@theia/plugin-ext(-vscode)`; bundled from Open VSX: C/C++ grammar, clangd, Python grammar, basedpyright, git, GitHub pull requests | A `.cpp` opens as C++ with colouring and Ctrl+click; extension list check | 6 |
-| U2 | Theia | app: the new window: workbenches on the left, Parts, Inspector and AI on the right, canvas, terminal and timeline at the bottom | Removes Home, the bottom workbench bar and the Mission steps panel; icons on both icon bars; bottom tabs Canvas, Terminal, Build output; green title bar; status bar with Build, Upload and Serial; `tools/storyboard-shots` | Layout tests: every area exists, workbench switch keeps the bottom | 0 |
+| U2 | Theia | app: the new window: workbenches on the left, Parts, Inspector and AI on the right, canvas, terminal and timeline at the bottom | Removes Home, the bottom workbench bar and the Mission steps panel; icons on both icon bars; bottom tabs Canvas, Terminal, Build output; green title bar; status bar with Build, Upload and Serial; `tools/storyboard-shots` | Layout tests; the navigation test (first version: workbenches × right-bar tabs × bottom tabs) | 0 |
 | U3 | Theia | app: the eight menus of SPEC §5 | One owner module for the menu map; Theia's Selection, Go and Terminal removed; items not built yet say which slice brings them | Menu tree compared with the SPEC table | 15 |
 | **B. Boards, setups, examples** | | | | | |
 | U4 | Theia | lab: board definitions from Core's devicetree and a board description | `ownstudio_lab.boards` with Zephyr's devicetree library; `boards/twist/board.yaml` (ports, ratings, drawing, plant, templates); Spin pin map | Reads Core4's Twist 1.4.2 overlay: legs, pins, defaults, sensors | 4 (its data) |
@@ -422,8 +429,8 @@ As in steps 1–4: every commit builds and passes its tests; work on `/data/owns
 | U6 | Theia | app: the Start page | Board grid with the connected board detected by serial number; recent setups; the board's examples from the examples index (board inferred) | Examples of the Twist listed from the real index | 1 |
 | U7 | Theia | app: an example loads on its own branch | Copy into `src/`, `origin.yaml`, branch named after the example, commit | The buck example loads; previous work still on its branch | 5 |
 | **C. The canvas** | | | | | |
-| U8 | Theia | app: the setup canvas with its palette and topology rules | React Flow (S1); DC source, Twist, resistor; typed ports; the first rules; values on nodes; tint per workbench; saved in `setup.yaml`, committed (S6) | Rule tests: source–Twist–source and load–Twist–load refused with a reason | 2, 3 |
-| U9 | Theia | app: the inside of the Twist and a read-only inspector | Five blocks on Luiz's reference layout (power side, control side, feeder in the centre, clockwise signals, isolation diagonal), values from the board definition; Design, Code, Tests buttons | Selecting the driver shows 200 kHz and 100 ns from the overlay | 4 |
+| U8 | Theia | app: the setup canvas with its palette and topology rules | React Flow (S1); DC source, Twist, resistor; typed ports; the first rules; values on nodes; tint per workbench; saved in `setup.yaml`, committed (S6) | Rule tests: source–Twist–source and load–Twist–load refused with a reason; navigation test extended to dragging a part from each workbench | 2, 3, 6b |
+| U9 | Theia | app: the inside of the Twist and a read-only inspector | Five blocks on Luiz's reference layout (power side, control side, feeder in the centre, clockwise signals, isolation diagonal), names only on the blocks; the details from the board definition in the inspector; Design, Code, Tests buttons | Selecting the driver shows 200 kHz and 100 ns from the overlay; navigation test extended to both canvas levels and selection | 4 |
 | **D. The bench** | | | | | |
 | U10 | Theia | lab: build and flash a setup, with progress | Code toolbar (Build, Upload, Build and upload, Clean, Serial); `pio run` in the setup with its log in Build output (compile progress), mcumgr upload (bytes); build identity; timeline events | Fake build and flash report progress; real build of the buck example | 6, 7 |
 | U11 | Theia | lab: the Lab checklist and the power token | Continuous checks of SPEC §9; Run green only while all hold; the runner refuses power without a one-time token from the dialog (S9) | A fake Spin, a dead HIGH and a 20 % mismatch each turn Run red with their sentence; the runner refuses a missing token | 8 |
