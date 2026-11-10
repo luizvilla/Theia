@@ -321,3 +321,5 @@ Luiz confirmed the shared understanding and asked for slice 0 (2026-11-10).
 | — | (Luiz) The plan has tests but no comparison with the storyboards | — | Each window commit names its frames and is checked against screenshots taken by `tools/storyboard-shots`; the slice report shows them side by side. | plan |
 | Q142 | Parts works the same from every workbench, without switching? | Yes. | Yes; test it and all clicking back and forth, with a specific test. | SPEC §5, plan (navigation test), storyboard 6b |
 | Q143 | (Luiz) The inside of the Twist | — | Too heavy: blocks show their names only, the inspector shows the details on click; keep the labels (sides, signals, isolation, ports). | SPEC §6, storyboard 4 |
+| Q144 | Requirement layers: badges on the inside view and a list in the inspector? | Yes. | Yes. | SPEC §6 |
+| Q145 | (Luiz) An averaged-model simulator, as in Core2, later | — | Recorded as a deferred third target for fast evaluation, following Core2's ADR 0004: never a verdict, only at the user's request, level D, INFO. | [ADR 0033](adr/0033-averaged-simulator-for-fast-evaluation.md) |

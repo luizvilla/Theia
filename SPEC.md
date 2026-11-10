@@ -126,6 +126,7 @@ The converter exchanges energy with the **environment** through **power ports**,
 - **Topology rules, first version:** exactly one source on HIGH, one Twist, one load on LOW1 (LOW2 may share it). A wire that breaks a rule doesn't snap, and the canvas says why (Q82).
 - **Two levels.** Double-click the Twist (or "open") to see its inside: the five blocks on Luiz's reference layout ([drawing](docs/images/five-blocks-reference.png)): power side and control side, the feeder in the centre, signals looping clockwise (power → measurement → controller → driver → power), the isolation barrier between the grounds, the power ports on the power block. The blocks carry their names only, to keep the view light; clicking one shows its details in the inspector, from the devicetree (legs, mode, frequency, dead time, calibration) (Q143). The inside view and a read-only inspector come in slice 1; editing in slice 2.
 - **Inspector.** Any node or inner block, when selected, shows its settings, its requirements and their test states, and three buttons: **Design**, **Code**, **Tests** (Q73).
+- **Requirement layers** (Specification, Verification), for setups that carry requirements, become **badges** on the blocks of the inside view (a count of requirements, coloured by their worst test state) and a **list in the inspector** for the selected block (Q144).
 - **The canvas follows the workbench.** Design shows values; Code shows which file and function each block maps to; the Lab shows **probes** and live readings; Simulate shows fidelity chips.
 - **Probes** are placed on a node, a block or (later) a Spin pin. Each probe is either **Monitor** (slow, blue) or **Capture** (fast, amber).
 - **Round-trip with the code** ([ADR 0027](docs/adr/0027-setup-round-trip.md)): the board's settings live in one marked setup function in `main.cpp`. On save, recognised SDK calls flow both ways; anything else in the function is shown as custom code and left alone.
@@ -175,6 +176,7 @@ Python still computes every number (the sheet's script runs on each change, abou
 - **PulsimGui is the circuit window.** Setup → Open in PulsimGui launches it (installed with pip in OwnStudio's environment) with an OwnStudio backend, so its Run button calls the same runner and gives identical results. Saving in PulsimGui writes the setup's `.pulsim`; OwnStudio syncs the named values back to the canvas; a structural change shows as "custom circuit".
 - **The simulation sheet** is the canvas in its Simulate tint: one sentence says what the control receives ("V_LOW1, I_LOW1, V_HIGH every 100 µs, ideal"), and each block carries a fidelity chip: green (as on the board), yellow (simplified, such as ideal sensors), hatched (not simulated, such as the APS). A click on a chip gives the detail in the inspector. Code in `main.cpp` outside the setup function is listed as board-only.
 - **Other simulators** (PLECS, MATLAB) can be added behind an external-simulator interface later.
+- **Later: an averaged simulator** ([ADR 0033](docs/adr/0033-averaged-simulator-for-fast-evaluation.md), deferred until after slice 4), as Core2 proposes: a third target where each leg is replaced by its duty-weighted average, running the same procedure and the same control code in seconds instead of minutes. It is for trying ideas only: never a verdict on a requirement, used only when the user asks (never on the AI's initiative), filed at test level D as INFO, and labelled "averaged" everywhere.
 
 ## 11. Wiring diagrams
 
@@ -270,7 +272,6 @@ The decision-by-decision comparison of 1.0 is in [docs/benchmark.md](docs/benchm
 
 ## 18. Open items
 
-- **Where the requirement layers go** (Specification, Build, Verification): proposed in the storyboards as badges on the inside view and a list in the inspector; to confirm when reviewing them.
 - **Exact PWM edges on the C-Block path:** the Pulsim fix (#12) was written for `switch_fn`; to check before slice 1's simulation is trusted. The Pulsim issue draft still waits for Luiz.
 - **PulsimGui's backend hook:** Core2 replaces a private method (`BackendLoader._discover_candidates`) to register its backend. A public entry point should be asked of PulsimGui's author.
 - **Browser sign-in** needs an OAuth application registered with GitHub and GitLab: under which account (OwnTech's)?
@@ -291,7 +292,8 @@ flowchart LR
   S2["Slice 2<br/>inspector editing · setup round-trip ·<br/>simulation chips · wiring export ·<br/>branch lanes"]
   S3["Slice 3<br/>Blockly test sequences · Monitor ·<br/>instrument drivers · libraries dialog"]
   S4["Slice 4<br/>skills · AI takeover"]
-  S0 --> S1 --> S2 --> S3 --> S4
+  L["Later<br/>averaged simulator (ADR 0033)"]
+  S0 --> S1 --> S2 --> S3 --> S4 --> L
 ```
 
 The 1.0 interface gets no more fixes (Q112); what it lacked (progress, language support, interactive plots, the checklist) is built into the new work.
@@ -332,3 +334,4 @@ The 1.0 interface gets no more fixes (Q112); what it lacked (progress, language 
 | [0030](docs/adr/0030-setups-are-git-repos.md) | Setups are git repos; timeline; libraries as submodules |
 | [0031](docs/adr/0031-ai-agents-and-takeover.md) | The user's own AI agent; AI takeover token |
 | [0032](docs/adr/0032-boards-from-the-devicetree.md) | Boards from the devicetree; custom boards |
+| [0033](docs/adr/0033-averaged-simulator-for-fast-evaluation.md) | Averaged simulator for fast evaluation (deferred) |

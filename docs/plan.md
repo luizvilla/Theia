@@ -377,6 +377,7 @@ Decided in rounds 11–20 ([decision log](decision-log.md)), specified in [SPEC 
 | 2 | Inspector editing, setup round-trip, simulation chips, wiring export, branch lanes | |
 | 3 | Blockly test sequences, Monitor mode and widgets, instrument-driver hook, libraries dialog and submodules, remotes and forks | |
 | 4 | Skills, AI takeover | |
+| Later | Averaged simulator target for fast evaluation ([ADR 0033](adr/0033-averaged-simulator-for-fast-evaluation.md)), following Core2's ADR 0004 | |
 
 ## Commit plan for slice 1
 

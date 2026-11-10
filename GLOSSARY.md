@@ -135,7 +135,7 @@ A light, shareable summary of one or more test records: plots, conditions, verdi
 _Avoid_: test record (that is the evidence), export
 
 **Test level**:
-How much of the system a test case exercises: L0 one object with synthetic inputs, L1 closed loop against the plant model on the simulator target, L2 closed loop on the bench.
+How much of the system a test case exercises: L0 one object with synthetic inputs, L1 closed loop against the switched plant model on the simulator target, L2 closed loop on the bench; and D, design runs on the averaged plant model, whose results are information only.
 _Avoid_: stage, phase
 
 **Firmware scope**:
@@ -241,6 +241,10 @@ _Avoid_: board pack, board support package
 **Plant model**:
 The simulated power block and environment that the firmware acts on when the target is the simulator.
 _Avoid_: simulation, model (unqualified), digital twin
+
+**Averaged plant model**:
+A plant model in which each switching leg is replaced by its duty-weighted average, used to evaluate ideas quickly and never to judge a requirement.
+_Avoid_: average model, small-signal model (that is a linearisation), simplified model
 
 **Fidelity**:
 How closely the simulator reproduces one block of the board: as on the board, simplified, or not simulated.
