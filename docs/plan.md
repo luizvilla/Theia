@@ -373,7 +373,7 @@ Decided in rounds 11–20 ([decision log](decision-log.md)), specified in [SPEC 
 | Slice | Content | Done when |
 |---|---|---|
 | 0 | Paper: storyboards, glossary, ADRs 0025–0032, SPEC 2.0, menu map, this commit plan | Luiz has reviewed it |
-| 1 | The thread: shell and menus, language support, Start and boards, setups as Core clones, examples as branches, canvas and palette, inside view (read-only), build and flash with progress, Lab checklist and power token, capture procedure, interactive results, Core2 simulation and PulsimGui, overlay, Design sheets, timeline dots, AI integrations | The exit criterion |
+| 1 | The thread: shell and menus, language support, Start and boards, setups as Core clones, examples as branches, canvas and palette, inside view with a read-only inspector, build and flash with progress, Lab checklist and power token, capture procedure, interactive results, Core2 simulation and PulsimGui, overlay, Design sheets, timeline dots, AI integrations | The exit criterion |
 | 2 | Inspector editing, setup round-trip, simulation chips, wiring export, branch lanes | |
 | 3 | Blockly test sequences, Monitor mode and widgets, instrument-driver hook, libraries dialog and submodules, remotes and forks | |
 | 4 | Skills, AI takeover | |
@@ -383,6 +383,8 @@ Decided in rounds 11–20 ([decision log](decision-log.md)), specified in [SPEC 
 ### Rules
 
 As in steps 1–4: every commit builds and passes its tests; work on `/data/ownstudio`; writes to the Twist chosen by its USB serial number; the converter is switched on only with Luiz present, one run at a time; automated tests and the AI agent never switch power on.
+
+**Every commit that changes the window is checked against the storyboards.** The table names the frames each commit implements. A script (`tools/storyboard-shots`, added in U2) drives the app, with a fake board, into the state of each frame and takes a screenshot into `docs/images/step-5/`. The commit is done when its screenshots match their frames, or the difference is written down with its reason. The slice report (U19) puts every frame beside its screenshot.
 
 ### Choices I would make in this slice (for Luiz's review)
 
@@ -394,7 +396,7 @@ As in steps 1–4: every commit builds and passes its tests; work on `/data/owns
 | S4 | New setups are cloned from a **local mirror of OwnTech Core** kept in `~/OwnStudio/.cache` | Creating a setup works offline and in seconds |
 | S5 | Timeline events are **commit trailers** (`OwnStudio-Event: build`) | Plain git; another tool sees ordinary commits |
 | S6 | Canvas edits are committed **after 10 s without change** or when leaving the canvas | One dot per change, not per pixel |
-| S7 | **Restore never destroys:** restoring an old dot creates a branch from it | Nothing is ever lost from the timeline |
+| S7 | **Restore never destroys:** restoring an old dot shows it; a branch is created only at the first edit made from there, and branches left without any edit are pruned | Nothing is ever lost; many back-and-forths make no clutter. Performance is tested (U5, U18): 200 restores on a setup of 1 000 commits with 3 libraries, each under 2 s |
 | S8 | Libraries stay fetched by PlatformIO in slice 1; submodules come with the libraries dialog in slice 3 | The thread does not need library edits |
 | S9 | The **power token** (ADR 0031) comes in slice 1, not slice 4 | It is the safety half of the Lab checklist; only the takeover button waits |
 | S10 | The old Home, Mission steps panel and study log are **removed** in slice 1; the control center stays as a Lab view for setups with requirements | They are superseded; the test-state machinery still serves the buck example |
@@ -408,35 +410,35 @@ As in steps 1–4: every commit builds and passes its tests; work on `/data/owns
 
 ### Order
 
-| Plan | Repo | Commit message | What | Test |
-|---|---|---|---|---|
-| **A. The shell** | | | | |
-| U1 | Theia | app: the plugin system, with C++, Python and git extensions | `@theia/plugin-ext(-vscode)`; bundled from Open VSX: C/C++ grammar, clangd, Python grammar, basedpyright, git, GitHub pull requests | A `.cpp` opens as C++ with colouring and Ctrl+click; extension list check |
-| U2 | Theia | app: the new window: workbenches on the left, Parts, Inspector and AI on the right, canvas, terminal and timeline at the bottom | Removes Home, the bottom workbench bar and the Mission steps panel; green title bar; status bar items | Layout tests: every area exists, workbench switch keeps the bottom |
-| U3 | Theia | app: the eight menus of SPEC §5 | One owner module for the menu map; Theia's Selection, Go and Terminal removed; items not built yet say which slice brings them | Menu tree compared with the SPEC table |
-| **B. Boards, setups, examples** | | | | |
-| U4 | Theia | lab: board definitions from Core's devicetree and a board description | `ownstudio_lab.boards` with Zephyr's devicetree library; `boards/twist/board.yaml` (ports, ratings, drawing, plant, templates); Spin pin map | Reads Core4's Twist 1.4.2 overlay: legs, pins, defaults, sensors |
-| U5 | Theia | lab: setups are Core clones with an OwnStudio folder, committed at events | Create from the Core mirror (S4); `ownstudio/setup.yaml`; event commits (S5); list the timeline; restore as a branch (S7) | Temp-repo tests: create, commit, list, restore never loses a commit |
-| U6 | Theia | app: the Start page | Board grid with the connected board detected by serial number; recent setups; the board's examples from the examples index (board inferred) | Examples of the Twist listed from the real index |
-| U7 | Theia | app: an example loads on its own branch | Copy into `src/`, `origin.yaml`, branch named after the example, commit | The buck example loads; previous work still on its branch |
-| **C. The canvas** | | | | |
-| U8 | Theia | app: the setup canvas with its palette and topology rules | React Flow (S1); DC source, Twist, resistor; typed ports; the first rules; values on nodes; tint per workbench; saved in `setup.yaml`, committed (S6) | Rule tests: source–Twist–source and load–Twist–load refused with a reason |
-| U9 | Theia | app: the inside of the Twist and a read-only inspector | Five blocks drawn from the board definition, with the devicetree values; Design, Code, Tests buttons | Selecting the driver shows 200 kHz and 100 ns from the overlay |
-| **D. The bench** | | | | |
-| U10 | Theia | lab: build and flash a setup, with progress | `pio run` in the setup (compile progress), mcumgr flash (bytes); build identity; timeline events | Fake build and flash report progress; real build of the buck example |
-| U11 | Theia | lab: the Lab checklist and the power token | Continuous checks of SPEC §9; Run green only while all hold; the runner refuses power without a one-time token from the dialog (S9) | A fake Spin, a dead HIGH and a 20 % mismatch each turn Run red with their sentence; the runner refuses a missing token |
-| U12 | Theia | lab: the capture procedure, records and reports, and interactive results | Default capture from the board (probes from the canvas, reference step, duration); records in `ownstudio/records/`; light HTML report in `reports/`; uPlot viewer zoomed on the event (S2) | Fake board: capture filed, report written, viewer opens on the step |
-| **E. Simulation** | | | | |
-| U13 | Theia | sim: the Twist plant as a .pulsim file, with the control code as a C-Block | `boards/twist/plant/twist_buck.pulsim` from the step-4 plant's values; C-Block wrapper for `control_step`; runner applies named values (Core2's pattern) | Same step response as the step-4 harness within tolerance; exact edges checked on the C-Block path |
-| U14 | Theia | sim: Open in PulsimGui, sharing the runner | Launcher with an OwnStudio backend (as Core2's `gui.py`); PulsimGui installed with pip; save → watch → named values synced to the canvas | Headless check run as Core2's `--check-run`; a value changed in the file shows on the canvas |
-| U15 | Theia | lab: simulate a run at its conditions and draw it over the measurement | "Simulate" on a result reruns the procedure on the simulator at the canvas's values | Fake board run plus its simulation on one plot |
-| **F. Design and AI** | | | | |
-| U16 | Theia | app: the Design sheets: output filter and control loop | Live forms over the board's `design/*.py --json`; Apply writes the gains; L and C changes update the canvas and the plant values | Moving L updates ripple within 0.5 s; Apply changes `control.cpp` |
-| U17 | Theia | ai: Claude Code and Codex through the user's account | `@theia/ai-claude-code`, `@theia/ai-codex`; the old key-based agent removed; a first `AGENTS.md` in the board definition pointing at the setup's Core | Both agents listed; the power token refuses an agent-started run |
-| **G. Timeline and end** | | | | |
-| U18 | Theia | app: the timeline strip | Dots with event icons; preview (canvas and diff); Restore here (S7) | Restore after a build returns the code and the canvas |
-| E21 | examples | buck example: OwnStudio extras | `ownstudio/` with the buck's procedures and requirements; `control.cpp` and the setup function in `main.cpp` | Loads through U7 with its extras |
-| U19 | Theia | docs: slice 1 report and how to try it | `try-it.md` for the nine steps; screenshots next to the storyboards | Luiz's test session |
+| Plan | Repo | Commit message | What | Test | Storyboard |
+|---|---|---|---|---|---|
+| **A. The shell** | | | | | |
+| U1 | Theia | app: the plugin system, with C++, Python and git extensions | `@theia/plugin-ext(-vscode)`; bundled from Open VSX: C/C++ grammar, clangd, Python grammar, basedpyright, git, GitHub pull requests | A `.cpp` opens as C++ with colouring and Ctrl+click; extension list check | 6 |
+| U2 | Theia | app: the new window: workbenches on the left, Parts, Inspector and AI on the right, canvas, terminal and timeline at the bottom | Removes Home, the bottom workbench bar and the Mission steps panel; icons on both icon bars; bottom tabs Canvas, Terminal, Build output; green title bar; status bar with Build, Upload and Serial; `tools/storyboard-shots` | Layout tests: every area exists, workbench switch keeps the bottom | 0 |
+| U3 | Theia | app: the eight menus of SPEC §5 | One owner module for the menu map; Theia's Selection, Go and Terminal removed; items not built yet say which slice brings them | Menu tree compared with the SPEC table | 15 |
+| **B. Boards, setups, examples** | | | | | |
+| U4 | Theia | lab: board definitions from Core's devicetree and a board description | `ownstudio_lab.boards` with Zephyr's devicetree library; `boards/twist/board.yaml` (ports, ratings, drawing, plant, templates); Spin pin map | Reads Core4's Twist 1.4.2 overlay: legs, pins, defaults, sensors | 4 (its data) |
+| U5 | Theia | lab: setups are Core clones with an OwnStudio folder, committed at events | Create from the Core mirror (S4); `ownstudio/setup.yaml`; event commits (S5); list the timeline; restore as a branch (S7) | Temp-repo tests: create, commit, list, restore never loses a commit; no edit after a restore, no branch; performance (S7) | 14 (its data) |
+| U6 | Theia | app: the Start page | Board grid with the connected board detected by serial number; recent setups; the board's examples from the examples index (board inferred) | Examples of the Twist listed from the real index | 1 |
+| U7 | Theia | app: an example loads on its own branch | Copy into `src/`, `origin.yaml`, branch named after the example, commit | The buck example loads; previous work still on its branch | 5 |
+| **C. The canvas** | | | | | |
+| U8 | Theia | app: the setup canvas with its palette and topology rules | React Flow (S1); DC source, Twist, resistor; typed ports; the first rules; values on nodes; tint per workbench; saved in `setup.yaml`, committed (S6) | Rule tests: source–Twist–source and load–Twist–load refused with a reason | 2, 3 |
+| U9 | Theia | app: the inside of the Twist and a read-only inspector | Five blocks on Luiz's reference layout (power side, control side, feeder in the centre, clockwise signals, isolation diagonal), values from the board definition; Design, Code, Tests buttons | Selecting the driver shows 200 kHz and 100 ns from the overlay | 4 |
+| **D. The bench** | | | | | |
+| U10 | Theia | lab: build and flash a setup, with progress | Code toolbar (Build, Upload, Build and upload, Clean, Serial); `pio run` in the setup with its log in Build output (compile progress), mcumgr upload (bytes); build identity; timeline events | Fake build and flash report progress; real build of the buck example | 6, 7 |
+| U11 | Theia | lab: the Lab checklist and the power token | Continuous checks of SPEC §9; Run green only while all hold; the runner refuses power without a one-time token from the dialog (S9) | A fake Spin, a dead HIGH and a 20 % mismatch each turn Run red with their sentence; the runner refuses a missing token | 8 |
+| U12 | Theia | lab: the capture procedure, records and reports, and interactive results | Default capture from the board (probes from the canvas, reference step, duration); records in `ownstudio/records/`; light HTML report in `reports/`; uPlot viewer zoomed on the event (S2) | Fake board: capture filed, report written, viewer opens on the step | 9, 10 |
+| **E. Simulation** | | | | | |
+| U13 | Theia | sim: the Twist plant as a .pulsim file, with the control code as a C-Block | `boards/twist/plant/twist_buck.pulsim` from the step-4 plant's values; C-Block wrapper for `control_step`; runner applies named values (Core2's pattern) | Same step response as the step-4 harness within tolerance; exact edges checked on the C-Block path | 12 (its data) |
+| U14 | Theia | sim: Open in PulsimGui, sharing the runner | Launcher with an OwnStudio backend (as Core2's `gui.py`); PulsimGui installed with pip; save → watch → named values synced to the canvas | Headless check run as Core2's `--check-run`; a value changed in the file shows on the canvas | 11 |
+| U15 | Theia | lab: simulate a run at its conditions and draw it over the measurement | "Simulate" on a result reruns the procedure on the simulator at the canvas's values | Fake board run plus its simulation on one plot | 12 |
+| **F. Design and AI** | | | | | |
+| U16 | Theia | app: the Design sheets: output filter and control loop | Live forms over the board's `design/*.py --json`; Apply writes the gains; L and C changes update the canvas and the plant values | Moving L updates ripple within 0.5 s; Apply changes `control.cpp` | 13 |
+| U17 | Theia | ai: Claude Code and Codex through the user's account | `@theia/ai-claude-code`, `@theia/ai-codex`; the old key-based agent removed; a first `AGENTS.md` in the board definition pointing at the setup's Core | Both agents listed; the power token refuses an agent-started run | 6, 16 |
+| **G. Timeline and end** | | | | | |
+| U18 | Theia | app: the timeline strip | Dots with event icons; preview (canvas and diff); Restore here (S7) | Restore after a build returns the code and the canvas; 200 back-and-forths, each under 2 s | 14 |
+| E21 | examples | buck example: OwnStudio extras | `ownstudio/` with the buck's procedures and requirements; `control.cpp` and the setup function in `main.cpp` | Loads through U7 with its extras | 5 |
+| U19 | Theia | docs: slice 1 report and how to try it | `try-it.md` for the nine steps; screenshots next to the storyboards | Luiz's test session | all, side by side |
 
 ### Still deferred
 

@@ -98,8 +98,9 @@ The converter exchanges energy with the **environment** through **power ports**,
 - **Left panel:** changes with the workbench: Design's sheets; Code's files (the student's files first, the libraries read-only below); the Lab's procedures and its checklist.
 - **Centre:** the work itself: Design's live forms and plots; the code editor; the Lab's test sequence editor, results and overlay.
 - **Right icon bar and panel:** **Parts** (the palette to drag from), **Inspector** (opens on its own when something is selected), **AI** (the agent's chat).
-- **Bottom:** the **setup canvas**, always present, with its background tinted by workbench (Design, Code, Lab, Simulate); a **Terminal** tab beside it, opened from View → Terminal or the button at the bottom, in the setup folder with OwnStudio's Python and toolchain on the path (Q136); under both, the **timeline** strip.
-- **Status bar:** the board and its identity, the firmware match, the Lab checklist, progress of builds, flashes and simulations.
+- **Bottom:** the **setup canvas**, always present, with its background tinted by workbench (Design, Code, Lab, Simulate); beside it a **Terminal** tab, opened from View → Terminal or the button at the bottom, in the setup folder with OwnStudio's Python and toolchain on the path (Q136), and a **Build output** tab with PlatformIO's own log; under them, the **timeline** strip.
+- **Status bar:** Build, Upload and Serial monitor buttons (as PlatformIO's), the board and its identity, the firmware match, the Lab checklist, progress of builds, flashes and simulations.
+- **Icons, not letters,** on both icon bars.
 - **Title bar** in OwnTech green, not Theia's grey.
 
 **Start page** (replaces Home): shown when no setup is open. A grid of boards with the connected one highlighted (as Arduino IDE 2 detects boards), recent setups, the chosen board's examples, and tutorials. Picking a board installs or updates its board definition and opens a new setup with the board on the canvas.
@@ -123,7 +124,7 @@ The converter exchanges energy with the **environment** through **power ports**,
 
 - **Nodes with typed ports.** Parts are dragged from the Parts palette: a DC source, the Twist, a resistor. Each node shows its values and live state (the source: 30 V set, 29.9 V measured). Power ports accept only power wires.
 - **Topology rules, first version:** exactly one source on HIGH, one Twist, one load on LOW1 (LOW2 may share it). A wire that breaks a rule doesn't snap, and the canvas says why (Q82).
-- **Two levels.** Double-click the Twist (or "open") to see its inside: the five blocks, drawn from its devicetree, with their settings (legs, mode, frequency, dead time, calibration).
+- **Two levels.** Double-click the Twist (or "open") to see its inside: the five blocks on Luiz's reference layout ([drawing](docs/images/five-blocks-reference.png)): power side and control side, the feeder in the centre, signals looping clockwise (power → measurement → controller → driver → power), the isolation barrier between the grounds, the power ports on the power block. Values come from the devicetree (legs, mode, frequency, dead time, calibration). The inside view and a read-only inspector come in slice 1; editing in slice 2.
 - **Inspector.** Any node or inner block, when selected, shows its settings, its requirements and their test states, and three buttons: **Design**, **Code**, **Tests** (Q73).
 - **The canvas follows the workbench.** Design shows values; Code shows which file and function each block maps to; the Lab shows **probes** and live readings; Simulate shows fidelity chips.
 - **Probes** are placed on a node, a block or (later) a Spin pin. Each probe is either **Monitor** (slow, blue) or **Capture** (fast, amber).
@@ -145,7 +146,7 @@ Python still computes every number (the sheet's script runs on each change, abou
 - **The student's files first** (Q76): `main.cpp` (its setup function is shared with the canvas) and `control.cpp` (the control law, hardware-free, simulated as written, [ADR 0018](docs/adr/0018-skeleton-simulates-a-hardware-free-control-function.md)). "Show all files" reveals the rest. The libraries are listed below, read-only by default, so the user and the AI can read Core.
 - **Data objects** are declared in `data_objects.yaml`, from which the C is generated ([ADR 0021](docs/adr/0021-data-objects-yaml-generates-c.md)); ThingSet replaces the communication task ([ADR 0019](docs/adr/0019-thingset-replaces-the-communication-task.md)).
 - **Build identity** (commit, dirty flag, binary hash) is compiled in and reported by the board.
-- **Build and flash** show real progress: compile steps, then bytes flashed out of the total.
+- **Build and upload** from a toolbar above the editor (Build, Upload, Build and upload, Clean, Serial monitor), from the status bar or from the Board menu. PlatformIO's log goes to the Build output tab; progress shows compile steps, then bytes uploaded out of the total.
 
 ## 9. Lab workbench
 
@@ -187,7 +188,7 @@ Each board ships its draw.io wiring and circuit diagrams as templates, one per t
 - **Examples need nothing for OwnStudio.** The board's defaults make any example usable at once (plant, capture procedure). An example may ship extras in an `ownstudio/` folder: only the buck example, for now.
 - **Libraries** are chosen in Setup → Libraries…, a checkbox list of every OwnTech library with the board's recommended set checked. Each is a git submodule in the setup's `libs/` (§13), and `lib_deps` in `app.ini` is kept in step so the VS Code build still works.
 
-**A setup is a clone of OwnTech Core** (proposed in slice 0, to confirm): OwnTech projects already are Core checkouts with the application in `src/`, and "pulling updates from other cores" is git with several remotes (Core4 has OwnTech's, Luiz's and Jean's). OwnStudio adds its files beside Core's, so the devicetree is read from the setup's own Core and the VS Code flow keeps working in the same folder. A setup on disk:
+**A setup is a clone of OwnTech Core** (confirmed by Luiz after slice 0): OwnTech projects already are Core checkouts with the application in `src/`, and "pulling updates from other cores" is git with several remotes (Core4 has OwnTech's, Luiz's and Jean's). OwnStudio adds its files beside Core's, so the devicetree is read from the setup's own Core and the VS Code flow keeps working in the same folder. A setup on disk:
 
 ```
 ~/OwnStudio/twist-buck/            one git repository: a clone of Core
@@ -269,8 +270,6 @@ The decision-by-decision comparison of 1.0 is in [docs/benchmark.md](docs/benchm
 
 ## 18. Open items
 
-- **A setup as a clone of Core** (§12): proposed during slice 0 from how OwnTech projects already work; to confirm.
-- **Objective step 2 in slice 1:** "click on the inside of the Twist to set it up" needs the inside view in slice 1, though the inspector and the round-trip were placed in slice 2. Proposed: the inside view and an inspector showing the settings in slice 1, editing them in slice 2.
 - **Where the requirement layers go** (Specification, Build, Verification): proposed in the storyboards as badges on the inside view and a list in the inspector; to confirm when reviewing them.
 - **Exact PWM edges on the C-Block path:** the Pulsim fix (#12) was written for `switch_fn`; to check before slice 1's simulation is trusted. The Pulsim issue draft still waits for Luiz.
 - **PulsimGui's backend hook:** Core2 replaces a private method (`BackendLoader._discover_candidates`) to register its backend. A public entry point should be asked of PulsimGui's author.
@@ -288,8 +287,8 @@ Slices, each finished before the next starts. Details and the commit plan are in
 ```mermaid
 flowchart LR
   S0["Slice 0 · paper<br/>storyboards · glossary · ADRs ·<br/>this spec · menu map · commit plan"]
-  S1["Slice 1 · the thread<br/>Start · canvas + palette · example as branch ·<br/>build/flash · capture procedure · Lab checklist ·<br/>Core2 simulation + PulsimGui · overlay ·<br/>Design sheet · timeline dots · AI integrations"]
-  S2["Slice 2<br/>inspector · setup round-trip ·<br/>simulation chips · wiring export ·<br/>branch lanes"]
+  S1["Slice 1 · the thread<br/>Start · canvas + palette · inside view ·<br/>example as branch · build/flash · capture procedure · Lab checklist ·<br/>Core2 simulation + PulsimGui · overlay ·<br/>Design sheet · timeline dots · AI integrations"]
+  S2["Slice 2<br/>inspector editing · setup round-trip ·<br/>simulation chips · wiring export ·<br/>branch lanes"]
   S3["Slice 3<br/>Blockly test sequences · Monitor ·<br/>instrument drivers · libraries dialog"]
   S4["Slice 4<br/>skills · AI takeover"]
   S0 --> S1 --> S2 --> S3 --> S4

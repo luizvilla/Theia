@@ -309,3 +309,13 @@ Facts found: `spin_header.dtsi` maps the Spin header to MCU pins; `twist_v1_4_2.
 | Q138 | Sign-in? | Browser sign-in; SSH generated and uploaded by API; existing keys used. | Yes. | ADR 0030 |
 
 Luiz confirmed the shared understanding and asked for slice 0 (2026-11-10).
+
+## Round 21 (2026-11-10): review of slice 0
+
+| # | Question | Recommendation | Answer | Recorded in |
+|---|---|---|---|---|
+| Q139 | A setup is a clone of OwnTech Core? | Yes. | Yes. | SPEC §12, ADR 0030 |
+| Q140 | The inside view and a read-only inspector in slice 1? | Yes. | Yes. | SPEC §6, plan |
+| Q141 | Choices S1–S10 of the slice 1 plan? | As written. | All accepted. S7 (restore makes a branch) must be tested for performance with many back-and-forths: a branch now appears only at the first edit after a restore, and 200 restores must each take under 2 s. | plan |
+| — | (Luiz) Storyboards | — | Icons instead of letters on both icon bars; panel 4's blocks not drawn as he likes (redrawn on his reference layout); panel 6 lacks Build and Upload buttons and PlatformIO's terminal (added: Code toolbar, status bar buttons, Build output tab). | storyboards v2, SPEC §5, §6, §8 |
+| — | (Luiz) The plan has tests but no comparison with the storyboards | — | Each window commit names its frames and is checked against screenshots taken by `tools/storyboard-shots`; the slice report shows them side by side. | plan |

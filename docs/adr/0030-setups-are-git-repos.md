@@ -30,4 +30,4 @@ Users sign in to GitHub or GitLab in the browser, as `gh` and VS Code do; the to
 
 - VS Code's git extension and GitHub's pull-request extension come through Theia's plugin system, which OwnStudio needs anyway for language support.
 - A user never types a submodule command; OwnStudio owns them.
-- Proposed in slice 0, to confirm: the setup repository is a clone of OwnTech Core, since OwnTech projects already are Core checkouts pulled from several cores ([SPEC §12](../../SPEC.md#12-boards-examples-and-libraries)).
+- Confirmed by Luiz after slice 0: the setup repository is a clone of OwnTech Core, since OwnTech projects already are Core checkouts pulled from several cores ([SPEC §12](../../SPEC.md#12-boards-examples-and-libraries)).
