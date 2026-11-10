@@ -451,3 +451,9 @@ As in steps 1–4: every commit builds and passes its tests; work on `/data/owns
 ### Still deferred
 
 Slice 2–4 content; the Windows installer (#5); sensor calibration (#14); the Pulsim upstream issue, waiting for Luiz.
+
+### Commits as made (slice 1)
+
+| Plan | Repo | Commit message | Note |
+|---|---|---|---|
+| U1 | Theia | app: the plugin system, with C++, Python and git extensions | The GitHub pull-request extension is left out until slice 3: it fails to start without GitHub sign-in. clangd itself is offered for download on first use; the installer (#5) will bundle it. Also fixed: the OwnStudio themes had no token colours, and Theia's theme cache replayed an old copy over them; they are now registered again after the cache is restored |

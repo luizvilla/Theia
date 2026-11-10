@@ -44,5 +44,6 @@ echo "OwnStudio trial in $run"
 echo "  mission copy: $run/mission"
 echo "  your notes:   $run/notes.md"
 cd "$here/app/applications/electron"
-exec env -u ELECTRON_RUN_AS_NODE "$here/app/node_modules/electron/dist/electron" . --no-sandbox \
+[ -d plugins ] || npm run download:plugins >/dev/null
+exec env -u ELECTRON_RUN_AS_NODE "$here/app/node_modules/electron/dist/electron" . --no-sandbox --plugins=local-dir:plugins \
     --user-data-dir="$run/userdata" "$run/mission"

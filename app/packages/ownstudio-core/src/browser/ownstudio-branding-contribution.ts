@@ -12,7 +12,26 @@ export class OwnStudioBrandingContribution implements FrontendApplicationContrib
     protected readonly theming: MonacoThemingService;
 
     initialize(): void {
-        this.theming.registerParsedTheme(OWNSTUDIO_LIGHT);
-        this.theming.registerParsedTheme(OWNSTUDIO_DARK);
+        registerOwnStudioThemes(this.theming);
+    }
+}
+
+export function registerOwnStudioThemes(theming: MonacoThemingService): void {
+    theming.registerParsedTheme(OWNSTUDIO_LIGHT);
+    theming.registerParsedTheme(OWNSTUDIO_DARK);
+}
+
+/**
+ * Theia restores the themes it cached in IndexedDB asynchronously, after the
+ * contributions' initialize(), and writes them back. A copy cached by an older
+ * OwnStudio (one without token colours) would then replace the current themes
+ * on every launch. Registering again once the restore is done makes the
+ * current definitions win, and refreshes the cache.
+ */
+@injectable()
+export class OwnStudioMonacoThemingService extends MonacoThemingService {
+    override async restore(): Promise<void> {
+        await super.restore();
+        registerOwnStudioThemes(this);
     }
 }

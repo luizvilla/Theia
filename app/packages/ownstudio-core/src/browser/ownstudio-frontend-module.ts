@@ -6,7 +6,8 @@ import { CommandContribution } from '@theia/core/lib/common';
 import {
     FrontendApplicationContribution, KeybindingContribution, WidgetFactory
 } from '@theia/core/lib/browser';
-import { OwnStudioBrandingContribution } from './ownstudio-branding-contribution';
+import { OwnStudioBrandingContribution, OwnStudioMonacoThemingService } from './ownstudio-branding-contribution';
+import { MonacoThemingService } from '@theia/monaco/lib/browser/monaco-theming-service';
 import { ExpertModeContribution } from './expert-mode-contribution';
 import { WorkbenchContribution } from './workbench-contribution';
 import { WorkbenchWidget } from './workbench-widget';
@@ -40,7 +41,7 @@ import { MISSION_STEPS_WIDGET_ID, MissionStepsWidget } from './mission-steps-wid
 import { QUESTIONNAIRE_WIDGET_ID, QuestionnaireWidget } from './questionnaire-widget';
 import { StudyContribution } from './study-contribution';
 
-export default new ContainerModule(bind => {
+export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
     bind(MissionService).toSelf().inSingletonScope();
 
     bind(BoardClientImpl).toSelf().inSingletonScope();
@@ -113,6 +114,8 @@ export default new ContainerModule(bind => {
     bind(LabContribution).toSelf().inSingletonScope();
     bind(CommandContribution).toService(LabContribution);
 
+    bind(OwnStudioMonacoThemingService).toSelf().inSingletonScope();
+    rebind(MonacoThemingService).toService(OwnStudioMonacoThemingService);
     bind(OwnStudioBrandingContribution).toSelf().inSingletonScope();
     bind(FrontendApplicationContribution).toService(OwnStudioBrandingContribution);
 

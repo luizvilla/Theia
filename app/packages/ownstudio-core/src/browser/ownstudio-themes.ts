@@ -40,6 +40,21 @@ const chrome = {
     'inputValidation.warningBorder': persimmon,
 };
 
+
+/** TextMate token colours, so code is coloured as in VS Code (C++, Python, YAML, JSON). */
+function tokens(c: { comment: string, keyword: string, type: string, func: string, num: string, str: string, variable: string, punct: string }): object[] {
+    return [
+        { scope: ['comment', 'punctuation.definition.comment'], settings: { foreground: c.comment, fontStyle: 'italic' } },
+        { scope: ['keyword', 'storage', 'storage.type', 'storage.modifier', 'keyword.control', 'keyword.operator.new', 'meta.preprocessor', 'keyword.control.directive', 'punctuation.definition.directive'], settings: { foreground: c.keyword } },
+        { scope: ['entity.name.type', 'entity.name.class', 'support.type', 'support.class', 'storage.type.built-in', 'entity.name.namespace'], settings: { foreground: c.type } },
+        { scope: ['entity.name.function', 'support.function', 'meta.function-call', 'entity.name.function.member'], settings: { foreground: c.func } },
+        { scope: ['constant.numeric', 'constant.language', 'constant.other', 'support.constant'], settings: { foreground: c.num } },
+        { scope: ['string', 'string.quoted', 'meta.preprocessor.string', 'punctuation.definition.string'], settings: { foreground: c.str } },
+        { scope: ['variable.parameter', 'variable.other.member', 'entity.name.tag', 'support.type.property-name'], settings: { foreground: c.variable } },
+        { scope: ['punctuation', 'keyword.operator'], settings: { foreground: c.punct } },
+    ];
+}
+
 export const OWNSTUDIO_LIGHT = {
     id: 'ownstudio-light',
     label: 'OwnStudio Light',
@@ -60,7 +75,7 @@ export const OWNSTUDIO_LIGHT = {
             'list.inactiveSelectionBackground': '#E2E9F9',
             'tab.activeBorderTop': green,
         },
-        tokenColors: [],
+        tokenColors: tokens({ comment: '#5C6F68', keyword: '#7B2FA8', type: '#1F5FA8', func: '#8A5A00', num: '#B5461F', str: '#2E7D32', variable: '#1D4F7A', punct: '#3A4643' }),
     },
 };
 
@@ -86,6 +101,6 @@ export const OWNSTUDIO_DARK = {
             'list.inactiveSelectionBackground': '#2A3550',
             'tab.activeBorderTop': yellow,
         },
-        tokenColors: [],
+        tokenColors: tokens({ comment: '#6A7F78', keyword: '#C792EA', type: '#82AAFF', func: '#FFCB6B', num: '#F78C6C', str: '#C3E88D', variable: '#9CDCFE', punct: '#B8C4C1' }),
     },
 };

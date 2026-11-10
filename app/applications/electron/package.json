@@ -39,6 +39,8 @@
     "@theia/monaco": "1.76.0",
     "@theia/navigator": "1.76.0",
     "@theia/output": "1.76.0",
+    "@theia/plugin-ext": "1.76.0",
+    "@theia/plugin-ext-vscode": "1.76.0",
     "@theia/preferences": "1.76.0",
     "@theia/process": "1.76.0",
     "@theia/terminal": "1.76.0",
@@ -50,6 +52,18 @@
   },
   "scripts": {
     "build": "theia build --mode development",
-    "start": "env -u ELECTRON_RUN_AS_NODE theia start"
+    "start": "env -u ELECTRON_RUN_AS_NODE theia start --plugins=local-dir:plugins",
+    "download:plugins": "theia download:plugins"
+  },
+  "theiaPluginsDir": "plugins",
+  "theiaPlugins": {
+    "vscode.cpp": "https://open-vsx.org/api/vscode/cpp/1.95.3/file/vscode.cpp-1.95.3.vsix",
+    "vscode.python": "https://open-vsx.org/api/vscode/python/1.95.3/file/vscode.python-1.95.3.vsix",
+    "vscode.json": "https://open-vsx.org/api/vscode/json/1.95.3/file/vscode.json-1.95.3.vsix",
+    "vscode.yaml": "https://open-vsx.org/api/vscode/yaml/1.95.3/file/vscode.yaml-1.95.3.vsix",
+    "vscode.git": "https://open-vsx.org/api/vscode/git/1.95.3/file/vscode.git-1.95.3.vsix",
+    "vscode.git-base": "https://open-vsx.org/api/vscode/git-base/1.95.3/file/vscode.git-base-1.95.3.vsix",
+    "llvm-vs-code-extensions.vscode-clangd": "https://open-vsx.org/api/llvm-vs-code-extensions/vscode-clangd/0.6.0/file/llvm-vs-code-extensions.vscode-clangd-0.6.0.vsix",
+    "detachhead.basedpyright": "https://open-vsx.org/api/detachhead/basedpyright/1.40.2/file/detachhead.basedpyright-1.40.2.vsix"
   }
 }
