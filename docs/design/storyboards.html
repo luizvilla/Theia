@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>OwnStudio Storyboards</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a storyboard. One frame per screen of Luiz's nine-step objective, each a medium-fidelity OwnStudio window with a caption beside it. */
+:root{
+  --page:#e9eeec; --paper:#ffffff; --ink:#16211f; --muted:#5a6a64; --line:#cad5d0;
+  --accent:#b89a00; --accent-soft:#f6eeb8;
+  --win-bg:#1a2321; --win-panel:#202b29; --win-panel2:#25312e; --win-line:#33433f; --win-ink:#e2ebe8; --win-muted:#8ea29c;
+  --title:#1f5a46; --status:#1f5a46; --yellow:#f0dc55;
+  --t-design:#1d2540; --t-code:#1f2427; --t-lab:#2d2915; --t-sim:#16301f;
+  --power:#f08a4b; --signal:#6bb3e3; --ok:#5cc489; --bad:#ef6b5b; --capture:#e0a526; --monitor:#4aa3e0; --off:#5d6e69;
+  --f-display:"Space Grotesk",system-ui,sans-serif; --f-body:Inter,system-ui,sans-serif; --f-mono:"JetBrains Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--page:#0e1413;--paper:#151d1c;--ink:#e4edea;--muted:#91a39d;--line:#2c3a37;--accent:#f0dc55;--accent-soft:#3a3615;color-scheme:dark}}
+:root[data-theme="dark"]{--page:#0e1413;--paper:#151d1c;--ink:#e4edea;--muted:#91a39d;--line:#2c3a37;--accent:#f0dc55;--accent-soft:#3a3615;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);font:14px/1.5 var(--f-body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:32px 64px}
+.wrap{max-width:1500px;margin:0 auto;display:grid;gap:44px}
+h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance}
+h1{font-size:2rem} h2{font-size:1.25rem}
+p{margin:0;max-width:70ch}
+.eyebrow{font:600 .72rem/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.lede{color:var(--muted);margin-top:8px}
+.toc{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.88rem}
+.toc a{color:var(--ink)}
+.frame{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:22px;align-items:start}
+@media (max-width:1100px){.frame{grid-template-columns:1fr}}
+.cap{display:grid;gap:10px;position:sticky;top:16px}
+.cap .num{font:700 2.2rem/1 var(--f-display);color:var(--accent)}
+.cap ul{margin:0;padding-left:18px;display:grid;gap:4px;font-size:.92rem}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:600 .7rem var(--f-mono);padding:3px 8px;border-radius:5px;background:var(--accent-soft);color:var(--ink)}
+.chip.s2{background:#d9e8f7;color:#16211f}.chip.s3{background:#e6dcf5;color:#16211f}.chip.s4{background:#f6dcd3;color:#16211f}
+.scroll{overflow-x:auto;border-radius:10px}
+/* the window */
+.win{min-width:1060px;height:640px;background:var(--win-bg);color:var(--win-ink);border-radius:10px;overflow:hidden;
+  display:grid;grid-template-rows:30px 24px minmax(0,1fr) 22px;font:12px/1.4 var(--f-body);position:relative;box-shadow:0 8px 30px #0003}
+.tb{background:var(--title);display:flex;align-items:center;padding:0 12px;gap:10px;font-weight:600;font-size:12px;color:#e9f6f0}
+.tb .dots{display:flex;gap:6px;margin-left:auto}.tb .dots i{width:10px;height:10px;border-radius:50%;background:#ffffff40;display:block}
+.mb{background:#18201f;display:flex;align-items:center;gap:16px;padding:0 12px;color:var(--win-muted);border-bottom:1px solid var(--win-line)}
+.mb b{font-weight:500;color:var(--win-ink)}
+.mb .board{margin-left:auto;font:600 11px var(--f-mono);color:var(--ok)}
+.body{display:grid;grid-template-columns:40px 210px minmax(0,1fr) 250px 40px;min-height:0}
+.body.noleft{grid-template-columns:40px minmax(0,1fr) 250px 40px}
+.body.noright{grid-template-columns:40px 210px minmax(0,1fr) 40px}
+.body.bare{grid-template-columns:minmax(0,1fr)}
+.ib{background:#151c1b;display:flex;flex-direction:column;align-items:center;gap:6px;padding-top:8px;border-right:1px solid var(--win-line)}
+.ib.r{border-right:0;border-left:1px solid var(--win-line)}
+.ic{width:30px;height:30px;border-radius:6px;display:grid;place-items:center;font:700 10px var(--f-mono);color:var(--win-muted)}
+.ic.on{background:var(--win-panel2);color:var(--yellow);box-shadow:inset 2px 0 0 var(--yellow)}
+.ib.r .ic.on{box-shadow:inset -2px 0 0 var(--yellow)}
+.ic.gear{margin-top:auto;margin-bottom:8px}
+.lp,.rp{background:var(--win-panel);padding:10px;overflow:hidden;display:flex;flex-direction:column;gap:8px;min-width:0}
+.rp{border-left:1px solid var(--win-line)}
+.lp{border-right:1px solid var(--win-line)}
+.ph{font:600 10px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--win-muted)}
+.mid{display:grid;grid-template-rows:minmax(0,1fr) 210px 26px;grid-template-columns:minmax(0,1fr);min-width:0;min-height:0;overflow:hidden}
+.mid>*{min-width:0}
+.bottom>*{min-width:0}
+.centre{padding:14px 16px;overflow:hidden;min-width:0;position:relative}
+.bottom{border-top:1px solid var(--win-line);display:grid;grid-template-rows:22px minmax(0,1fr);min-height:0}
+.btabs{display:flex;align-items:center;gap:2px;padding-left:8px;background:#18201f;font-size:11px}
+.btab{padding:3px 10px;border-radius:4px 4px 0 0;color:var(--win-muted)}
+.btab.on{background:var(--cv,#1f2427);color:var(--win-ink)}
+.btabs .tbtn{margin-left:auto;margin-right:8px;font:600 10px var(--f-mono);color:var(--win-muted);border:1px solid var(--win-line);border-radius:4px;padding:1px 6px}
+.cv{background:var(--cv,#1f2427);position:relative;overflow:hidden}
+.cv svg{display:block;width:100%;height:100%}
+.cvlabel{position:absolute;right:10px;top:6px;font:600 10px var(--f-mono);color:#ffffff99;letter-spacing:.06em;text-transform:uppercase}
+.tl{background:#141b1a;border-top:1px solid var(--win-line);display:flex;align-items:center;gap:0;padding:0 12px;font:10px var(--f-mono);color:var(--win-muted)}
+.tl svg{height:26px;flex:1}
+.sb{background:var(--status);display:flex;align-items:center;gap:16px;padding:0 10px;font:11px var(--f-mono);color:#e9f6f0}
+.sb .r{margin-left:auto}
+/* widgets in panels */
+.item{padding:5px 8px;border-radius:5px;background:var(--win-panel2);display:flex;gap:8px;align-items:center;min-width:0}
+.item.sel{outline:1.5px solid var(--yellow)}
+.item small{color:var(--win-muted);margin-left:auto;font-family:var(--f-mono);font-size:10px}
+.dot{width:8px;height:8px;border-radius:50%;flex:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:5px 12px;border-radius:5px;font-weight:600;font-size:11.5px;background:var(--win-panel2);border:1px solid var(--win-line);color:var(--win-ink)}
+.btn.go{background:#2f8a55;border-color:#2f8a55;color:#fff}
+.btn.no{background:#7a2e27;border-color:#7a2e27;color:#ffd9d4}
+.btn.ai{background:#4b3d78;border-color:#4b3d78;color:#ece6ff}
+.btn.dis{opacity:.45}
+.field{display:flex;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px solid var(--win-line);font-size:11.5px}
+.field span:last-child{font-family:var(--f-mono)}
+.h{font:700 15px var(--f-display);margin-bottom:6px}
+.sub{color:var(--win-muted);font-size:11.5px}
+.code{font:11.5px/1.6 var(--f-mono);white-space:pre;color:#d7e3df}
+.code .k{color:#c792ea}.code .t{color:#82aaff}.code .n{color:#f78c6c}.code .c{color:#6a7f78}.code .s{color:#c3e88d}.code .f{color:#ffcb6b}
+.ln{color:#4f625c;display:inline-block;width:22px;text-align:right;margin-right:12px}
+.menu{position:absolute;background:#232e2c;border:1px solid var(--win-line);border-radius:6px;box-shadow:0 8px 24px #0008;padding:4px;min-width:200px;z-index:5;font-size:11.5px}
+.menu div{padding:4px 10px;border-radius:4px;display:flex;gap:12px}
+.menu div.on{background:#2f5f4d}
+.menu div small{margin-left:auto;color:var(--win-muted);font-family:var(--f-mono);font-size:10px}
+.menu hr{border:0;border-top:1px solid var(--win-line);margin:4px 0}
+.dlg{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);width:400px;background:#232e2c;border:1px solid var(--win-line);border-radius:8px;box-shadow:0 10px 40px #000a;padding:16px;display:grid;gap:10px;z-index:6}
+.toast{position:absolute;right:300px;bottom:270px;background:#232e2c;border:1px solid var(--win-line);border-radius:6px;padding:8px 12px;width:290px;z-index:4;display:grid;gap:6px}
+.bar{height:6px;border-radius:3px;background:#33433f;overflow:hidden}.bar i{display:block;height:100%;background:var(--yellow)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.card{background:var(--win-panel);border:1px solid var(--win-line);border-radius:8px;padding:10px;display:grid;gap:6px}
+.card.hot{outline:2px solid var(--yellow)}
+.chk{display:grid;grid-template-columns:14px 1fr;gap:6px;font-size:11.5px;align-items:start}
+.chk b{font-weight:600}
+.legend-annot{position:absolute;font:600 11px var(--f-mono);color:#16211f;background:var(--yellow);padding:2px 7px;border-radius:4px;z-index:7}
+.pill{font:600 10px var(--f-mono);padding:1px 6px;border-radius:8px;background:#ffffff1a}
+@media print{.frame{break-inside:avoid;page-break-inside:avoid}.cap{position:static}.wrap{gap:24px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="eyebrow">OwnStudio · slice 0 · storyboards · for Luiz's review</div>
+  <h1>OwnStudio 2.0, screen by screen</h1>
+  <p class="lede">Luiz's nine-step objective (SPEC §2), drawn as the windows a colleague would see, from the Start page to a second run. Each frame says which slice builds it. Grey-green is the window; yellow marks what the frame is about. Values are the buck example's: 30 V supply, Twist 1.4.2, 33 Ω on LOW1.</p>
+</header>
+<nav class="toc" id="toc"></nav>
+<div id="frames" style="display:grid;gap:56px"></div>
+</div>
+
+<script>
+(function(){
+const T={design:'var(--t-design)',code:'var(--t-code)',lab:'var(--t-lab)',sim:'var(--t-sim)'};
+
+/* ---------- canvas drawings ---------- */
+function node(x,y,w,h,head,headColor,rows,opt={}){
+  let s=`<g><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="8" fill="#202b29" stroke="${opt.sel?'#f0dc55':'#3c4d49'}" stroke-width="${opt.sel?2.2:1.2}" ${opt.ghost?'stroke-dasharray="5 4" opacity=".75"':''}/>`;
+  s+=`<path d="M${x} ${y+8} a8 8 0 0 1 8 -8 h${w-16} a8 8 0 0 1 8 8 v12 h-${w}z" fill="${headColor}"/>`;
+  s+=`<text x="${x+10}" y="${y+14}" fill="#fff" font-family="Space Grotesk,sans-serif" font-weight="700" font-size="11">${head}</text>`;
+  rows.forEach((r,i)=>{s+=`<text x="${x+10}" y="${y+38+i*16}" fill="#8ea29c" font-size="10" font-family="Inter,sans-serif">${r[0]}</text><text x="${x+w-10}" y="${y+38+i*16}" text-anchor="end" fill="${r[2]||'#e2ebe8'}" font-size="10" font-family="JetBrains Mono,monospace">${r[1]}</text>`});
+  return s+'</g>';
+}
+function port(x,y,filled=true){return `<circle cx="${x}" cy="${y}" r="5" fill="${filled?'#f08a4b':'none'}" stroke="#f08a4b" stroke-width="1.6"/>`}
+function wire(x1,y1,x2,y2,c='#f08a4b',dash=''){const m=(x1+x2)/2;return `<path d="M${x1} ${y1} C${m} ${y1} ${m} ${y2} ${x2} ${y2}" stroke="${c}" stroke-width="2.6" fill="none" ${dash?`stroke-dasharray="${dash}"`:''}/>`}
+function probe(x,y,label,mode,tx,ty){const c=mode==='monitor'?'#4aa3e0':'#e0a526';return `<path d="M${x} ${y} L${tx+10} ${ty}" stroke="${c}" stroke-width="1.8"/><rect x="${tx}" y="${ty-9}" width="${label.length*6.4+14}" height="18" rx="9" fill="${c}"/><text x="${tx+7}" y="${ty+4}" font-size="9.5" font-weight="600" font-family="JetBrains Mono,monospace" fill="#16211f">${label}</text>`}
+function outer(o={}){
+  const W=760,H=180; let s=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">`;
+  const srcRows=o.empty?[]:[['Voltage','30 V'],['Limit','1 A'],o.live?['Measured',o.live,o.liveColor]:['','']];
+  const tw=o.twistRows||[['Leg 1','buck'],['PWM','200 kHz'],['Firmware',o.fw||'—',o.fwColor]];
+  if(!o.noSource) s+=node(40,40,150,96,'DC source','#b2532a',srcRows,{ghost:o.dragSource,sel:o.selSource});
+  s+=node(300,24,170,130,'Twist 1.4.2','#1f5a46',tw,{sel:o.selTwist});
+  s+=`<text x="458" y="38" text-anchor="end" fill="#cfe9dd" font-size="9" font-family="JetBrains Mono,monospace">⤢ open</text>`;
+  s+=`<text x="310" y="146" fill="#8ea29c" font-size="9" font-family="Inter">HIGH</text><text x="460" y="146" text-anchor="end" fill="#8ea29c" font-size="9" font-family="Inter">LOW1 · LOW2</text>`;
+  s+=port(300,88)+port(470,80)+port(470,118,false);
+  if(!o.noLoad) s+=node(580,46,140,84,'Resistor','#2c6f9e',[['Value',o.ohm||'33 Ω'],['Power','4.4 W']],{ghost:o.dragLoad,sel:o.selLoad});
+  if(!o.noSource) s+=port(190,88);
+  if(!o.noLoad) s+=port(580,88);
+  if(o.wired){s+=wire(195,88,295,88)+wire(475,80,575,88)}
+  if(o.refused){s+=wire(585,88,305,92,'#ef6b5b','6 4');s+=`<rect x="330" y="160" width="300" height="18" rx="4" fill="#7a2e27"/><text x="340" y="173" fill="#ffd9d4" font-size="10" font-family="Inter">A load can only connect to LOW1 or LOW2. HIGH takes the source.</text>`}
+  if(o.probes){s+=probe(470,80,'CH1 V_LOW1','capture',500,26)+probe(470,84,'CH2 I_LOW1','capture',500,150)+probe(190,88,'V_HIGH','monitor',196,26)}
+  if(o.mapping){s+=`<text x="300" y="172" fill="#cfe9dd" font-size="10" font-family="JetBrains Mono,monospace">src/main.cpp · setup()   src/control.cpp · control_step()</text>`}
+  if(o.dragHint){s+=`<path d="M720 20 C690 18 660 30 650 40" stroke="#f0dc55" stroke-width="1.6" stroke-dasharray="4 3" fill="none" marker-end="url(#ar)"/><text x="600" y="16" fill="#f0dc55" font-size="10" font-family="Inter">dragged from Parts</text>`}
+  s+=`<defs><marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8z" fill="#f0dc55"/></marker></defs>`;
+  return s+'</svg>';
+}
+function inner(o={}){
+  const W=760,H=180; let s=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">`;
+  s+=`<text x="16" y="16" fill="#8ea29c" font-size="10" font-family="Inter">Setup › Twist 1.4.2 › inside</text>`;
+  const b=(x,y,t,l1,l2,key,dash)=>{const sel=o.sel===key;let r=`<rect x="${x}" y="${y}" width="190" height="58" rx="8" fill="#202b29" stroke="${sel?'#f0dc55':'#3c4d49'}" stroke-width="${sel?2.2:1.2}" ${dash?'stroke-dasharray="5 4"':''}/><text x="${x+10}" y="${y+18}" fill="#e2ebe8" font-family="Space Grotesk" font-weight="700" font-size="11.5">${t}</text><text x="${x+10}" y="${y+34}" fill="#8ea29c" font-size="9.5" font-family="Inter">${l1}</text><text x="${x+10}" y="${y+48}" fill="#8ea29c" font-size="9.5" font-family="Inter">${l2}</text>`;
+    if(o.chips&&o.chips[key]){const [txt,c]=o.chips[key];r+=`<rect x="${x+100}" y="${y+6}" width="84" height="16" rx="8" fill="${c}"/><text x="${x+142}" y="${y+17}" text-anchor="middle" fill="#16211f" font-size="8.5" font-weight="600" font-family="JetBrains Mono">${txt}</text>`}
+    return r};
+  s+=b(20,28,'Power','2 legs · 33 µH · 61 µF','leg 1 buck, leg 2 same duty','power');
+  s+=b(250,28,'Measurement','V1, V2, VHIGH, I1, I2','calibration: default','meas');
+  s+=b(480,28,'Driver','200 kHz · dead time 100 ns','HRTIM, both legs','driver');
+  s+=b(135,110,'Controller','Spin · control_step every 100 µs','voltage mode, PI','ctrl');
+  s+=b(365,110,'Auxiliary supply','6 V feeder','no settings','aps',true);
+  s+=`<path d="M210 57 H250" stroke="#f08a4b" stroke-width="2.4"/><path d="M440 57 H480" stroke="#6bb3e3" stroke-width="1.6" stroke-dasharray="4 3"/><path d="M345 86 V100 H230 V110" stroke="#6bb3e3" stroke-width="1.6" stroke-dasharray="4 3" fill="none"/><path d="M270 110 V98 H575 V86" stroke="#6bb3e3" stroke-width="1.6" stroke-dasharray="4 3" fill="none"/>`;
+  if(o.summary){s+=`<rect x="590" y="112" width="160" height="56" rx="6" fill="#16211f" stroke="#3c4d49"/><text x="600" y="128" fill="#e2ebe8" font-size="9" font-family="Inter" font-weight="600">The control receives</text><text x="600" y="142" fill="#8ea29c" font-size="9" font-family="Inter">V_LOW1, I_LOW1, V_HIGH</text><text x="600" y="156" fill="#8ea29c" font-size="9" font-family="Inter">every 100 µs, ideal</text>`}
+  return s+'</svg>';
+}
+function timeline(o={}){
+  const ev=o.ev||[['ex','example'],['set','canvas'],['b','build'],['f','flash'],['r','run ✓']];
+  let s=`<svg viewBox="0 0 900 26" preserveAspectRatio="xMinYMid meet"><line x1="10" y1="13" x2="${20+ev.length*70}" y2="13" stroke="#3c4d49" stroke-width="2"/>`;
+  const col={ex:'#f0dc55',set:'#8ea29c',b:'#6bb3e3',f:'#6bb3e3',r:'#5cc489',rx:'#ef6b5b',sim:'#5cc489',ms:'#f0dc55',d:'#b49cf0'};
+  ev.forEach((e,i)=>{const x=20+i*70;const c=col[e[0]]||'#8ea29c';
+    s+= e[0]==='ms'?`<rect x="${x-6}" y="7" width="12" height="12" transform="rotate(45 ${x} 13)" fill="${c}"/>`:`<circle cx="${x}" cy="13" r="${i===ev.length-1?6:4.5}" fill="${c}" ${i===ev.length-1?'stroke="#fff" stroke-width="1.5"':''}/>`;
+    s+=`<text x="${x+9}" y="10" fill="#8ea29c" font-size="9" font-family="JetBrains Mono">${e[1]}</text>`});
+  if(o.branch){const x0=20+o.branch.from*70;s+=`<path d="M${x0} 13 C${x0+20} 13 ${x0+20} 22 ${x0+40} 22 H${x0+40+o.branch.n*70}" stroke="#b49cf0" stroke-width="2" fill="none"/>`;
+    for(let i=1;i<=o.branch.n;i++){s+=`<circle cx="${x0+40+i*70-30}" cy="22" r="4" fill="#b49cf0"/>`}}
+  return s+'</svg>';
+}
+
+/* ---------- the window ---------- */
+function win(o){
+  const bench=o.bench;
+  const menus=['File','Edit','Setup','Board','Lab','History','View','Help'].map(m=>m===o.menuOpen?`<b style="background:#2f5f4d;padding:1px 6px;border-radius:3px">${m}</b>`:`<b>${m}</b>`).join('');
+  const left=o.left===false?'':`<div class="lp">${o.left||''}</div>`;
+  const right=o.right===false?'':`<div class="rp">${o.right||''}</div>`;
+  const ibl=['De','Co','La'].map((k,i)=>`<div class="ic ${['design','code','lab'][i]===bench?'on':''}" title="${['Design','Code','Lab'][i]}">${k}</div>`).join('')+'<div class="ic gear">⚙</div>';
+  const ibr=['Pa','In','AI'].map(k=>`<div class="ic ${k===o.rtab?'on':''}">${k}</div>`).join('');
+  const cls=o.left===false&&o.right===false?'body noleft noright':o.left===false?'body noleft':o.right===false?'body noright':'body';
+  const bodyCls=o.left===false&&o.right===false?'body':cls;
+  const gridCols=o.left===false&&o.right===false?'style="grid-template-columns:40px minmax(0,1fr) 40px"':'';
+  return `<div class="win">
+   <div class="tb">${o.title||'twist-buck — OwnStudio'}<span class="dots"><i></i><i></i><i></i></span></div>
+   <div class="mb">${menus}<span class="board">${o.board||'● Twist 1.4.2 · 58435001004B001E'}</span></div>
+   <div class="${bodyCls}" ${gridCols}>
+     <div class="ib">${ibl}</div>${left}
+     <div class="mid" ${o.noBottom?'style="grid-template-rows:minmax(0,1fr)"':''}>
+       <div class="centre">${o.centre||''}</div>
+       ${o.noBottom?'':`<div class="bottom" style="--cv:${T[o.tint||bench]||T.code}"><div class="btabs"><span class="btab ${o.term?'':'on'}">Canvas</span><span class="btab ${o.term?'on':''}">Terminal</span><span class="tbtn">&gt;_ terminal</span></div>
+       <div class="cv">${o.term?`<div class="code" style="padding:8px 12px">${o.term}</div>`:(o.canvas||'')}<span class="cvlabel">${o.cvlabel||({design:'Design',code:'Code',lab:'Lab',sim:'Simulate'}[o.tint||bench]||'')}</span></div></div>
+       <div class="tl">${timeline(o.tl||{})}</div>`}
+     </div>${right}
+     <div class="ib r">${ibr}</div>
+   </div>
+   <div class="sb"><span>${o.s1??'Twist 1.4.2 ✓'}</span><span>${o.s2??'firmware 584efeb ✓'}</span><span>${o.s3||''}</span><span class="r">${o.s4??'main'}</span></div>
+   ${o.overlay||''}
+  </div>`;
+}
+
+/* ---------- reusable panels ---------- */
+const parts=`<div class="ph">Parts</div>
+ <div class="item"><span class="dot" style="background:#b2532a"></span>DC source<small>drag</small></div>
+ <div class="item"><span class="dot" style="background:#1f5a46"></span>Twist 1.4.2<small>drag</small></div>
+ <div class="item sel"><span class="dot" style="background:#2c6f9e"></span>Resistor<small>drag</small></div>
+ <div class="item" style="opacity:.55"><span class="dot" style="background:#8ea29c"></span>Oscilloscope<small>later</small></div>
+ <div class="sub" style="margin-top:6px">First version: one source on HIGH, one Twist, one load on LOW1. Wires that break the rule don't snap.</div>`;
+const files=`<div class="ph">My files</div>
+ <div class="item">main.cpp<small>setup()</small></div><div class="item sel">control.cpp<small>law</small></div><div class="item">data_objects.yaml</div><div class="item">app.ini</div>
+ <div class="sub">Show all files</div>
+ <div class="ph" style="margin-top:8px">Libraries · read-only</div>
+ <div class="item">Core (owntech)<small>4b1e2c0</small></div><div class="item">control_library<small>v1.2</small></div><div class="item">scopemimicry<small>main</small></div>`;
+function checklist(bad){
+  const L=[['Board','Twist 1.4.2, as on the canvas'],['Firmware','runs this setup (584efeb)'],['HIGH',bad?'0.2 V measured, canvas says 30 V. Switch the supply on.':'29.9 V, canvas 30 V (within 10 %)'],['Outputs','LOW1 0.0 V, inside 20 V / 8 A'],['Load','33 Ω on LOW1'],['Procedure','Capture · ready']];
+  return `<div class="ph">Lab checklist</div>`+L.map((l,i)=>{const b=bad&&i===2;return `<div class="chk"><span class="dot" style="margin-top:4px;background:${b?'var(--bad)':'var(--ok)'}"></span><span><b>${l[0]}</b> · ${l[1]}</span></div>`}).join('');
+}
+const procList=`<div class="ph">Procedures</div><div class="item sel"><span class="dot" style="background:var(--capture)"></span>Capture: reference step<small>board</small></div><div class="item"><span class="dot" style="background:var(--capture)"></span>BUCK-REF-01<small>example</small></div><div class="item"><span class="dot" style="background:var(--monitor)"></span>Monitor HIGH<small>slice 3</small></div><div class="sub">New procedure</div>`;
+function inspector(title,rows,note){return `<div class="ph">Inspector · ${title}</div>`+rows.map(r=>`<div class="field"><span>${r[0]}</span><span>${r[1]}</span></div>`).join('')+`<div style="display:flex;gap:6px;margin-top:6px"><span class="btn">Design</span><span class="btn">Code</span><span class="btn">Tests</span></div>`+(note?`<div class="sub">${note}</div>`:'')}
+function plot(o={}){
+  const W=640,H=230; let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" style="background:#16211f;border-radius:6px">`;
+  for(let i=0;i<6;i++){const y=20+i*36;s+=`<line x1="44" y1="${y}" x2="${W-10}" y2="${y}" stroke="#2a3734"/><text x="38" y="${y+3}" text-anchor="end" fill="#8ea29c" font-size="9" font-family="JetBrains Mono">${(12.6-i*0.6).toFixed(1)}</text>`}
+  const xs=[0,5,10,15,20,25];xs.forEach((v,i)=>{const x=44+i*((W-54)/5);s+=`<text x="${x}" y="${H-4}" text-anchor="middle" fill="#8ea29c" font-size="9" font-family="JetBrains Mono">${v} ms</text>`});
+  const curve=(tau,ov,col,w,dash,noise)=>{let d='';for(let i=0;i<=200;i++){const t=i/200*25;let v= t<2?10:10+2*(1-Math.exp(-(t-2)/tau)*(1+ov*Math.sin((t-2)*1.2)));if(noise)v+=Math.sin(i*1.7)*0.05+Math.sin(i*5.3)*0.04;const x=44+t/25*(W-54);const y=20+(12.6-v)/0.6*36;d+=(i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1)}return `<path d="${d}" stroke="${col}" stroke-width="${w}" fill="none" ${dash?`stroke-dasharray="${dash}"`:''}/>`};
+  // band
+  const yb1=20+(12.6-12.24)/0.6*36,yb2=20+(12.6-11.76)/0.6*36;s+=`<rect x="44" y="${yb1}" width="${W-54}" height="${yb2-yb1}" fill="#5cc48922"/><text x="${W-14}" y="${yb1-3}" text-anchor="end" fill="#5cc489" font-size="9" font-family="Inter">±2 % of 12 V</text>`;
+  s+=curve(o.tau||5.2,0.0,'#e0a526',1.6,'',true);
+  if(o.sim) s+=curve((o.tau||5.2)*0.93,0,'#ffffff',1.4,'5 3',false);
+  if(o.cursor){const x=44+o.cursor/25*(W-54);s+=`<line x1="${x}" y1="14" x2="${x}" y2="${H-18}" stroke="#f0dc55" stroke-dasharray="3 3"/><rect x="${x+6}" y="26" width="138" height="34" rx="4" fill="#232e2c" stroke="#3c4d49"/><text x="${x+12}" y="40" fill="#e2ebe8" font-size="9.5" font-family="JetBrains Mono">t = ${o.cursor} ms</text><text x="${x+12}" y="53" fill="#e0a526" font-size="9.5" font-family="JetBrains Mono">V_LOW1 = 11.78 V</text>`}
+  return s+'</svg>';
+}
+
+/* ---------- frames ---------- */
+const F=[];
+F.push({id:'anatomy',num:'0',title:'The window, part by part',slice:['S1'],obj:'All steps',
+ notes:['Workbenches on the left icon bar; their panel beside it.','Centre: the work itself.','Right icon bar: Parts, Inspector, AI.','Bottom: the setup canvas (tinted per workbench) with a Terminal tab and button, and the timeline under it.','Status bar: board, firmware, checklist, progress. Green title bar.'],
+ html:win({bench:'code',rtab:'In',left:files,centre:`<div class="code"><span class="ln">1</span><span class="c">// control.cpp: the control law, hardware-free</span>\n<span class="ln">2</span><span class="k">#include</span> <span class="s">"control.h"</span></div>`,
+  right:inspector('Controller',[['Runs','control_step()'],['Period','100 µs'],['Mode','voltage, PI']]),canvas:outer({wired:true,fw:'584efeb ✓',fwColor:'#5cc489',mapping:true}),
+  overlay:`<span class="legend-annot" style="left:8px;top:70px">1 workbenches</span><span class="legend-annot" style="left:60px;top:96px">2 workbench panel</span><span class="legend-annot" style="left:420px;top:96px">3 centre: the work</span><span class="legend-annot" style="right:60px;top:70px">4 Parts · Inspector · AI</span><span class="legend-annot" style="left:420px;top:410px">5 setup canvas, tinted</span><span class="legend-annot" style="left:640px;top:410px">Terminal tab + button</span><span class="legend-annot" style="left:420px;bottom:52px">6 timeline</span><span class="legend-annot" style="left:16px;bottom:30px">7 status bar</span><span class="legend-annot" style="left:16px;top:2px">green title bar</span><span class="legend-annot" style="left:120px;top:30px">8 menus</span>`})});
+
+F.push({id:'start',num:'1',title:'Start: choose a board',slice:['S1'],obj:'Before step 1',
+ notes:['Shown when no setup is open. Replaces Home.','The Twist on USB is detected by its serial number and highlighted, as Arduino IDE 2 does.','Picking a board installs or updates its board definition (devicetree + board description) and creates a setup: a clone of Core with an ownstudio/ folder.','Custom board: your overlay plus a board description.'],
+ html:win({bench:'',title:'OwnStudio',noBottom:true,left:false,right:false,board:'● Twist detected on USB',s1:'no setup open',s2:'',s4:'',
+  centre:`<div class="h" style="font-size:20px">Start</div><div class="sub" style="margin-bottom:14px">Choose a board to start a setup, or open one.</div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px">
+   <div class="card hot"><div class="h">Twist 1.4.2</div><div class="sub">2 legs · buck, boost, inverter</div><div class="pill" style="color:#5cc489">● connected · 58435001004B001E</div><span class="btn go">New setup on the Twist</span></div>
+   <div class="card"><div class="h">Spin</div><div class="sub">the controller alone</div><span class="btn">New setup</span></div>
+   <div class="card"><div class="h">Ownverter</div><div class="sub">3-phase · install</div><span class="btn">Install</span></div>
+   <div class="card" style="border-style:dashed"><div class="h">Custom board</div><div class="sub">your overlay + a board description</div><span class="btn">Add…</span></div></div>
+  <div class="grid2"><div class="card"><div class="ph">Recent setups</div><div class="item">twist-buck<small>2 h ago · main</small></div><div class="item">twist-boost-trial<small>yesterday</small></div></div>
+  <div class="card"><div class="ph">Twist examples (38 in OwnTech examples)</div><div class="item">Buck voltage mode<small>DC-DC · extras</small></div><div class="item">Open-loop PWM<small>Basic</small></div><div class="item">Measurements enable<small>Basic</small></div><div class="item">Boost voltage mode<small>DC-DC</small></div></div></div>
+  <div class="card" style="margin-top:12px"><div class="ph">Tutorials</div><div class="item">Make the Twist follow its reference and hold 12 V<small>after slice 1</small></div></div>`})});
+
+F.push({id:'parts',num:'2',title:'Drag the source, the Twist and the load',slice:['S1'],obj:'Step 1',
+ notes:['The new setup opens with the Twist on the canvas.','Parts on the right; the resistor is being dragged in.','Values sit on the nodes. Ports are typed: power wires only.'],
+ html:win({bench:'lab',rtab:'Pa',left:checklist(true),right:parts,centre:`<div class="h">Lab</div><div class="sub">No procedure yet. Place a source and a load first.</div>`,
+  canvas:outer({dragLoad:true,dragHint:true,wired:false,fw:'—'}),tl:{ev:[['set','new setup'],['set','source'],['set','Twist']]},s3:'checklist 3/6'})});
+
+F.push({id:'rules',num:'3',title:'Wire them; a wrong wire does not snap',slice:['S1'],obj:'Step 1',
+ notes:['Source → HIGH and LOW1 → load snap.','A load dragged to HIGH is refused with one sentence.','Each change becomes a dot on the timeline after 10 s without edits.'],
+ html:win({bench:'lab',rtab:'Pa',left:checklist(true),right:parts,centre:`<div class="h">Lab</div><div class="sub">Source and load placed.</div>`,canvas:outer({wired:true,refused:true,fw:'—'}),tl:{ev:[['set','new setup'],['set','source'],['set','Twist'],['set','load'],['set','wired']]},s3:'checklist 4/6'})});
+
+F.push({id:'inside',num:'4',title:'Open the Twist and look at its parts',slice:['S1','S2'],obj:'Step 2',
+ notes:['Double-click the Twist: its five blocks, drawn from the devicetree.','Selecting a block fills the inspector: here the driver, 200 kHz and 100 ns from twist_v1_4_2.overlay.','Slice 1 shows the settings; slice 2 makes them editable, written into setup() on save.','Design, Code and Tests open what belongs to the block.'],
+ html:win({bench:'design',rtab:'In',left:`<div class="ph">Design sheets</div><div class="item">Output filter</div><div class="item">Control loop</div>`,
+  right:inspector('Driver',[['Switching frequency','200 kHz'],['Dead time','100 ns / 100 ns'],['Modulation','up-down'],['Set in','setup() · main.cpp:42'],['Source','twist_v1_4_2.overlay']],'Read-only in slice 1, editable in slice 2.'),
+  centre:`<div class="h">Design</div><div class="sub">Pick a sheet, or a block on the canvas.</div>`,canvas:inner({sel:'driver'}),tl:{ev:[['set','wired'],['set','opened Twist']]}})});
+
+F.push({id:'example',num:'5',title:'Load an example: it lands on its own branch',slice:['S1'],obj:'Step 3',
+ notes:['File → Examples lists the Twist\'s examples from the OwnTech examples index.','Loading copies the example into src/ on a new branch named after it, records its origin; nothing goes to an old/ folder.','The timeline shows the branch point.'],
+ html:win({bench:'code',rtab:'In',menuOpen:'File',left:files,right:inspector('Twist 1.4.2',[['Example','—'],['Board','Twist 1.4.2']]),
+  centre:`<div class="sub">src/main.cpp</div>`,canvas:outer({wired:true,mapping:true,fw:'—'}),tl:{ev:[['set','new setup'],['set','wired'],['ex','buck voltage mode']]},s4:'branch: buck-voltage-mode',
+  overlay:`<div class="menu" style="left:12px;top:54px"><div>New setup…</div><div>Open setup…</div><div>Open recent<small>▸</small></div><div class="on">Examples<small>▸</small></div><hr><div>Save<small>Ctrl+S</small></div><div>Export<small>▸</small></div><hr><div>Preferences</div><div>Quit</div></div>
+  <div class="menu" style="left:214px;top:116px;min-width:260px"><div style="color:#8ea29c">Twist · DC-DC</div><div class="on">Buck voltage mode<small>+ OwnStudio extras</small></div><div>Boost voltage mode</div><div>Buck current mode</div><hr><div style="color:#8ea29c">Twist · Basic</div><div>Open-loop PWM</div><div>Measurements enable</div><div>More…<small>38</small></div></div>`})});
+
+F.push({id:'code',num:'6',title:'Code: the student\'s files, with real language support',slice:['S1'],obj:'Step 9 (change the code)',
+ notes:['My files first: main.cpp (its setup() is shared with the canvas) and control.cpp. Libraries below, read-only, so the user and the AI can read Core.','Colouring, completion and Ctrl+click from clangd and basedpyright through the plugin system.','The canvas, in its Code tint, says which file each block maps to.'],
+ html:win({bench:'code',rtab:'AI',left:files,right:`<div class="ph">AI · Claude Code</div><div class="item" style="display:block;white-space:normal">How do I make LOW1 settle faster than 10 ms?</div><div class="item" style="display:block;white-space:normal;background:#2b2546">Raise kp: your crossover is at 180 Hz. I read Pid in control_library (libs/). Proposed change: kp 0.000215 → 0.0012. <u>Review the diff</u></div><div class="sub">Signed in with your Claude account. The agent cannot switch power on.</div>`,
+  centre:`<div class="sub" style="margin-bottom:6px">src/control.cpp</div><div class="code"><span class="ln">14</span><span class="c">/* PI coefficients */</span>
+<span class="ln">15</span><span class="k">static const</span> <span class="t">float</span> kp = <span class="n">0.000215F</span>;
+<span class="ln">16</span><span class="k">static const</span> <span class="t">float</span> Ti = <span class="n">7.5175e-5F</span>;
+<span class="ln">17</span>
+<span class="ln">18</span><span class="k">static</span> <span class="t">Pid</span> pid;  <span class="c">// Ctrl+click → libs/control_library/src/pid.h</span>
+<span class="ln">19</span>
+<span class="ln">20</span><span class="t">float</span> <span class="f">control_step</span>(<span class="t">float</span> reference, <span class="k">const</span> <span class="t">Measurements</span> &amp;m)
+<span class="ln">21</span>{
+<span class="ln">22</span>    <span class="k">return</span> pid.<span class="f">calculateWithReturn</span>(reference, m.v1_low);
+<span class="ln">23</span>}</div>`,canvas:outer({wired:true,mapping:true,fw:'584efeb',selTwist:true}),tl:{ev:[['set','wired'],['ex','buck voltage mode'],['set','edit']]},s4:'branch: buck-voltage-mode'})});
+
+F.push({id:'build',num:'7',title:'Build and flash, with real progress',slice:['S1'],obj:'Step 4',
+ notes:['Board → Build and flash (or the button in the status bar).','Compile steps, then bytes flashed out of the total: no back-and-forth bar.','Both events become dots; the build identity ties every later record to this commit.'],
+ html:win({bench:'code',rtab:'In',left:files,right:inspector('Twist 1.4.2',[['Firmware on board','584efeb → 9c1d7a2'],['Serial number','58435001004B001E']]),
+  centre:`<div class="sub">src/control.cpp</div>`,canvas:outer({wired:true,fw:'flashing…',fwColor:'#f0dc55'}),tl:{ev:[['ex','buck voltage mode'],['set','edit'],['b','build ✓'],['f','flash 62 %']]},s3:'Flashing 98 / 158 kB',s4:'branch: buck-voltage-mode',
+  overlay:`<div class="toast"><b>Flashing the Twist</b><div class="sub">Build 9c1d7a2 ✓ (31 s) · writing 98 of 158 kB</div><div class="bar"><i style="width:62%"></i></div></div>`})});
+
+F.push({id:'checklist',num:'8',title:'The Lab checks before Run turns green',slice:['S1'],obj:'Step 5',
+ notes:['The checklist runs on its own and stays visible.','Here HIGH reads 0.2 V while the canvas says 30 V: Run is red and says why.','A bare Spin, the wrong firmware or limits crossed would turn it red the same way.'],
+ html:win({bench:'lab',rtab:'In',left:checklist(true)+procList,right:inspector('DC source',[['Set','30 V'],['Limit','1 A'],['Measured','0.2 V']]),
+  centre:`<div class="h">Capture: reference step</div><div class="sub" style="margin-bottom:12px">On the board · probes from the canvas</div><span class="btn no">Run on the board · HIGH is 0.2 V, expected 30 V</span>`,canvas:outer({wired:true,probes:true,live:'0.2 V',liveColor:'#ef6b5b',fw:'9c1d7a2 ✓',fwColor:'#5cc489',selSource:true}),tl:{ev:[['set','edit'],['b','build ✓'],['f','flash ✓']]},s3:'checklist 5/6 · HIGH',s4:'branch: buck-voltage-mode'})});
+
+F.push({id:'procedure',num:'9',title:'A simple procedure: switch on and capture',slice:['S1','S3'],obj:'Step 5',
+ notes:['The board offers a default capture: probes from the canvas (amber = Capture, fast), a reference step, a duration.','Supply on: every line is green, Run is green.','Power always asks, and only OwnStudio\'s dialog issues the token the runner needs.','Slice 3 replaces the form with Blockly test sequences.'],
+ html:win({bench:'lab',rtab:'In',left:checklist(false)+procList,right:inspector('DC source',[['Set','30 V'],['Limit','1 A'],['Measured','29.9 V']]),
+  centre:`<div class="h">Capture: reference step</div><div class="sub" style="margin-bottom:10px">On the board</div>
+   <div style="display:grid;gap:4px;max-width:420px"><div class="field"><span>Channels</span><span style="color:var(--capture)">CH1 V_LOW1 · CH2 I_LOW1</span></div><div class="field"><span>Trigger</span><span>reference 10 → 12 V</span></div><div class="field"><span>Window</span><span>100 ms, 20 ms before</span></div><div class="field"><span>Rate</span><span>100 µs</span></div></div>
+   <div style="margin-top:12px"><span class="btn go">Run on the board</span> <span class="btn">Run on the simulator</span></div>`,
+  canvas:outer({wired:true,probes:true,live:'29.9 V',liveColor:'#5cc489',fw:'9c1d7a2 ✓',fwColor:'#5cc489'}),tl:{ev:[['b','build ✓'],['f','flash ✓']]},s3:'checklist 6/6',s4:'branch: buck-voltage-mode',
+  overlay:`<div class="dlg"><b style="font-size:14px">Switch the converter on?</b><div class="sub">HIGH 29.9 V, limit 1 A, 33 Ω on LOW1. The run stops above 16 V on LOW1. Stay at the bench.</div><div style="display:flex;gap:8px;justify-content:flex-end"><span class="btn">Cancel</span><span class="btn go">Switch on and run</span></div></div>`})});
+
+F.push({id:'result',num:'10',title:'The result: interactive, zoomed on the step',slice:['S1'],obj:'Step 5',
+ notes:['Opens on the event (the 10 → 12 V step), the whole run one click away.','Zoom, pan, cursor readout, channels on and off.','The run is a dot on the timeline; its light report goes to reports/.','Next: Simulate, or Open in PulsimGui.'],
+ html:win({bench:'lab',rtab:'In',left:checklist(false)+procList,right:inspector('Run 17:49',[['Settling (2 %)','9.4 ms'],['HIGH','29.9 V'],['Commit','9c1d7a2'],['Record','records/…/capture']]),
+  centre:`<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><div class="h" style="margin:0">Capture · 17:49 · board</div><span class="btn">Whole run</span><span class="btn go">Simulate at these conditions</span><span class="btn">Open in PulsimGui</span><span class="btn">Report</span></div>${plot({cursor:9.4})}<div class="sub" style="margin-top:6px"><span style="color:var(--capture)">━ V_LOW1 measured</span> · scroll to zoom · drag to pan</div>`,
+  canvas:outer({wired:true,probes:true,live:'29.9 V',liveColor:'#5cc489',fw:'9c1d7a2 ✓',fwColor:'#5cc489'}),tl:{ev:[['b','build ✓'],['f','flash ✓'],['r','run 9.4 ms']]},s4:'branch: buck-voltage-mode'})});
+
+F.push({id:'pulsimgui',num:'11',title:'Open in PulsimGui: the simulator\'s circuit',slice:['S1'],obj:'Step 6',
+ notes:['PulsimGui opens in its own window on the setup\'s .pulsim plant, with the canvas values already in it (30 V, 33 Ω) and the control code as a C-Block, as in Core2.','Its Run button calls OwnStudio\'s runner: identical results.','Save in PulsimGui writes the setup\'s file; OwnStudio syncs the named values back to the canvas.'],
+ html:`<div class="win" style="grid-template-rows:30px 24px minmax(0,1fr) 22px;background:#ececec;color:#222">
+  <div class="tb" style="background:#3b3f45">PulsimGui — twist_buck.pulsim (opened by OwnStudio)<span class="dots"><i></i><i></i><i></i></span></div>
+  <div class="mb" style="background:#f4f4f4;color:#333;border-color:#ccc"><b style="color:#333">File</b><b style="color:#333">Edit</b><b style="color:#333">View</b><b style="color:#333">Simulation</b><b style="color:#333">Help</b><span class="board" style="color:#2f8a55">Backend: OwnStudio runner</span></div>
+  <div style="display:grid;grid-template-columns:minmax(0,1fr) 300px;min-height:0"><svg viewBox="0 0 760 560" style="background:#fff">
+   <defs><pattern id="g" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="#ddd"/></pattern></defs><rect width="760" height="560" fill="url(#g)"/>
+   <g stroke="#222" stroke-width="2" fill="none">
+    <circle cx="90" cy="300" r="28"/><path d="M90 272 V160 H250 M90 328 V440 H560"/>
+    <path d="M250 160 H270 M270 160 L295 146 M297 160 H320 V200"/><path d="M320 200 V230 M305 240 h30 l-15 -14z M305 226 h30 M320 240 V300"/>
+    <path d="M320 300 V440"/><path d="M320 300 H350 c6 -16 14 -16 20 0 c6 -16 14 -16 20 0 c6 -16 14 -16 20 0 H460"/>
+    <path d="M460 300 V350 M445 350 h30 M445 358 h30 M460 358 V440"/><path d="M460 300 H560 V330 l-10 5 l20 8 l-20 8 l20 8 l-10 5 V440"/>
+   </g>
+   <g font-family="Inter" font-size="13" fill="#222"><text x="40" y="350">Vin = 30 V</text><text x="355" y="285">L1 33 µH</text><text x="480" y="360">C1 61 µF</text><text x="585" y="390">Rload = 33 Ω</text><text x="250" y="140">S1 / S2 (leg 1)</text></g>
+   <rect x="180" y="470" width="260" height="60" rx="6" fill="#eef6ff" stroke="#2c6f9e" stroke-width="2"/><text x="196" y="495" font-family="Inter" font-size="13" font-weight="600" fill="#1d4f7a">C-Block: control_step</text><text x="196" y="514" font-family="JetBrains Mono" font-size="11" fill="#1d4f7a">src/control.cpp · every 100 µs</text>
+   <path d="M310 470 V430" stroke="#2c6f9e" stroke-dasharray="4 3" stroke-width="1.5"/>
+  </svg>
+  <div style="background:#f6f6f6;border-left:1px solid #ccc;padding:12px;display:grid;gap:8px;align-content:start;font-size:12px"><b>Properties · Rload</b><div>Resistance <span style="float:right;font-family:JetBrains Mono">33 Ω</span></div><div style="color:#666">Name "Rload" is synced with the canvas resistor.</div><b style="margin-top:12px">Waveforms</b><svg viewBox="0 0 260 110" style="background:#fff;border:1px solid #ddd"><path d="M10 90 C60 90 70 30 120 25 S250 22 250 22" stroke="#2c6f9e" fill="none" stroke-width="2"/></svg><div style="color:#666">Run uses the same runner as OwnStudio.</div></div></div>
+  <div class="sb" style="background:#3b3f45">Saved · OwnStudio will sync Vin, Rload, L1, C1</div></div>`});
+
+F.push({id:'overlay',num:'12',title:'Simulate: the simulation over the measurement',slice:['S1','S2'],obj:'Step 7',
+ notes:['"Simulate at these conditions" reruns the same procedure on the simulator with the canvas values (and the measured HIGH).','White dashed: simulation; amber: measurement.','The canvas in its Simulate tint shows fidelity chips (slice 2): what the simulation covers and what it leaves out.'],
+ html:win({bench:'lab',tint:'sim',rtab:'In',left:checklist(false)+procList,right:inspector('Comparison',[['Settling, board','9.4 ms'],['Settling, simulation','8.8 ms'],['Mean gap (window)','24 mV']],'Simulated with Pulsim 2.0, exact PWM edges.'),
+  centre:`<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><div class="h" style="margin:0">Capture · board and simulation</div><span class="btn">Whole run</span><span class="btn">Open in PulsimGui</span></div>${plot({sim:true,cursor:9.4})}<div class="sub" style="margin-top:6px"><span style="color:var(--capture)">━ measured</span> · <span>┅ simulated</span></div>`,
+  canvas:inner({summary:true,chips:{power:['switching','#5cc489'],meas:['ideal sensors','#e0a526'],driver:['PWM + dead time','#5cc489'],ctrl:['your code','#5cc489'],aps:['not simulated','#8ea29c']}}),
+  tl:{ev:[['b','build ✓'],['f','flash ✓'],['r','run 9.4 ms'],['sim','sim 8.8 ms']]},s4:'branch: buck-voltage-mode'})});
+
+F.push({id:'design',num:'13',title:'Design: change a parameter on a live sheet',slice:['S1'],obj:'Step 8',
+ notes:['Sheets are forms, not code: sliders and fields, curves update live against the requirement lines; the Twist\'s own values are marked.','Python still computes every number; "Show the formulas" opens the script.','Changing L updates the canvas and the plant model; "Apply to the code" writes the gains.'],
+ html:win({bench:'design',rtab:'In',left:`<div class="ph">Design sheets</div><div class="item sel">Output filter</div><div class="item">Control loop</div>`,right:inspector('Power',[['L per leg','33 µH → 47 µH'],['C per leg','61 µF'],['f_sw','200 kHz']]),
+  centre:`<div style="display:flex;align-items:center;gap:10px"><div class="h" style="margin:0">Output filter</div><span class="sub" style="margin-left:auto">Show the formulas</span></div>
+  <div style="display:grid;grid-template-columns:240px 1fr;gap:16px;margin-top:10px">
+   <div style="display:grid;gap:10px">${[['L','47 µH',0.62],['C','61 µF',0.45],['f_sw','200 kHz',0.5],['Load step','1 → 1.5 A',0.4]].map(r=>`<div><div class="field" style="border:0"><span>${r[0]}</span><span>${r[1]}</span></div><div class="bar"><i style="width:${r[2]*100}%"></i></div></div>`).join('')}
+    <div class="field"><span>Ripple</span><span style="color:var(--ok)">41 mV ≤ 100 mV ✓</span></div><div class="field"><span>Undershoot</span><span style="color:var(--ok)">3.1 % ≤ 5 % ✓</span></div></div>
+   <svg viewBox="0 0 380 220" style="background:#16211f;border-radius:6px"><text x="10" y="16" fill="#8ea29c" font-size="10" font-family="Inter">Ripple vs L</text><line x1="40" y1="60" x2="370" y2="60" stroke="#ef6b5b" stroke-dasharray="4 3"/><text x="368" y="54" text-anchor="end" fill="#ef6b5b" font-size="9" font-family="Inter">REQ-RIPPLE 100 mV</text><path d="M40 30 C90 120 160 170 370 195" stroke="#f0dc55" stroke-width="2" fill="none"/><line x1="120" y1="20" x2="120" y2="205" stroke="#8ea29c" stroke-dasharray="2 3"/><text x="124" y="200" fill="#8ea29c" font-size="9" font-family="Inter">Twist 33 µH</text><circle cx="168" cy="158" r="5" fill="#f0dc55"/><text x="176" y="154" fill="#f0dc55" font-size="9" font-family="JetBrains Mono">47 µH</text></svg></div>`,
+  canvas:outer({wired:true,twistRows:[['L per leg','47 µH','#f0dc55'],['C per leg','61 µF'],['PWM','200 kHz']],fw:'9c1d7a2'}),tl:{ev:[['r','run 9.4 ms'],['sim','sim 8.8 ms'],['d','design: L 47 µH']]},s4:'branch: buck-voltage-mode'})});
+
+F.push({id:'timeline',num:'14',title:'Run again; go back in time; branch',slice:['S1','S2'],obj:'Step 9',
+ notes:['Every run, build and change is a dot. A click previews that state; "Restore here" goes back without losing anything (it starts a branch).','Branches are supported in slice 1; their lanes appear in slice 2 (purple, below).','Records stay out of git; reports and the commit reproduce any dot.'],
+ html:win({bench:'lab',rtab:'In',left:checklist(false)+procList,right:inspector('Dot · run 9.4 ms',[['Commit','9c1d7a2'],['When','17:49'],['kp','0.000215'],['Report','reports/17-49.html']]),
+  centre:`<div class="h">Timeline preview</div><div class="sub" style="margin-bottom:8px">run 9.4 ms · 9c1d7a2 · compared with now</div><div class="code" style="background:#16211f;padding:8px;border-radius:6px"><span class="c">src/control.cpp</span>
+<span style="color:#ef6b5b">- static const float kp = 0.0012F;</span>
+<span style="color:#5cc489">+ static const float kp = 0.000215F;</span>
+<span class="c">ownstudio/setup.yaml</span>
+<span style="color:#ef6b5b">-   L_per_leg: 47e-6</span>
+<span style="color:#5cc489">+   L_per_leg: 33e-6</span></div><div style="margin-top:10px;display:flex;gap:8px"><span class="btn go">Restore here (new branch)</span><span class="btn">Open its report</span><span class="btn">Milestone…</span></div>`,
+  canvas:outer({wired:true,probes:true,live:'29.9 V',liveColor:'#5cc489',fw:'2f0e1b4 ✓',fwColor:'#5cc489'}),tl:{ev:[['ex','buck'],['b','build'],['f','flash'],['r','run 9.4 ms'],['sim','sim'],['d','L 47 µH'],['b','build'],['f','flash'],['r','run 4.1 ms'],['ms','kp tuned']],branch:{from:3,n:2}},s4:'branch: buck-voltage-mode'})});
+
+F.push({id:'menus',num:'15',title:'The eight menus',slice:['S1'],obj:'Everywhere',
+ notes:['Theia\'s Selection, Go and Terminal menus are gone; the terminal is in View and has a button at the bottom.','Every item has one owner module in the code.','Items whose feature comes later say which slice brings it.'],
+ html:`<div class="win" style="grid-template-rows:30px minmax(0,1fr)"><div class="tb">Menu map — SPEC §5<span class="dots"><i></i><i></i><i></i></span></div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:14px;align-content:start">
+  ${[['File',['New setup…','Open setup…','Open recent ▸','Examples ▸','—','Save','Save all','Export ▸ report · wiring diagram','—','Preferences','Quit']],
+     ['Edit',['Undo','Redo','—','Cut','Copy','Paste','—','Find','Replace']],
+     ['Setup',['Add part ▸','Libraries… (slice 3)','Check setup','—','Wiring diagram (slice 2)','Simulation sheet (slice 2)','Open in PulsimGui']],
+     ['Board',['Select board…','Boards manager…','—','Build','Flash','Build and flash','—','Board info']],
+     ['Lab',['Run procedure','Stop','Run on the simulator','—','New procedure','AI takeover (slice 4, when enabled)','—','Reports']],
+     ['History',['Milestone…','Restore…','New branch…','—','Pull','Push','Remotes… (slice 3)','Propose upstream… (slice 3)']],
+     ['View',['Design','Code','Lab','—','Parts','Inspector','AI','—','Canvas','Timeline','Terminal','Zoom ▸']],
+     ['Help',['Tutorials','Documentation','Board datasheet','—','Report a problem','About OwnStudio']]]
+    .map(m=>`<div class="menu" style="position:static;min-width:0"><div style="font-weight:700;color:var(--yellow)">${m[0]}</div><hr>${m[1].map(i=>i==='—'?'<hr>':`<div>${i.replace(/\((slice \d[^)]*)\)/,'<small>$1</small>')}</div>`).join('')}</div>`).join('')}
+  </div></div>`});
+
+F.push({id:'ai',num:'16',title:'The AI: your own agent, and the takeover button',slice:['S1','S4'],obj:'Around every step',
+ notes:['Claude Code or Codex, signed in with your own account; OwnTech skills come with the board, Core is its reference.','The agent edits code and runs the simulator freely; it cannot switch power on.','AI takeover (slice 4): enabled in the settings, apart from Run, in its own colour; a token for one sequence, 30 minutes, revoked on a red check, a change or Stop.'],
+ html:win({bench:'lab',rtab:'AI',left:checklist(false)+procList,right:`<div class="ph">AI · Claude Code</div><div class="item" style="display:block;white-space:normal">Run BUCK-REF-01 on the simulator with kp from 0.0006 to 0.0015 and tell me which settles under 10 ms.</div><div class="item" style="display:block;white-space:normal;background:#2b2546">Done on the simulator: 0.0009 → 6.8 ms, 0.0012 → 4.1 ms, 0.0015 → 3.3 ms but 9 % overshoot. I'd take 0.0012. Want me to run it on the board? I need your takeover for that.</div><div class="sub">Skills: owntech-setup · twist · buck-tuning</div>`,
+  centre:`<div class="h">Capture: reference step</div><div class="sub" style="margin-bottom:12px">On the board</div><div style="display:flex;gap:10px"><span class="btn go">Run on the board</span><span style="flex:1"></span><span class="btn ai">AI takeover · 30 min · this sequence</span></div><div class="sub" style="margin-top:10px">Stop stays visible while the agent holds the token. Any red check ends it.</div>`,
+  canvas:outer({wired:true,probes:true,live:'29.9 V',liveColor:'#5cc489',fw:'2f0e1b4 ✓',fwColor:'#5cc489'}),tl:{ev:[['r','run 4.1 ms'],['sim','agent: sweep kp']]}})});
+
+const toc=document.getElementById('toc'),box=document.getElementById('frames');
+F.forEach(f=>{
+  toc.insertAdjacentHTML('beforeend',`<a href="#${f.id}">${f.num} ${f.title}</a>`);
+  box.insertAdjacentHTML('beforeend',`<section class="frame" id="${f.id}"><div class="scroll">${f.html}</div>
+   <aside class="cap"><div class="num">${f.num}</div><h2>${f.title}</h2><div class="eyebrow">Objective: ${f.obj}</div>
+   <div class="chips">${f.slice.map(s=>`<span class="chip ${s.toLowerCase()}">${s==='S1'?'slice 1':s.replace('S','slice ')}</span>`).join('')}</div>
+   <ul>${f.notes.map(n=>`<li>${n}</li>`).join('')}</ul></aside></section>`);
+});
+})();
+</script>
+</body>
+</html>

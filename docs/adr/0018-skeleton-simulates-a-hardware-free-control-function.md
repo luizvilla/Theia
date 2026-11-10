@@ -1,3 +1,7 @@
+---
+status: stands; reached through the C-Block of ADR 0028
+---
+
 # The skeleton simulates a hardware-free control function in the mission code, as Core2 does
 
 Because a mission carries its own firmware source, that source is written from the start with its control logic in a hardware-free function (measurements in, duty cycles out), called by the critical task between reading sensors and writing PWM. The simulator target compiles only that function, with the code it depends on, into the Pulsim C-Block, exactly as Core2's L1 tests do with `controlStep`. No part of the OwnTech API needs to run on the host, so the simulation backend of ADR 0016 is deferred. The price, accepted for now: sensor scaling, calibration and PWM configuration are not exercised on the simulator target, and the Verification layer must say so.

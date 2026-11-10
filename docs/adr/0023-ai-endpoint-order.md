@@ -1,3 +1,7 @@
+---
+status: amended by ADR 0031 (the user's own agent account first)
+---
+
 # The AI agent uses a sovereign university service first, a personal key second, a local model last
 
 OwnStudio's AI settings accept any OpenAI-compatible endpoint, so that the agent can use, in order of preference: (1) an AI service made available by the University of Toulouse or the CNRS, (2) a student's or researcher's own API key, (3) a local model on the laptop, shown as limited. Luiz does not share his own key. The AI is optional: every mission can be completed without it.

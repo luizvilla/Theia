@@ -1,3 +1,7 @@
+---
+status: refined by ADR 0032 (devicetree overlay plus a small OwnStudio board file)
+---
+
 # Boards are described by a file in their hardware repository plus the Core devicetree, and installed as board packs
 
 A board's facts are split by owner, with no fact in two places. The devicetree in Core (for the Twist, `zephyr/boards/shields/twist/`) keeps what the firmware needs: sensors, ADC channels, default gains and offsets. A board description file in the board's hardware repository (for the Twist, the TWIST repo) keeps what the devicetree cannot: port ratings, component values (33 µH, 33 µF per leg, 200 kHz), operating modes and isolation of the bridge blocks, versioned with the board revision. The application reads both. Boards are installed as board packs fetched with git from a board index, as Arduino's Boards Manager does. The Twist pack ships inside the installer for offline use, and anyone can add a board that follows the standard description. Keeping the facts in the hardware repo was chosen because the existing Twist documentation already disagrees with itself (high side given as 100 V and 110 V), and only the hardware team can settle it.

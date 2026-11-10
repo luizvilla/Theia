@@ -176,3 +176,136 @@ Answer to Luiz's Q38 follow-up: Core2 needs no plumbing because its control logi
 | Q69 | Wrap up into one SPEC.md and a shareable page? | Yes. | Yes. | [SPEC](../SPEC.md) |
 
 The design tree is fully visited. Open items are listed in [SPEC §15](../SPEC.md#15-open-items).
+
+---
+
+# Step 5 grilling, after Luiz's trial of 2026-11-10
+
+Luiz tried OwnStudio end to end ([his notes](design/trial-2026-11-10-notes.md)) and found it cumbersome. These rounds turned his notes into a new direction. Recorded in [ADRs 0025–0032](adr/), the [glossary](../GLOSSARY.md) and [SPEC 2.0](../SPEC.md). Design references: [canvas styles](design/canvas-styles.html), [test sequence editor](design/test-sequence-blockly.html), [storyboards](design/storyboards.html).
+
+## Round 11 (2026-11-10): the roast of the trial
+
+| # | Question | Recommendation | Answer | Recorded in |
+|---|---|---|---|---|
+| Q70 | The objective? | A student completes the five mission steps in 65 min without help. | No: a colleague or PhD student builds a setup on a Twist (drag source, Twist, load; set up the inside; load an example; build and flash; a simple capture; simulate with the same parameters, overlaid; change design or code; rerun), all in one tool. | SPEC §2 |
+| Q71 | One canvas, two zoom levels, always visible at the bottom? | Yes. | Yes; propose better-looking designs. | [ADR 0026](adr/0026-setup-canvas.md) |
+| Q72 | Parts pre-placed by the mission? | Pre-placed, palette later. | Palette now; the setup starts empty; the simplest case refuses source–Twist–source and load–Twist–load. | ADR 0026 |
+| Q73 | A block click opens an inspector? | Yes. | Yes, with Design, Code and Tests as buttons. | ADR 0026 |
+| Q74 | Workbenches on the left icon bar; green title bar? | Yes. | Yes. | SPEC §5 |
+| Q75 | Design as a live form, Python computing? | Yes. | Yes. He never saw the Bode plot (step 2 opened `sizing.py`). | SPEC §7 |
+| Q76 | Code shows the student files only, with language support? | Yes. | Yes, `main.cpp` included: its setup may need tweaking. | SPEC §8 |
+| Q77 | Interactive plots zoomed on the event; real progress? | Yes. | Yes. | SPEC §9 |
+| Q78 | Refuse a dead HIGH and the wrong board? | Yes. | Yes; the profile partly from the bottom pane, details in the Lab. | SPEC §9 |
+
+## Round 12 (2026-11-10)
+
+| # | Question | Recommendation | Answer | Recorded in |
+|---|---|---|---|---|
+| Q79 | Example as base, mission on top? | Yes. | The **board** is the base: it opens examples, the design sheet and lab procedures. A mission is a guided tutorial. | [ADR 0025](adr/0025-the-board-is-the-root.md) |
+| Q80 | Canvas or example owns the hardware? | Canvas wins. | The board owns everything; the canvas matches things together and chooses what to observe. Its background follows the tab. | ADR 0025, 0026 |
+| Q81 | Inside-the-Twist settings: generated `setup.cpp`? | Generated, with "take over". | The canvas is the source of truth but code edits must flow back. | [ADR 0027](adr/0027-setup-round-trip.md) |
+| Q82 | Topology rules for the first version? | One source on HIGH, one Twist, one load on LOW1. | Yes, simple first. | ADR 0026 |
+| Q83 | A form that writes a procedure? | Yes. | Like today: scope captures retrieved into a data folder (as Core2), rendered nicely. | SPEC §9 |
+| Q84 | Read-only generated schematic? | Yes. | Use PulsimGui (AppImage on this machine): can it be added? | Q88, Q109 |
+| Q85 | What is simulated? | ADR 0018 plus setup. | Tell the user what the harness feeds and what Pulsim models; import setup details where possible. | SPEC §10 |
+| Q86 | Profile from the canvas, 10 % check? | Yes. | Yes: the Lab checks automatically before Run goes green. | SPEC §9 |
+| — | (Luiz) The AI companion | — | Like VS Code: link a ChatGPT or Claude account; OwnTech and power-electronics skills. | Q94 |
+
+## Round 13 (2026-11-10)
+
+| # | Question | Recommendation | Answer | Recorded in |
+|---|---|---|---|---|
+| Q87 | "Board pack", "Mission"? | Board pack, Example, Setup, Mission. | Not "pack" (see what others use), "Tutorial" instead of "Mission". Example and Setup kept. | Q96, glossary |
+| Q88 | Same canvas, tab-dependent; probes in the Lab? | Yes. | Yes. Code on the source and load may come (instrument scripts). The Lab also has a test sequence; no-code, generating Python. | ADR 0029 |
+| Q89 | Round-trip on recognised calls? | Yes. | Yes: back and forth on save, recognised calls inside the setup routine only. | ADR 0027 |
+| Q90 | Scope capture as default? | Yes. | Yes, through ThingSet. Slow code (state machines) needs widgets and slow plots like modular; fast code needs the scope. | Q99 |
+| Q91 | PulsimGui: what to do? | Adopt `.pulsim`, draw it, button later. | Too much work to re-create PulsimGui; a button, and room for PLECS or MATLAB later. | Q100, Q107 |
+| Q92 | A simulation sheet? | Yes. | Yes, but good-looking, not an endless table; as the competition does. | Q101 |
+| Q93 | Run green only after checks? | Yes. | Yes, and it keeps checking: back to red if something goes off. | SPEC §9 |
+| Q94 | Claude Code and Codex integrations, skills in the board? | Yes. | Yes, and consider shipping a light AI specialised in power electronics. | Q103, Q110 |
+| Q95 | Power only through OwnStudio's dialog? | (b) token. | (b), with an "AI takeover" button that appears only when enabled. | [ADR 0031](adr/0031-ai-agents-and-takeover.md) |
+
+## Round 14 (2026-11-10)
+
+| # | Question | Recommendation | Answer | Recorded in |
+|---|---|---|---|---|
+| Q96 | Board, Example, Setup, Tutorial? | Yes. | Yes. | glossary |
+| Q97 | Sequences of steps, no-code, Python underneath? | Yes. | Yes; find an editor; drag variables into boxes; call it a test flowchart. A procedure is more than the flowchart (setup, data). | Q105 |
+| Q98 | Instrument driver hook? | Yes. | Hook now, real drivers later from existing projects. | SPEC §9 |
+| Q99 | Monitor and Capture probe modes? | Yes. | Yes, and the user must see which mode they are in (colour). | Q106 |
+| Q100 | "Open in PulsimGui" over an external-simulator interface? | Yes. | Yes. Core2 runs Pulsim and opens the GUI: doesn't it simulate there? Could Simulate happen in PulsimGui, with "save changes" exported to the model? | Q107 |
+| Q101 | Fidelity chips on the canvas? | Yes. | The user will want to edit and see the model: how? | Q107 |
+| Q102 | Canvas style C (nodes) with D's palette? | Yes. | Yes, but how does the user export a wiring diagram? The Twist docs have them. | Q109 |
+| Q103 | Offline AI in three stages? | Yes. | Yes, ambitious even without training. | Q110 |
+| Q104 | Takeover limits? | One sequence, 30 min, revoked on red, change or Stop. | Yes. | ADR 0031 |
+
+## Round 15 (2026-11-10)
+
+Facts found: Core2's plant is a `.pulsim` file with the firmware as a C-Block; its runner loads it without Qt; `open_gui.sh` runs PulsimGui with a Core backend calling the same runner. The Twist docs hold draw.io wiring and circuit diagrams per topology.
+
+| # | Question | Recommendation | Answer | Recorded in |
+|---|---|---|---|---|
+| Q105 | Procedure contains a test flowchart; UML subset; React Flow? | Yes. | Agreed, but Blockly to customise: can it nest? | Q111 |
+| Q106 | Monitor blue, Capture amber? | Yes. | Yes. | SPEC §9 |
+| Q107 | Adopt Core2's simulation pattern (replaces A11)? | Yes. | Yes. | [ADR 0028](adr/0028-simulation-follows-core2.md) |
+| Q108 | PulsimGui through pip? | Yes. | Yes. | ADR 0028 |
+| Q109 | Wiring diagrams from draw.io templates? | Yes. | How would auto-generation work: a template library with connection points, in a GitHub repo? Answer: no routing; placeholders and layers only. | SPEC §11 |
+| Q110 | AI: integrations, takeover, three skills; local model a research track? | Yes. | Yes; Core is the API's source of truth, as in VS Code today. | ADR 0031 |
+
+## Round 16 (2026-11-10)
+
+| # | Question | Recommendation | Answer | Recorded in |
+|---|---|---|---|---|
+| Q111 | Blockly or React Flow? | Blockly, flat theme. | Blockly; render it ([mock-up](design/test-sequence-blockly.html)). | [ADR 0029](adr/0029-test-sequences-in-blockly.md) |
+| Q112 | Slice 0: fix the trial's bugs first? | Yes. | No: the new version is totally different. Progress bars, language support, interactive plots and the checklist go into the new work. | plan |
+| Q113 | Slices 1–4? | Yes. | Yes, but first artwork showing where everything goes: that is slice 0. | plan |
+| Q114 | PhD trial after slice 1? | Yes. | Only once Luiz has used it end to end and finds it "good enough", not perfect. | plan |
+| Q115 | Board definition in the OwnStudio repo? | Yes. | Boards first; examples pulled from the examples library; examples depend on other libraries; rethink the examples-library workaround. | Q118–Q121 |
+| Q116 | Paper before code? | Yes. | Yes: thoroughly documented, commit sequences, storyboards and pages kept locally as HTML or PDF. | plan |
+
+## Round 17 (2026-11-10)
+
+| # | Question | Recommendation | Answer | Recorded in |
+|---|---|---|---|---|
+| Q117 | Layout and Start? | As drawn. | Add a timeline at the bottom like Fusion 360, git-based with branches and resets. Start replaces Home; look at Arduino's board choice. | [ADR 0030](adr/0030-setups-are-git-repos.md), SPEC §5 |
+| Q118 | Read the examples index, filtered by board? | Yes. | Yes (it means updating the repo). | Q128 |
+| Q119 | Load example into a new setup? | Yes. | OwnTech libraries loaded natively, with a checkbox menu; loading an example like Arduino; the previous one filed away as today. | Q125, Q126 |
+| Q120 | `lib_deps` plus a lock file? | Yes. | OwnStudio must be git-native: commit, pull from other cores, edit libraries locally, PRs, local libraries. | Q127, ADR 0030 |
+| Q121 | OwnStudio extras in `ownstudio/` in examples? | Yes. | Examples are quick starts; changes are kept in an OwnStudio folder; unsure of the implications. | Q129 |
+
+## Round 18 (2026-11-10)
+
+| # | Question | Recommendation | Answer | Recorded in |
+|---|---|---|---|---|
+| — | (Luiz) The top menus | — | Must be set now; forgetting them cost a lot in modular. | Q130 |
+| Q122 | The timeline: auto-commits, icons, restore, branches? | Yes, lanes later. | Yes; branches later but supported. | ADR 0030 |
+| Q123 | Records out of git? | Yes. | Yes: reproduce, don't share heavy results; share light reports. | ADR 0030 |
+| Q124 | Start and board choice, Arduino-style? | Yes. | Yes, ready for custom boards; look at the devicetree in Core's zephyr folder, including Spin pins on shields, maybe an oscilloscope on a Spin pin. | Q131, Q132 |
+| Q125 | An example loads as a branch? | Yes. | Yes. | ADR 0030 |
+| Q126 | Library list in a left panel? | Yes. | Yes, but in a menu: it is rare. | SPEC §12 |
+| Q127 | Libraries as submodules, proposable upstream? | Yes. | Yes, and forks: many remotes and cherry-picks. | Q133 |
+| Q128 | Infer the board now, PR the field later? | Yes. | Yes. | ADR 0025 |
+| Q129 | Where things live? | `~/OwnStudio/` setups, board defaults, plain examples. | How does this fit the git workflow? | Q134 |
+
+## Round 19 (2026-11-10)
+
+Facts found: `spin_header.dtsi` maps the Spin header to MCU pins; `twist_v1_4_2.overlay` describes legs, PWM pins, defaults and sensors with gains, offsets and Spin pins.
+
+| # | Question | Recommendation | Answer | Recorded in |
+|---|---|---|---|---|
+| Q130 | Eight menus, expert mode for Theia's? | Yes. | Yes, without Theia's at all, but with a terminal. | [SPEC §5](../SPEC.md#5-the-window) |
+| Q131 | Board = devicetree overlay + small OwnStudio file? | Yes. | Yes. | [ADR 0032](adr/0032-boards-from-the-devicetree.md) |
+| Q132 | Pin map and oscilloscope node in the model now? | Yes. | Yes. | ADR 0032 |
+| Q133 | Forks, many remotes, import local clones? | Yes. | Yes. | ADR 0030 |
+| Q134 | The setup as git repo, example copied, reports committed? | Yes. | Yes; how does it avoid merge deadlocks? | Q137 |
+| Q135 | Push guard? | Yes. | Propose the user's own fork, and make keys easy (generate, open the GitHub keys page). | Q138 |
+
+## Round 20 (2026-11-10)
+
+| # | Question | Recommendation | Answer | Recorded in |
+|---|---|---|---|---|
+| Q136 | Terminal as a bottom tab? | Yes. | Yes, with a button at the bottom. | SPEC §5 |
+| Q137 | Four merge rules? | Yes. | Yes. | ADR 0030 |
+| Q138 | Sign-in? | Browser sign-in; SSH generated and uploaded by API; existing keys used. | Yes. | ADR 0030 |
+
+Luiz confirmed the shared understanding and asked for slice 0 (2026-11-10).

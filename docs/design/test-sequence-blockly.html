@@ -1,0 +1,200 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>OwnStudio Test Sequence</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a mock-up of the Lab's test sequence editor (toolbox | workspace | generated Python), then the same sequence collapsed. */
+:root{
+  --bg:#eef3f1; --panel:#ffffff; --sunk:#f6f8f7; --fg:#16211f; --muted:#56665f; --line:#c9d5d0;
+  --accent:#b89a00;
+  --c-board:#2f6f58; --c-power:#c4541e; --c-instr:#4f6b8a; --c-capture:#b77d00; --c-monitor:#2c76ad; --c-flow:#6a5a8c; --c-check:#3f7f4f;
+  --on-block:#ffffff; --pill:#ffffffe6; --pill-fg:#16211f;
+  --f-display:"Space Grotesk",system-ui,sans-serif; --f-body:Inter,system-ui,sans-serif; --f-mono:"JetBrains Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#111918; --panel:#182220; --sunk:#141d1b; --fg:#e4edea; --muted:#90a39d; --line:#2e3d39; --accent:#f0dc55;
+  --c-board:#2f7a60; --c-power:#d0632c; --c-instr:#56759a; --c-capture:#c08a0c; --c-monitor:#3683bb; --c-flow:#76679a; --c-check:#3f8a52;
+  --pill:#0f1716e6; --pill-fg:#e4edea; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111918; --panel:#182220; --sunk:#141d1b; --fg:#e4edea; --muted:#90a39d; --line:#2e3d39; --accent:#f0dc55;
+  --c-board:#2f7a60; --c-power:#d0632c; --c-instr:#56759a; --c-capture:#c08a0c; --c-monitor:#3683bb; --c-flow:#76679a; --c-check:#3f8a52;
+  --pill:#0f1716e6; --pill-fg:#e4edea; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:32px 56px}
+.wrap{max-width:1240px;margin:0 auto;display:grid;gap:32px}
+h1,h2{font-family:var(--f-display);margin:0;text-wrap:balance}
+h1{font-size:1.9rem} h2{font-size:1.3rem}
+p{margin:0;max-width:72ch}
+.lede{color:var(--muted);margin-top:8px}
+.eyebrow{font:600 .72rem/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.editor{display:grid;grid-template-columns:190px minmax(0,1fr) 330px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel)}
+@media (max-width:980px){.editor{grid-template-columns:1fr}}
+.tool{background:var(--sunk);border-right:1px solid var(--line);padding:14px;display:grid;gap:14px;align-content:start}
+.cat{display:flex;align-items:center;gap:8px;font-size:.86rem;font-weight:500}
+.sw{width:12px;height:12px;border-radius:3px;flex:none}
+.vars{display:flex;flex-wrap:wrap;gap:6px}
+.var{font:600 .72rem var(--f-mono);padding:3px 8px;border-radius:10px;border:1px dashed var(--line);background:var(--panel);cursor:grab}
+.ws{padding:20px;min-width:0;overflow-x:auto;background:
+  radial-gradient(circle,var(--line) 1px,transparent 1.2px) 0 0/18px 18px,var(--panel)}
+.code{background:var(--sunk);border-left:1px solid var(--line);padding:14px;min-width:0;overflow-x:auto}
+.code pre{margin:0;font:12px/1.55 var(--f-mono);color:var(--fg);white-space:pre}
+.code .k{color:var(--c-flow);font-weight:600} .code .c{color:var(--muted)} .code .s{color:var(--c-board)}
+/* blocks */
+.stack{display:grid;gap:3px;width:max-content;min-width:520px}
+.b{color:var(--on-block);border-radius:6px;font-size:.84rem;font-weight:500;position:relative}
+.row{display:flex;align-items:center;flex-wrap:wrap;gap:7px;padding:7px 12px}
+.b::before{content:"";position:absolute;top:-3px;left:16px;width:18px;height:5px;border-radius:0 0 4px 4px;background:inherit;filter:brightness(.82)}
+.stack>.b:first-child::before,.top::before{display:none}
+.pill{background:var(--pill);color:var(--pill-fg);font:600 .74rem var(--f-mono);padding:2px 8px;border-radius:9px}
+.drop{background:var(--pill);color:var(--muted);font:500 .72rem var(--f-mono);padding:2px 8px;border-radius:9px;outline:1.5px dashed var(--accent)}
+.c-wrap{display:grid}
+.c-inner{margin-left:16px;padding:4px 0 4px 0;display:grid;gap:3px;background:var(--panel);border-left:0}
+.c-foot{height:12px;border-radius:0 0 6px 6px}
+.cblock{border-radius:6px;overflow:hidden}
+.cblock>.row{border-radius:6px 6px 0 0}
+.cblock .c-inner{box-shadow:inset 16px 0 0 0 var(--cc)}
+.cblock .c-inner{margin-left:0;padding-left:16px}
+.chev{font-family:var(--f-mono);opacity:.85;margin-right:2px}
+.hat{border-radius:12px 12px 6px 6px}
+.badge{margin-left:auto;font:600 .66rem var(--f-mono);letter-spacing:.06em;text-transform:uppercase;opacity:.9}
+.def{display:grid;gap:18px;margin-top:22px}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.85rem;color:var(--muted)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:20px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;gap:10px;min-width:0;overflow-x:auto}
+.notes{display:grid;gap:8px;font-size:.92rem}
+.notes b{font-weight:600}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">OwnStudio · Lab · test sequence editor · mock-up</div>
+  <h1>Test sequence editor</h1>
+  <p class="lede">The reference-step procedure from the buck example, built with Blockly in a flat OwnStudio theme. Toolbox on the left, sequence in the middle, the generated Python on the right. The "Step response" block is a user-defined block: it is defined once (bottom of the workspace) and used as one line in the sequence.</p>
+</header>
+
+<div class="editor">
+  <aside class="tool">
+    <div class="eyebrow">Blocks</div>
+    <div class="cat"><span class="sw" style="background:var(--c-board)"></span>Board</div>
+    <div class="cat"><span class="sw" style="background:var(--c-power)"></span>Power</div>
+    <div class="cat"><span class="sw" style="background:var(--c-instr)"></span>Instruments</div>
+    <div class="cat"><span class="sw" style="background:var(--c-capture)"></span>Capture · fast</div>
+    <div class="cat"><span class="sw" style="background:var(--c-monitor)"></span>Monitor · slow</div>
+    <div class="cat"><span class="sw" style="background:var(--c-flow)"></span>Flow</div>
+    <div class="cat"><span class="sw" style="background:var(--c-check)"></span>Checks</div>
+    <div class="cat"><span class="sw" style="background:var(--muted)"></span>My blocks</div>
+    <div class="eyebrow" style="margin-top:6px">Variables</div>
+    <div class="vars">
+      <span class="var">wVoltageRef_V</span><span class="var">Mode</span>
+      <span class="var">V_LOW1</span><span class="var">I_LOW1</span><span class="var">V_HIGH</span>
+      <span class="var">source.voltage</span><span class="var">load.ohm</span>
+    </div>
+    <p style="font-size:.78rem;color:var(--muted)">From the board's data objects, the source and load nodes, and the probes on the canvas. Drag one into a slot.</p>
+  </aside>
+
+  <div class="ws">
+    <div class="stack">
+      <div class="b hat top" style="background:var(--c-flow)"><div class="row">Test sequence <span class="pill">BUCK-REF-01</span> on <span class="pill">board</span><span class="badge">start</span></div></div>
+      <div class="b" style="background:var(--c-board)"><div class="row">check setup: board <span class="pill">Twist 1.4.2</span> runs <span class="pill">this setup's firmware</span></div></div>
+      <div class="b" style="background:var(--c-instr)"><div class="row">ask the user: load on LOW1 = <span class="pill">load.ohm</span></div></div>
+      <div class="b" style="background:var(--c-board)"><div class="row">set <span class="pill">wVoltageRef_V</span> to <span class="pill">10 V</span></div></div>
+      <div class="b" style="background:var(--c-power)"><div class="row">switch the converter on <span class="badge">asks to confirm</span></div></div>
+      <div class="cblock" style="--cc:var(--c-flow)">
+        <div class="row b top" style="background:var(--c-flow)">repeat for <span class="pill">step</span> in <span class="pill">[10→12 V, 12→10 V]</span></div>
+        <div class="c-inner">
+          <div class="b top" style="background:var(--muted)"><div class="row"><span class="chev">▸</span>Step response <span class="pill">step</span> capture <span class="pill">V_LOW1</span> <span class="pill">I_LOW1</span><span class="badge">my block</span></div></div>
+          <div class="cblock" style="--cc:var(--c-check)">
+            <div class="row b" style="background:var(--c-check)">if settling time ≤ <span class="pill">10 ms</span></div>
+            <div class="c-inner">
+              <div class="b top" style="background:var(--c-check)"><div class="row">record <span class="pill">PASS</span> REQ-TRACKING</div></div>
+            </div>
+            <div class="row b top" style="background:var(--c-check);border-radius:0">else</div>
+            <div class="c-inner">
+              <div class="b top" style="background:var(--c-check)"><div class="row">record <span class="pill">FAIL</span> with the measured time</div></div>
+            </div>
+            <div class="c-foot" style="background:var(--c-check)"></div>
+          </div>
+        </div>
+        <div class="c-foot" style="background:var(--c-flow)"></div>
+      </div>
+      <div class="b" style="background:var(--c-monitor)"><div class="row">monitor <span class="pill">V_HIGH</span> <span class="pill">I_LOW1</span> every <span class="pill">100 ms</span> during <span class="pill">2 s</span></div></div>
+      <div class="b" style="background:var(--c-power)"><div class="row">switch the converter off</div></div>
+      <div class="b" style="background:var(--c-flow)"><div class="row">simulate the same sequence and overlay <span class="drop">drop a capture here</span></div></div>
+    </div>
+
+    <div class="def">
+      <div class="eyebrow">Definition of "Step response" (expanded)</div>
+      <div class="stack" style="min-width:480px">
+        <div class="b hat top" style="background:var(--muted)"><div class="row"><span class="chev">▾</span>define Step response <span class="pill">step</span> capture <span class="pill">channels</span></div></div>
+        <div class="b" style="background:var(--c-capture)"><div class="row">arm the scope on <span class="pill">channels</span> for <span class="pill">100 ms</span>, <span class="pill">20 ms</span> before the trigger</div></div>
+        <div class="b" style="background:var(--c-board)"><div class="row">set <span class="pill">wVoltageRef_V</span> to <span class="pill">step.to</span> <span class="badge">trigger</span></div></div>
+        <div class="b" style="background:var(--c-capture)"><div class="row">read the capture into <span class="pill">waveform</span></div></div>
+        <div class="b" style="background:var(--c-check)"><div class="row">settling time = time for <span class="pill">V_LOW1</span> to stay within <span class="pill">2 %</span> of <span class="pill">step.to</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <aside class="code">
+    <div class="eyebrow" style="margin-bottom:10px">Generated Python · read only</div>
+<pre><span class="c"># BUCK-REF-01, generated by the editor.
+# Hand edits become a "custom step" block.</span>
+<span class="k">def</span> step_response(t, step, channels):
+    t.arm(channels, window_s=<span class="s">0.100</span>,
+          pretrigger_s=<span class="s">0.020</span>)
+    t.update(wVoltageRef_V=step.to)
+    waveform = t.capture()
+    <span class="k">return</span> waveform, settling_time(
+        waveform[<span class="s">"V_LOW1"</span>], step.to, band=<span class="s">0.02</span>)
+
+<span class="k">def</span> run(t, ctx):
+    t.check_setup()
+    load = ctx.ask(<span class="s">"Load on LOW1 (ohm)"</span>)
+    t.update(wVoltageRef_V=<span class="s">10.0</span>)
+    t.power_on()          <span class="c"># OwnStudio asks</span>
+    <span class="k">for</span> step <span class="k">in</span> STEPS:
+        w, ts = step_response(t, step,
+                              [<span class="s">"V_LOW1"</span>, <span class="s">"I_LOW1"</span>])
+        <span class="k">if</span> ts &lt;= <span class="s">0.010</span>:
+            ctx.record(<span class="s">"REQ-TRACKING"</span>, PASS)
+        <span class="k">else</span>:
+            ctx.record(<span class="s">"REQ-TRACKING"</span>, FAIL, ts)
+    t.monitor([<span class="s">"V_HIGH"</span>, <span class="s">"I_LOW1"</span>],
+              period_s=<span class="s">0.1</span>, duration_s=<span class="s">2</span>)
+    t.power_off()
+    ctx.twin()</pre>
+  </aside>
+</div>
+
+<div class="legend">
+  <span>Colours follow the probe modes:</span>
+  <span><span class="sw" style="display:inline-block;background:var(--c-capture);vertical-align:-1px"></span> amber = Capture (fast, scope)</span>
+  <span><span class="sw" style="display:inline-block;background:var(--c-monitor);vertical-align:-1px"></span> blue = Monitor (slow, ThingSet)</span>
+  <span><span class="sw" style="display:inline-block;background:var(--c-power);vertical-align:-1px"></span> orange = power, always confirmed</span>
+</div>
+
+<section class="two">
+  <div class="card">
+    <h2>The same sequence, collapsed</h2>
+    <div class="stack" style="min-width:420px">
+      <div class="b hat top" style="background:var(--c-flow)"><div class="row">Test sequence <span class="pill">BUCK-REF-01</span> on <span class="pill">board</span></div></div>
+      <div class="b" style="background:var(--c-board)"><div class="row"><span class="chev">▸</span>prepare: setup check, load, reference 10 V <span class="badge">3 blocks</span></div></div>
+      <div class="b" style="background:var(--c-power)"><div class="row">switch the converter on</div></div>
+      <div class="b" style="background:var(--c-flow)"><div class="row"><span class="chev">▸</span>repeat for 2 steps: Step response, check REQ-TRACKING <span class="badge">5 blocks</span></div></div>
+      <div class="b" style="background:var(--c-monitor)"><div class="row">monitor V_HIGH, I_LOW1 for 2 s</div></div>
+      <div class="b" style="background:var(--c-power)"><div class="row">switch the converter off</div></div>
+    </div>
+    <p style="font-size:.88rem;color:var(--muted)">Any block with children folds to one line showing how many blocks it hides. This is the answer to the Jenga tower.</p>
+  </div>
+  <div class="card notes">
+    <h2>What makes it readable</h2>
+    <div><b>Nesting.</b> C-shaped blocks (repeat, if/else, "while the converter is on") hold other blocks; the indentation is the structure.</div>
+    <div><b>Your own blocks.</b> A group of blocks becomes a named block with inputs ("Step response"), used as one line, defined once.</div>
+    <div><b>Collapse.</b> Any container folds to one line with a count.</div>
+    <div><b>Sentences, not code.</b> Blocks read as instructions with slots; variables are dragged from the list built from the setup.</div>
+    <div><b>Structured only.</b> No arbitrary jumps, so the Python is clean and the editor can read back its own output.</div>
+    <div><b>Theme.</b> Blockly's flat renderer with OwnStudio's colours, no puzzle-piece cartoon: only a small notch shows where blocks join.</div>
+  </div>
+</section>
+</div>

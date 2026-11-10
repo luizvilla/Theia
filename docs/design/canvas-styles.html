@@ -1,0 +1,337 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>OwnStudio Canvas Styles</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a design board. Four options for the outside of the setup, then the inside of the Twist, then the simulation coverage, each as a drawing with a short verdict. */
+:root{
+  --bg:#eef3f1; --panel:#ffffff; --fg:#16211f; --muted:#56665f; --line:#c3d0cb;
+  --accent:#b89a00; --accent-soft:#f6eeb8; --power:#cf5a22; --signal:#2c76ad; --ok:#2b8552; --off:#9aa8a3;
+  --pcb:#1f5a46; --pcb-ink:#d8efe4; --tint-design:#e9eefc; --tint-code:#eef0f2; --tint-lab:#fbf4dc; --tint-sim:#e6f4ee;
+  --f-display:"Space Grotesk",system-ui,sans-serif; --f-body:Inter,system-ui,sans-serif; --f-mono:"JetBrains Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#111918; --panel:#182220; --fg:#e4edea; --muted:#90a39d; --line:#2e3d39;
+  --accent:#f0dc55; --accent-soft:#3a3615; --power:#f08a4b; --signal:#6bb3e3; --ok:#5cc489; --off:#5d6e69;
+  --pcb:#1d4d3d; --pcb-ink:#cfe9dd; --tint-design:#1a2134; --tint-code:#1b2023; --tint-lab:#2a2614; --tint-sim:#15281f; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111918; --panel:#182220; --fg:#e4edea; --muted:#90a39d; --line:#2e3d39;
+  --accent:#f0dc55; --accent-soft:#3a3615; --power:#f08a4b; --signal:#6bb3e3; --ok:#5cc489; --off:#5d6e69;
+  --pcb:#1d4d3d; --pcb-ink:#cfe9dd; --tint-design:#1a2134; --tint-code:#1b2023; --tint-lab:#2a2614; --tint-sim:#15281f; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:32px 56px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;gap:40px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
+h1{font-size:2rem;letter-spacing:-.01em}
+h2{font-size:1.35rem}
+h3{font-size:1.05rem}
+p{margin:0;max-width:68ch}
+.lede{color:var(--muted);margin-top:8px}
+.eyebrow{font:600 .72rem/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+section{display:grid;gap:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,520px),1fr));gap:20px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;gap:10px;min-width:0}
+.card header{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.tag{font:600 .7rem/1 var(--f-mono);padding:4px 7px;border-radius:4px;background:var(--accent-soft);color:var(--fg)}
+.draw{overflow-x:auto;border-radius:6px}
+.draw svg{display:block;width:100%;min-width:460px;height:auto}
+.refs{font-size:.85rem;color:var(--muted)}
+.verdict{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:.88rem}
+.verdict b{font-weight:600}
+.plus{color:var(--ok)} .minus{color:var(--power)}
+.rec{border-left:3px solid var(--accent);padding:10px 14px;background:var(--panel);border-radius:0 8px 8px 0}
+.tints{display:flex;flex-wrap:wrap;gap:10px}
+.tint{flex:1 1 140px;border:1px solid var(--line);border-radius:8px;padding:12px;font:500 .85rem var(--f-body)}
+/* svg classes */
+.t{fill:var(--fg);font-family:var(--f-body);font-size:12px}
+.tm{fill:var(--muted);font-family:var(--f-body);font-size:10.5px}
+.tmono{fill:var(--fg);font-family:var(--f-mono);font-size:11px}
+.th{fill:var(--fg);font-family:var(--f-display);font-size:13px;font-weight:700}
+.box{fill:var(--panel);stroke:var(--line);stroke-width:1.5}
+.boxs{fill:var(--panel);stroke:var(--fg);stroke-width:1.5}
+.pw{stroke:var(--power);stroke-width:3;fill:none;stroke-linecap:round}
+.sg{stroke:var(--signal);stroke-width:1.6;fill:none;stroke-dasharray:4 3}
+.ink{stroke:var(--fg);stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.inkf{fill:var(--fg)}
+.pcb{fill:var(--pcb)}
+.pcbi{fill:var(--pcb-ink);font-family:var(--f-mono);font-size:9.5px}
+.pcbl{stroke:var(--pcb-ink);stroke-width:1;fill:none;opacity:.6}
+.acc{fill:var(--accent)}
+.accs{stroke:var(--accent);stroke-width:2.5;fill:none}
+.okf{fill:var(--ok)} .pwf{fill:var(--power)} .sgf{fill:var(--signal)} .offf{fill:var(--off)}
+.bgfill{fill:var(--bg)}
+.hatch{fill:url(#hatch)}
+.hl{stroke:var(--off);stroke-width:1}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">OwnStudio · design board · round 3</div>
+  <h1>How the setup could look on the canvas</h1>
+  <p class="lede">Four ways to draw the same setup: a 30 V supply, the Twist running leg 1 as a buck, and a 33 Ω load on LOW1. Then the inside of the Twist, and how the simulation coverage can be shown without a table. All drawings show the same values so you compare styles, not content.</p>
+</header>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="7" height="7" fill="var(--panel)"/><line x1="0" y1="0" x2="0" y2="7" class="hl"/>
+    </pattern>
+  </defs>
+</svg>
+
+<section>
+  <h2>The outside: source, Twist, load</h2>
+  <div class="grid">
+
+    <!-- A -->
+    <article class="card">
+      <header><span class="tag">A</span><h3>Front panels</h3></header>
+      <div class="draw"><svg viewBox="0 0 560 230" role="img" aria-label="Front panel style: a bench supply, the Twist board, a resistor bank">
+        <rect x="0" y="0" width="560" height="230" class="bgfill"/>
+        <!-- supply -->
+        <rect x="16" y="40" width="130" height="150" rx="8" class="boxs"/>
+        <text x="28" y="62" class="th">Supply</text>
+        <rect x="28" y="74" width="106" height="30" rx="3" class="inkf"/>
+        <text x="122" y="95" text-anchor="end" style="fill:var(--accent);font:600 17px var(--f-mono)">30.0 V</text>
+        <rect x="28" y="110" width="106" height="30" rx="3" class="inkf"/>
+        <text x="122" y="131" text-anchor="end" style="fill:var(--accent);font:600 17px var(--f-mono)">1.00 A</text>
+        <text x="28" y="156" class="tm">limit</text>
+        <circle cx="104" cy="172" r="7" class="pwf"/><circle cx="126" cy="172" r="7" class="inkf"/>
+        <!-- twist -->
+        <rect x="190" y="30" width="190" height="170" rx="6" class="pcb"/>
+        <path d="M200 52h170M200 178h170" class="pcbl"/>
+        <text x="202" y="46" class="pcbi">TWIST 1.4.2</text>
+        <rect x="258" y="88" width="54" height="54" rx="3" style="fill:#0e2a20;stroke:var(--pcb-ink);stroke-width:1"/>
+        <text x="285" y="119" text-anchor="middle" class="pcbi">SPIN</text>
+        <rect x="210" y="64" width="34" height="34" rx="4" style="fill:#1a1a1a"/><text x="227" y="110" text-anchor="middle" class="pcbi">L1</text>
+        <rect x="326" y="64" width="34" height="34" rx="4" style="fill:#1a1a1a"/><text x="343" y="110" text-anchor="middle" class="pcbi">L2</text>
+        <circle cx="227" cy="150" r="10" style="fill:#2d2d2d"/><circle cx="343" cy="150" r="10" style="fill:#2d2d2d"/>
+        <rect x="182" y="104" width="12" height="28" rx="2" style="fill:#3fa35b"/><text x="186" y="146" class="pcbi" text-anchor="middle" transform="rotate(-90 186 146)"> </text>
+        <text x="202" y="194" class="pcbi">HIGH</text>
+        <rect x="376" y="70" width="12" height="28" rx="2" style="fill:#3fa35b"/><rect x="376" y="134" width="12" height="28" rx="2" style="fill:#3fa35b"/>
+        <text x="368" y="64" class="pcbi" text-anchor="end">LOW1</text><text x="368" y="176" class="pcbi" text-anchor="end">LOW2</text>
+        <!-- load -->
+        <rect x="430" y="56" width="114" height="80" rx="6" class="boxs"/>
+        <text x="442" y="76" class="th">Load</text>
+        <path d="M444 106 l8 -10 l8 20 l8 -20 l8 20 l8 -20 l8 20 l8 -20 l8 10" class="ink"/>
+        <text x="532" y="128" text-anchor="end" class="tmono">33 Ω</text>
+        <!-- wires -->
+        <path d="M104 172 C150 172 150 118 182 118" class="pw"/>
+        <path d="M388 84 C410 84 410 96 430 96" class="pw"/>
+        <text x="16" y="222" class="tm">Wires are power; their colour follows the safety envelope.</text>
+      </svg></div>
+      <p class="refs">Close to: Typhoon HIL SCADA panels, LabVIEW front panels, a photo of the bench.</p>
+      <div class="verdict">
+        <b class="plus">+</b><span>Reads like the bench. The Lab checklist (HIGH 30.0 V measured) has an obvious place: the supply's display.</span>
+        <b class="minus">−</b><span>Each instrument needs its own artwork, and it says nothing about the circuit inside.</span>
+      </div>
+    </article>
+
+    <!-- B -->
+    <article class="card">
+      <header><span class="tag">B</span><h3>Schematic</h3></header>
+      <div class="draw"><svg viewBox="0 0 560 230" role="img" aria-label="Schematic style: voltage source, buck converter box, resistor">
+        <rect x="0" y="0" width="560" height="230" class="bgfill"/>
+        <!-- source -->
+        <circle cx="70" cy="115" r="26" class="ink"/>
+        <text x="70" y="108" text-anchor="middle" class="th">+</text><text x="70" y="132" text-anchor="middle" class="th">−</text>
+        <text x="70" y="166" text-anchor="middle" class="tmono">30 V</text><text x="70" y="180" text-anchor="middle" class="tm">limit 1 A</text>
+        <path d="M70 89 V50 H200 M70 141 V190 H200" class="ink"/>
+        <!-- converter box -->
+        <rect x="200" y="36" width="170" height="170" rx="4" class="boxs"/>
+        <text x="212" y="56" class="th">Twist · leg 1 buck</text>
+        <!-- switch -->
+        <path d="M220 72 H240 M240 72 L260 62 M262 72 H280" class="ink"/>
+        <path d="M280 72 V100" class="ink"/>
+        <path d="M280 100 H300 c4 -12 10 -12 14 0 c4 -12 10 -12 14 0 c4 -12 10 -12 14 0 H352" class="ink"/>
+        <path d="M280 100 V120 M270 128 h20 l-10 -10 z" class="ink"/><path d="M270 118 h20" class="ink"/>
+        <path d="M280 128 V172" class="ink"/>
+        <path d="M352 100 V130 M342 130 h20 M342 136 h20 M352 136 V172" class="ink"/>
+        <path d="M220 172 H352" class="ink"/>
+        <text x="314" y="92" text-anchor="middle" class="tmono">33 µH</text>
+        <text x="366" y="138" class="tmono">61 µF</text>
+        <text x="212" y="196" class="tm">200 kHz · dead time 100 ns</text>
+        <!-- load -->
+        <path d="M370 100 H470 V112 l-8 4 l16 6 l-16 6 l16 6 l-16 6 l8 4 V172 H370" class="ink"/>
+        <text x="486" y="140" class="tmono">33 Ω</text>
+        <text x="486" y="154" class="tm">on LOW1</text>
+        <!-- probe -->
+        <circle cx="420" cy="100" r="5" class="acc"/><text x="428" y="90" class="tmono">CH1 V_LOW1</text>
+      </svg></div>
+      <p class="refs">Close to: PLECS, PulsimGui, Simulink with Simscape, LTspice.</p>
+      <div class="verdict">
+        <b class="plus">+</b><span>Engineers read it at once; values sit on the components, and probes land on a node.</span>
+        <b class="minus">−</b><span>Invites "let me edit the circuit". We'd be one step from a schematic editor, which you ruled out with PulsimGui (Q5).</span>
+      </div>
+    </article>
+
+    <!-- C -->
+    <article class="card">
+      <header><span class="tag">C</span><h3>Nodes with typed ports</h3></header>
+      <div class="draw"><svg viewBox="0 0 560 230" role="img" aria-label="Node graph style: three nodes with power ports and fields">
+        <rect x="0" y="0" width="560" height="230" class="bgfill"/>
+        <!-- source node -->
+        <rect x="16" y="54" width="140" height="118" rx="10" class="box"/>
+        <path d="M16 64 a10 10 0 0 1 10 -10 h120 a10 10 0 0 1 10 10 v14 h-140z" class="pwf" opacity=".9"/>
+        <text x="28" y="72" style="fill:#fff;font:700 12px var(--f-display)">DC source</text>
+        <text x="28" y="100" class="tm">Voltage</text><text x="144" y="100" text-anchor="end" class="tmono">30 V</text>
+        <text x="28" y="120" class="tm">Current limit</text><text x="144" y="120" text-anchor="end" class="tmono">1 A</text>
+        <text x="28" y="140" class="tm">Measured</text><text x="144" y="140" text-anchor="end" class="tmono" style="fill:var(--ok)">29.9 V ✓</text>
+        <circle cx="156" cy="112" r="6" class="pwf"/>
+        <!-- twist node -->
+        <rect x="200" y="30" width="170" height="168" rx="10" class="box" style="stroke:var(--accent);stroke-width:2"/>
+        <path d="M200 40 a10 10 0 0 1 10 -10 h150 a10 10 0 0 1 10 10 v14 h-170z" class="pcb"/>
+        <text x="212" y="48" style="fill:var(--pcb-ink);font:700 12px var(--f-display)">Twist 1.4.2</text>
+        <text x="358" y="48" text-anchor="end" style="fill:var(--pcb-ink);font:600 10px var(--f-mono)">⤢ open</text>
+        <text x="212" y="78" class="tm">Leg 1</text><text x="358" y="78" text-anchor="end" class="tmono">buck</text>
+        <text x="212" y="98" class="tm">Leg 2</text><text x="358" y="98" text-anchor="end" class="tmono">same duty</text>
+        <text x="212" y="118" class="tm">PWM</text><text x="358" y="118" text-anchor="end" class="tmono">200 kHz</text>
+        <text x="212" y="138" class="tm">Firmware</text><text x="358" y="138" text-anchor="end" class="tmono">584efeb</text>
+        <text x="212" y="166" class="tm">HIGH</text><text x="358" y="166" text-anchor="end" class="tm">LOW1</text><text x="358" y="186" text-anchor="end" class="tm">LOW2</text>
+        <circle cx="200" cy="112" r="6" class="pwf"/><circle cx="370" cy="112" r="6" class="pwf"/><circle cx="370" cy="160" r="6" style="fill:none;stroke:var(--power);stroke-width:2"/>
+        <!-- load node -->
+        <rect x="414" y="64" width="130" height="96" rx="10" class="box"/>
+        <path d="M414 74 a10 10 0 0 1 10 -10 h110 a10 10 0 0 1 10 10 v14 h-130z" style="fill:var(--signal)"/>
+        <text x="426" y="82" style="fill:#fff;font:700 12px var(--f-display)">Resistor</text>
+        <text x="426" y="110" class="tm">Value</text><text x="532" y="110" text-anchor="end" class="tmono">33 Ω</text>
+        <text x="426" y="130" class="tm">Power</text><text x="532" y="130" text-anchor="end" class="tmono">4.4 W</text>
+        <circle cx="414" cy="112" r="6" class="pwf"/>
+        <!-- wires -->
+        <path d="M162 112 C180 112 182 112 194 112" class="pw"/>
+        <path d="M376 112 C392 112 396 112 408 112" class="pw"/>
+        <!-- probe -->
+        <rect x="372" y="176" width="88" height="20" rx="10" class="acc"/><text x="416" y="190" text-anchor="middle" style="fill:#16211f;font:600 10px var(--f-mono)">CH1 V_LOW1</text>
+        <path d="M384 176 L372 118" class="accs"/>
+        <text x="16" y="222" class="tm">A power port only accepts a power wire: source → HIGH and LOW → load, nothing else snaps.</text>
+      </svg></div>
+      <p class="refs">Close to: Node-RED, Unreal Blueprints, Simulink subsystems, React Flow apps.</p>
+      <div class="verdict">
+        <b class="plus">+</b><span>Settings live on the node, so the inspector is optional. Typed ports make your rule (no source–Twist–source) visible: the wire won't snap.</span>
+        <b class="minus">−</b><span>Generic look; less "power electronics" at first sight.</span>
+      </div>
+    </article>
+
+    <!-- D -->
+    <article class="card">
+      <header><span class="tag">D</span><h3>Illustrated bench, parts dragged in</h3></header>
+      <div class="draw"><svg viewBox="0 0 560 230" role="img" aria-label="Illustrated bench style with a parts palette on the right">
+        <rect x="0" y="0" width="560" height="230" class="bgfill"/>
+        <rect x="8" y="12" width="420" height="206" rx="10" style="fill:var(--tint-lab);stroke:var(--line)"/>
+        <!-- supply illustration -->
+        <rect x="24" y="70" width="96" height="74" rx="8" style="fill:#2b2f33"/>
+        <rect x="34" y="80" width="76" height="22" rx="3" style="fill:#0d1a12"/><text x="104" y="96" text-anchor="end" style="fill:#7cff9e;font:600 13px var(--f-mono)">30.0V</text>
+        <circle cx="50" cy="124" r="7" style="fill:#d23b2a"/><circle cx="72" cy="124" r="7" style="fill:#111"/>
+        <circle cx="100" cy="124" r="9" style="fill:#555"/>
+        <!-- twist top view -->
+        <rect x="160" y="52" width="150" height="112" rx="4" class="pcb"/>
+        <rect x="216" y="86" width="40" height="40" rx="2" style="fill:#0e2a20;stroke:var(--pcb-ink)"/>
+        <rect x="172" y="64" width="28" height="28" rx="3" style="fill:#151515"/><rect x="270" y="64" width="28" height="28" rx="3" style="fill:#151515"/>
+        <circle cx="186" cy="138" r="9" style="fill:#2a2a2a"/><circle cx="284" cy="138" r="9" style="fill:#2a2a2a"/>
+        <rect x="152" y="96" width="10" height="24" style="fill:#3fa35b"/><rect x="308" y="74" width="10" height="24" style="fill:#3fa35b"/>
+        <!-- load -->
+        <rect x="350" y="76" width="62" height="26" rx="4" style="fill:#b9b2a2;stroke:#7a7466"/>
+        <path d="M356 89 h50" style="stroke:#7a7466;stroke-width:1"/>
+        <text x="381" y="120" text-anchor="middle" class="tmono">33 Ω</text>
+        <!-- cables -->
+        <path d="M50 124 C60 170 130 150 152 108" style="stroke:#d23b2a;stroke-width:3.5;fill:none"/>
+        <path d="M318 86 C330 86 336 89 350 89" style="stroke:#d23b2a;stroke-width:3.5;fill:none"/>
+        <!-- palette -->
+        <rect x="444" y="12" width="108" height="206" rx="10" class="box"/>
+        <text x="456" y="34" class="eyebrow" style="fill:var(--muted);font:600 9.5px var(--f-mono);letter-spacing:.08em">PARTS</text>
+        <rect x="456" y="46" width="84" height="40" rx="6" style="fill:var(--bg);stroke:var(--line)"/><text x="498" y="70" text-anchor="middle" class="tm">DC source</text>
+        <rect x="456" y="94" width="84" height="40" rx="6" style="fill:var(--bg);stroke:var(--line)"/><text x="498" y="118" text-anchor="middle" class="tm">Twist</text>
+        <rect x="456" y="142" width="84" height="40" rx="6" style="fill:var(--bg);stroke:var(--accent);stroke-width:2;stroke-dasharray:4 3"/><text x="498" y="166" text-anchor="middle" class="tm">Resistor</text>
+        <text x="456" y="204" class="tm">drag onto the bench</text>
+      </svg></div>
+      <p class="refs">Close to: Wokwi, Tinkercad Circuits, Fritzing's breadboard view.</p>
+      <div class="verdict">
+        <b class="plus">+</b><span>The friendliest for your drag-and-drop first steps; a colleague recognises their bench.</span>
+        <b class="minus">−</b><span>The most artwork per part (every board version, every instrument), and settings need the inspector.</span>
+      </div>
+    </article>
+  </div>
+  <div class="rec"><b>My recommendation: C for the canvas, with D's palette.</b> Nodes carry their values and their live state, typed ports enforce the topology rules, and the look scales to new boards without new artwork. The Twist node gets a small board picture in its header so it still reads as hardware. B stays for the read-only "simulator window" if we ever draw one.</div>
+</section>
+
+<section>
+  <h2>The inside of the Twist</h2>
+  <p>Double-click the Twist node, or "open". The five blocks keep the arrows of today's Home diagram, drawn as nodes. Clicking a block fills the inspector on the right panel with its settings and the three buttons you asked for.</p>
+  <div class="card">
+    <div class="draw"><svg viewBox="0 0 1100 300" role="img" aria-label="Inside the Twist: five blocks, the Driver selected, and an inspector showing its settings">
+      <rect x="0" y="0" width="1100" height="300" class="bgfill"/>
+      <text x="16" y="26" class="tm">Setup  ›  Twist 1.4.2  ›  inside</text>
+      <!-- blocks -->
+      <g>
+        <rect x="16" y="50" width="200" height="74" rx="10" class="box"/><text x="30" y="76" class="th">Power</text><text x="30" y="96" class="tm">2 legs · 33 µH · 61 µF per leg</text><text x="30" y="112" class="tm">Leg 1 buck, leg 2 same duty</text>
+        <rect x="256" y="50" width="200" height="74" rx="10" class="box"/><text x="270" y="76" class="th">Measurement</text><text x="270" y="96" class="tm">V1, V2, VHIGH, I1, I2</text><text x="270" y="112" class="tm">calibration: default</text>
+        <rect x="496" y="50" width="200" height="74" rx="10" class="box" style="stroke:var(--accent);stroke-width:2.5"/><text x="510" y="76" class="th">Driver</text><text x="510" y="96" class="tm">200 kHz · dead time 100 ns</text><text x="510" y="112" class="tm">HRTIM, both legs</text>
+        <rect x="136" y="186" width="200" height="74" rx="10" class="box"/><text x="150" y="212" class="th">Controller</text><text x="150" y="232" class="tm">Spin · control.cpp every 100 µs</text><text x="150" y="248" class="tm">voltage mode, PI</text>
+        <rect x="376" y="186" width="200" height="74" rx="10" class="box" style="stroke-dasharray:5 4"/><text x="390" y="212" class="th">Auxiliary supply</text><text x="390" y="232" class="tm">6 V feeder, no settings</text>
+      </g>
+      <path d="M216 87 H256" class="pw"/><path d="M456 87 H496" class="sg"/>
+      <path d="M356 124 V155 H236 V186" class="sg"/><path d="M336 223 H376" class="sg" style="stroke:var(--off)"/>
+      <path d="M286 186 V160 H596 V124" class="sg"/>
+      <text x="300" y="150" class="tm">signals</text><text x="560" y="152" class="tm">PWM</text>
+      <!-- inspector -->
+      <rect x="760" y="40" width="324" height="246" rx="10" class="box"/>
+      <text x="778" y="66" class="eyebrow" style="fill:var(--muted);font:600 9.5px var(--f-mono);letter-spacing:.08em">INSPECTOR · DRIVER</text>
+      <text x="778" y="96" class="tm">Switching frequency</text>
+      <rect x="938" y="82" width="128" height="22" rx="4" style="fill:var(--bg);stroke:var(--line)"/><text x="1056" y="97" text-anchor="end" class="tmono">200 kHz</text>
+      <text x="778" y="126" class="tm">Dead time</text>
+      <rect x="938" y="112" width="128" height="22" rx="4" style="fill:var(--bg);stroke:var(--line)"/><text x="1056" y="127" text-anchor="end" class="tmono">100 ns</text>
+      <text x="778" y="156" class="tm">Set in</text><text x="1066" y="156" text-anchor="end" class="tmono">setup() · main.cpp:42</text>
+      <text x="778" y="182" class="tm">Requirements</text><text x="1066" y="182" text-anchor="end" class="tmono" style="fill:var(--ok)">REQ-RIPPLE ✓</text>
+      <rect x="778" y="214" width="88" height="30" rx="6" style="fill:var(--bg);stroke:var(--line)"/><text x="822" y="234" text-anchor="middle" class="t">Design</text>
+      <rect x="876" y="214" width="88" height="30" rx="6" style="fill:var(--bg);stroke:var(--line)"/><text x="920" y="234" text-anchor="middle" class="t">Code</text>
+      <rect x="974" y="214" width="92" height="30" rx="6" style="fill:var(--bg);stroke:var(--line)"/><text x="1020" y="234" text-anchor="middle" class="t">Tests</text>
+      <text x="778" y="270" class="tm">Edits rewrite the recognised call in setup() on save.</text>
+    </svg></div>
+  </div>
+</section>
+
+<section>
+  <h2>What the simulation covers, without a table</h2>
+  <p>Your Q6: the simulation sheet shown on the canvas itself, in its Simulate tint. Each block gets one fidelity chip, the way Simscape blocks offer a modelling fidelity and PLECS separates ideal from detailed models. Hatched means not simulated. One sentence on top says what the control receives. A click on a chip opens the detail in the inspector.</p>
+  <div class="card" style="background:var(--tint-sim)">
+    <div class="draw"><svg viewBox="0 0 1100 250" role="img" aria-label="Simulation coverage view with a fidelity chip on each block">
+      <rect x="0" y="0" width="1100" height="250" style="fill:var(--tint-sim)"/>
+      <rect x="16" y="14" width="1068" height="34" rx="8" class="box"/>
+      <text x="32" y="36" class="t"><tspan style="font-weight:600">The control receives</tspan> V_LOW1, I_LOW1 and V_HIGH every 100 µs, ideal; it returns one duty for both legs. Simulated with Pulsim 2.0, exact PWM edges.</text>
+      <!-- blocks with chips -->
+      <rect x="16" y="72" width="200" height="70" rx="10" class="box"/><text x="30" y="98" class="th">Power</text>
+      <rect x="30" y="110" width="130" height="20" rx="10" class="okf"/><text x="95" y="124" text-anchor="middle" style="fill:#fff;font:600 10px var(--f-mono)">switching model</text>
+      <rect x="256" y="72" width="200" height="70" rx="10" class="box"/><text x="270" y="98" class="th">Measurement</text>
+      <rect x="270" y="110" width="150" height="20" rx="10" style="fill:var(--accent)"/><text x="345" y="124" text-anchor="middle" style="fill:#16211f;font:600 10px var(--f-mono)">ideal · no sensor error</text>
+      <rect x="496" y="72" width="200" height="70" rx="10" class="box"/><text x="510" y="98" class="th">Driver</text>
+      <rect x="510" y="110" width="130" height="20" rx="10" class="okf"/><text x="575" y="124" text-anchor="middle" style="fill:#fff;font:600 10px var(--f-mono)">PWM + dead time</text>
+      <rect x="136" y="166" width="200" height="70" rx="10" class="box"/><text x="150" y="192" class="th">Controller</text>
+      <rect x="150" y="204" width="168" height="20" rx="10" class="okf"/><text x="234" y="218" text-anchor="middle" style="fill:#fff;font:600 10px var(--f-mono)">your control.cpp, compiled</text>
+      <rect x="376" y="166" width="200" height="70" rx="10" class="hatch" style="stroke:var(--line);stroke-width:1.5"/><text x="390" y="192" class="th">Auxiliary supply</text>
+      <rect x="390" y="204" width="110" height="20" rx="10" class="offf"/><text x="445" y="218" text-anchor="middle" style="fill:#fff;font:600 10px var(--f-mono)">not simulated</text>
+      <!-- legend -->
+      <g transform="translate(760 80)">
+        <text x="0" y="0" class="eyebrow" style="fill:var(--muted);font:600 9.5px var(--f-mono);letter-spacing:.08em">LEGEND</text>
+        <rect x="0" y="14" width="14" height="14" rx="7" class="okf"/><text x="22" y="26" class="t">simulated as on the board</text>
+        <rect x="0" y="40" width="14" height="14" rx="7" style="fill:var(--accent)"/><text x="22" y="52" class="t">simplified: differs from the board</text>
+        <rect x="0" y="66" width="14" height="14" rx="7" class="offf"/><text x="22" y="78" class="t">not simulated</text>
+        <text x="0" y="110" class="tm">Board-only code in main.cpp (outside setup())</text>
+        <text x="0" y="126" class="tm">is listed under the Controller chip.</text>
+      </g>
+    </svg></div>
+  </div>
+</section>
+
+<section>
+  <h2>The canvas tint per tab</h2>
+  <p>Your Q2 idea: the canvas keeps its place and changes background, so you always know which job you are in.</p>
+  <div class="tints">
+    <div class="tint" style="background:var(--tint-design)">Design<br><span class="refs">values on each block</span></div>
+    <div class="tint" style="background:var(--tint-code)">Code<br><span class="refs">file and function per block</span></div>
+    <div class="tint" style="background:var(--tint-lab)">Lab<br><span class="refs">probes, live readings, checks</span></div>
+    <div class="tint" style="background:var(--tint-sim)">Simulate<br><span class="refs">fidelity chips</span></div>
+  </div>
+</section>
+</div>

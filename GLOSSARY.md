@@ -1,12 +1,36 @@
 # OwnStudio
 
-An application that carries one power converter from requirements to a validated prototype, through three workbenches that all work on the same converter project.
+An application that starts from a board, lets the user wire it into a setup, and carries that setup from design through code to measurements compared with simulation, in three workbenches that all work on the same setup.
 
-## Project
+## Boards, examples and setups
 
-**Converter project**:
-The single shared object that every workbench reads and writes: the converter's requirements, its blocks, its plant model, its firmware, its test procedures and its test records.
-_Avoid_: workspace, design, model (unqualified)
+**Board**:
+The OwnTech hardware a user starts from (Twist, Spin, Ownverter); choosing it opens its examples, its design sheet, its procedures and its plant model.
+_Avoid_: board pack, BSP, platform
+
+**Example**:
+Firmware for one board, listed in the OwnTech examples collection, that a user loads into a setup to get going in seconds.
+_Avoid_: mission, template, demo, sketch
+
+**Setup**:
+A source, a board and a load as wired on the bench, together with the board's settings, the firmware, the procedures, the reports and the history that go with them, kept as one folder; the single shared object every workbench reads and writes.
+_Avoid_: converter project (SPEC 1.0), workspace, project (unqualified), experiment
+
+**Tutorial**:
+An optional guided walk over a setup that teaches the tools step by step.
+_Avoid_: mission (SPEC 1.0), lesson, course
+
+**Library**:
+A body of code a setup's firmware builds against, such as the control library or ScopeMimicry, tracked with its own history and remotes.
+_Avoid_: dependency (unqualified), package, module
+
+**Timeline**:
+The history of a setup shown as a row of dots, one per saved state, from which any earlier state can be previewed or restored, and from which a branch can start.
+_Avoid_: undo history, checkpoints, versions (unqualified)
+
+**Milestone**:
+A state on the timeline that the user named.
+_Avoid_: tag, release, checkpoint
 
 **Requirement**:
 A numeric property the converter must meet, stated with a value, a tolerance and the conditions under which it is checked.
@@ -58,16 +82,28 @@ _Avoid_: GND (unqualified), earth (that is protective earth)
 
 **Environment**:
 Everything outside the converter that a test needs: whatever supplies and absorbs the converted energy, and the instruments and systems the converter or the bench talks to.
-_Avoid_: test bench (that is the physical setup), surroundings, system (unqualified)
+_Avoid_: test bench (that is the physical bench), surroundings, system (unqualified)
 
 **Power port**:
 A point where the power block exchanges energy with the environment, named for what is connected to it; its voltage side (high or low), its kind (DC or AC) and its allowed power direction are properties of the port, not its name.
 _Avoid_: input, output, source, load (these change with power direction)
 
+**Source** / **Load**:
+A part of the environment, placed on the setup canvas, that supplies energy to a power port (source) or absorbs it (load), with its own values such as voltage, current limit or resistance; ports are not named after them.
+_Avoid_: input, output (for the parts), supply (in writing; acceptable in speech for a DC source)
+
+**Instrument**:
+A part of the environment that measures or drives the setup from outside the board, such as an oscilloscope, a programmable supply or an electronic load.
+_Avoid_: device (unqualified), equipment
+
+**Instrument driver**:
+The code a procedure uses to command or read one instrument.
+_Avoid_: driver (unqualified; that is the driver block), plugin
+
 ## Safety
 
 **Safety envelope**:
-The maximum voltage, current and temperature allowed at each power port, at or below the board ratings, declared once per converter project and enforced by firmware trips, instrument limits, simulator checks and component ratings.
+The maximum voltage, current and temperature allowed at each power port, at or below the board ratings, declared once per setup and enforced by firmware trips, instrument limits, simulator checks and component ratings.
 _Avoid_: limits (unqualified), ratings (those belong to components)
 
 **Protection chain**:
@@ -92,7 +128,11 @@ _Avoid_: test session, test run (when meaning the whole set)
 
 **Test record**:
 The filed evidence of a test campaign: setup, versions, per-criterion verdicts and raw data.
-_Avoid_: report, log, result file
+_Avoid_: report (that is the light summary), log, result file
+
+**Report**:
+A light, shareable summary of one or more test records: plots, conditions, verdicts and the timeline state they came from, without the raw data.
+_Avoid_: test record (that is the evidence), export
 
 **Test level**:
 How much of the system a test case exercises: L0 one object with synthetic inputs, L1 closed loop against the plant model on the simulator target, L2 closed loop on the bench.
@@ -102,10 +142,22 @@ _Avoid_: stage, phase
 A triggered capture buffer inside the firmware that records fast signals from the board's own sensors and is downloaded after the event.
 _Avoid_: oscilloscope (that is an instrument), scope (unqualified)
 
+**Probe**:
+A point of observation placed on the setup canvas, on a node, a block or a pin, that names what a procedure records.
+_Avoid_: channel (that is the scope's), sensor (that is hardware), tap
+
+**Monitor**:
+The slow way of observing a probe: values read periodically over the data link, shown on widgets and rolling plots, for algorithms and state machines.
+_Avoid_: logging, streaming, telemetry
+
+**Capture**:
+The fast way of observing a probe: a triggered recording by the firmware scope, read after the event, for step responses and other fast transients.
+_Avoid_: snapshot, acquisition (unqualified), recording (unqualified)
+
 ## Workbenches
 
 **Workbench**:
-One of three views of the converter project, each devoted to one activity: Design, Code or Lab.
+One of three views of the setup, each devoted to one activity: Design, Code or Lab.
 _Avoid_: page, perspective (Theia's implementation term), mode
 
 **Design workbench**:
@@ -129,8 +181,20 @@ A Lab view for hands-on operation of a target: it shows incoming data objects an
 _Avoid_: dashboard (modular's term, acceptable in speech), SCADA, GUI
 
 **Procedure**:
-A Python script that drives a target through a fixed sequence and files a test record.
+Everything a run in the Lab needs: the check that the setup is ready, a test sequence, and the handling of the data afterwards into a test record and a report.
 _Avoid_: script (unqualified), test (unqualified), supervisor
+
+**Test sequence**:
+The ordered steps of a procedure (set values, switch the converter on and off, wait, capture, monitor, check), drawn as nested blocks and kept as Python.
+_Avoid_: flowchart, test plan, script (unqualified)
+
+**Lab checklist**:
+The conditions checked continuously before and during a run on the board (the right board, the right firmware, the measured input matching the setup, limits, a load, a valid procedure); a run may start only while every one holds.
+_Avoid_: preflight, interlock (that is hardware)
+
+**AI takeover**:
+The user's grant to the AI agent to run one test sequence on the board, power included, for a limited time, ended by any failed check, any change to the setup, or Stop.
+_Avoid_: autopilot, unattended mode
 
 **Data object**:
 One named value a firmware exchanges with the outside world through ThingSet, with its unit and access.
@@ -144,16 +208,20 @@ _Avoid_: variable dictionary, object tree (ThingSet's term), register map
 The git commit, dirty flag and binary hash compiled into a firmware and reported by the board, used to tell whether the board runs the project's code.
 _Avoid_: firmware version (unqualified), hash (unqualified)
 
-**Mission**:
-A guided path from the landing page that opens a pre-filled converter project, including its firmware source for the student to iterate on, and ends in a real result.
-_Avoid_: tutorial, lesson, example (an OwnTech example is what a mission is usually derived from)
+**Start page**:
+What OwnStudio shows when no setup is open: the boards to choose from, recent setups, the chosen board's examples and the tutorials.
+_Avoid_: Home (SPEC 1.0), landing page, dashboard
 
-**Home**:
-The landing view of a converter project: its block diagram, from which each block opens what belongs to it, shown in one of three layers.
-_Avoid_: dashboard, start page
+**Setup canvas**:
+The drawing of the setup, always visible at the bottom of the window, where sources, boards, loads and instruments are placed and wired, and which opens to the inside of a board.
+_Avoid_: schematic (that is the plant model's), diagram (unqualified), Home
+
+**Inspector**:
+The side view that shows the settings, requirements and test states of whatever is selected on the setup canvas, with the ways into Design, Code and Tests.
+_Avoid_: properties panel, details
 
 **Specification layer** / **Build layer** / **Verification layer**:
-The three layers of Home: what the converter must do (requirements, safety envelope), what it is (blocks, ports, firmware), and what has been shown (each requirement coloured by its latest test record).
+Three ways of looking at a setup that carries requirements: what the converter must do (requirements, safety envelope), what it is (blocks, ports, firmware), and what has been shown (each requirement coloured by its latest test record).
 _Avoid_: evidence (a false friend in French), data, validation (in V-model terms validation is the final check against the need, not a per-requirement check)
 
 ## Boards and models
@@ -163,12 +231,20 @@ The versioned file, kept with a board's hardware sources, that states the board'
 _Avoid_: datasheet (that is a document for people), board file, BSP
 
 **Board rating**:
-A limit of the hardware itself, taken from the board description and not editable in a converter project.
+A limit of the hardware itself, taken from the board description and not editable in a setup.
 _Avoid_: envelope (that is the project's chosen limit, at or below the rating)
+
+**Board definition**:
+A board's devicetree overlay together with its board description: everything OwnStudio needs to offer a board, including a custom one.
+_Avoid_: board pack, board support package
 
 **Plant model**:
 The simulated power block and environment that the firmware acts on when the target is the simulator.
 _Avoid_: simulation, model (unqualified), digital twin
+
+**Fidelity**:
+How closely the simulator reproduces one block of the board: as on the board, simplified, or not simulated.
+_Avoid_: accuracy (that is a measured error), level of detail
 
 **Simulation backend**:
 The part of the OwnTech API that, when the target is the simulator, takes measurements from and gives PWM commands to the plant model instead of the hardware, so the rest of the API runs unchanged.

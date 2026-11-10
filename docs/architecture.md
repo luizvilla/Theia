@@ -2,6 +2,8 @@
 
 What exists after step 4, how the parts talk, and every engineering choice behind it. A choice is either **agreed** (an ADR or your explicit decision) or **mine**, taken during the steps without asking you. The "mine" rows are the ones to review. Each says what it would cost to change.
 
+> **Status after the step 5 grilling (2026-11-10).** This file describes 1.0 as built. Of the choices in §5: **A11** is replaced by Core2's pattern ([ADR 0028](adr/0028-simulation-follows-core2.md)); **A10** stays (procedures are Python against a target) but their sequences are drawn in Blockly ([ADR 0029](adr/0029-test-sequences-in-blockly.md)); **A16** (study log) and **A17** (workbench switching) go with the old window ([SPEC 2.0 §5](../SPEC.md#5-the-window)); **A18** is replaced by the user's own agent and the power token ([ADR 0031](adr/0031-ai-agents-and-takeover.md)); **A7** is refined (records out of git, reports in, [ADR 0030](adr/0030-setups-are-git-repos.md)). The others stand.
+
 ## 1. The pieces
 
 ```mermaid
