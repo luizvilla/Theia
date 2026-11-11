@@ -16,8 +16,9 @@ import { SETUP_SERVICE_PATH, SetupService } from '../common/setup-protocol';
 import { START_WIDGET_ID, StartWidget } from './start-widget';
 import { ExampleContribution } from './example-contribution';
 import {
-    CanvasWidget, DesignPanelWidget, InspectorWidget, LabPanelWidget, PartsWidget, TimelineWidget
+    DesignPanelWidget, InspectorWidget, LabPanelWidget, PartsWidget, TimelineWidget
 } from './window-widgets';
+import { CanvasWidget } from './canvas-widget';
 import { BOTTOM_SLOTS, RIGHT_SLOTS, WORKBENCH_SLOTS } from '../common/window-layout';
 import { WORKBENCHES, widgetId } from './workbenches';
 import { ServiceConnectionProvider } from '@theia/core/lib/browser/messaging/service-connection-provider';

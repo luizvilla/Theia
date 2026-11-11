@@ -4,12 +4,12 @@
 // so far and saves a screenshot beside its frame number in docs/images/step-5/.
 // Each commit that builds a frame adds it to FRAMES.
 //
-// Usage: run.sh <port> <setup folder> shots.mjs [only-frame-id]   (frames on a setup)
+// Usage: run.sh <port> <setup folder> shots.mjs [only-frame-id]   (frames on a setup; they change its canvas: give it a copy)
 //        run.sh <port> - shots.mjs                               (frames without a folder: Start)
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { connect, waitForWindow, STATE, sleep } from './cdp.mjs';
+import { connect, dropPart, waitForWindow, wire, STATE, sleep } from './cdp.mjs';
 
 const [port, only] = process.argv.slice(2);
 const out = join(dirname(fileURLToPath(import.meta.url)), '../../docs/images/step-5');
@@ -64,6 +64,50 @@ const FRAMES = [
             'The board grid comes from the board descriptions: the Twist (defined), Spin and Ownverter (not yet, "Later"), and Custom board (slice 2).',
             'The connected board is highlighted only when a Spin is plugged in; this shot is taken without one.',
             'Tutorials are listed as after slice 1, as in the frame.',
+        ],
+    },
+    {
+        id: 'parts', num: '2', title: 'Drag the source, the Twist and the load',
+        go: async () => {
+            await show('left', 'ownstudio.left.lab');
+            await show('right', 'ownstudio.parts');
+            await show('bottom', 'ownstudio.canvas');
+            await dropPart(app, 'dc-source', 0.03, 0.45);
+            await dropPart(app, 'resistor', 0.78, 0.45);
+            await sleep(600);
+        },
+        differences: [
+            'The Lab panel shows what its checklist will check; the checklist itself comes in U11.',
+            'The frame shows the resistor mid-drag; this stable check captures the source and resistor after both drops.',
+            'The timeline dots come in U18.',
+        ],
+    },
+    {
+        id: 'rules', num: '3', title: 'Wire them; a wrong wire does not snap',
+        go: async () => {
+            await wire(app, ['dc-source', 'out'], ['board', 'HIGH']);
+            await wire(app, ['board', 'LOW1'], ['resistor', 'in']);
+            await wire(app, ['resistor', 'in'], ['board', 'HIGH']);       // refused: it says why
+            await sleep(200);
+        },
+        differences: [
+            'The refusal shows under the canvas for a few seconds; the frame draws it beside the wire.',
+            'The timeline dots come in U18.',
+        ],
+    },
+    {
+        id: 'partscode', num: '6b', title: 'Parts from the Code workbench: nothing else moves',
+        go: async () => {
+            await show('left', 'explorer-view-container');
+            await openFile(process.env.SHOT_FILE || 'src/main.cpp');
+            await show('right', 'ownstudio.parts');
+            await show('bottom', 'ownstudio.canvas');
+            await sleep(400);
+        },
+        differences: [
+            'The canvas keeps the source, Twist and resistor wired in frames 2 and 3; the navigation test checks a drop from every workbench.',
+            'The file mapping under the nodes and the Build/Upload toolbar come with U9 and U10.',
+            'The timeline dots come in U18.',
         ],
     },
     {

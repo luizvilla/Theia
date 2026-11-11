@@ -8,7 +8,7 @@
    "left": "explorer-view-container",
    "right": "ownstudio.inspector",
    "bottom": "ownstudio.canvas",
-   "main": "code-editor-opener:file:///data/ownstudio/build/nav-home/setups/twist-buck/src/main.cpp:8453538795699863",
+   "main": "code-editor-opener:file:///data/ownstudio/build/shots-setup/src/main.cpp:2094287597095626",
    "centreScroll": "0px",
    "leftTabs": [
     "ownstudio.left.design",
@@ -101,15 +101,120 @@
   ]
  },
  {
+  "frame": "2",
+  "title": "Drag the source, the Twist and the load",
+  "file": "frame-02-parts.png",
+  "state": {
+   "workbench": "lab",
+   "left": "ownstudio.left.lab",
+   "right": "ownstudio.parts",
+   "bottom": "ownstudio.canvas",
+   "main": "ownstudio.workbench.lab",
+   "centreScroll": null,
+   "leftTabs": [
+    "ownstudio.left.design",
+    "explorer-view-container",
+    "ownstudio.left.lab"
+   ],
+   "rightTabs": [
+    "ownstudio.parts",
+    "ownstudio.inspector",
+    "chat-view-widget"
+   ],
+   "bottomTabs": [
+    "Canvas",
+    "Terminal",
+    "Build output"
+   ],
+   "canvasTint": "lab",
+   "timeline": true,
+   "leftOpen": true,
+   "rightOpen": true,
+   "bottomOpen": true,
+   "status": [
+    "",
+    "",
+    "",
+    "twist-buck*",
+    "",
+    "0  0",
+    "Twist 1.4.2 ·  firmware differs",
+    "Ln 1, Col 1",
+    "LF",
+    "UTF-8",
+    "Spaces: 4",
+    ""
+   ],
+   "titleBar": "rgb(23, 51, 46)"
+  },
+  "differences": [
+   "The Lab panel shows what its checklist will check; the checklist itself comes in U11.",
+   "The frame shows the resistor mid-drag; this stable check captures the source and resistor after both drops.",
+   "The timeline dots come in U18."
+  ]
+ },
+ {
+  "frame": "3",
+  "title": "Wire them; a wrong wire does not snap",
+  "file": "frame-03-rules.png",
+  "state": {
+   "workbench": "lab",
+   "left": "ownstudio.left.lab",
+   "right": "ownstudio.parts",
+   "bottom": "ownstudio.canvas",
+   "main": "ownstudio.workbench.lab",
+   "centreScroll": null,
+   "leftTabs": [
+    "ownstudio.left.design",
+    "explorer-view-container",
+    "ownstudio.left.lab"
+   ],
+   "rightTabs": [
+    "ownstudio.parts",
+    "ownstudio.inspector",
+    "chat-view-widget"
+   ],
+   "bottomTabs": [
+    "Canvas",
+    "Terminal",
+    "Build output"
+   ],
+   "canvasTint": "lab",
+   "timeline": true,
+   "leftOpen": true,
+   "rightOpen": true,
+   "bottomOpen": true,
+   "status": [
+    "",
+    "",
+    "",
+    "twist-buck*",
+    "",
+    "0  0",
+    "Twist 1.4.2 ·  firmware differs",
+    "Ln 1, Col 1",
+    "LF",
+    "UTF-8",
+    "Spaces: 4",
+    ""
+   ],
+   "titleBar": "rgb(23, 51, 46)"
+  },
+  "differences": [
+   "The refusal shows under the canvas for a few seconds; the frame draws it beside the wire.",
+   "The timeline dots come in U18."
+  ]
+ },
+ {
   "frame": "5",
   "title": "Load an example: it lands on its own branch",
   "file": "frame-05-example.png",
   "state": {
    "workbench": "code",
    "left": "explorer-view-container",
-   "right": "ownstudio.inspector",
+   "right": "ownstudio.parts",
    "bottom": "ownstudio.canvas",
-   "main": "code-editor-opener:file:///data/ownstudio/build/nav-home/setups/twist-buck/src/main.cpp:8453538795699863",
+   "main": "code-editor-opener:file:///data/ownstudio/build/shots-setup/src/main.cpp:2094287597095626",
    "centreScroll": "0px",
    "leftTabs": [
     "ownstudio.left.design",
@@ -136,7 +241,7 @@
     "",
     "",
     "twist-buck",
-    "",
+    "0↓ 1↑",
     "0  0",
     "Twist 1.4.2 ·  firmware differs",
     "Ln 1, Col 1",
@@ -153,15 +258,15 @@
   ]
  },
  {
-  "frame": "15",
-  "title": "The eight menus",
-  "file": "frame-15-menus.png",
+  "frame": "6b",
+  "title": "Parts from the Code workbench: nothing else moves",
+  "file": "frame-6b-partscode.png",
   "state": {
    "workbench": "code",
    "left": "explorer-view-container",
-   "right": "ownstudio.inspector",
+   "right": "ownstudio.parts",
    "bottom": "ownstudio.canvas",
-   "main": "code-editor-opener:file:///data/ownstudio/build/nav-home/setups/twist-buck/src/main.cpp:8453538795699863",
+   "main": "code-editor-opener:file:///data/ownstudio/build/shots-setup/src/main.cpp:2094287597095626",
    "centreScroll": "0px",
    "leftTabs": [
     "ownstudio.left.design",
@@ -188,7 +293,60 @@
     "",
     "",
     "twist-buck",
+    "0↓ 1↑",
+    "0  0",
+    "Twist 1.4.2 ·  firmware differs",
+    "Ln 1, Col 1",
+    "LF",
+    "UTF-8",
+    "Spaces: 4",
+    ""
+   ],
+   "titleBar": "rgb(23, 51, 46)"
+  },
+  "differences": [
+   "The canvas keeps the source, Twist and resistor wired in frames 2 and 3; the navigation test checks a drop from every workbench.",
+   "The file mapping under the nodes and the Build/Upload toolbar come with U9 and U10.",
+   "The timeline dots come in U18."
+  ]
+ },
+ {
+  "frame": "15",
+  "title": "The eight menus",
+  "file": "frame-15-menus.png",
+  "state": {
+   "workbench": "code",
+   "left": "explorer-view-container",
+   "right": "ownstudio.parts",
+   "bottom": "ownstudio.canvas",
+   "main": "code-editor-opener:file:///data/ownstudio/build/shots-setup/src/main.cpp:2094287597095626",
+   "centreScroll": "0px",
+   "leftTabs": [
+    "ownstudio.left.design",
+    "explorer-view-container",
+    "ownstudio.left.lab"
+   ],
+   "rightTabs": [
+    "ownstudio.parts",
+    "ownstudio.inspector",
+    "chat-view-widget"
+   ],
+   "bottomTabs": [
+    "Canvas",
+    "Terminal",
+    "Build output"
+   ],
+   "canvasTint": "code",
+   "timeline": true,
+   "leftOpen": true,
+   "rightOpen": true,
+   "bottomOpen": true,
+   "status": [
     "",
+    "",
+    "",
+    "twist-buck",
+    "0↓ 1↑",
     "0  0",
     "Twist 1.4.2 ·  firmware differs",
     "Ln 1, Col 1",

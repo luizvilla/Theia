@@ -73,3 +73,38 @@ export const STATE = `(() => {
         titleBar: getComputedStyle(document.querySelector('#theia-top-panel') || document.body).backgroundColor,
     };
 })()`;
+
+/** Drops a part from the Parts panel onto the canvas at a fraction of its size (HTML drag and drop, as a user's drag). The node shows on React's next render. */
+export async function dropPart(app, part, fx = 0.5, fy = 0.5) {
+    return app.evaluate(`(() => {
+        const src = document.querySelector('#ownstudio\\\\.parts [data-part="${part}"]');
+        const cv = document.querySelector('#ownstudio\\\\.canvas .ownstudio-canvas');
+        if (!src || !cv) { return null; }
+        const r = cv.getBoundingClientRect();
+        const dt = new DataTransfer();
+        src.dispatchEvent(new DragEvent('dragstart', { bubbles: true, dataTransfer: dt }));
+        const at = { bubbles: true, cancelable: true, dataTransfer: dt, clientX: r.x + r.width * ${fx}, clientY: r.y + r.height * ${fy} };
+        cv.dispatchEvent(new DragEvent('dragover', at));
+        cv.dispatchEvent(new DragEvent('drop', at));
+        src.dispatchEvent(new DragEvent('dragend', { bubbles: true, dataTransfer: dt }));
+        return true;
+    })()`);
+}
+
+/** Drags a wire from one port to another with the mouse; returns the number of wires after. */
+export async function wire(app, [nodeA, portA], [nodeB, portB]) {
+    const centre = (node, port) => app.evaluate(`(() => {
+        const h = document.querySelector('.react-flow__node[data-id="${node}"] .react-flow__handle[data-handleid="${port}"]');
+        const r = h.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`);
+    const a = await centre(nodeA, portA);
+    const b = await centre(nodeB, portB);
+    await app.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: a.x, y: a.y });
+    await app.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: a.x, y: a.y, button: 'left', buttons: 1, clickCount: 1 });
+    for (let i = 1; i <= 12; i++) {
+        await app.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: a.x + (b.x - a.x) * i / 12, y: a.y + (b.y - a.y) * i / 12, button: 'left', buttons: 1 });
+    }
+    await sleep(100);
+    await app.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: b.x, y: b.y, button: 'left', buttons: 0, clickCount: 1 });
+    await sleep(400);
+    return app.evaluate(`document.querySelectorAll('#ownstudio\\\\.canvas .react-flow__edge').length`);
+}

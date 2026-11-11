@@ -5,10 +5,12 @@
 // a model of it expects, and how long it took to get there (#13's lesson): 95 % of
 // the switches within 200 ms, none above 300 ms. The clock starts when the press
 // reaches the page and stops at the first frame that shows the expected state.
-// Later commits extend it: canvas levels and selection (U9), dragging parts (U8).
+// U8 adds a part dropped from Parts in each workbench: it lands once, and
+// nothing else moves. U9 extends it to canvas levels and selection.
 //
-// Usage: run.sh <port> <folder> navigation-test.mjs [file-to-open] [random-clicks] [seed]
-import { connect, waitForWindow, STATE, sleep } from './cdp.mjs';
+// Usage: run.sh <port> <setup folder> navigation-test.mjs [file-to-open] [random-clicks] [seed]
+// The test changes the setup's canvas (parts are dropped): give it a copy.
+import { connect, dropPart, waitForWindow, STATE, sleep } from './cdp.mjs';
 
 const [port, file = 'src/main.cpp', clicksArg = '500', seedArg = '1'] = process.argv.slice(2);
 const P95_MS = 200;
@@ -145,6 +147,24 @@ for (let i = 0; i < Number(clicksArg); i++) {
     await run(side, id, `random #${i + 1} ${side} ${id}`);
 }
 
+// U8: a resistor dropped from Parts in each workbench lands on the canvas once; the window does not move.
+const drops = [];
+for (const wb of WORKBENCHES) {
+    if (!(model.workbench === wb[0] && model.leftOpen)) { await run('left', wb[1], `drop: open ${wb[0]}`); }
+    if (!(model.right === RIGHT[0] && model.rightOpen)) { await run('right', RIGHT[0], `drop: Parts in ${wb[0]}`); }
+    if (model.bottom !== BOTTOM[0]) { await run('bottom', BOTTOM[0], `drop: canvas in ${wb[0]}`); }
+    const before = await app.evaluate(STATE);
+    const count = await app.evaluate(`Number(document.querySelector('#ownstudio\\\\.canvas .ownstudio-canvas')?.dataset.nodeCount)`);
+    await dropPart(app, 'resistor', 0.3 + 0.2 * drops.length, 0.75);
+    await sleep(300);       // React draws the new node on its next render
+    const after = await app.evaluate(`Number(document.querySelector('#ownstudio\\\\.canvas .ownstudio-canvas')?.dataset.nodeCount)`);
+    const state = await app.evaluate(STATE);
+    const moved = differences(state, { workbench: before.workbench, left: before.left, right: before.right, bottom: before.bottom, main: before.main, centreScroll: before.centreScroll });
+    const ok = after === count + 1 && moved.length === 0;
+    drops.push({ workbench: wb[0], before: count, after, ok, moved });
+    if (!ok) { failures.push({ label: `drop in ${wb[0]}`, ok, diff: moved, count, after }); }
+}
+
 times.sort((a, b) => a - b);
 const report = {
     clicks: times.length,
@@ -154,6 +174,7 @@ const report = {
     maxMs: times[times.length - 1],
     bySide: Object.fromEntries(Object.entries(bySide).map(([k, v]) => { v.sort((a, b) => a - b); return [k, { median: v[v.length >> 1], p95: v[Math.floor(v.length * 0.95)], max: v[v.length - 1] }]; })),
     byTarget: process.env.NAV_DETAIL ? Object.fromEntries(Object.entries(byTarget).map(([k, v]) => { v.sort((a, b) => a - b); return [k, `n=${v.length} median=${v[v.length >> 1]} max=${v[v.length - 1]}`]; })) : undefined,
+    drops,
     firstFailures: failures.slice(0, 10),
 };
 report.pass = failures.length === 0 && report.p95Ms <= P95_MS;

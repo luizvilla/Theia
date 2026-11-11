@@ -8,7 +8,7 @@ import {
 import { TabBarToolbarContribution, TabBarToolbarRegistry } from '@theia/core/lib/browser/shell/tab-bar-toolbar';
 import { WORKBENCHES, Workbench, commandId, iconClass, widgetId } from './workbenches';
 import { BOTTOM_SLOTS, RIGHT_SLOTS, STATUS_ACTIONS, WorkbenchId, bottomSlotOf, workbenchOfLeftWidget } from '../common/window-layout';
-import { CanvasWidget } from './window-widgets';
+import { CanvasWidget } from './canvas-widget';
 import { TabBar } from '@theia/core/shared/@lumino/widgets';
 import { WorkspaceService } from '@theia/workspace/lib/browser';
 import { SetupService } from '../common/setup-protocol';

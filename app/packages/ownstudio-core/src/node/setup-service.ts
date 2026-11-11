@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import { injectable } from '@theia/core/shared/inversify';
-import { load } from 'js-yaml';
+import { dump, load } from 'js-yaml';
 import { ExampleLoaded, SetupService, SetupSummary, StartInfo, setupSlug } from '../common/setup-protocol';
 
 const CORE_UPSTREAM = 'https://github.com/owntech-foundation/Core.git';
@@ -72,6 +72,24 @@ export class SetupServiceImpl implements SetupService {
         const branch = await new Promise<string | null>(resolve =>
             execFile('git', ['-C', folder, 'symbolic-ref', '--quiet', '--short', 'HEAD'], (error, stdout) => resolve(error ? null : stdout.trim())));
         return { name: setup.name ?? path.basename(folder), board: setup.board ?? '', branch };
+    }
+
+    protected setupFile(folder: string): string { return path.join(folder, 'ownstudio', 'setup.yaml'); }
+
+    async readCanvas(folder: string): Promise<unknown> {
+        const setup = (load(fs.readFileSync(this.setupFile(folder), 'utf8')) ?? {}) as { canvas?: unknown };
+        return setup.canvas ?? { nodes: [], wires: [] };
+    }
+
+    async writeCanvas(folder: string, canvas: unknown): Promise<void> {
+        const file = this.setupFile(folder);
+        const setup = (load(fs.readFileSync(file, 'utf8')) ?? {}) as Record<string, unknown>;
+        setup.canvas = canvas;
+        fs.writeFileSync(file, dump(setup, { sortKeys: false, lineWidth: 120 }));
+    }
+
+    async commitEvent(folder: string, event: string, summary: string): Promise<void> {
+        await this.run('ownstudio_lab.setups', ['event', folder, event, summary]);
     }
 
     async loadExample(folder: string, example: string): Promise<ExampleLoaded> {

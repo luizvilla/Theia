@@ -7,7 +7,7 @@ import * as React from '@theia/core/shared/react';
 import { injectable, postConstruct } from '@theia/core/shared/inversify';
 import { ReactWidget } from '@theia/core/lib/browser/widgets/react-widget';
 import { Message } from '@theia/core/shared/@lumino/messaging';
-import { CANVAS_TINT, RIGHT_SLOTS, BOTTOM_SLOTS, WORKBENCH_SLOTS, WindowSlot, WorkbenchId } from '../common/window-layout';
+import { RIGHT_SLOTS, WORKBENCH_SLOTS, WindowSlot } from '../common/window-layout';
 import { iconClass } from './workbenches';
 
 abstract class WindowPanel extends ReactWidget {
@@ -32,12 +32,14 @@ abstract class WindowPanel extends ReactWidget {
     }
 }
 
-interface Part { name: string; colour: string; note: string; later?: boolean }
+/** Kept in step with canvas-widget.tsx's drop target. */
+const PART_MIME = 'application/ownstudio-part';
+interface Part { name: string; part?: string; colour: string; note: string }
 const PARTS: Part[] = [
-    { name: 'DC source', colour: '#b2532a', note: 'on HIGH' },
-    { name: 'Twist 1.4.2', colour: '#1f5a46', note: 'the board' },
-    { name: 'Resistor', colour: '#2c6f9e', note: 'on LOW1' },
-    { name: 'Oscilloscope', colour: '#8ea29c', note: 'later', later: true },
+    { name: 'DC source', part: 'dc-source', colour: '#b2532a', note: 'on HIGH' },
+    { name: 'Twist 1.4.2', part: 'twist', colour: '#1f5a46', note: 'the board' },
+    { name: 'Resistor', part: 'resistor', colour: '#2c6f9e', note: 'on LOW1' },
+    { name: 'Oscilloscope', colour: '#8ea29c', note: 'later' },
 ];
 
 @injectable()
@@ -46,12 +48,13 @@ export class PartsWidget extends WindowPanel {
 
     protected render(): React.ReactNode {
         return <div className='ownstudio-panel-body'>
-            {PARTS.map(p => <div key={p.name} className={'ownstudio-part' + (p.later ? ' ownstudio-later' : '')}
-                data-part={p.name}>
+            {PARTS.map(p => <div key={p.name} className={'ownstudio-part' + (p.part ? '' : ' ownstudio-later')}
+                data-part={p.part ?? ''} draggable={!!p.part}
+                onDragStart={e => { if (p.part) { e.dataTransfer.setData(PART_MIME, p.part); e.dataTransfer.effectAllowed = 'copy'; } }}>
                 <span className='ownstudio-dot' style={{ background: p.colour }} />{p.name}<small>{p.note}</small>
             </div>)}
-            <p className='ownstudio-muted'>Drag a part onto the setup canvas. Wires that break the rules do not snap.
-                Dragging arrives with the canvas.</p>
+            <p className='ownstudio-muted'>Drag a part onto the setup canvas: one source on HIGH, one Twist, loads on LOW1 or LOW2.
+                Wires that break the rules do not snap.</p>
         </div>;
     }
 }
@@ -60,41 +63,20 @@ export class PartsWidget extends WindowPanel {
 export class InspectorWidget extends WindowPanel {
     protected readonly slot = RIGHT_SLOTS[1];
     protected selection: string | undefined;
+    protected rows: [string, string][] = [];
 
-    select(selection: string | undefined): void {
+    select(selection: string | undefined, rows: [string, string][] = []): void {
         this.selection = selection;
+        this.rows = rows;
         this.update();
     }
 
     protected render(): React.ReactNode {
         return <div className='ownstudio-panel-body'>
             {this.selection && <div className='ownstudio-panel-head'>{this.selection}</div>}
+            {this.rows.map(([k, v]) => <div key={k} className='ownstudio-field'><span>{k}</span><b>{v}</b></div>)}
             <p className='ownstudio-muted' data-inspector-empty={!this.selection}>
                 {this.selection ? 'Details of the selected block.' : 'Select a block on the canvas to see its details.'}</p>
-        </div>;
-    }
-}
-
-@injectable()
-export class CanvasWidget extends WindowPanel {
-    protected readonly slot = BOTTOM_SLOTS[0];
-    protected workbench: WorkbenchId = 'code';
-
-    setWorkbench(workbench: WorkbenchId): void {
-        this.workbench = workbench;
-        this.node.style.setProperty('--ownstudio-canvas', CANVAS_TINT[workbench]);
-        this.node.dataset.workbench = workbench;
-        this.update();
-    }
-
-    protected render(): React.ReactNode {
-        const label = WORKBENCH_SLOTS.find(w => w.id === this.workbench)?.label;
-        return <div className='ownstudio-canvas'>
-            <div className='ownstudio-canvas-empty'>
-                <div className='ownstudio-panel-head'>Setup canvas</div>
-                <p className='ownstudio-muted'>The setup's source, Twist and load appear here, the same in every workbench.</p>
-            </div>
-            <span className='ownstudio-canvas-label'>{label}</span>
         </div>;
     }
 }

@@ -28,6 +28,12 @@ export interface SetupService {
     describeSetup(folder: string): Promise<SetupSummary | undefined>;
     /** Loads an example (a path in the examples index) on its own branch (plan U7). */
     loadExample(folder: string, example: string): Promise<ExampleLoaded>;
+    /** The canvas section of ownstudio/setup.yaml (plan U8). */
+    readCanvas(folder: string): Promise<unknown>;
+    /** Writes the canvas section, leaving the rest of setup.yaml as it is. */
+    writeCanvas(folder: string, canvas: unknown): Promise<void>;
+    /** Commits the setup as one timeline dot (U5's events). */
+    commitEvent(folder: string, event: string, summary: string): Promise<void>;
 }
 
 export interface SetupSummary { name: string; board: string; branch: string | null }
