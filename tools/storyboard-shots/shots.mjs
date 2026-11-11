@@ -96,6 +96,23 @@ const FRAMES = [
         ],
     },
     {
+        id: 'inside', num: '4', title: 'Open the Twist and look at its parts',
+        go: async () => {
+            await app.doubleClickOn('.react-flow__node[data-id="board"]');
+            await sleep(500);
+            await app.clickOn('.ownstudio-inside-block[data-block="driver"]');
+            await show('left', 'ownstudio.left.design');
+            await show('right', 'ownstudio.inspector');
+            await show('bottom', 'ownstudio.canvas');
+            await sleep(300);
+        },
+        after: async () => { await app.clickOn('.ownstudio-inside-breadcrumb button'); },
+        differences: [
+            'The Design sheets in the centre arrive in U16; the selected Driver and its devicetree values are complete here.',
+            'The requirement badges come when a setup carries requirements, and timeline dots come in U18.',
+        ],
+    },
+    {
         id: 'partscode', num: '6b', title: 'Parts from the Code workbench: nothing else moves',
         go: async () => {
             await show('left', 'explorer-view-container');
@@ -106,7 +123,7 @@ const FRAMES = [
         },
         differences: [
             'The canvas keeps the source, Twist and resistor wired in frames 2 and 3; the navigation test checks a drop from every workbench.',
-            'The file mapping under the nodes and the Build/Upload toolbar come with U9 and U10.',
+            'The file mapping under the nodes and the Build/Upload toolbar come with U10.',
             'The timeline dots come in U18.',
         ],
     },

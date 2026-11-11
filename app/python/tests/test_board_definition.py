@@ -30,11 +30,13 @@ class TwistFromTheOverlay(unittest.TestCase):
     def test_legs(self):
         self.assertEqual([leg.name for leg in self.board.legs], ["LEG1", "LEG2"])
         leg1 = self.board.leg("LEG1")
+        self.assertEqual(leg1.pwm_devices, ["pwma", "pwma"])
         self.assertEqual(leg1.pwm_pins, [12, 14])
         self.assertEqual((leg1.driver_pin, leg1.current_pin, leg1.capacitor_pin), (19, 30, 7))
         self.assertEqual(leg1.dead_time_ns, [100, 100])
         self.assertEqual((leg1.modulation, leg1.edge_trigger, leg1.adc), ("UpDwn", "EdgeTrigger_up", "ADC_1"))
         self.assertTrue(leg1.enabled)
+        self.assertEqual(self.board.leg("LEG2").pwm_devices, ["pwmc", "pwmc"])
         self.assertEqual(self.board.leg("LEG2").pwm_pins, [2, 4])
 
     def test_sensors(self):

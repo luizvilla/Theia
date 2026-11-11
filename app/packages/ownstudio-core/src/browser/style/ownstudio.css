@@ -328,3 +328,35 @@ body.theia-dark .ownstudio-start-body h1 { color: var(--ownstudio-yellow); }
     color: #ffd9d4; padding: 4px 12px; border-radius: 4px; font-size: 12px; }
 .ownstudio-field { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid rgba(128,128,128,0.15); font-size: 12px; }
 .ownstudio-field span { opacity: 0.7; }
+.ownstudio-field b { max-width: 66%; text-align: right; overflow-wrap: anywhere; font-weight: 500; }
+.ownstudio-inspector-actions { display: flex; gap: 4px; margin-top: 12px; }
+.ownstudio-inspector-actions button, .ownstudio-inside-breadcrumb button { border: 1px solid var(--theia-panel-border, #53615e); border-radius: 4px;
+    color: var(--theia-foreground); background: var(--theia-button-secondaryBackground, #263532); cursor: pointer; font: inherit; }
+.ownstudio-inspector-actions button { flex: 1; padding: 4px 2px; font-size: 11px; }
+.ownstudio-inspector-actions button:hover, .ownstudio-inside-breadcrumb button:hover { border-color: var(--ownstudio-yellow); }
+
+/* Inside the Twist (plan U9): board.yaml's five-block reference layout. */
+.ownstudio-canvas-inside { overflow: hidden; }
+.ownstudio-inside-breadcrumb { position: absolute; z-index: 6; left: 12px; top: 7px; display: flex; align-items: center; gap: 6px;
+    color: #8ea29c; font-size: 10px; }
+.ownstudio-inside-breadcrumb button { padding: 2px 7px; }
+.ownstudio-inside-breadcrumb b { color: #e2ebe8; font-weight: 600; }
+.ownstudio-inside-side { position: absolute; top: 34px; bottom: 18px; width: 42%; border: 1px dashed; border-radius: 8px; pointer-events: none; }
+.ownstudio-inside-side span { position: absolute; top: 5px; font: 600 8px var(--theia-code-font-family, monospace); letter-spacing: 0.06em; }
+.ownstudio-inside-power { left: 4%; border-color: rgba(240,138,75,0.34); background: rgba(240,138,75,0.035); }
+.ownstudio-inside-power span { left: 8px; color: #f08a4b; }
+.ownstudio-inside-control { right: 4%; border-color: rgba(107,179,227,0.34); background: rgba(107,179,227,0.035); }
+.ownstudio-inside-control span { right: 8px; color: #6bb3e3; }
+.ownstudio-inside-signals { position: absolute; z-index: 1; left: 4%; top: 34px; width: 92%; height: calc(100% - 52px); overflow: visible; }
+.ownstudio-inside-signals path { fill: none; }
+.ownstudio-signal { stroke: #6bb3e3; stroke-width: 2; marker-end: url(#ownstudio-signal-arrow); }
+.ownstudio-energy { stroke: #f08a4b; stroke-width: 1.4; stroke-dasharray: 4 3; marker-end: url(#ownstudio-energy-arrow); }
+.ownstudio-isolation { stroke: #8ea29c; stroke-width: 1.2; stroke-dasharray: 3 5; }
+.ownstudio-inside-svg-label { fill: #8ea29c; font: 10px var(--theia-ui-font-family); }
+.ownstudio-inside-block { position: absolute; z-index: 3; width: 26%; min-height: 38px; transform: translateY(-2px); border: 1.3px solid #4a5e59;
+    border-radius: 8px; background: #202b29; color: #e2ebe8; box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+    text-align: left; padding: 9px 12px; cursor: pointer; font: 700 12px var(--ownstudio-emphasis-font); }
+.ownstudio-inside-block:hover { border-color: #8ea29c; }
+.ownstudio-inside-block.selected { border: 2.4px solid var(--ownstudio-yellow); padding: 7.9px 10.9px; }
+.ownstudio-inside-block[data-block='feeder'] { border-style: dashed; }
+.ownstudio-inside-block small { float: right; color: #8ea29c; font: 9px var(--theia-ui-font-family); }

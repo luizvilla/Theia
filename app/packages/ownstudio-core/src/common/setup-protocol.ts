@@ -34,10 +34,45 @@ export interface SetupService {
     writeCanvas(folder: string, canvas: unknown): Promise<void>;
     /** Commits the setup as one timeline dot (U5's events). */
     commitEvent(folder: string, event: string, summary: string): Promise<void>;
+    /** Board description plus the setup Core clone's devicetree values (plan U9). */
+    boardDefinition(folder: string): Promise<BoardDefinition>;
 }
 
 export interface SetupSummary { name: string; board: string; branch: string | null }
 export interface ExampleLoaded { branch: string; previous_branch: string; commit: string; files: string[]; extras: boolean }
+
+export interface BoardLeg {
+    name: string;
+    pwm_devices: string[];
+    dead_time_ns: number[];
+    modulation: string;
+    pwm_pins: number[];
+    enabled: boolean;
+}
+
+export interface BoardSensor { name: string; adc: string | null; enabled: boolean }
+export interface InsideBlockDescription { label: string; side: 'power' | 'control' | 'centre'; at: [number, number] }
+export interface BoardDefinition {
+    name: string;
+    version: string;
+    overlay: string;
+    default_frequency_hz: number;
+    min_frequency_hz: number;
+    legs: BoardLeg[];
+    sensors: BoardSensor[];
+    description: {
+        board: string;
+        label: string;
+        controller: string;
+        ports: Record<string, unknown>;
+        inside: {
+            blocks: Record<string, InsideBlockDescription>;
+            signals: [string, string, string][];
+            ports_on: string;
+            isolation: boolean;
+        };
+    };
+}
 
 /** A folder name from what the user typed. */
 export function setupSlug(name: string): string {

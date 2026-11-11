@@ -5,7 +5,7 @@ import * as os from 'os';
 import * as path from 'path';
 import { injectable } from '@theia/core/shared/inversify';
 import { dump, load } from 'js-yaml';
-import { ExampleLoaded, SetupService, SetupSummary, StartInfo, setupSlug } from '../common/setup-protocol';
+import { BoardDefinition, ExampleLoaded, SetupService, SetupSummary, StartInfo, setupSlug } from '../common/setup-protocol';
 
 const CORE_UPSTREAM = 'https://github.com/owntech-foundation/Core.git';
 
@@ -90,6 +90,18 @@ export class SetupServiceImpl implements SetupService {
 
     async commitEvent(folder: string, event: string, summary: string): Promise<void> {
         await this.run('ownstudio_lab.setups', ['event', folder, event, summary]);
+    }
+
+    async boardDefinition(folder: string): Promise<BoardDefinition> {
+        const setup = (load(fs.readFileSync(this.setupFile(folder), 'utf8')) ?? {}) as { board?: string };
+        if (!setup.board) {
+            throw new Error('The setup does not name its board.');
+        }
+        const description = path.join(this.boards, setup.board, 'board.yaml');
+        if (!fs.existsSync(description)) {
+            throw new Error(`No board description for ${setup.board}.`);
+        }
+        return await this.run('ownstudio_lab.board_definition', [description, folder]) as BoardDefinition;
     }
 
     async loadExample(folder: string, example: string): Promise<ExampleLoaded> {

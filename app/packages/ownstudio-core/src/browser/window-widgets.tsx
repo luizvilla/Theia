@@ -64,22 +64,29 @@ export class InspectorWidget extends WindowPanel {
     protected readonly slot = RIGHT_SLOTS[1];
     protected selection: string | undefined;
     protected rows: [string, string][] = [];
+    protected actions: InspectorAction[] = [];
 
-    select(selection: string | undefined, rows: [string, string][] = []): void {
+    select(selection: string | undefined, rows: [string, string][] = [], actions: InspectorAction[] = []): void {
         this.selection = selection;
         this.rows = rows;
+        this.actions = actions;
         this.update();
     }
 
     protected render(): React.ReactNode {
-        return <div className='ownstudio-panel-body'>
+        return <div className='ownstudio-panel-body' data-inspector-selection={this.selection ?? ''}>
             {this.selection && <div className='ownstudio-panel-head'>{this.selection}</div>}
             {this.rows.map(([k, v]) => <div key={k} className='ownstudio-field'><span>{k}</span><b>{v}</b></div>)}
+            {!!this.actions.length && <div className='ownstudio-inspector-actions'>
+                {this.actions.map(action => <button key={action.label} onClick={action.run}>{action.label}</button>)}
+            </div>}
             <p className='ownstudio-muted' data-inspector-empty={!this.selection}>
-                {this.selection ? 'Details of the selected block.' : 'Select a block on the canvas to see its details.'}</p>
+                {this.selection ? 'Read-only in slice 1.' : 'Select a block on the canvas to see its details.'}</p>
         </div>;
     }
 }
+
+export interface InspectorAction { label: string; run: () => void }
 
 export const TIMELINE_WIDGET_ID = 'ownstudio.timeline';
 

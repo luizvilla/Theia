@@ -30,8 +30,20 @@ export async function connect(port) {
         await click(box.x, box.y);
         return true;
     };
+    /** Double-clicks the centre of the first matching element, with the same CDP events as a user. */
+    const doubleClickOn = async selector => {
+        const box = await evaluate(`(() => { const e = document.querySelector(${JSON.stringify(selector)}); if (!e) return null;
+            const r = e.getBoundingClientRect(); return r.width ? { x: r.x + r.width / 2, y: r.y + r.height / 2 } : null; })()`);
+        if (!box) { return false; }
+        for (const clickCount of [1, 2]) {
+            for (const type of ['mousePressed', 'mouseReleased']) {
+                await send('Input.dispatchMouseEvent', { type, x: box.x, y: box.y, button: 'left', clickCount });
+            }
+        }
+        return true;
+    };
     const screenshot = async () => Buffer.from((await send('Page.captureScreenshot', { format: 'png' })).result.data, 'base64');
-    return { send, evaluate, click, clickOn, screenshot, close: () => ws.close() };
+    return { send, evaluate, click, clickOn, doubleClickOn, screenshot, close: () => ws.close() };
 }
 
 export const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -57,6 +69,8 @@ export const STATE = `(() => {
     const visible = id => { const e = document.getElementById(id); return !!e && e.offsetWidth > 0 && e.offsetHeight > 0; };
     const mainId = main ? tabId(main) : null;
     const lines = mainId && document.getElementById(mainId)?.querySelector('.monaco-editor .lines-content');
+    const canvas = document.getElementById('ownstudio.canvas')?.querySelector('.ownstudio-canvas');
+    const inspector = document.getElementById('ownstudio.inspector')?.querySelector('[data-inspector-selection]');
     return {
         workbench: document.body.dataset.ownstudioWorkbench,
         left: current('left'), right: current('right'),
@@ -67,6 +81,9 @@ export const STATE = `(() => {
         rightTabs: [...document.querySelectorAll('.lm-TabBar.theia-app-right .lm-TabBar-content .lm-TabBar-tab')].map(tabId),
         bottomTabs: [...document.querySelectorAll('#theia-bottom-content-panel .lm-TabBar-tab')].map(t => t.querySelector('.lm-TabBar-tabLabel')?.textContent),
         canvasTint: document.getElementById('ownstudio.canvas')?.dataset.workbench ?? null,
+        canvasLevel: canvas?.dataset.canvasLevel ?? null,
+        canvasSelection: canvas?.dataset.selectedBlock || null,
+        inspectorSelection: inspector?.dataset.inspectorSelection || null,
         timeline: visible('ownstudio.timeline'),
         leftOpen: visible('theia-left-content-panel'), rightOpen: visible('theia-right-content-panel'), bottomOpen: visible('theia-bottom-content-panel'),
         status: cur('#theia-statusBar .element').slice(0, 12),

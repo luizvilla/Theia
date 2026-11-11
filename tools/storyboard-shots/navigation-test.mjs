@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: LGPL-2.1-only
 // The navigation test (plan U2, first version; Luiz's request): drives the real
 // window through every workbench × right-bar tab × bottom tab, forward and back,
-// then 500 random clicks. After every click it checks that the window shows what
+// at both canvas levels, then 500 random clicks split between the levels. After
+// every click it checks that the window shows what
 // a model of it expects, and how long it took to get there (#13's lesson): 95 % of
 // the switches within 200 ms, none above 300 ms. The clock starts when the press
 // reaches the page and stops at the first frame that shows the expected state.
 // U8 adds a part dropped from Parts in each workbench: it lands once, and
-// nothing else moves. U9 extends it to canvas levels and selection.
+// nothing else moves. U9 keeps the inside level and its selected block through
+// every switch, and checks that the inspector still describes that block.
 //
 // Usage: run.sh <port> <setup folder> navigation-test.mjs [file-to-open] [random-clicks] [seed]
 // The test changes the setup's canvas (parts are dropped): give it a copy.
@@ -44,7 +46,10 @@ const editorScroll = first.centreScroll;
 if (!editorId) { console.error('no editor opened for', file); process.exit(2); }
 
 // The model: what the window must show.
-const model = { workbench: 'code', leftOpen: true, right: first.right, rightOpen: true, bottom: first.bottom };
+const model = {
+    workbench: 'code', leftOpen: true, right: first.right, rightOpen: true, bottom: first.bottom,
+    canvasLevel: first.canvasLevel, canvasSelection: first.canvasSelection, inspectorSelection: first.inspectorSelection,
+};
 
 function expected() {
     const wb = WORKBENCHES.find(w => w[0] === model.workbench);
@@ -56,6 +61,9 @@ function expected() {
         main: wb[2] ?? editorId,
         centreScroll: wb[2] ? undefined : editorScroll,
         canvasTint: model.workbench,
+        canvasLevel: model.canvasLevel,
+        canvasSelection: model.canvasSelection,
+        inspectorSelection: model.inspectorSelection,
     };
 }
 
@@ -125,7 +133,7 @@ async function run(side, id, label) {
     }
 }
 
-// Every combination, forward then back.
+// Every combination, forward then back, at each canvas level.
 const combos = [];
 for (const wb of WORKBENCHES) { for (const right of RIGHT) { for (const bottom of BOTTOM) { combos.push([wb[1], right, bottom]); } } }
 async function visit([left, right, bottom], label) {
@@ -135,17 +143,70 @@ async function visit([left, right, bottom], label) {
     if (!(model.right === right && model.rightOpen)) { await run('right', right, label); }
     await run('bottom', bottom, label);
 }
-for (const c of combos) { await visit(c, 'forward ' + c.join(' · ')); }
-for (const c of [...combos].reverse()) { await visit(c, 'back ' + c.join(' · ')); }
+async function allCombinations(level) {
+    for (const c of combos) { await visit(c, `${level} forward ${c.join(' · ')}`); }
+    for (const c of [...combos].reverse()) { await visit(c, `${level} back ${c.join(' · ')}`); }
+}
 
 // Random clicks, including clicks on a panel that is already open.
 let seed = Number(seedArg);
 const random = n => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed % n; };
 const all = [...WORKBENCHES.map(w => ['left', w[1]]), ...RIGHT.map(id => ['right', id]), ...BOTTOM.map(id => ['bottom', id])];
-for (let i = 0; i < Number(clicksArg); i++) {
-    const [side, id] = all[random(all.length)];
-    await run(side, id, `random #${i + 1} ${side} ${id}`);
+async function randomClicks(count, level, offset) {
+    for (let i = 0; i < count; i++) {
+        const [side, id] = all[random(all.length)];
+        await run(side, id, `${level} random #${offset + i + 1} ${side} ${id}`);
+    }
 }
+
+const randomTotal = Number(clicksArg);
+const setupRandom = Math.floor(randomTotal / 2);
+await allCombinations('setup');
+await randomClicks(setupRandom, 'setup', 0);
+
+// U9: open the board, select Driver, then keep the level, selection and inspector through the same matrix.
+if (model.bottom !== BOTTOM[0]) { await run('bottom', BOTTOM[0], 'inside: show canvas'); }
+const opened = await app.doubleClickOn('.react-flow__node[data-id="board"]');
+await sleep(500);
+model.canvasLevel = 'inside';
+model.canvasSelection = null;
+model.inspectorSelection = null;
+const openDiff = opened ? differences(await app.evaluate(STATE), expected()) : ['board node not found'];
+if (openDiff.length) { failures.push({ label: 'open the Twist', ok: false, diff: openDiff }); }
+
+const selected = await app.clickOn('.ownstudio-inside-block[data-block="driver"]');
+await sleep(300);
+model.canvasSelection = 'driver';
+model.inspectorSelection = 'Driver';
+model.right = RIGHT[1];
+model.rightOpen = true;
+const selectDiff = selected ? differences(await app.evaluate(STATE), expected()) : ['driver block not found'];
+if (selectDiff.length) { failures.push({ label: 'select Driver', ok: false, diff: selectDiff }); }
+
+// The three inspector buttons land in Design, Code and Lab (labelled Tests) without losing the inside selection.
+const actions = [];
+for (const [button, workbench] of [[1, 'design'], [2, 'code'], [3, 'lab']]) {
+    const clicked = await app.clickOn(`[id="ownstudio.inspector"] .ownstudio-inspector-actions button:nth-child(${button})`);
+    await sleep(300);
+    model.workbench = workbench;
+    model.leftOpen = true;
+    const diff = clicked ? differences(await app.evaluate(STATE), expected()) : [`inspector action ${button} not found`];
+    actions.push({ button, workbench, clicked, diff });
+    if (diff.length) { failures.push({ label: `Driver action → ${workbench}`, ok: false, diff }); }
+}
+
+await allCombinations('inside');
+await randomClicks(randomTotal - setupRandom, 'inside', setupRandom);
+
+// Return to the setup level for U8's drag checks.
+if (model.bottom !== BOTTOM[0]) { await run('bottom', BOTTOM[0], 'setup: show canvas'); }
+const closed = await app.clickOn('.ownstudio-inside-breadcrumb button');
+await sleep(300);
+model.canvasLevel = 'setup';
+model.canvasSelection = null;
+model.inspectorSelection = null;
+const closeDiff = closed ? differences(await app.evaluate(STATE), expected()) : ['inside breadcrumb not found'];
+if (closeDiff.length) { failures.push({ label: 'close the Twist', ok: false, diff: closeDiff }); }
 
 // U8: a resistor dropped from Parts in each workbench lands on the canvas once; the window does not move.
 const drops = [];
@@ -174,6 +235,7 @@ const report = {
     maxMs: times[times.length - 1],
     bySide: Object.fromEntries(Object.entries(bySide).map(([k, v]) => { v.sort((a, b) => a - b); return [k, { median: v[v.length >> 1], p95: v[Math.floor(v.length * 0.95)], max: v[v.length - 1] }]; })),
     byTarget: process.env.NAV_DETAIL ? Object.fromEntries(Object.entries(byTarget).map(([k, v]) => { v.sort((a, b) => a - b); return [k, `n=${v.length} median=${v[v.length >> 1]} max=${v[v.length - 1]}`]; })) : undefined,
+    inside: { opened: !!opened, selected: !!selected, closed: !!closed, openDiff, selectDiff, actions, closeDiff },
     drops,
     firstFailures: failures.slice(0, 10),
 };

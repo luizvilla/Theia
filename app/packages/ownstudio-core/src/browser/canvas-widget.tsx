@@ -9,6 +9,8 @@
 import '@xyflow/react/dist/style.css';
 import * as React from '@theia/core/shared/react';
 import { inject, injectable, postConstruct } from '@theia/core/shared/inversify';
+import { CommandRegistry } from '@theia/core/lib/common';
+import { ApplicationShell } from '@theia/core/lib/browser';
 import { ReactWidget } from '@theia/core/lib/browser/widgets/react-widget';
 import { Message } from '@theia/core/shared/@lumino/messaging';
 import { WorkspaceService } from '@theia/workspace/lib/browser';
@@ -18,9 +20,10 @@ import {
 } from '@xyflow/react';
 import { BOTTOM_SLOTS, CANVAS_TINT, WORKBENCH_SLOTS, WorkbenchId } from '../common/window-layout';
 import { Canvas, PartDef, addPart, canConnect, normaliseCanvas, partDef } from '../common/canvas-model';
+import { InsideBlockId, InsideModel, insideModel } from '../common/inside-model';
 import { SetupService } from '../common/setup-protocol';
-import { iconClass } from './workbenches';
-import { InspectorWidget } from './window-widgets';
+import { WORKBENCHES, commandId, iconClass } from './workbenches';
+import { InspectorAction, InspectorWidget } from './window-widgets';
 
 export const PART_MIME = 'application/ownstudio-part';
 const COMMIT_AFTER_MS = 10_000;
@@ -51,11 +54,16 @@ export class CanvasWidget extends ReactWidget {
     @inject(SetupService) protected readonly setups: SetupService;
     @inject(WorkspaceService) protected readonly workspace: WorkspaceService;
     @inject(InspectorWidget) protected readonly inspector: InspectorWidget;
+    @inject(ApplicationShell) protected readonly shell: ApplicationShell;
+    @inject(CommandRegistry) protected readonly commands: CommandRegistry;
 
     protected readonly slot = BOTTOM_SLOTS[0];
     protected workbench: WorkbenchId = 'code';
     protected folder: string | undefined;
     protected canvas: Canvas = { nodes: [], wires: [] };
+    protected inside: InsideModel | undefined;
+    protected level: 'setup' | 'inside' = 'setup';
+    protected insideSelection: InsideBlockId | undefined;
     protected rfNodes: Node<PartData>[] = [];
     protected selected: string | undefined;
     protected refusal = '';
@@ -107,7 +115,15 @@ export class CanvasWidget extends ReactWidget {
             return;
         }
         this.folder = folder;
-        this.canvas = normaliseCanvas(await this.setups.readCanvas(folder));
+        const [canvas, definition] = await Promise.all([
+            this.setups.readCanvas(folder),
+            this.setups.boardDefinition(folder).catch(error => {
+                console.error('board inside not loaded', error);
+                return undefined;
+            }),
+        ]);
+        this.canvas = normaliseCanvas(canvas);
+        this.inside = definition ? insideModel(definition) : undefined;
         // The board of a new setup has no place yet: put it in the middle.
         this.canvas.nodes = this.canvas.nodes.map(n => n.x === undefined ? { ...n, x: 300, y: 40 } : n);
         this.syncNodes();
@@ -240,6 +256,100 @@ export class CanvasWidget extends ReactWidget {
         }
     }
 
+    protected openInside = (_event: React.MouseEvent, node: Node<PartData>): void => {
+        if (node.data.def.kind !== 'board') {
+            return;
+        }
+        if (!this.inside) {
+            this.refuse('The board has no inside view.');
+            return;
+        }
+        this.level = 'inside';
+        this.selected = undefined;
+        this.syncNodes();
+        this.insideSelection = undefined;
+        this.inspector.select(undefined);
+        this.update();
+    };
+
+    protected closeInside = (): void => {
+        this.level = 'setup';
+        this.insideSelection = undefined;
+        if (this.selected) {
+            this.select(this.selected);
+        } else {
+            this.inspector.select(undefined);
+        }
+        this.update();
+    };
+
+    protected actions(): InspectorAction[] {
+        const action = (label: string, workbench: WorkbenchId): InspectorAction => ({
+            label,
+            run: () => {
+                const target = WORKBENCHES.find(candidate => candidate.id === workbench)!;
+                void this.commands.executeCommand(commandId(target));
+            },
+        });
+        return [action('Design', 'design'), action('Code', 'code'), action('Tests', 'lab')];
+    }
+
+    protected selectInside = (id: InsideBlockId): void => {
+        const block = this.inside?.blocks.find(candidate => candidate.id === id);
+        if (!block) {
+            return;
+        }
+        this.insideSelection = id;
+        this.inspector.select(block.label, block.details, this.actions());
+        this.shell.expandPanel('right');
+        this.shell.rightPanelHandler.activate(this.inspector.id);
+        this.update();
+    };
+
+    protected renderInside(label: string | undefined): React.ReactNode {
+        const model = this.inside!;
+        const signal = (from: InsideBlockId, to: InsideBlockId) => model.signals.find(item => item[0] === from && item[1] === to)?.[2] ?? '';
+        return <div className='ownstudio-canvas ownstudio-canvas-inside' data-canvas-level='inside'
+            data-selected-block={this.insideSelection ?? ''}>
+            <div className='ownstudio-inside-breadcrumb'><button onClick={this.closeInside}>Setup</button><span>›</span>
+                <b>{model.boardLabel}</b><span>› inside</span></div>
+            <div className='ownstudio-inside-side ownstudio-inside-power'><span>POWER SIDE · power ground</span></div>
+            <div className='ownstudio-inside-side ownstudio-inside-control'><span>CONTROL SIDE · digital ground</span></div>
+            <svg className='ownstudio-inside-signals' viewBox='0 0 1000 300' preserveAspectRatio='none' aria-hidden='true'>
+                <defs>
+                    <marker id='ownstudio-signal-arrow' markerWidth='9' markerHeight='9' refX='7' refY='4.5' orient='auto'>
+                        <path d='M0 0 L9 4.5 L0 9z' fill='#6bb3e3' />
+                    </marker>
+                    <marker id='ownstudio-energy-arrow' markerWidth='9' markerHeight='9' refX='7' refY='4.5' orient='auto'>
+                        <path d='M0 0 L9 4.5 L0 9z' fill='#f08a4b' />
+                    </marker>
+                </defs>
+                {model.isolation && <><path className='ownstudio-isolation' d='M330 300 L650 0' />
+                    <text x='660' y='18' className='ownstudio-inside-svg-label'>isolation barrier</text></>}
+                <path className='ownstudio-signal' d='M320 68 H680' />
+                <text x='420' y='55' className='ownstudio-inside-svg-label'>{signal('power', 'measurement')}</text>
+                <path className='ownstudio-signal' d='M790 96 V214' />
+                <text x='802' y='155' className='ownstudio-inside-svg-label'>{signal('measurement', 'controller')}</text>
+                <path className='ownstudio-signal' d='M680 240 H320' />
+                <text x='475' y='264' className='ownstudio-inside-svg-label'>{signal('controller', 'driver')}</text>
+                <path className='ownstudio-signal' d='M210 214 V96' />
+                <text x='222' y='155' className='ownstudio-inside-svg-label'>{signal('driver', 'power')}</text>
+                <path className='ownstudio-energy' d='M455 135 L325 88' />
+                <path className='ownstudio-energy' d='M545 135 L675 88' />
+                <path className='ownstudio-energy' d='M455 166 L325 220' />
+                <path className='ownstudio-energy' d='M545 166 L675 220' />
+            </svg>
+            {model.blocks.map(block => <button key={block.id} data-block={block.id}
+                className={'ownstudio-inside-block' + (this.insideSelection === block.id ? ' selected' : '')}
+                style={{ left: `${8 + block.at[0] * 58}%`, top: `${18 + block.at[1] * 50}%` }}
+                onClick={() => this.selectInside(block.id)}>
+                {block.label}
+                {block.id === 'power' && <small>{model.ports.join(' · ')}</small>}
+            </button>)}
+            <span className='ownstudio-canvas-label'>{label}</span>
+        </div>;
+    }
+
     protected render(): React.ReactNode {
         const label = WORKBENCH_SLOTS.find(w => w.id === this.workbench)?.label;
         if (!this.folder) {
@@ -251,15 +361,19 @@ export class CanvasWidget extends ReactWidget {
                 <span className='ownstudio-canvas-label'>{label}</span>
             </div>;
         }
+        if (this.level === 'inside' && this.inside) {
+            return this.renderInside(label);
+        }
         const edges: Edge[] = this.canvas.wires.map((w, i) => ({
             id: `w${i}`, source: w.from.node, sourceHandle: w.from.port, target: w.to.node, targetHandle: w.to.port, className: 'ownstudio-wire',
         }));
-        return <div className='ownstudio-canvas' onDrop={this.onDrop} onDragOver={this.onDragOver} data-node-count={this.canvas.nodes.length}>
+        return <div className='ownstudio-canvas' onDrop={this.onDrop} onDragOver={this.onDragOver} data-node-count={this.canvas.nodes.length}
+            data-canvas-level='setup' data-selected-block={this.selected ?? ''}>
             <ReactFlowProvider>
                 <ReactFlow<Node<PartData>, Edge> nodes={this.rfNodes} edges={edges} nodeTypes={NODE_TYPES}
                     connectionMode={ConnectionMode.Loose} isValidConnection={this.isValidConnection}
                     onConnect={this.onConnect} onConnectStart={() => { this.refusal = ''; }} onConnectEnd={this.onConnectEnd} onNodesChange={this.onNodesChange}
-                    onNodeDragStop={this.onNodeDragStop} onInit={flow => { this.flow = flow; }}
+                    onNodeDragStop={this.onNodeDragStop} onNodeDoubleClick={this.openInside} onInit={flow => { this.flow = flow; }}
                     fitView fitViewOptions={{ padding: 0.25, maxZoom: 1.2 }} minZoom={0.3} maxZoom={2}
                     proOptions={{ hideAttribution: true }} deleteKeyCode={null}>
                     <Background gap={18} size={1} color='rgba(255,255,255,0.12)' />

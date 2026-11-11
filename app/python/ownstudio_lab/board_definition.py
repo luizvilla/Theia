@@ -37,6 +37,7 @@ from devicetree import dtlib
 @dataclass
 class Leg:
     name: str
+    pwm_devices: list         # devicetree labels of the PWM controllers (pwma, pwmc)
     pwm_pins: list            # Spin pins of the high and low switch
     capacitor_pin: int
     driver_pin: int
@@ -134,7 +135,11 @@ def _with_stubs(text):
 
 def parse_devicetree(paths):
     """Parses one or more devicetree fragments (overlay, .dtsi) as one tree."""
-    text = "\n".join(open(p, encoding="utf-8").read() for p in paths)
+    fragments = []
+    for path in paths:
+        with open(path, encoding="utf-8") as source:
+            fragments.append(source.read())
+    text = "\n".join(fragments)
     with tempfile.NamedTemporaryFile("w", suffix=".dts", delete=False, encoding="utf-8") as f:
         f.write(_with_stubs(text))
         name = f.name
@@ -189,6 +194,19 @@ def _spin_pins(dt):
     return out
 
 
+def _pwm_devices(node, dt):
+    """Labels referenced by ``pwms``; the Twist overlay uses two specifier cells per phandle."""
+    prop = node.props.get("pwms")
+    if prop is None:
+        return []
+    cells = struct.unpack(f">{len(prop.value) // 4}I", prop.value)
+    out = []
+    for i in range(0, len(cells), 3):
+        target = dt.phandle2node[cells[i]]
+        out.append(target.labels[0] if target.labels else target.name)
+    return out
+
+
 def read_board(description_path, core):
     """Reads ``board.yaml`` and the devicetree it names inside a Core clone."""
     with open(description_path, encoding="utf-8") as f:
@@ -201,6 +219,7 @@ def read_board(description_path, core):
     shield = next(n for n in dt.node_iter() if _opt(n, "compatible", "str") == "power-leg")
     legs = [Leg(
         name=_opt(n, "leg-name", "str"),
+        pwm_devices=_pwm_devices(n, dt),
         pwm_pins=_opt(n, "pwm-pin-num", "nums"),
         capacitor_pin=_opt(n, "capa-pin-num", "num"),
         driver_pin=_opt(n, "driver-pin-num", "num"),

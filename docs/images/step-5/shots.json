@@ -8,7 +8,7 @@
    "left": "explorer-view-container",
    "right": "ownstudio.inspector",
    "bottom": "ownstudio.canvas",
-   "main": "code-editor-opener:file:///data/ownstudio/build/shots-setup/src/main.cpp:2094287597095626",
+   "main": "code-editor-opener:file:///data/ownstudio/build/shots-setup/src/main.cpp:3613307452478332",
    "centreScroll": "0px",
    "leftTabs": [
     "ownstudio.left.design",
@@ -26,6 +26,9 @@
     "Build output"
    ],
    "canvasTint": "code",
+   "canvasLevel": "setup",
+   "canvasSelection": null,
+   "inspectorSelection": null,
    "timeline": true,
    "leftOpen": true,
    "rightOpen": true,
@@ -127,6 +130,9 @@
     "Build output"
    ],
    "canvasTint": "lab",
+   "canvasLevel": "setup",
+   "canvasSelection": null,
+   "inspectorSelection": null,
    "timeline": true,
    "leftOpen": true,
    "rightOpen": true,
@@ -180,6 +186,9 @@
     "Build output"
    ],
    "canvasTint": "lab",
+   "canvasLevel": "setup",
+   "canvasSelection": null,
+   "inspectorSelection": null,
    "timeline": true,
    "leftOpen": true,
    "rightOpen": true,
@@ -206,6 +215,61 @@
   ]
  },
  {
+  "frame": "4",
+  "title": "Open the Twist and look at its parts",
+  "file": "frame-04-inside.png",
+  "state": {
+   "workbench": "design",
+   "left": "ownstudio.left.design",
+   "right": "ownstudio.inspector",
+   "bottom": "ownstudio.canvas",
+   "main": "ownstudio.workbench.design",
+   "centreScroll": null,
+   "leftTabs": [
+    "ownstudio.left.design",
+    "explorer-view-container",
+    "ownstudio.left.lab"
+   ],
+   "rightTabs": [
+    "ownstudio.parts",
+    "ownstudio.inspector",
+    "chat-view-widget"
+   ],
+   "bottomTabs": [
+    "Canvas",
+    "Terminal",
+    "Build output"
+   ],
+   "canvasTint": "design",
+   "canvasLevel": "inside",
+   "canvasSelection": "driver",
+   "inspectorSelection": "Driver",
+   "timeline": true,
+   "leftOpen": true,
+   "rightOpen": true,
+   "bottomOpen": true,
+   "status": [
+    "",
+    "",
+    "",
+    "twist-buck*",
+    "",
+    "0  0",
+    "Twist 1.4.2 ·  firmware differs",
+    "Ln 1, Col 1",
+    "LF",
+    "UTF-8",
+    "Spaces: 4",
+    ""
+   ],
+   "titleBar": "rgb(23, 51, 46)"
+  },
+  "differences": [
+   "The Design sheets in the centre arrive in U16; the selected Driver and its devicetree values are complete here.",
+   "The requirement badges come when a setup carries requirements, and timeline dots come in U18."
+  ]
+ },
+ {
   "frame": "5",
   "title": "Load an example: it lands on its own branch",
   "file": "frame-05-example.png",
@@ -214,7 +278,7 @@
    "left": "explorer-view-container",
    "right": "ownstudio.parts",
    "bottom": "ownstudio.canvas",
-   "main": "code-editor-opener:file:///data/ownstudio/build/shots-setup/src/main.cpp:2094287597095626",
+   "main": "code-editor-opener:file:///data/ownstudio/build/shots-setup/src/main.cpp:3613307452478332",
    "centreScroll": "0px",
    "leftTabs": [
     "ownstudio.left.design",
@@ -232,6 +296,9 @@
     "Build output"
    ],
    "canvasTint": "code",
+   "canvasLevel": "setup",
+   "canvasSelection": null,
+   "inspectorSelection": null,
    "timeline": true,
    "leftOpen": true,
    "rightOpen": true,
@@ -266,7 +333,7 @@
    "left": "explorer-view-container",
    "right": "ownstudio.parts",
    "bottom": "ownstudio.canvas",
-   "main": "code-editor-opener:file:///data/ownstudio/build/shots-setup/src/main.cpp:2094287597095626",
+   "main": "code-editor-opener:file:///data/ownstudio/build/shots-setup/src/main.cpp:3613307452478332",
    "centreScroll": "0px",
    "leftTabs": [
     "ownstudio.left.design",
@@ -284,6 +351,9 @@
     "Build output"
    ],
    "canvasTint": "code",
+   "canvasLevel": "setup",
+   "canvasSelection": null,
+   "inspectorSelection": null,
    "timeline": true,
    "leftOpen": true,
    "rightOpen": true,
@@ -306,7 +376,7 @@
   },
   "differences": [
    "The canvas keeps the source, Twist and resistor wired in frames 2 and 3; the navigation test checks a drop from every workbench.",
-   "The file mapping under the nodes and the Build/Upload toolbar come with U9 and U10.",
+   "The file mapping under the nodes and the Build/Upload toolbar come with U10.",
    "The timeline dots come in U18."
   ]
  },
@@ -319,7 +389,7 @@
    "left": "explorer-view-container",
    "right": "ownstudio.parts",
    "bottom": "ownstudio.canvas",
-   "main": "code-editor-opener:file:///data/ownstudio/build/shots-setup/src/main.cpp:2094287597095626",
+   "main": "code-editor-opener:file:///data/ownstudio/build/shots-setup/src/main.cpp:3613307452478332",
    "centreScroll": "0px",
    "leftTabs": [
     "ownstudio.left.design",
@@ -337,6 +407,9 @@
     "Build output"
    ],
    "canvasTint": "code",
+   "canvasLevel": "setup",
+   "canvasSelection": null,
+   "inspectorSelection": null,
    "timeline": true,
    "leftOpen": true,
    "rightOpen": true,
