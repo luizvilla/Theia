@@ -1,0 +1,52 @@
+# SPDX-License-Identifier: LGPL-2.1
+# The Twist 1.4.2's board description (ADR 0017, ADR 0032): only what its
+# devicetree does not say. Pins, legs, frequencies, dead times, sensors, gains
+# and thresholds are read from the overlay in the setup's Core clone.
+board: twist
+label: Twist 1.4.2
+controller: spin
+devicetree:
+  overlay: zephyr/boards/shields/twist/twist_v1_4_2.overlay
+  include:
+    - zephyr/boards/owntech/spin/spin_header.dtsi
+
+# Power ports of the setup canvas. Ratings come from the thresholds of the
+# sensors that measure each port; they are not repeated here.
+ports:
+  HIGH:
+    side: high
+    accepts: [source]
+    voltage_sensor: V_HIGH
+    current_sensor: I_HIGH
+  LOW1:
+    side: low
+    leg: LEG1
+    accepts: [load]
+    voltage_sensor: V1_LOW
+    current_sensor: I1_LOW
+  LOW2:
+    side: low
+    leg: LEG2
+    accepts: [load]
+    voltage_sensor: V2_LOW
+    current_sensor: I2_LOW
+
+# The inside view (SPEC §6, Luiz's reference layout): five blocks, names only on
+# the canvas; each block's details come from the devicetree nodes it names.
+inside:
+  blocks:
+    power:       {label: Power,       side: power,   at: [0, 0], devicetree: [power-shield]}
+    measurement: {label: Measurement, side: control, at: [1, 0], devicetree: [shield-sensors]}
+    feeder:      {label: Feeder,      side: centre,  at: [0.5, 0.5]}
+    driver:      {label: Driver,      side: power,   at: [0, 1], devicetree: [power-shield]}
+    controller:  {label: Controller,  side: control, at: [1, 1], devicetree: [spin-header]}
+  signals:   # clockwise
+    - [power, measurement, sensor signals]
+    - [measurement, controller, measurements]
+    - [controller, driver, PWM]
+    - [driver, power, gates]
+  ports_on: power
+  isolation: true
+
+plant: null        # the .pulsim plant arrives with U13
+wiring_templates: []   # draw.io templates arrive in slice 2
