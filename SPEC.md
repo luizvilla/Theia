@@ -115,7 +115,7 @@ The converter exchanges energy with the **environment** through **power ports**,
 | Board | Select board…, Boards manager…, Build, Flash, Build and flash, Board info |
 | Lab | Run procedure, Stop, Run on the simulator, New procedure, AI takeover (only when enabled), Reports |
 | History | Milestone…, Restore…, New branch…, Pull, Push, Remotes…, Propose upstream… |
-| View | Design, Code, Lab, Parts, Inspector, AI, Canvas, Timeline, Terminal, Zoom |
+| View | Design, Code, Lab, Parts, Inspector, AI, Canvas, Timeline, Terminal, Zoom ▸ |
 | Help | Tutorials, Documentation, Board datasheet, Report a problem, About |
 
 ## 6. The setup canvas and the inspector

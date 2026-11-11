@@ -52,9 +52,23 @@ const FRAMES = [
         },
         differences: [
             'Canvas, inspector and timeline are empty: no setup exists until U5 to U9, and the timeline\'s dots come in U18.',
-            'Menus are still Theia\'s; the eight menus come in U3.',
             'The Code panel is Theia\'s explorer (open editors, the folder, the git timeline); "My files" and the libraries list come with setups.',
             'The status bar shows Build, Upload and Serial as icons; board and firmware entries come with the board definition (U4) and the build (U10).',
+        ],
+    },
+    {
+        id: 'menus', num: '15', title: 'The eight menus',
+        go: async () => {
+            await app.clickOn('#theia-top-panel .lm-MenuBar-item:nth-child(1)');
+            await sleep(500);
+        },
+        after: async () => {
+            for (const type of ['keyDown', 'keyUp']) { await app.send('Input.dispatchKeyEvent', { type, key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 }); }
+        },
+        differences: [
+            'The frame draws all eight menus side by side as a map; the app opens one at a time (File here). menus-test.mjs checks every menu against the map.',
+            'Items not built yet carry "(slice N)", including those of slice 1; each drops it when its plan step lands.',
+            'File › Open recent opens Theia\'s recent-folders picker rather than a submenu.',
         ],
     },
 ];
@@ -68,6 +82,7 @@ for (const f of FRAMES.filter(x => !only || x.id === only)) {
     const file = `frame-${f.num.padStart(2, '0')}-${f.id}.png`;
     writeFileSync(join(out, file), await app.screenshot());
     report.push({ frame: f.num, title: f.title, file, state: await app.evaluate(STATE), differences: f.differences });
+    await f.after?.();
 }
 writeFileSync(join(out, 'shots.json'), JSON.stringify(report, null, 1) + '\n');
 console.log(JSON.stringify(report.map(r => ({ frame: r.frame, file: r.file })), null, 1));

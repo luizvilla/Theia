@@ -10,6 +10,7 @@ Both start this checkout's built app with a throwaway profile under
 # from the repository root, after `npm run build` in app/
 tools/storyboard-shots/run.sh 9482 /data/ownstudio/build/mission-demo tools/storyboard-shots/navigation-test.mjs control.cpp 500
 tools/storyboard-shots/run.sh 9484 /data/ownstudio/build/mission-demo tools/storyboard-shots/shots.mjs
+tools/storyboard-shots/run.sh 9485 /data/ownstudio/build/mission-demo tools/storyboard-shots/menus-test.mjs
 ```
 
 - **`navigation-test.mjs`**: clicks through every workbench × right-bar tab ×
@@ -24,5 +25,7 @@ tools/storyboard-shots/run.sh 9484 /data/ownstudio/build/mission-demo tools/stor
   so far and saves `docs/images/step-5/frame-NN-<id>.png`, plus `shots.json`
   with the window state and the known differences from the frame, each with its
   reason. Each commit that builds a frame adds it to `FRAMES`.
+- **`menus-test.mjs`** (U3): opens each menu of the menu bar and compares it,
+  item by item and separator by separator, with `common/menu-map.ts`.
 - **`cdp.mjs`**: the small DevTools Protocol client both scripts use, and `STATE`,
   the window state read from the page.

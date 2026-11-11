@@ -2,7 +2,7 @@
 // OwnStudio frontend module: branding, the window of 2.0 and the workbench views.
 import '../../src/browser/style/ownstudio.css';
 import { ContainerModule } from '@theia/core/shared/inversify';
-import { CommandContribution } from '@theia/core/lib/common';
+import { CommandContribution, MenuModelRegistry } from '@theia/core/lib/common';
 import {
     ApplicationShell, FrontendApplicationContribution, KeybindingContribution, WidgetFactory
 } from '@theia/core/lib/browser';
@@ -11,6 +11,7 @@ import { OwnStudioBrandingContribution, OwnStudioMonacoThemingService } from './
 import { MonacoThemingService } from '@theia/monaco/lib/browser/monaco-theming-service';
 import { WorkbenchContribution } from './workbench-contribution';
 import { OwnStudioApplicationShell } from './ownstudio-shell';
+import { MenuMapContribution, OwnStudioMenuModelRegistry } from './menu-map-contribution';
 import {
     CanvasWidget, DesignPanelWidget, InspectorWidget, LabPanelWidget, PartsWidget, TimelineWidget
 } from './window-widgets';
@@ -116,6 +117,12 @@ export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
         bind(widget).toSelf().inSingletonScope();
         bind(WidgetFactory).toDynamicValue(ctx => ({ id, createWidget: () => ctx.container.get(widget) })).inSingletonScope();
     }
+
+    // The eight menus (plan U3): the menu bar is common/menu-map.ts and nothing else.
+    bind(OwnStudioMenuModelRegistry).toSelf().inSingletonScope();
+    rebind(MenuModelRegistry).toService(OwnStudioMenuModelRegistry);
+    bind(MenuMapContribution).toSelf().inSingletonScope();
+    bind(CommandContribution).toService(MenuMapContribution);
 
     bind(WorkbenchContribution).toSelf().inSingletonScope();
     for (const service of [CommandContribution, KeybindingContribution, FrontendApplicationContribution, TabBarToolbarContribution]) {
