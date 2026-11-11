@@ -24,7 +24,14 @@ export interface SetupService {
     createSetup(board: string, name: string): Promise<string>;
     /** True when `folder` holds ownstudio/setup.yaml. */
     isSetup(folder: string): Promise<boolean>;
+    /** The setup's name, board and branch; undefined when `folder` is not a setup. */
+    describeSetup(folder: string): Promise<SetupSummary | undefined>;
+    /** Loads an example (a path in the examples index) on its own branch (plan U7). */
+    loadExample(folder: string, example: string): Promise<ExampleLoaded>;
 }
+
+export interface SetupSummary { name: string; board: string; branch: string | null }
+export interface ExampleLoaded { branch: string; previous_branch: string; commit: string; files: string[]; extras: boolean }
 
 /** A folder name from what the user typed. */
 export function setupSlug(name: string): string {

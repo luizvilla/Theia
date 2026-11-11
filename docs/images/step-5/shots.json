@@ -8,7 +8,7 @@
    "left": "explorer-view-container",
    "right": "ownstudio.inspector",
    "bottom": "ownstudio.canvas",
-   "main": "code-editor-opener:file:///data/ownstudio/build/nav-home/setups/twist-buck/src/main.cpp:8147136447478363",
+   "main": "code-editor-opener:file:///data/ownstudio/build/nav-home/setups/twist-buck/src/main.cpp:8453538795699863",
    "centreScroll": "0px",
    "leftTabs": [
     "ownstudio.left.design",
@@ -101,6 +101,58 @@
   ]
  },
  {
+  "frame": "5",
+  "title": "Load an example: it lands on its own branch",
+  "file": "frame-05-example.png",
+  "state": {
+   "workbench": "code",
+   "left": "explorer-view-container",
+   "right": "ownstudio.inspector",
+   "bottom": "ownstudio.canvas",
+   "main": "code-editor-opener:file:///data/ownstudio/build/nav-home/setups/twist-buck/src/main.cpp:8453538795699863",
+   "centreScroll": "0px",
+   "leftTabs": [
+    "ownstudio.left.design",
+    "explorer-view-container",
+    "ownstudio.left.lab"
+   ],
+   "rightTabs": [
+    "ownstudio.parts",
+    "ownstudio.inspector",
+    "chat-view-widget"
+   ],
+   "bottomTabs": [
+    "Canvas",
+    "Terminal",
+    "Build output"
+   ],
+   "canvasTint": "code",
+   "timeline": true,
+   "leftOpen": true,
+   "rightOpen": true,
+   "bottomOpen": true,
+   "status": [
+    "",
+    "",
+    "",
+    "twist-buck",
+    "",
+    "0  0",
+    "Twist 1.4.2 ·  firmware differs",
+    "Ln 1, Col 1",
+    "LF",
+    "UTF-8",
+    "Spaces: 4",
+    ""
+   ],
+   "titleBar": "rgb(23, 51, 46)"
+  },
+  "differences": [
+   "File › Examples › \"Examples of the board…\" opens a picker of the board's examples, grouped as the frame's submenu; the frame draws the list as a submenu.",
+   "The timeline's branch point and the inspector's Example field come with the timeline (U18) and the inspector (U9); the branch shows in the status bar."
+  ]
+ },
+ {
   "frame": "15",
   "title": "The eight menus",
   "file": "frame-15-menus.png",
@@ -109,7 +161,7 @@
    "left": "explorer-view-container",
    "right": "ownstudio.inspector",
    "bottom": "ownstudio.canvas",
-   "main": "code-editor-opener:file:///data/ownstudio/build/nav-home/setups/twist-buck/src/main.cpp:8147136447478363",
+   "main": "code-editor-opener:file:///data/ownstudio/build/nav-home/setups/twist-buck/src/main.cpp:8453538795699863",
    "centreScroll": "0px",
    "leftTabs": [
     "ownstudio.left.design",

@@ -153,6 +153,76 @@ class Setups(unittest.TestCase):
         self.assertEqual(self.ohm(), 24)
 
 
+REAL_EXAMPLES = os.environ.get("OWNSTUDIO_EXAMPLES")
+
+
+class Examples(unittest.TestCase):
+    """Plan U7: an example loads on its own branch; the previous work stays on its branch."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        root = self.tmp.name
+        upstream = fake_core(root)
+        mirror = os.path.join(root, "core.git")
+        su.update_mirror(upstream, mirror)
+        self.setup = su.create_setup(mirror, os.path.join(root, "s"), "twist", "twist-buck")
+        self.examples = os.path.join(root, "examples")
+        ex = os.path.join(self.examples, "TWIST", "DC_DC", "buck_voltage_mode")
+        os.makedirs(os.path.join(ex, "Image"))
+        os.makedirs(os.path.join(ex, "ownstudio", "procedures"))
+        for path, text in {"main.cpp": "// buck\n", "app.ini": "[env]\nboard_shield = twist\n", "README.md": "# Buck\n",
+                           "Image/fig.png": "png", "ownstudio/procedures/capture.py": "# capture\n"}.items():
+            with open(os.path.join(ex, path), "w") as f:
+                f.write(text)
+        run(self.examples, "git", "init", "--quiet")
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def read(self, path):
+        with open(os.path.join(self.setup, path)) as f:
+            return f.read()
+
+    def test_the_example_lands_on_its_own_branch_and_the_previous_work_stays(self):
+        with open(os.path.join(self.setup, "src", "main.cpp"), "w") as f:
+            f.write("// my own work, unsaved\n")
+        out = su.load_example(self.setup, self.examples, "TWIST/DC_DC/buck_voltage_mode")
+        self.assertEqual(out["branch"], "buck-voltage-mode")
+        self.assertEqual(out["previous_branch"], "twist-buck")
+        self.assertEqual(su.current_branch(self.setup), "buck-voltage-mode")
+        self.assertEqual(self.read("src/main.cpp"), "// buck\n")
+        self.assertTrue(os.path.exists(os.path.join(self.setup, "src", "app.ini")))
+        self.assertFalse(os.path.exists(os.path.join(self.setup, "src", "README.md")))
+        self.assertFalse(os.path.exists(os.path.join(self.setup, "src", "Image")))
+        self.assertEqual(self.read("ownstudio/procedures/capture.py"), "# capture\n")       # the extras
+        origin = yaml.safe_load(self.read(su.ORIGIN_FILE))
+        self.assertEqual(origin["example"], "TWIST/DC_DC/buck_voltage_mode")
+        self.assertTrue(origin["extras"])
+        self.assertEqual(su.timeline(self.setup)[-1].event, "example")
+        self.assertFalse(su.is_dirty(self.setup))
+        # The previous work is on its branch, committed; no old/ folder anywhere.
+        self.assertEqual(su.git(self.setup, "show", "twist-buck:src/main.cpp"), "// my own work, unsaved\n")
+        self.assertFalse(os.path.exists(os.path.join(self.setup, "old")))
+
+    def test_loading_the_same_example_twice_makes_a_second_branch(self):
+        su.load_example(self.setup, self.examples, "TWIST/DC_DC/buck_voltage_mode")
+        self.assertEqual(su.load_example(self.setup, self.examples, "TWIST/DC_DC/buck_voltage_mode")["branch"], "buck-voltage-mode-2")
+
+    def test_not_an_example_is_refused(self):
+        with self.assertRaises(su.SetupError):
+            su.load_example(self.setup, self.examples, "TWIST/DC_DC")
+
+    @unittest.skipUnless(REAL_EXAMPLES, "set OWNSTUDIO_EXAMPLES to a clone of owntech-foundation/examples")
+    def test_the_real_buck_example_loads(self):
+        out = su.load_example(self.setup, REAL_EXAMPLES, "TWIST/DC_DC/buck_voltage_mode")
+        self.assertEqual(out["branch"], "buck-voltage-mode")
+        self.assertIn("main.cpp", out["files"])
+        self.assertIn("app.ini", out["files"])
+        self.assertNotIn("mission", out["files"])
+        self.assertIn("buck", self.read("src/main.cpp").lower())
+        self.assertEqual(su.git(self.setup, "show", "twist-buck:src/main.cpp"), "void setup_routine() {}\n")
+
+
 class CommandLine(unittest.TestCase):
     def test_create_event_timeline_restore_back(self):
         import json

@@ -14,6 +14,7 @@ import { OwnStudioApplicationShell } from './ownstudio-shell';
 import { MenuMapContribution, OwnStudioMenuModelRegistry } from './menu-map-contribution';
 import { SETUP_SERVICE_PATH, SetupService } from '../common/setup-protocol';
 import { START_WIDGET_ID, StartWidget } from './start-widget';
+import { ExampleContribution } from './example-contribution';
 import {
     CanvasWidget, DesignPanelWidget, InspectorWidget, LabPanelWidget, PartsWidget, TimelineWidget
 } from './window-widgets';
@@ -54,6 +55,8 @@ export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
     bind(SetupService).toDynamicValue(ctx =>
         ServiceConnectionProvider.createProxy<SetupService>(ctx.container, SETUP_SERVICE_PATH)
     ).inSingletonScope();
+    bind(ExampleContribution).toSelf().inSingletonScope();
+    bind(CommandContribution).toService(ExampleContribution);
     bind(StartWidget).toSelf();
     bind(WidgetFactory).toDynamicValue(ctx => ({ id: START_WIDGET_ID, createWidget: () => ctx.container.get(StartWidget) })).inSingletonScope();
     bind(ProcedureClientImpl).toSelf().inSingletonScope();

@@ -7,7 +7,8 @@ import { inject, injectable, postConstruct } from '@theia/core/shared/inversify'
 import { ReactWidget } from '@theia/core/lib/browser/widgets/react-widget';
 import { Message } from '@theia/core/shared/@lumino/messaging';
 import { QuickInputService } from '@theia/core/lib/browser';
-import { MessageService } from '@theia/core/lib/common';
+import { CommandService, MessageService } from '@theia/core/lib/common';
+import { LOAD_EXAMPLE } from './example-contribution';
 import URI from '@theia/core/lib/common/uri';
 import { WorkspaceService } from '@theia/workspace/lib/browser';
 import { SetupService, StartBoard, StartInfo } from '../common/setup-protocol';
@@ -22,6 +23,7 @@ export class StartWidget extends ReactWidget {
     @inject(WorkspaceService) protected readonly workspace: WorkspaceService;
     @inject(QuickInputService) protected readonly input: QuickInputService;
     @inject(MessageService) protected readonly messages: MessageService;
+    @inject(CommandService) protected readonly commands: CommandService;
 
     protected info: StartInfo | undefined;
     protected error = '';
@@ -121,7 +123,7 @@ export class StartWidget extends ReactWidget {
                     {!info?.examplesFound && <p className='ownstudio-muted'>OwnTech's examples are not on this computer yet ({info?.home}/.cache/examples).</p>}
                     <div className='ownstudio-start-examples'>
                         {examples.map(e => <div key={e.path} className='ownstudio-part' data-example={e.path} title={e.path}
-                            onClick={() => this.messages.info('Loading an example into a setup arrives in slice 1 (plan step U7).')}>
+                            onClick={() => this.commands.executeCommand(LOAD_EXAMPLE.id, e.path)}>
                             {e.title}<small>{e.group}{e.extras ? ' · extras' : ''}</small>
                         </div>)}
                     </div>

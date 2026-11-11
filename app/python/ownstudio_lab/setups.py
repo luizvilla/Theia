@@ -17,10 +17,11 @@ at the first edit made from there. Going back and forth makes no branches.
 Plain git through its command line: nothing here needs a git library.
 """
 import datetime
-import sys
 import os
 import re
+import shutil
 import subprocess
+import sys
 from dataclasses import dataclass
 
 import yaml
@@ -215,6 +216,72 @@ def _branch_from_restore(repo):
     return name
 
 
+# --- examples (plan U7, storyboard frame 5) -----------------------------------------
+
+ORIGIN_FILE = "ownstudio/origin.yaml"
+# What an example folder holds besides its firmware: not copied into src/.
+EXAMPLE_SKIP = {"README.md", "Image", "images", "mission", "ownstudio", ".git"}
+
+
+def load_example(repo, examples_root, example):
+    """Loads an example into the setup on a new branch named after it.
+
+    Unsaved work is committed first on the branch it was made on, so the previous
+    firmware stays there (nothing goes to an old/ folder). The example's files
+    replace ``src/``; its OwnStudio extras (an ``ownstudio/`` folder) join the
+    setup's; ``ownstudio/origin.yaml`` records where it came from.
+    """
+    source = os.path.join(examples_root, example)
+    if not os.path.isfile(os.path.join(source, "main.cpp")):
+        raise SetupError(f"{example} is not an example (no main.cpp)")
+    if is_dirty(repo):
+        commit_event(repo, "save", "unsaved work, kept before loading an example")
+    previous = current_branch(repo)
+    if previous is None:
+        previous = _branch_from_restore(repo)
+    name, n = slug(os.path.basename(example.rstrip("/"))), 1
+    branch = name
+    while git(repo, "rev-parse", "--verify", "--quiet", f"refs/heads/{branch}", check=False).strip():
+        n += 1
+        branch = f"{name}-{n}"
+    git(repo, "checkout", "--quiet", "-b", branch)
+
+    src = os.path.join(repo, "src")
+    tracked = [p for p in git(repo, "ls-files", "-z", "src").split("\0") if p]
+    if tracked:
+        git(repo, "rm", "--quiet", "-r", "--", *tracked)
+    os.makedirs(src, exist_ok=True)
+    copied = []
+    for entry in sorted(os.listdir(source)):
+        if entry in EXAMPLE_SKIP:
+            continue
+        path = os.path.join(source, entry)
+        if os.path.isdir(path):
+            shutil.copytree(path, os.path.join(src, entry), dirs_exist_ok=True)
+        else:
+            shutil.copy2(path, os.path.join(src, entry))
+        copied.append(entry)
+    extras = os.path.join(source, "ownstudio")
+    if os.path.isdir(extras):
+        shutil.copytree(extras, os.path.join(repo, "ownstudio"), dirs_exist_ok=True)
+
+    examples_commit = git(examples_root, "rev-parse", "HEAD", check=False).strip() or None
+    origin = {
+        "example": example.replace(os.sep, "/"),
+        "repository": git(examples_root, "remote", "get-url", "origin", check=False).strip() or examples_root,
+        "commit": examples_commit,
+        "loaded": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
+        "files": copied,
+        "extras": os.path.isdir(extras),
+        "previous_branch": previous,
+    }
+    with open(os.path.join(repo, ORIGIN_FILE), "w", encoding="utf-8") as f:
+        yaml.safe_dump(origin, f, sort_keys=False)
+    dot = commit_event(repo, "example", f"example: {os.path.basename(example.rstrip('/'))}",
+                       {"OwnStudio-Example": origin["example"]})
+    return {"branch": branch, "previous_branch": previous, "commit": dot.commit, "files": copied, "extras": origin["extras"]}
+
+
 def all_commits(repo):
     """Every commit reachable from any branch, tag or HEAD (the restore tests check none is lost)."""
     return set(git(repo, "rev-list", "--all", "HEAD").split())
@@ -231,6 +298,7 @@ def main(argv):
     timeline <setup> [ref]
     restore <setup> <commit>
     back <setup>
+    example <setup> <examples root> <example path>
     """
     import json
     from dataclasses import asdict
@@ -250,6 +318,8 @@ def main(argv):
         elif cmd == "restore":
             restore(args[0], args[1])
             out = {"restored": args[1]}
+        elif cmd == "example":
+            out = load_example(args[0], args[1], args[2])
         elif cmd == "back":
             out = {"branch": back_to_latest(args[0])}
         else:

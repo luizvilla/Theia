@@ -67,6 +67,25 @@ const FRAMES = [
         ],
     },
     {
+        id: 'example', num: '5', title: 'Load an example: it lands on its own branch',
+        go: async () => {
+            await app.clickOn('#theia-top-panel .lm-MenuBar-item:nth-child(1)');
+            await sleep(400);
+            const key = async (k, vk) => { for (const type of ['keyDown', 'keyUp']) { await app.send('Input.dispatchKeyEvent', { type, key: k, code: k, windowsVirtualKeyCode: vk }); } await sleep(150); };
+            for (let i = 0; i < 4; i++) { await key('ArrowDown', 40); }
+            await key('ArrowRight', 39);
+            await key('Enter', 13);
+            await sleep(2500);
+        },
+        after: async () => {
+            for (const type of ['keyDown', 'keyUp']) { await app.send('Input.dispatchKeyEvent', { type, key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 }); }
+        },
+        differences: [
+            'File › Examples › "Examples of the board…" opens a picker of the board\'s examples, grouped as the frame\'s submenu; the frame draws the list as a submenu.',
+            'The timeline\'s branch point and the inspector\'s Example field come with the timeline (U18) and the inspector (U9); the branch shows in the status bar.',
+        ],
+    },
+    {
         id: 'menus', num: '15', title: 'The eight menus',
         go: async () => {
             await app.clickOn('#theia-top-panel .lm-MenuBar-item:nth-child(1)');

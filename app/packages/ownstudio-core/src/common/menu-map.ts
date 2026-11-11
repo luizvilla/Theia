@@ -29,7 +29,7 @@ export const MENU_MAP: Menu[] = [
             later('New setup…', 1, 'U6'),
             { label: 'Open setup…', command: 'workspace:openFolder' },
             { label: 'Open recent', command: 'workspace:openRecent' },
-            { label: 'Examples', items: [later('Examples of the board', 1, 'U6')] },
+            { label: 'Examples', items: [{ label: 'Examples of the board…', command: 'ownstudio.setup.loadExample' }] },
             '-',
             { label: 'Save', command: 'core.save' },
             { label: 'Save all', command: 'core.saveAll' },

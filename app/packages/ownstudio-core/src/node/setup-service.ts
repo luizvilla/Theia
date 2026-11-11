@@ -4,7 +4,8 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import { injectable } from '@theia/core/shared/inversify';
-import { SetupService, StartInfo, setupSlug } from '../common/setup-protocol';
+import { load } from 'js-yaml';
+import { ExampleLoaded, SetupService, SetupSummary, StartInfo, setupSlug } from '../common/setup-protocol';
 
 const CORE_UPSTREAM = 'https://github.com/owntech-foundation/Core.git';
 
@@ -60,5 +61,20 @@ export class SetupServiceImpl implements SetupService {
 
     async isSetup(folder: string): Promise<boolean> {
         return fs.existsSync(path.join(folder, 'ownstudio', 'setup.yaml'));
+    }
+
+    async describeSetup(folder: string): Promise<SetupSummary | undefined> {
+        const file = path.join(folder, 'ownstudio', 'setup.yaml');
+        if (!fs.existsSync(file)) {
+            return undefined;
+        }
+        const setup = (load(fs.readFileSync(file, 'utf8')) ?? {}) as { name?: string; board?: string };
+        const branch = await new Promise<string | null>(resolve =>
+            execFile('git', ['-C', folder, 'symbolic-ref', '--quiet', '--short', 'HEAD'], (error, stdout) => resolve(error ? null : stdout.trim())));
+        return { name: setup.name ?? path.basename(folder), board: setup.board ?? '', branch };
+    }
+
+    async loadExample(folder: string, example: string): Promise<ExampleLoaded> {
+        return await this.run('ownstudio_lab.setups', ['example', folder, this.examples, example]) as ExampleLoaded;
     }
 }
