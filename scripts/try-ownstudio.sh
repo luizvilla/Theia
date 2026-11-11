@@ -40,6 +40,10 @@ NOTES
 export OWNSTUDIO_PYTHON=/data/ownstudio/build/venv-mission/bin/python
 export OWNSTUDIO_MCUMGR=/data/ownstudio/build/core-otf/owntech/third_party/mcumgr
 export THEIA_CONFIG_DIR="$run/config"
+# 2.0: board descriptions from this checkout; OwnTech's examples from a local clone when there is one
+# (the Start page lists them); setups go to ~/OwnStudio/setups, Core is mirrored in ~/OwnStudio/.cache.
+export OWNSTUDIO_BOARDS="$here/boards"
+[ -d "$HOME/code/examples/TWIST" ] && export OWNSTUDIO_EXAMPLES="${OWNSTUDIO_EXAMPLES:-$HOME/code/examples}"
 echo "OwnStudio trial in $run"
 echo "  mission copy: $run/mission"
 echo "  your notes:   $run/notes.md"

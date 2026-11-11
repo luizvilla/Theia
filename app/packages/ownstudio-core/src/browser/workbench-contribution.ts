@@ -10,6 +10,10 @@ import { WORKBENCHES, Workbench, commandId, iconClass, widgetId } from './workbe
 import { BOTTOM_SLOTS, RIGHT_SLOTS, STATUS_ACTIONS, WorkbenchId, bottomSlotOf, workbenchOfLeftWidget } from '../common/window-layout';
 import { CanvasWidget } from './window-widgets';
 import { TabBar } from '@theia/core/shared/@lumino/widgets';
+import { WorkspaceService } from '@theia/workspace/lib/browser';
+import { SetupService } from '../common/setup-protocol';
+import { START_WIDGET_ID } from './start-widget';
+import { TimelineWidget } from './window-widgets';
 
 const THEIA_NEW_TERMINAL = 'terminal:new';
 type Side = 'left' | 'right';
@@ -43,6 +47,12 @@ export class WorkbenchContribution implements CommandContribution, KeybindingCon
     @inject(WidgetManager) protected readonly widgets: WidgetManager;
     @inject(MessageService) protected readonly messages: MessageService;
     @inject(CommandRegistry) protected readonly commands: CommandRegistry;
+    @inject(WorkspaceService) protected readonly workspace: WorkspaceService;
+    @inject(SetupService) protected readonly setups: SetupService;
+    @inject(TimelineWidget) protected readonly timeline: TimelineWidget;
+
+    /** No setup open: the Start page fills the window (frame 1) until a workbench is chosen. */
+    protected startMode = false;
 
     protected active: Workbench | undefined;
     protected queue: Promise<void> = Promise.resolve();
@@ -85,7 +95,42 @@ export class WorkbenchContribution implements CommandContribution, KeybindingCon
             }
         });
         this.renderStatus();
-        await this.switchTo(WORKBENCHES.find(w => w.id === 'code')!);
+        if (await this.setupIsOpen()) {
+            await this.switchTo(WORKBENCHES.find(w => w.id === 'code')!);
+        } else {
+            await this.showStart();
+        }
+    }
+
+    protected async setupIsOpen(): Promise<boolean> {
+        const roots = await this.workspace.roots;
+        return roots.length > 0 && this.setups.isSetup(roots[0].resource.path.fsPath()).catch(() => false);
+    }
+
+    /** Frame 1: the Start page alone, the icon bars kept, panels, canvas and timeline put away. */
+    async showStart(): Promise<void> {
+        this.startMode = true;
+        this.active = undefined;
+        const start = await this.widgets.getOrCreateWidget(START_WIDGET_ID);
+        if (!start.isAttached) {
+            await this.shell.addWidget(start, { area: 'main' });
+        }
+        this.shell.mainPanel.activateWidget(start);
+        for (const area of ['left', 'right', 'bottom'] as const) {
+            this.shell.collapsePanel(area);
+        }
+        this.timeline.setHidden(true);
+        document.body.dataset.ownstudioWorkbench = 'start';
+    }
+
+    protected leaveStart(): void {
+        if (!this.startMode) {
+            return;
+        }
+        this.startMode = false;
+        this.shell.expandPanel('right');
+        this.shell.expandPanel('bottom');
+        this.timeline.setHidden(false);
     }
 
     /** Puts every panel of frame 0 in its place. */
@@ -220,6 +265,7 @@ export class WorkbenchContribution implements CommandContribution, KeybindingCon
         if (this.active !== target) {
             return;     // a later switch is queued: skip this one
         }
+        this.leaveStart();
         const left = this.shell.getWidgets('left').find(w => w.id === target.widgetId);
         if (left && this.shell.leftPanelHandler.tabBar.currentTitle?.owner !== left) {
             this.shell.leftPanelHandler.activate(left.id);

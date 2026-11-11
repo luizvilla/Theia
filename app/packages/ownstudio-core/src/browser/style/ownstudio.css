@@ -289,3 +289,23 @@ body.theia-dark .ownstudio-diagram .os-block-verified.os-state-no-case .os-block
 .ownstudio-sus-choice { text-align: center; }
 .ownstudio-open-question { display: block; margin: 10px 0; max-width: 760px; }
 .ownstudio-open-question textarea { display: block; width: 100%; margin-top: 4px; }
+
+/* The Start page (plan U6, storyboard frame 1). */
+.ownstudio-start { overflow-y: auto; }
+.ownstudio-start:focus { outline: none; }
+.ownstudio-start-body { padding: 28px 40px; max-width: 1200px; }
+.ownstudio-start-body h1 { font-size: 30px; font-weight: 400; margin: 0 0 4px; color: var(--ownstudio-green); }
+body.theia-dark .ownstudio-start-body h1 { color: var(--ownstudio-yellow); }
+.ownstudio-start-boards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin: 16px 0; }
+.ownstudio-start-columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; margin-bottom: 12px; }
+.ownstudio-start-card { border: 1px solid var(--theia-panel-border, rgba(128,128,128,0.3)); border-radius: 8px; padding: 12px 14px;
+    background: var(--theia-sideBar-background); display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.ownstudio-start-boards .ownstudio-start-card { cursor: pointer; }
+.ownstudio-start-card .theia-button { align-self: flex-start; margin: 6px 0 0; }
+.ownstudio-start-card.ownstudio-chosen { border-color: var(--ownstudio-azure); }
+.ownstudio-start-card.ownstudio-hot { border-color: var(--ownstudio-yellow); box-shadow: 0 0 0 1px var(--ownstudio-yellow) inset; }
+.ownstudio-start-card.ownstudio-dashed { border-style: dashed; }
+.ownstudio-start-card-title { font: 700 16px var(--ownstudio-emphasis-font); }
+.ownstudio-start-connected { color: #5cc489; font-size: 12px; }
+.ownstudio-start-examples { max-height: 320px; overflow-y: auto; }
+.ownstudio-start-error { color: var(--ownstudio-persimmon); }

@@ -8,9 +8,15 @@ Both start this checkout's built app with a throwaway profile under
 
 ```sh
 # from the repository root, after `npm run build` in app/
-tools/storyboard-shots/run.sh 9482 /data/ownstudio/build/mission-demo tools/storyboard-shots/navigation-test.mjs control.cpp 500
-tools/storyboard-shots/run.sh 9484 /data/ownstudio/build/mission-demo tools/storyboard-shots/shots.mjs
-tools/storyboard-shots/run.sh 9485 /data/ownstudio/build/mission-demo tools/storyboard-shots/menus-test.mjs
+# a setup to drive (U5's command line), from a Core clone or mirror
+python -m ownstudio_lab.setups mirror <Core clone or URL> /data/ownstudio/build/nav-home/.cache/core.git
+python -m ownstudio_lab.setups create /data/ownstudio/build/nav-home/.cache/core.git /data/ownstudio/build/nav-home/setups/twist-buck twist twist-buck
+S=/data/ownstudio/build/nav-home/setups/twist-buck
+export OWNSTUDIO_HOME=/data/ownstudio/build/nav-home OWNSTUDIO_EXAMPLES=~/code/examples
+tools/storyboard-shots/run.sh 9482 $S tools/storyboard-shots/navigation-test.mjs src/main.cpp 500
+tools/storyboard-shots/run.sh 9484 $S tools/storyboard-shots/shots.mjs     # frames on a setup
+tools/storyboard-shots/run.sh 9486 -  tools/storyboard-shots/shots.mjs     # frames without a folder (Start)
+tools/storyboard-shots/run.sh 9485 $S tools/storyboard-shots/menus-test.mjs
 ```
 
 - **`navigation-test.mjs`**: clicks through every workbench × right-bar tab ×

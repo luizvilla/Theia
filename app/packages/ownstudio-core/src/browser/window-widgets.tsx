@@ -92,8 +92,7 @@ export class CanvasWidget extends WindowPanel {
         return <div className='ownstudio-canvas'>
             <div className='ownstudio-canvas-empty'>
                 <div className='ownstudio-panel-head'>Setup canvas</div>
-                <p className='ownstudio-muted'>No setup open. A setup shows its source, Twist and load here,
-                    the same in every workbench.</p>
+                <p className='ownstudio-muted'>The setup's source, Twist and load appear here, the same in every workbench.</p>
             </div>
             <span className='ownstudio-canvas-label'>{label}</span>
         </div>;
@@ -115,7 +114,7 @@ export class TimelineWidget extends ReactWidget {
     protected render(): React.ReactNode {
         return <div className='ownstudio-timeline-body'>
             <span className='ownstudio-timeline-line' />
-            <span className='ownstudio-muted'>Timeline · no setup open</span>
+            <span className='ownstudio-muted'>Timeline</span>
         </div>;
     }
 }

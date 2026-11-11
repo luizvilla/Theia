@@ -8,7 +8,7 @@
    "left": "explorer-view-container",
    "right": "ownstudio.inspector",
    "bottom": "ownstudio.canvas",
-   "main": "code-editor-opener:file:///data/ownstudio/build/mission-demo/firmware/control.cpp:662393787385881",
+   "main": "code-editor-opener:file:///data/ownstudio/build/nav-home/setups/twist-buck/src/main.cpp:8147136447478363",
    "centreScroll": "0px",
    "leftTabs": [
     "ownstudio.left.design",
@@ -34,15 +34,15 @@
     "",
     "",
     "",
-    "master",
+    "twist-buck",
+    "",
     "0  0",
-    "Board link unavailable",
+    "Twist 1.4.2 ·  firmware differs",
     "Ln 1, Col 1",
     "LF",
     "UTF-8",
     "Spaces: 4",
-    "",
-    "C++"
+    ""
    ],
    "titleBar": "rgb(23, 51, 46)"
   },
@@ -50,6 +50,54 @@
    "Canvas, inspector and timeline are empty: no setup exists until U5 to U9, and the timeline's dots come in U18.",
    "The Code panel is Theia's explorer (open editors, the folder, the git timeline); \"My files\" and the libraries list come with setups.",
    "The status bar shows Build, Upload and Serial as icons; board and firmware entries come with the board definition (U4) and the build (U10)."
+  ]
+ },
+ {
+  "frame": "1",
+  "title": "Start: choose a board",
+  "file": "frame-01-start.png",
+  "state": {
+   "workbench": "start",
+   "left": null,
+   "right": null,
+   "bottom": "ownstudio.canvas",
+   "main": "ownstudio.start",
+   "centreScroll": null,
+   "leftTabs": [
+    "ownstudio.left.design",
+    "explorer-view-container",
+    "ownstudio.left.lab"
+   ],
+   "rightTabs": [
+    "ownstudio.parts",
+    "ownstudio.inspector",
+    "chat-view-widget"
+   ],
+   "bottomTabs": [
+    "Canvas",
+    "Terminal",
+    "Build output"
+   ],
+   "canvasTint": null,
+   "timeline": false,
+   "leftOpen": true,
+   "rightOpen": true,
+   "bottomOpen": false,
+   "status": [
+    "",
+    "",
+    "",
+    "0  0",
+    "Twist 1.4.2 ·  firmware differs",
+    "",
+    ""
+   ],
+   "titleBar": "rgb(23, 51, 46)"
+  },
+  "differences": [
+   "The board grid comes from the board descriptions: the Twist (defined), Spin and Ownverter (not yet, \"Later\"), and Custom board (slice 2).",
+   "The connected board is highlighted only when a Spin is plugged in; this shot is taken without one.",
+   "Tutorials are listed as after slice 1, as in the frame."
   ]
  },
  {
@@ -61,7 +109,7 @@
    "left": "explorer-view-container",
    "right": "ownstudio.inspector",
    "bottom": "ownstudio.canvas",
-   "main": "code-editor-opener:file:///data/ownstudio/build/mission-demo/firmware/control.cpp:662393787385881",
+   "main": "code-editor-opener:file:///data/ownstudio/build/nav-home/setups/twist-buck/src/main.cpp:8147136447478363",
    "centreScroll": "0px",
    "leftTabs": [
     "ownstudio.left.design",
@@ -87,15 +135,15 @@
     "",
     "",
     "",
-    "master",
+    "twist-buck",
+    "",
     "0  0",
-    "Board link unavailable",
+    "Twist 1.4.2 ·  firmware differs",
     "Ln 1, Col 1",
     "LF",
     "UTF-8",
     "Spaces: 4",
-    "",
-    "C++"
+    ""
    ],
    "titleBar": "rgb(23, 51, 46)"
   },

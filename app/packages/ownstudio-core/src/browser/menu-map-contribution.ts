@@ -9,7 +9,7 @@ import {
     DOCUMENTATION_URL, MENU_MAP, MenuEntry, MenuItem, REPORT_PROBLEM_URL, comingMessage, placeholderCommand, shownLabel
 } from '../common/menu-map';
 import { BOTTOM_SLOTS, RIGHT_SLOTS } from '../common/window-layout';
-import { TIMELINE_WIDGET_ID } from './window-widgets';
+import { TimelineWidget } from './window-widgets';
 
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-$/, '');
 
@@ -71,6 +71,7 @@ export class MenuMapContribution implements CommandContribution {
     @inject(ApplicationShell) protected readonly shell: ApplicationShell;
     @inject(WidgetManager) protected readonly widgets: WidgetManager;
     @inject(WindowService) protected readonly windows: WindowService;
+    @inject(TimelineWidget) protected readonly timeline: TimelineWidget;
 
     registerCommands(registry: CommandRegistry): void {
         const walk = (menu: string, items: MenuEntry[]): void => {
@@ -97,11 +98,8 @@ export class MenuMapContribution implements CommandContribution {
         registry.registerCommand({ id: 'ownstudio.view.ai', label: 'AI', category: 'View' }, { execute: show(ai) });
         registry.registerCommand({ id: 'ownstudio.view.canvas', label: 'Canvas', category: 'View' }, { execute: show(BOTTOM_SLOTS[0].widgetId) });
         registry.registerCommand({ id: 'ownstudio.view.timeline', label: 'Timeline', category: 'View' }, {
-            execute: () => {
-                const timeline = this.widgets.tryGetWidget(TIMELINE_WIDGET_ID);
-                timeline?.setHidden(!timeline.isHidden);
-            },
-            isToggled: () => !this.widgets.tryGetWidget(TIMELINE_WIDGET_ID)?.isHidden,
+            execute: () => this.timeline.setHidden(!this.timeline.isHidden),
+            isToggled: () => !this.timeline.isHidden,
         });
         registry.registerCommand({ id: 'ownstudio.view.terminal', label: 'Terminal', category: 'View' }, {
             execute: async () => {

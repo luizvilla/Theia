@@ -12,6 +12,8 @@ import { MonacoThemingService } from '@theia/monaco/lib/browser/monaco-theming-s
 import { WorkbenchContribution } from './workbench-contribution';
 import { OwnStudioApplicationShell } from './ownstudio-shell';
 import { MenuMapContribution, OwnStudioMenuModelRegistry } from './menu-map-contribution';
+import { SETUP_SERVICE_PATH, SetupService } from '../common/setup-protocol';
+import { START_WIDGET_ID, StartWidget } from './start-widget';
 import {
     CanvasWidget, DesignPanelWidget, InspectorWidget, LabPanelWidget, PartsWidget, TimelineWidget
 } from './window-widgets';
@@ -49,6 +51,11 @@ export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
         ServiceConnectionProvider.createProxy<BoardService>(ctx.container, BOARD_SERVICE_PATH, ctx.container.get(BoardClientImpl))
     ).inSingletonScope();
     bind(BoardModel).toSelf().inSingletonScope();
+    bind(SetupService).toDynamicValue(ctx =>
+        ServiceConnectionProvider.createProxy<SetupService>(ctx.container, SETUP_SERVICE_PATH)
+    ).inSingletonScope();
+    bind(StartWidget).toSelf();
+    bind(WidgetFactory).toDynamicValue(ctx => ({ id: START_WIDGET_ID, createWidget: () => ctx.container.get(StartWidget) })).inSingletonScope();
     bind(ProcedureClientImpl).toSelf().inSingletonScope();
     bind(ProcedureService).toDynamicValue(ctx =>
         ServiceConnectionProvider.createProxy<ProcedureService>(ctx.container, PROCEDURE_SERVICE_PATH, ctx.container.get(ProcedureClientImpl))

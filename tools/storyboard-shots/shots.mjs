@@ -4,8 +4,9 @@
 // so far and saves a screenshot beside its frame number in docs/images/step-5/.
 // Each commit that builds a frame adds it to FRAMES.
 //
-// Usage: run.sh <port> <folder> shots.mjs [only-frame-id]
-import { mkdirSync, writeFileSync } from 'node:fs';
+// Usage: run.sh <port> <setup folder> shots.mjs [only-frame-id]   (frames on a setup)
+//        run.sh <port> - shots.mjs                               (frames without a folder: Start)
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { connect, waitForWindow, STATE, sleep } from './cdp.mjs';
@@ -46,7 +47,7 @@ const FRAMES = [
         id: 'anatomy', num: '0', title: 'The window, part by part',
         go: async () => {
             await show('left', 'explorer-view-container');
-            await openFile('control.cpp');
+            await openFile(process.env.SHOT_FILE || 'src/main.cpp');
             await show('right', 'ownstudio.inspector');
             await show('bottom', 'ownstudio.canvas');
         },
@@ -54,6 +55,15 @@ const FRAMES = [
             'Canvas, inspector and timeline are empty: no setup exists until U5 to U9, and the timeline\'s dots come in U18.',
             'The Code panel is Theia\'s explorer (open editors, the folder, the git timeline); "My files" and the libraries list come with setups.',
             'The status bar shows Build, Upload and Serial as icons; board and firmware entries come with the board definition (U4) and the build (U10).',
+        ],
+    },
+    {
+        id: 'start', num: '1', title: 'Start: choose a board', noFolder: true,
+        go: async () => { await sleep(2500); },
+        differences: [
+            'The board grid comes from the board descriptions: the Twist (defined), Spin and Ownverter (not yet, "Later"), and Custom board (slice 2).',
+            'The connected board is highlighted only when a Spin is plugged in; this shot is taken without one.',
+            'Tutorials are listed as after slice 1, as in the frame.',
         ],
     },
     {
@@ -74,7 +84,9 @@ const FRAMES = [
 ];
 
 const report = [];
-for (const f of FRAMES.filter(x => !only || x.id === only)) {
+// A run opens either a setup or no folder (the Start page): each frame says which it needs.
+const noFolder = await app.evaluate(`document.body.dataset.ownstudioWorkbench === 'start'`);
+for (const f of FRAMES.filter(x => (!only || x.id === only) && !!x.noFolder === noFolder)) {
     await f.go();
     // Notifications (such as clangd's download offer) are transient: they are not part of the frame.
     await app.evaluate(`document.querySelectorAll('.theia-notification-toasts .theia-notification-list-item .codicon-close').forEach(b => b.click()); true`);
@@ -84,6 +96,10 @@ for (const f of FRAMES.filter(x => !only || x.id === only)) {
     report.push({ frame: f.num, title: f.title, file, state: await app.evaluate(STATE), differences: f.differences });
     await f.after?.();
 }
-writeFileSync(join(out, 'shots.json'), JSON.stringify(report, null, 1) + '\n');
+// shots.json gathers every frame: runs with and without a folder each update their own.
+let all = [];
+try { all = JSON.parse(readFileSync(join(out, 'shots.json'), 'utf8')); } catch { /* first run */ }
+const merged = [...all.filter(r => !report.some(n => n.frame === r.frame)), ...report].sort((a, b) => parseFloat(a.frame) - parseFloat(b.frame));
+writeFileSync(join(out, 'shots.json'), JSON.stringify(merged, null, 1) + '\n');
 console.log(JSON.stringify(report.map(r => ({ frame: r.frame, file: r.file })), null, 1));
 app.close();

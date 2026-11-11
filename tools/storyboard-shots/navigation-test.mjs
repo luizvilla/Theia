@@ -10,7 +10,7 @@
 // Usage: run.sh <port> <folder> navigation-test.mjs [file-to-open] [random-clicks] [seed]
 import { connect, waitForWindow, STATE, sleep } from './cdp.mjs';
 
-const [port, file = 'control.cpp', clicksArg = '500', seedArg = '1'] = process.argv.slice(2);
+const [port, file = 'src/main.cpp', clicksArg = '500', seedArg = '1'] = process.argv.slice(2);
 const P95_MS = 200;
 const MAX_MS = 300;
 const WORKBENCHES = [['design', 'ownstudio.left.design', 'ownstudio.workbench.design'], ['code', 'explorer-view-container', null], ['lab', 'ownstudio.left.lab', 'ownstudio.workbench.lab']];

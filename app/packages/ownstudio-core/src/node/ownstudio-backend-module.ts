@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: LGPL-2.1-only
-// OwnStudio backend module: the board link and the procedure runner.
+// OwnStudio backend module: the board link, the procedure runner and setups.
 import { ContainerModule } from '@theia/core/shared/inversify';
 import { ConnectionHandler, RpcConnectionHandler } from '@theia/core/lib/common/messaging';
 import { BOARD_SERVICE_PATH, BoardClient } from '../common/board-protocol';
 import { BoardServiceImpl } from './board-service';
 import { PROCEDURE_SERVICE_PATH, ProcedureClient } from '../common/procedure-protocol';
 import { ProcedureServiceImpl } from './procedure-service';
+import { SETUP_SERVICE_PATH } from '../common/setup-protocol';
+import { SetupServiceImpl } from './setup-service';
 
 export default new ContainerModule(bind => {
     // One bridge per frontend connection (one per window).
@@ -26,5 +28,9 @@ export default new ContainerModule(bind => {
             client.onDidCloseConnection(() => service.dispose());
             return service;
         })
+    ).inSingletonScope();
+    bind(SetupServiceImpl).toSelf().inSingletonScope();
+    bind(ConnectionHandler).toDynamicValue(ctx =>
+        new RpcConnectionHandler(SETUP_SERVICE_PATH, () => ctx.container.get(SetupServiceImpl))
     ).inSingletonScope();
 });
