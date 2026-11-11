@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-2.1
 import hashlib
+import io
 import json
 import os
 import pathlib
@@ -65,6 +66,27 @@ class Flashing(unittest.TestCase):
         board = self.flash()
         self.assertEqual(self.calls, [("touch", "/dev/fake-A"), ("image", "upload"), ("reset",)])
         self.assertEqual(board.product, "TWIST_V1_4_2")
+
+    def test_fake_upload_reports_byte_progress(self):
+        progress = []
+
+        def upload(cmd, log):
+            self.calls.append(tuple(cmd[5:7]))
+            log("Uploading 32 / 64 bytes")
+            log("Uploading 64 / 64 bytes")
+            return SimpleNamespace(returncode=0, stdout="", stderr="")
+
+        fl.flash(self.manifest, None, str(self.mcumgr), log=lambda line: progress.append(line),
+                 find=self.find, touch=self.touch, run=self.run_tool, upload=upload, sleep=lambda _: None)
+        self.assertIn("Uploading 32 / 64 bytes", progress)
+        self.assertIn("Uploading 64 / 64 bytes", progress)
+
+    def test_mcumgr_carriage_return_progress_is_streamed(self):
+        process = SimpleNamespace(stdout=io.StringIO("Uploading 32 / 64 bytes\rUploading 64 / 64 bytes\n"), wait=lambda: 0)
+        progress = []
+        result = fl.stream_upload(["mcumgr"], progress.append, popen=lambda *args, **kwargs: process)
+        self.assertEqual(progress, ["Uploading 32 / 64 bytes", "Uploading 64 / 64 bytes"])
+        self.assertIn("64 / 64", result.stdout)
 
     def test_board_already_in_bootloader_is_not_touched(self):
         self.state["A"] = "MCUBOOT"

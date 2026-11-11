@@ -119,6 +119,10 @@ async function step(side, id) {
 }
 
 const failures = [];
+const toolbar = ['Build', 'Upload', 'Build and upload', 'Clean', 'Serial'];
+if (JSON.stringify(first.codeToolbar) !== JSON.stringify(toolbar)) {
+    failures.push({ label: 'Code toolbar', ok: false, diff: [`${JSON.stringify(first.codeToolbar)}, expected ${JSON.stringify(toolbar)}`] });
+}
 const times = [];
 const bySide = { left: [], right: [], bottom: [] };
 const byTarget = {};

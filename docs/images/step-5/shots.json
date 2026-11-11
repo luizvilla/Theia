@@ -8,7 +8,7 @@
    "left": "explorer-view-container",
    "right": "ownstudio.inspector",
    "bottom": "ownstudio.canvas",
-   "main": "code-editor-opener:file:///data/ownstudio/build/shots-setup/src/main.cpp:3613307452478332",
+   "main": "code-editor-opener:file:///data/ownstudio/build/shots-setup/src/main.cpp:7641784864972719",
    "centreScroll": "0px",
    "leftTabs": [
     "ownstudio.left.design",
@@ -29,6 +29,15 @@
    "canvasLevel": "setup",
    "canvasSelection": null,
    "inspectorSelection": null,
+   "canvasFirmware": null,
+   "codeToolbar": [
+    "Build",
+    "Upload",
+    "Build and upload",
+    "Clean",
+    "Serial"
+   ],
+   "buildOutput": [],
    "timeline": true,
    "leftOpen": true,
    "rightOpen": true,
@@ -38,7 +47,7 @@
     "",
     "",
     "twist-buck",
-    "",
+    "1↓ 0↑",
     "0  0",
     "Twist 1.4.2 ·  firmware differs",
     "Ln 1, Col 1",
@@ -50,9 +59,9 @@
    "titleBar": "rgb(23, 51, 46)"
   },
   "differences": [
-   "Canvas, inspector and timeline are empty: no setup exists until U5 to U9, and the timeline's dots come in U18.",
+   "This first-state capture has the setup's Twist only; frames 2 and 3 add and wire its source and load. Timeline dots come in U18.",
    "The Code panel is Theia's explorer (open editors, the folder, the git timeline); \"My files\" and the libraries list come with setups.",
-   "The status bar shows Build, Upload and Serial as icons; board and firmware entries come with the board definition (U4) and the build (U10)."
+   "The status-bar icons and the Code toolbar run the same Build, Upload and Serial actions; board identity appears when a Twist is connected."
   ]
  },
  {
@@ -133,6 +142,9 @@
    "canvasLevel": "setup",
    "canvasSelection": null,
    "inspectorSelection": null,
+   "canvasFirmware": null,
+   "codeToolbar": [],
+   "buildOutput": [],
    "timeline": true,
    "leftOpen": true,
    "rightOpen": true,
@@ -142,7 +154,7 @@
     "",
     "",
     "twist-buck*",
-    "",
+    "1↓ 0↑",
     "0  0",
     "Twist 1.4.2 ·  firmware differs",
     "Ln 1, Col 1",
@@ -189,6 +201,9 @@
    "canvasLevel": "setup",
    "canvasSelection": null,
    "inspectorSelection": null,
+   "canvasFirmware": null,
+   "codeToolbar": [],
+   "buildOutput": [],
    "timeline": true,
    "leftOpen": true,
    "rightOpen": true,
@@ -198,7 +213,7 @@
     "",
     "",
     "twist-buck*",
-    "",
+    "1↓ 0↑",
     "0  0",
     "Twist 1.4.2 ·  firmware differs",
     "Ln 1, Col 1",
@@ -244,6 +259,9 @@
    "canvasLevel": "inside",
    "canvasSelection": "driver",
    "inspectorSelection": "Driver",
+   "canvasFirmware": null,
+   "codeToolbar": [],
+   "buildOutput": [],
    "timeline": true,
    "leftOpen": true,
    "rightOpen": true,
@@ -253,7 +271,7 @@
     "",
     "",
     "twist-buck*",
-    "",
+    "1↓ 0↑",
     "0  0",
     "Twist 1.4.2 ·  firmware differs",
     "Ln 1, Col 1",
@@ -276,9 +294,9 @@
   "state": {
    "workbench": "code",
    "left": "explorer-view-container",
-   "right": "ownstudio.parts",
+   "right": "ownstudio.inspector",
    "bottom": "ownstudio.canvas",
-   "main": "code-editor-opener:file:///data/ownstudio/build/shots-setup/src/main.cpp:3613307452478332",
+   "main": "code-editor-opener:file:///data/ownstudio/build/shots-setup/src/main.cpp:7641784864972719",
    "centreScroll": "0px",
    "leftTabs": [
     "ownstudio.left.design",
@@ -293,12 +311,24 @@
    "bottomTabs": [
     "Canvas",
     "Terminal",
-    "Build output"
+    "Build output",
+    ""
    ],
    "canvasTint": "code",
    "canvasLevel": "setup",
    "canvasSelection": null,
    "inspectorSelection": null,
+   "canvasFirmware": "295a6058ce86d775 ✓",
+   "codeToolbar": [
+    "Build",
+    "Upload",
+    "Build and upload",
+    "Clean",
+    "Serial"
+   ],
+   "buildOutput": [
+    "Board 58435001004B001E (MCUBOOT); image 5a5a5a5a5a5a5a5aUploading…Uploading 32768 / 163840 bytesUploading 65536 / 163840 bytesUploading 98304 / 163840 bytesUploading 131072 / 163840 bytesUploading 163840 / 163840 bytesRestarting the board…Done: board 58435001004B001E runs TWIST_V1_4_2Flash 295a6058ce86d775 ✓ 5 s"
+   ],
    "timeline": true,
    "leftOpen": true,
    "rightOpen": true,
@@ -308,7 +338,7 @@
     "",
     "",
     "twist-buck",
-    "0↓ 1↑",
+    "1↓ 3↑",
     "0  0",
     "Twist 1.4.2 ·  firmware differs",
     "Ln 1, Col 1",
@@ -333,7 +363,7 @@
    "left": "explorer-view-container",
    "right": "ownstudio.parts",
    "bottom": "ownstudio.canvas",
-   "main": "code-editor-opener:file:///data/ownstudio/build/shots-setup/src/main.cpp:3613307452478332",
+   "main": "code-editor-opener:file:///data/ownstudio/build/shots-setup/src/main.cpp:7641784864972719",
    "centreScroll": "0px",
    "leftTabs": [
     "ownstudio.left.design",
@@ -354,6 +384,15 @@
    "canvasLevel": "setup",
    "canvasSelection": null,
    "inspectorSelection": null,
+   "canvasFirmware": null,
+   "codeToolbar": [
+    "Build",
+    "Upload",
+    "Build and upload",
+    "Clean",
+    "Serial"
+   ],
+   "buildOutput": [],
    "timeline": true,
    "leftOpen": true,
    "rightOpen": true,
@@ -363,7 +402,7 @@
     "",
     "",
     "twist-buck",
-    "0↓ 1↑",
+    "1↓ 1↑",
     "0  0",
     "Twist 1.4.2 ·  firmware differs",
     "Ln 1, Col 1",
@@ -376,20 +415,19 @@
   },
   "differences": [
    "The canvas keeps the source, Twist and resistor wired in frames 2 and 3; the navigation test checks a drop from every workbench.",
-   "The file mapping under the nodes and the Build/Upload toolbar come with U10.",
    "The timeline dots come in U18."
   ]
  },
  {
-  "frame": "15",
-  "title": "The eight menus",
-  "file": "frame-15-menus.png",
+  "frame": "7",
+  "title": "Build and flash, with real progress",
+  "file": "frame-07-build.png",
   "state": {
    "workbench": "code",
    "left": "explorer-view-container",
-   "right": "ownstudio.parts",
-   "bottom": "ownstudio.canvas",
-   "main": "code-editor-opener:file:///data/ownstudio/build/shots-setup/src/main.cpp:3613307452478332",
+   "right": "ownstudio.inspector",
+   "bottom": "outputView",
+   "main": "code-editor-opener:file:///data/ownstudio/build/shots-setup/src/main.cpp:7641784864972719",
    "centreScroll": "0px",
    "leftTabs": [
     "ownstudio.left.design",
@@ -404,12 +442,31 @@
    "bottomTabs": [
     "Canvas",
     "Terminal",
-    "Build output"
+    "Build output",
+    ""
    ],
    "canvasTint": "code",
    "canvasLevel": "setup",
    "canvasSelection": null,
    "inspectorSelection": null,
+   "canvasFirmware": "flashing…",
+   "codeToolbar": [
+    "Build",
+    "Upload",
+    "Build and upload",
+    "Clean",
+    "Serial"
+   ],
+   "buildOutput": [
+    "Flash: [===       ]  30.1% (used 157804 bytes from 524288 bytes)",
+    "Build 295a6058ce86d775 ✓ 1 s",
+    "> /data/ownstudio/Theia/tools/storyboard-shots/fake-flash.mjs -m ownstudio_lab.flash /data/ownstudio/build/shots-setup/.pio/",
+    "ownstudio/manifest.json",
+    "Board 58435001004B001E (MCUBOOT); image 5a5a5a5a5a5a5a5a",
+    "Uploading…",
+    "Uploading 32768 / 163840 bytes",
+    "Uploading 65536 / 163840 bytes"
+   ],
    "timeline": true,
    "leftOpen": true,
    "rightOpen": true,
@@ -419,7 +476,74 @@
     "",
     "",
     "twist-buck",
-    "0↓ 1↑",
+    "1↓ 2↑",
+    "0  0",
+    "Twist 1.4.2 ·  firmware differs",
+    "Ln 1, Col 1",
+    "LF",
+    "UTF-8",
+    "Spaces: 4",
+    ""
+   ],
+   "titleBar": "rgb(23, 51, 46)"
+  },
+  "differences": [
+   "The screenshot uses deterministic fake PlatformIO and mcumgr processes; the same service is gated below with a real buck build.",
+   "Timeline dots are committed now but their strip is drawn in U18."
+  ]
+ },
+ {
+  "frame": "15",
+  "title": "The eight menus",
+  "file": "frame-15-menus.png",
+  "state": {
+   "workbench": "code",
+   "left": "explorer-view-container",
+   "right": "ownstudio.inspector",
+   "bottom": "ownstudio.canvas",
+   "main": "code-editor-opener:file:///data/ownstudio/build/shots-setup/src/main.cpp:7641784864972719",
+   "centreScroll": "0px",
+   "leftTabs": [
+    "ownstudio.left.design",
+    "explorer-view-container",
+    "ownstudio.left.lab"
+   ],
+   "rightTabs": [
+    "ownstudio.parts",
+    "ownstudio.inspector",
+    "chat-view-widget"
+   ],
+   "bottomTabs": [
+    "Canvas",
+    "Terminal",
+    "Build output",
+    ""
+   ],
+   "canvasTint": "code",
+   "canvasLevel": "setup",
+   "canvasSelection": null,
+   "inspectorSelection": null,
+   "canvasFirmware": "295a6058ce86d775 ✓",
+   "codeToolbar": [
+    "Build",
+    "Upload",
+    "Build and upload",
+    "Clean",
+    "Serial"
+   ],
+   "buildOutput": [
+    "Board 58435001004B001E (MCUBOOT); image 5a5a5a5a5a5a5a5aUploading…Uploading 32768 / 163840 bytesUploading 65536 / 163840 bytesUploading 98304 / 163840 bytesUploading 131072 / 163840 bytesUploading 163840 / 163840 bytesRestarting the board…Done: board 58435001004B001E runs TWIST_V1_4_2Flash 295a6058ce86d775 ✓ 5 s"
+   ],
+   "timeline": true,
+   "leftOpen": true,
+   "rightOpen": true,
+   "bottomOpen": true,
+   "status": [
+    "",
+    "",
+    "",
+    "twist-buck",
+    "1↓ 3↑",
     "0  0",
     "Twist 1.4.2 ·  firmware differs",
     "Ln 1, Col 1",

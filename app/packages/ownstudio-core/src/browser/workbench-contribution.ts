@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-only
 import { inject, injectable } from '@theia/core/shared/inversify';
-import { CommandContribution, CommandRegistry, MessageService } from '@theia/core/lib/common';
+import { CommandContribution, CommandRegistry } from '@theia/core/lib/common';
 import {
     ApplicationShell, FrontendApplication, FrontendApplicationContribution, KeybindingContribution, KeybindingRegistry,
     StatusBar, StatusBarAlignment, Widget, WidgetManager, codicon
@@ -18,13 +18,6 @@ import { TimelineWidget } from './window-widgets';
 const THEIA_NEW_TERMINAL = 'terminal:new';
 type Side = 'left' | 'right';
 export const NEW_TERMINAL = { id: 'ownstudio.terminal.new', category: 'OwnStudio', label: 'New Terminal', iconClass: codicon('terminal') };
-
-/** What each status bar action will do, and the plan commit that brings it. */
-const COMING: Record<string, string> = {
-    'ownstudio.setup.build': 'Build arrives with the Code toolbar (slice 1, U10).',
-    'ownstudio.setup.upload': 'Upload arrives with the Code toolbar (slice 1, U10).',
-    'ownstudio.setup.serial': 'The serial monitor arrives with the Code toolbar (slice 1, U10).',
-};
 
 /**
  * The window of OwnStudio 2.0 (SPEC §5, storyboard frame 0):
@@ -45,7 +38,6 @@ export class WorkbenchContribution implements CommandContribution, KeybindingCon
     @inject(StatusBar) protected readonly statusBar: StatusBar;
     @inject(ApplicationShell) protected readonly shell: ApplicationShell;
     @inject(WidgetManager) protected readonly widgets: WidgetManager;
-    @inject(MessageService) protected readonly messages: MessageService;
     @inject(CommandRegistry) protected readonly commands: CommandRegistry;
     @inject(WorkspaceService) protected readonly workspace: WorkspaceService;
     @inject(SetupService) protected readonly setups: SetupService;
@@ -63,10 +55,6 @@ export class WorkbenchContribution implements CommandContribution, KeybindingCon
         for (const w of WORKBENCHES) {
             registry.registerCommand({ id: commandId(w), category: 'OwnStudio', label: `Open ${w.label}` },
                 { execute: () => this.switchTo(w) });
-        }
-        for (const a of STATUS_ACTIONS) {
-            registry.registerCommand({ id: a.command, category: 'OwnStudio', label: a.label },
-                { execute: () => this.messages.info(COMING[a.command]) });
         }
         registry.registerCommand(NEW_TERMINAL, { execute: () => registry.executeCommand(THEIA_NEW_TERMINAL) });
     }

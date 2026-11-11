@@ -44,6 +44,8 @@ import { ProcedureClientImpl, ProcedureModel } from './procedure-model';
 import { PROCEDURE_WIDGET_ID, ProcedureWidget } from './procedure-widget';
 import { CONTROL_CENTER_WIDGET_ID, ControlCenterWidget } from './control-center-widget';
 import { LabContribution } from './lab-contribution';
+import { BUILD_SERVICE_PATH, BuildService } from '../common/build-protocol';
+import { BuildClientImpl, BuildContribution } from './build-contribution';
 
 export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
     bind(MissionService).toSelf().inSingletonScope();
@@ -56,6 +58,13 @@ export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
     bind(SetupService).toDynamicValue(ctx =>
         ServiceConnectionProvider.createProxy<SetupService>(ctx.container, SETUP_SERVICE_PATH)
     ).inSingletonScope();
+    bind(BuildClientImpl).toSelf().inSingletonScope();
+    bind(BuildService).toDynamicValue(ctx =>
+        ServiceConnectionProvider.createProxy<BuildService>(ctx.container, BUILD_SERVICE_PATH, ctx.container.get(BuildClientImpl))
+    ).inSingletonScope();
+    bind(BuildContribution).toSelf().inSingletonScope();
+    bind(CommandContribution).toService(BuildContribution);
+    bind(TabBarToolbarContribution).toService(BuildContribution);
     bind(ExampleContribution).toSelf().inSingletonScope();
     bind(CommandContribution).toService(ExampleContribution);
     bind(StartWidget).toSelf();

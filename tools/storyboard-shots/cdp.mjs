@@ -71,6 +71,7 @@ export const STATE = `(() => {
     const lines = mainId && document.getElementById(mainId)?.querySelector('.monaco-editor .lines-content');
     const canvas = document.getElementById('ownstudio.canvas')?.querySelector('.ownstudio-canvas');
     const inspector = document.getElementById('ownstudio.inspector')?.querySelector('[data-inspector-selection]');
+    const buildOutput = document.getElementById('outputView')?.innerText?.split('\\n').filter(Boolean).slice(-8) ?? [];
     return {
         workbench: document.body.dataset.ownstudioWorkbench,
         left: current('left'), right: current('right'),
@@ -84,6 +85,10 @@ export const STATE = `(() => {
         canvasLevel: canvas?.dataset.canvasLevel ?? null,
         canvasSelection: canvas?.dataset.selectedBlock || null,
         inspectorSelection: inspector?.dataset.inspectorSelection || null,
+        canvasFirmware: document.getElementById('ownstudio.canvas')?.querySelector('.ownstudio-node-firmware')?.textContent || null,
+        codeToolbar: [...document.querySelectorAll('[id^="toolbar.ownstudio.setup."]')]
+            .map(e => ({ text: e.textContent?.trim(), x: e.getBoundingClientRect().x })).sort((a, b) => a.x - b.x).map(e => e.text).filter(Boolean),
+        buildOutput,
         timeline: visible('ownstudio.timeline'),
         leftOpen: visible('theia-left-content-panel'), rightOpen: visible('theia-right-content-panel'), bottomOpen: visible('theia-bottom-content-panel'),
         status: cur('#theia-statusBar .element').slice(0, 12),

@@ -30,7 +30,9 @@ tools/storyboard-shots/run.sh 9485 $S tools/storyboard-shots/menus-test.mjs
 - **`shots.mjs`**: puts the window into the state of each storyboard frame built
   so far and saves `docs/images/step-5/frame-NN-<id>.png`, plus `shots.json`
   with the window state and the known differences from the frame, each with its
-  reason. Each commit that builds a frame adds it to `FRAMES`.
+  reason. Each commit that builds a frame adds it to `FRAMES`. Frame 7 uses the
+  deterministic `fake-pio.mjs` and `fake-flash.mjs`; override `OWNSTUDIO_PIO`
+  and `OWNSTUDIO_BUILD_PYTHON` to drive installed tools instead.
 - **`menus-test.mjs`** (U3): opens each menu of the menu bar and compares it,
   item by item and separator by separator, with `common/menu-map.ts`.
 - **`cdp.mjs`**: the small DevTools Protocol client both scripts use, and `STATE`,

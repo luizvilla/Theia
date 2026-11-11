@@ -52,9 +52,9 @@ const FRAMES = [
             await show('bottom', 'ownstudio.canvas');
         },
         differences: [
-            'Canvas, inspector and timeline are empty: no setup exists until U5 to U9, and the timeline\'s dots come in U18.',
+            'This first-state capture has the setup\'s Twist only; frames 2 and 3 add and wire its source and load. Timeline dots come in U18.',
             'The Code panel is Theia\'s explorer (open editors, the folder, the git timeline); "My files" and the libraries list come with setups.',
-            'The status bar shows Build, Upload and Serial as icons; board and firmware entries come with the board definition (U4) and the build (U10).',
+            'The status-bar icons and the Code toolbar run the same Build, Upload and Serial actions; board identity appears when a Twist is connected.',
         ],
     },
     {
@@ -123,8 +123,28 @@ const FRAMES = [
         },
         differences: [
             'The canvas keeps the source, Twist and resistor wired in frames 2 and 3; the navigation test checks a drop from every workbench.',
-            'The file mapping under the nodes and the Build/Upload toolbar come with U10.',
             'The timeline dots come in U18.',
+        ],
+    },
+    {
+        id: 'build', num: '7', title: 'Build and flash, with real progress',
+        go: async () => {
+            await show('left', 'explorer-view-container');
+            await openFile(process.env.SHOT_FILE || 'src/main.cpp');
+            await show('right', 'ownstudio.inspector');
+            const buttons = await app.evaluate(`(() => [...document.querySelectorAll('.theia-tabBar-toolbar .item')]
+                .map(e => ({ text: e.textContent?.trim(), title: e.getAttribute('title'), cls: e.className })))()`);
+            const clicked = await app.clickOn('[id="toolbar.ownstudio.setup.buildUpload"]');
+            if (!clicked) { throw new Error(`Build and upload toolbar button not found: ${JSON.stringify(buttons)}`); }
+            await sleep(2300);
+        },
+        after: async () => {
+            await sleep(4000);
+            await show('bottom', 'ownstudio.canvas');
+        },
+        differences: [
+            'The screenshot uses deterministic fake PlatformIO and mcumgr processes; the same service is gated below with a real buck build.',
+            'Timeline dots are committed now but their strip is drawn in U18.',
         ],
     },
     {

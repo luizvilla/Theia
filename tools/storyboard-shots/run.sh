@@ -18,6 +18,10 @@ rm -rf "$scratch"; mkdir -p "$scratch/config" "$scratch/home"
 export OWNSTUDIO_PYTHON="${OWNSTUDIO_PYTHON:-/data/ownstudio/build/venv-mission/bin/python}"
 export OWNSTUDIO_HOME="${OWNSTUDIO_HOME:-$scratch/home}"
 export OWNSTUDIO_BOARDS="${OWNSTUDIO_BOARDS:-$root/boards}"
+# Frame 7 needs deterministic progress without requiring a board. Callers can
+# override either tool when testing a real build or a real Twist.
+export OWNSTUDIO_PIO="${OWNSTUDIO_PIO:-$root/tools/storyboard-shots/fake-pio.mjs}"
+export OWNSTUDIO_BUILD_PYTHON="${OWNSTUDIO_BUILD_PYTHON:-$root/tools/storyboard-shots/fake-flash.mjs}"
 (cd "$app" && THEIA_CONFIG_DIR="$scratch/config" env -u ELECTRON_RUN_AS_NODE "$bin" . --remote-debugging-port="$port" \
     --no-sandbox --disable-backgrounding-occluded-windows --disable-renderer-backgrounding --disable-background-timer-throttling \
     --user-data-dir="$scratch/userdata" --plugins=local-dir:plugins ${folder:+"$folder"} > "$scratch/app.log" 2>&1 &)

@@ -24,6 +24,7 @@ import shutil
 import subprocess
 import sys
 import time
+from types import SimpleNamespace
 
 import serial
 
@@ -95,8 +96,33 @@ def find_mcumgr(explicit=None):
     raise FlashError("mcumgr not found: pass --mcumgr or set OWNSTUDIO_MCUMGR")
 
 
+def stream_upload(cmd, log, popen=subprocess.Popen):
+    """Run mcumgr while forwarding each newline or carriage-return progress update."""
+    process = popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1)
+    pending = ""
+    output = []
+    while True:
+        char = process.stdout.read(1)
+        if not char:
+            break
+        if char in "\r\n":
+            if pending.strip():
+                line = pending.strip()
+                output.append(line)
+                log(line)
+            pending = ""
+        else:
+            pending += char
+    if pending.strip():
+        line = pending.strip()
+        output.append(line)
+        log(line)
+    code = process.wait()
+    return SimpleNamespace(returncode=code, stdout="\n".join(output[-10:]), stderr="")
+
+
 def flash(manifest_path, serial_number=None, mcumgr=None, log=print,
-          find=find_boards, touch=touch_1200, run=subprocess.run, sleep=time.sleep):
+          find=find_boards, touch=touch_1200, run=None, upload=None, sleep=time.sleep):
     image, manifest = check_image(manifest_path)
     tool = find_mcumgr(mcumgr)
     board = pick_board(serial_number, find())
@@ -112,11 +138,17 @@ def flash(manifest_path, serial_number=None, mcumgr=None, log=print,
     connection = ["--conntype", "serial", "--connstring",
                   f"dev={stable_path(board.console, board.serial_number)},baud=115200,mtu=128"]
     log("Uploading…")
-    result = run([tool, *connection, "image", "upload", str(image)], capture_output=True, text=True)
+    upload_command = [tool, *connection, "image", "upload", str(image)]
+    if upload is not None:
+        result = upload(upload_command, log)
+    elif run is not None:  # dependency-injected, non-streaming runner used by unit tests
+        result = run(upload_command, capture_output=True, text=True)
+    else:
+        result = stream_upload(upload_command, log)
     if result.returncode != 0:
         raise FlashError("upload failed: " + (result.stderr or result.stdout).strip())
     log("Restarting the board…")
-    result = run([tool, *connection, "reset"], capture_output=True, text=True)
+    result = (run or subprocess.run)([tool, *connection, "reset"], capture_output=True, text=True)
     if result.returncode != 0:
         raise FlashError("reset failed: " + (result.stderr or result.stdout).strip())
     board = wait_for(board.serial_number, False, find, sleep, timeout=30)

@@ -8,6 +8,8 @@ import { PROCEDURE_SERVICE_PATH, ProcedureClient } from '../common/procedure-pro
 import { ProcedureServiceImpl } from './procedure-service';
 import { SETUP_SERVICE_PATH } from '../common/setup-protocol';
 import { SetupServiceImpl } from './setup-service';
+import { BUILD_SERVICE_PATH, BuildClient } from '../common/build-protocol';
+import { BuildServiceImpl } from './build-service';
 
 export default new ContainerModule(bind => {
     // One bridge per frontend connection (one per window).
@@ -32,5 +34,14 @@ export default new ContainerModule(bind => {
     bind(SetupServiceImpl).toSelf().inSingletonScope();
     bind(ConnectionHandler).toDynamicValue(ctx =>
         new RpcConnectionHandler(SETUP_SERVICE_PATH, () => ctx.container.get(SetupServiceImpl))
+    ).inSingletonScope();
+    bind(BuildServiceImpl).toSelf();
+    bind(ConnectionHandler).toDynamicValue(ctx =>
+        new RpcConnectionHandler<BuildClient>(BUILD_SERVICE_PATH, client => {
+            const service = ctx.container.get(BuildServiceImpl);
+            service.setClient(client);
+            client.onDidCloseConnection(() => service.setClient(undefined));
+            return service;
+        })
     ).inSingletonScope();
 });

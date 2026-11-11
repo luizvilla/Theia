@@ -321,11 +321,14 @@ body.theia-dark .ownstudio-start-body h1 { color: var(--ownstudio-yellow); }
 .ownstudio-node-rows span { color: #8ea29c; }
 .ownstudio-node-rows b { font: 500 10.5px var(--theia-code-font-family, monospace); }
 .ownstudio-node-ports { color: #8ea29c; font-size: 9.5px; margin-top: 18px; }
+.ownstudio-node-firmware { margin-top: 4px; color: var(--ownstudio-yellow); font: 9px var(--theia-code-font-family, monospace); }
 .ownstudio-node .ownstudio-port { width: 11px; height: 11px; background: #f08a4b; border: 1.6px solid #f08a4b; }
 .ownstudio-node .ownstudio-port-open { background: transparent; }
 .ownstudio-canvas .react-flow__edge-path, .ownstudio-canvas .react-flow__connection-path { stroke: #f08a4b; stroke-width: 2.6; }
 .ownstudio-canvas-refusal { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); z-index: 10; background: #7a2e27;
     color: #ffd9d4; padding: 4px 12px; border-radius: 4px; font-size: 12px; }
+.ownstudio-canvas-mapping { position: absolute; z-index: 4; left: 50%; bottom: 5px; transform: translateX(-50%); color: #b9d7ce;
+    font: 9px var(--theia-code-font-family, monospace); pointer-events: none; }
 .ownstudio-field { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid rgba(128,128,128,0.15); font-size: 12px; }
 .ownstudio-field span { opacity: 0.7; }
 .ownstudio-field b { max-width: 66%; text-align: right; overflow-wrap: anywhere; font-weight: 500; }
@@ -360,3 +363,11 @@ body.theia-dark .ownstudio-start-body h1 { color: var(--ownstudio-yellow); }
 .ownstudio-inside-block.selected { border: 2.4px solid var(--ownstudio-yellow); padding: 7.9px 10.9px; }
 .ownstudio-inside-block[data-block='feeder'] { border-style: dashed; }
 .ownstudio-inside-block small { float: right; color: #8ea29c; font: 9px var(--theia-ui-font-family); }
+
+/* U10: named actions on the Code editor tab bar. */
+.theia-tabBar-toolbar [id="toolbar.ownstudio.setup.build"],
+.theia-tabBar-toolbar [id="toolbar.ownstudio.setup.upload"],
+.theia-tabBar-toolbar [id="toolbar.ownstudio.setup.buildUpload"],
+.theia-tabBar-toolbar [id="toolbar.ownstudio.setup.clean"],
+.theia-tabBar-toolbar [id="toolbar.ownstudio.setup.serial"] { width: auto; padding: 0 7px; }
+.theia-tabBar-toolbar [id="toolbar.ownstudio.setup.buildUpload"] { color: #17201e; background: var(--ownstudio-yellow); border-radius: 4px; }

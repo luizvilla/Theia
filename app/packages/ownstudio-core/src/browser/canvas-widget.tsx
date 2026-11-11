@@ -24,11 +24,12 @@ import { InsideBlockId, InsideModel, insideModel } from '../common/inside-model'
 import { SetupService } from '../common/setup-protocol';
 import { WORKBENCHES, commandId, iconClass } from './workbenches';
 import { InspectorAction, InspectorWidget } from './window-widgets';
+import { BuildService } from '../common/build-protocol';
 
 export const PART_MIME = 'application/ownstudio-part';
 const COMMIT_AFTER_MS = 10_000;
 
-type PartData = { def: PartDef; values: Record<string, number>; selected?: boolean };
+type PartData = { def: PartDef; values: Record<string, number>; selected?: boolean; firmware?: string };
 
 function PartNode({ data, selected }: NodeProps<Node<PartData>>): React.ReactElement {
     const { def, values } = data;
@@ -40,6 +41,7 @@ function PartNode({ data, selected }: NodeProps<Node<PartData>>): React.ReactEle
         <div className='ownstudio-node-rows'>
             {def.values.map(v => <div key={v.key}><span>{v.label}</span><b>{values[v.key] ?? v.default} {v.unit}</b></div>)}
             {def.kind === 'board' && <div className='ownstudio-node-ports'><span>HIGH</span><span>LOW1 · LOW2</span></div>}
+            {def.kind === 'board' && data.firmware && <div className='ownstudio-node-firmware'>{data.firmware}</div>}
         </div>
         {left.map((p, i) => <Handle key={p.id} id={p.id} type='source' position={Position.Left} style={{ top: at(i, left.length) }}
             className='ownstudio-port' title={p.label} />)}
@@ -56,6 +58,7 @@ export class CanvasWidget extends ReactWidget {
     @inject(InspectorWidget) protected readonly inspector: InspectorWidget;
     @inject(ApplicationShell) protected readonly shell: ApplicationShell;
     @inject(CommandRegistry) protected readonly commands: CommandRegistry;
+    @inject(BuildService) protected readonly builds: BuildService;
 
     protected readonly slot = BOTTOM_SLOTS[0];
     protected workbench: WorkbenchId = 'code';
@@ -66,6 +69,7 @@ export class CanvasWidget extends ReactWidget {
     protected insideSelection: InsideBlockId | undefined;
     protected rfNodes: Node<PartData>[] = [];
     protected selected: string | undefined;
+    protected firmware: string | undefined;
     protected refusal = '';
     protected refusalTimer: ReturnType<typeof setTimeout> | undefined;
     protected pendingSummary: string | undefined;
@@ -115,15 +119,17 @@ export class CanvasWidget extends ReactWidget {
             return;
         }
         this.folder = folder;
-        const [canvas, definition] = await Promise.all([
+        const [canvas, definition, built] = await Promise.all([
             this.setups.readCanvas(folder),
             this.setups.boardDefinition(folder).catch(error => {
                 console.error('board inside not loaded', error);
                 return undefined;
             }),
+            this.builds.lastBuild(folder).catch(() => undefined),
         ]);
         this.canvas = normaliseCanvas(canvas);
         this.inside = definition ? insideModel(definition) : undefined;
+        this.firmware = built ? `${built.identity.source_hash} ✓` : undefined;
         // The board of a new setup has no place yet: put it in the middle.
         this.canvas.nodes = this.canvas.nodes.map(n => n.x === undefined ? { ...n, x: 300, y: 40 } : n);
         this.syncNodes();
@@ -138,9 +144,16 @@ export class CanvasWidget extends ReactWidget {
             const def = partDef(n.part);
             return def ? [{
                 id: n.id, type: 'part', position: { x: n.x ?? 0, y: n.y ?? 0 }, selected: n.id === this.selected,
-                data: { def, values: n.values ?? {} },
+                data: { def, values: n.values ?? {}, firmware: this.firmware },
             }] : [];
         });
+    }
+
+    /** U10: the build identity follows the board on the canvas. */
+    setFirmware(label: string | undefined): void {
+        this.firmware = label;
+        this.syncNodes();
+        this.update();
     }
 
     protected changed(next: Canvas, summary: string): void {
@@ -379,6 +392,7 @@ export class CanvasWidget extends ReactWidget {
                     <Background gap={18} size={1} color='rgba(255,255,255,0.12)' />
                 </ReactFlow>
             </ReactFlowProvider>
+            <span className='ownstudio-canvas-mapping'>src/main.cpp · setup_routine()</span>
             {this.refusal && <div className='ownstudio-canvas-refusal' role='status'>{this.refusal}</div>}
             <span className='ownstudio-canvas-label'>{label}</span>
         </div>;
