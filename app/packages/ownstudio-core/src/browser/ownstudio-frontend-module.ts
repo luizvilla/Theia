@@ -1,17 +1,20 @@
 // SPDX-License-Identifier: LGPL-2.1-only
-// OwnStudio frontend module: branding, expert mode, the workbench bar and the workbench views.
+// OwnStudio frontend module: branding, the window of 2.0 and the workbench views.
 import '../../src/browser/style/ownstudio.css';
 import { ContainerModule } from '@theia/core/shared/inversify';
 import { CommandContribution } from '@theia/core/lib/common';
 import {
-    FrontendApplicationContribution, KeybindingContribution, WidgetFactory
+    ApplicationShell, FrontendApplicationContribution, KeybindingContribution, WidgetFactory
 } from '@theia/core/lib/browser';
+import { TabBarToolbarContribution } from '@theia/core/lib/browser/shell/tab-bar-toolbar';
 import { OwnStudioBrandingContribution, OwnStudioMonacoThemingService } from './ownstudio-branding-contribution';
 import { MonacoThemingService } from '@theia/monaco/lib/browser/monaco-theming-service';
-import { ExpertModeContribution } from './expert-mode-contribution';
 import { WorkbenchContribution } from './workbench-contribution';
-import { WorkbenchWidget } from './workbench-widget';
-import { HomeWidget } from './home-widget';
+import { OwnStudioApplicationShell } from './ownstudio-shell';
+import {
+    CanvasWidget, DesignPanelWidget, InspectorWidget, LabPanelWidget, PartsWidget, TimelineWidget
+} from './window-widgets';
+import { BOTTOM_SLOTS, RIGHT_SLOTS, WORKBENCH_SLOTS } from '../common/window-layout';
 import { WORKBENCHES, widgetId } from './workbenches';
 import { ServiceConnectionProvider } from '@theia/core/lib/browser/messaging/service-connection-provider';
 import { PreferenceContribution } from '@theia/core/lib/common/preferences';
@@ -36,10 +39,6 @@ import { ProcedureClientImpl, ProcedureModel } from './procedure-model';
 import { PROCEDURE_WIDGET_ID, ProcedureWidget } from './procedure-widget';
 import { CONTROL_CENTER_WIDGET_ID, ControlCenterWidget } from './control-center-widget';
 import { LabContribution } from './lab-contribution';
-import { StudyModel } from './study-model';
-import { MISSION_STEPS_WIDGET_ID, MissionStepsWidget } from './mission-steps-widget';
-import { QUESTIONNAIRE_WIDGET_ID, QuestionnaireWidget } from './questionnaire-widget';
-import { StudyContribution } from './study-contribution';
 
 export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
     bind(MissionService).toSelf().inSingletonScope();
@@ -96,21 +95,7 @@ export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
         id: CONTROL_CENTER_WIDGET_ID,
         createWidget: () => ctx.container.get(ControlCenterWidget),
     })).inSingletonScope();
-    bind(StudyModel).toSelf().inSingletonScope();
-    bind(MissionStepsWidget).toSelf();
-    bind(WidgetFactory).toDynamicValue(ctx => ({
-        id: MISSION_STEPS_WIDGET_ID,
-        createWidget: () => ctx.container.get(MissionStepsWidget),
-    })).inSingletonScope();
-    bind(QuestionnaireWidget).toSelf();
-    bind(WidgetFactory).toDynamicValue(ctx => ({
-        id: QUESTIONNAIRE_WIDGET_ID,
-        createWidget: () => ctx.container.get(QuestionnaireWidget),
-    })).inSingletonScope();
-    bind(StudyContribution).toSelf().inSingletonScope();
-    bind(CommandContribution).toService(StudyContribution);
-    bind(FrontendApplicationContribution).toService(StudyContribution);
-    bind(LabWidget).toSelf();
+    bind(LabWidget).toSelf().inSingletonScope();
     bind(LabContribution).toSelf().inSingletonScope();
     bind(CommandContribution).toService(LabContribution);
 
@@ -119,36 +104,32 @@ export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
     bind(OwnStudioBrandingContribution).toSelf().inSingletonScope();
     bind(FrontendApplicationContribution).toService(OwnStudioBrandingContribution);
 
-    bind(ExpertModeContribution).toSelf().inSingletonScope();
-    bind(CommandContribution).toService(ExpertModeContribution);
-    bind(FrontendApplicationContribution).toService(ExpertModeContribution);
+    // The window of 2.0 (plan U2): the timeline strip under the centre, the panels of frame 0.
+    bind(TimelineWidget).toSelf().inSingletonScope();
+    bind(OwnStudioApplicationShell).toSelf().inSingletonScope();
+    rebind(ApplicationShell).toService(OwnStudioApplicationShell);
+    const panels = [
+        [WORKBENCH_SLOTS[0].widgetId, DesignPanelWidget], [WORKBENCH_SLOTS[2].widgetId, LabPanelWidget],
+        [RIGHT_SLOTS[0].widgetId, PartsWidget], [RIGHT_SLOTS[1].widgetId, InspectorWidget], [BOTTOM_SLOTS[0].widgetId, CanvasWidget],
+    ] as const;
+    for (const [id, widget] of panels) {
+        bind(widget).toSelf().inSingletonScope();
+        bind(WidgetFactory).toDynamicValue(ctx => ({ id, createWidget: () => ctx.container.get(widget) })).inSingletonScope();
+    }
 
     bind(WorkbenchContribution).toSelf().inSingletonScope();
-    for (const service of [CommandContribution, KeybindingContribution, FrontendApplicationContribution]) {
+    for (const service of [CommandContribution, KeybindingContribution, FrontendApplicationContribution, TabBarToolbarContribution]) {
         bind(service).toService(WorkbenchContribution);
     }
 
-    bind(WorkbenchWidget).toSelf();
-    // Not singletons: switching workbench closes (disposes) the others, and a
-    // disposed React widget cannot render again. The factory makes a new one.
-    bind(HomeWidget).toSelf();
-    bind(WidgetFactory).toDynamicValue(ctx => ({
-        id: widgetId(WORKBENCHES[0]),
-        createWidget: () => ctx.container.get(HomeWidget),
-    })).inSingletonScope();
+    // Singletons: a workbench switch detaches the other centre view without disposing it.
     bind(WidgetFactory).toDynamicValue(ctx => ({
         id: widgetId(WORKBENCHES.find(wb => wb.id === 'lab')!),
         createWidget: () => ctx.container.get(LabWidget),
     })).inSingletonScope();
-    bind(DesignWidget).toSelf();
+    bind(DesignWidget).toSelf().inSingletonScope();
     bind(WidgetFactory).toDynamicValue(ctx => ({
         id: widgetId(WORKBENCHES.find(wb => wb.id === 'design')!),
         createWidget: () => ctx.container.get(DesignWidget),
     })).inSingletonScope();
-    for (const w of WORKBENCHES.filter(wb => wb.id !== 'home' && wb.id !== 'lab' && wb.id !== 'design')) {
-        bind(WidgetFactory).toDynamicValue(ctx => ({
-            id: widgetId(w),
-            createWidget: () => ctx.container.get(WorkbenchWidget).configure(w),
-        })).inSingletonScope();
-    }
 });

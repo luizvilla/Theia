@@ -1,0 +1,56 @@
+[
+ {
+  "frame": "0",
+  "title": "The window, part by part",
+  "file": "frame-00-anatomy.png",
+  "state": {
+   "workbench": "code",
+   "left": "explorer-view-container",
+   "right": "ownstudio.inspector",
+   "bottom": "ownstudio.canvas",
+   "main": "code-editor-opener:file:///data/ownstudio/build/mission-demo/firmware/control.cpp:726541709992038",
+   "centreScroll": "0px",
+   "leftTabs": [
+    "ownstudio.left.design",
+    "explorer-view-container",
+    "ownstudio.left.lab"
+   ],
+   "rightTabs": [
+    "ownstudio.parts",
+    "ownstudio.inspector",
+    "chat-view-widget"
+   ],
+   "bottomTabs": [
+    "Canvas",
+    "Terminal",
+    "Build output"
+   ],
+   "canvasTint": "code",
+   "timeline": true,
+   "leftOpen": true,
+   "rightOpen": true,
+   "bottomOpen": true,
+   "status": [
+    "",
+    "",
+    "",
+    "master",
+    "0  0",
+    "Board link unavailable",
+    "Ln 1, Col 1",
+    "LF",
+    "UTF-8",
+    "Spaces: 4",
+    "",
+    "C++"
+   ],
+   "titleBar": "rgb(23, 51, 46)"
+  },
+  "differences": [
+   "Canvas, inspector and timeline are empty: no setup exists until U5 to U9, and the timeline's dots come in U18.",
+   "Menus are still Theia's; the eight menus come in U3.",
+   "The Code panel is Theia's explorer (open editors, the folder, the git timeline); \"My files\" and the libraries list come with setups.",
+   "The status bar shows Build, Upload and Serial as icons; board and firmware entries come with the board definition (U4) and the build (U10)."
+  ]
+ }
+]

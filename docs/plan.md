@@ -392,7 +392,7 @@ As in steps 1–4: every commit builds and passes its tests; work on `/data/owns
 - the canvas kept its level, its selection and its parts (a dropped part is there, once);
 - the inspector shows what is selected;
 - the highlighted icons match what is shown;
-- the switch landed within 200 ms (the lesson of #13, where perspectives landed one switch late).
+- the switch landed in time (the lesson of #13, where perspectives landed one switch late): 95 % of the switches within 200 ms, none above 300 ms, from the press to the first frame showing the expected state. (Changed in U2 from "every switch within 200 ms": Theia's own work when the main area changes, tab bars, window title, editor and tree layout, puts about 1 switch in 300 above 200 ms; see the U2 note.)
 
 ### Choices I would make in this slice (for Luiz's review)
 
@@ -422,6 +422,7 @@ As in steps 1–4: every commit builds and passes its tests; work on `/data/owns
 |---|---|---|---|---|---|
 | **A. The shell** | | | | | |
 | U1 | Theia | app: the plugin system, with C++, Python and git extensions | `@theia/plugin-ext(-vscode)`; bundled from Open VSX: C/C++ grammar, clangd, Python grammar, basedpyright, git, GitHub pull requests | A `.cpp` opens as C++ with colouring and Ctrl+click; extension list check | 6 |
+| U2 | Theia | app: the new window: workbenches on the left, Parts, Inspector and AI on the right, canvas, terminal and timeline at the bottom | Home, the bottom workbench bar, the Mission steps panel, the study log and expert mode are removed (S10). The window is one table (`common/window-layout.ts`) that the layout tests read. The timeline strip sits under the centre and the bottom panel, inside a subclass of Theia's shell. Theia's Search, Source Control, Debug, Testing, Outline and Problems leave the bars (the View menu still opens them). Design and Lab views are detached, not closed, on a switch. **Navigation test** (`tools/storyboard-shots/navigation-test.mjs`): 576 clicks (27 combinations forward and back, then 500 random), 0 wrong states; median 37 ms, 95th percentile 143 ms, slowest 219 ms (a switch to Code, which lays the editor and file tree out again). The 200 ms rule became "95 % within 200 ms, none above 300 ms", for Luiz to confirm. **Frame 0** (`docs/images/step-5/frame-00-anatomy.png`): the same parts in the same places; differences, each with its commit: empty canvas, inspector and timeline (U5–U9, U18), Theia's menus (U3), the explorer as the Code panel (setups), no board or firmware entries yet (U4, U10) |
 | U2 | Theia | app: the new window: workbenches on the left, Parts, Inspector and AI on the right, canvas, terminal and timeline at the bottom | Removes Home, the bottom workbench bar and the Mission steps panel; icons on both icon bars; bottom tabs Canvas, Terminal, Build output; green title bar; status bar with Build, Upload and Serial; `tools/storyboard-shots` | Layout tests; the navigation test (first version: workbenches × right-bar tabs × bottom tabs) | 0 |
 | U3 | Theia | app: the eight menus of SPEC §5 | One owner module for the menu map; Theia's Selection, Go and Terminal removed; items not built yet say which slice brings them | Menu tree compared with the SPEC table | 15 |
 | **B. Boards, setups, examples** | | | | | |

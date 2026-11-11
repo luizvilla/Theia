@@ -16,7 +16,8 @@
         "defaultIconTheme": "theia-file-icons",
         "preferences": {
           "toolbar.showToolbar": false,
-          "security.workspace.trust.enabled": false
+          "security.workspace.trust.enabled": false,
+          "window.titleBarStyle": "custom"
         }
       }
     }

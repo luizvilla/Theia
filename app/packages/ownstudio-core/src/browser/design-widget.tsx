@@ -76,7 +76,7 @@ export class DesignWidget extends ReactWidget {
         this.id = widgetId(design);
         this.title.label = design.label;
         this.title.caption = design.purpose;
-        this.title.iconClass = codicon(design.icon);
+        this.title.iconClass = design.iconClass;
         this.title.closable = false;
         this.addClass('ownstudio-workbench');
         this.addClass('ownstudio-design');

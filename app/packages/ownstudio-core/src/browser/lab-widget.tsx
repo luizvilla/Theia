@@ -35,7 +35,7 @@ export class LabWidget extends ReactWidget {
         this.id = widgetId(lab);
         this.title.label = lab.label;
         this.title.caption = lab.purpose;
-        this.title.iconClass = codicon(lab.icon);
+        this.title.iconClass = lab.iconClass;
         this.title.closable = false;
         this.addClass('ownstudio-workbench');
         this.node.tabIndex = 0;
