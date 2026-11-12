@@ -148,6 +148,21 @@ const FRAMES = [
         ],
     },
     {
+        id: 'checklist', num: '8', title: 'The Lab checks before Run turns green',
+        go: async () => {
+            await show('left', 'ownstudio.left.lab');
+            await show('right', 'ownstudio.inspector');
+            await show('bottom', 'ownstudio.canvas');
+            await app.clickOn('.react-flow__node[data-id="dc-source"]');
+            await sleep(3000);
+        },
+        differences: [
+            'The deterministic storyboard Twist reports HIGH = 0.2 V; all other live checks hold, so the one failing sentence is visible in the panel and on Run.',
+            'U12 fills the capture form in the centre; U11 lists its board procedure and enforces the checklist before it can start.',
+            'Timeline dots are committed now but their strip is drawn in U18.',
+        ],
+    },
+    {
         id: 'example', num: '5', title: 'Load an example: it lands on its own branch',
         go: async () => {
             await app.clickOn('#theia-top-panel .lm-MenuBar-item:nth-child(1)');

@@ -9,7 +9,7 @@
 import '@xyflow/react/dist/style.css';
 import * as React from '@theia/core/shared/react';
 import { inject, injectable, postConstruct } from '@theia/core/shared/inversify';
-import { CommandRegistry } from '@theia/core/lib/common';
+import { CommandRegistry, Emitter } from '@theia/core/lib/common';
 import { ApplicationShell } from '@theia/core/lib/browser';
 import { ReactWidget } from '@theia/core/lib/browser/widgets/react-widget';
 import { Message } from '@theia/core/shared/@lumino/messaging';
@@ -21,7 +21,7 @@ import {
 import { BOTTOM_SLOTS, CANVAS_TINT, WORKBENCH_SLOTS, WorkbenchId } from '../common/window-layout';
 import { Canvas, PartDef, addPart, canConnect, normaliseCanvas, partDef } from '../common/canvas-model';
 import { InsideBlockId, InsideModel, insideModel } from '../common/inside-model';
-import { SetupService } from '../common/setup-protocol';
+import { BoardDefinition, SetupService } from '../common/setup-protocol';
 import { WORKBENCHES, commandId, iconClass } from './workbenches';
 import { InspectorAction, InspectorWidget } from './window-widgets';
 import { BuildService } from '../common/build-protocol';
@@ -64,6 +64,7 @@ export class CanvasWidget extends ReactWidget {
     protected workbench: WorkbenchId = 'code';
     protected folder: string | undefined;
     protected canvas: Canvas = { nodes: [], wires: [] };
+    protected definition: BoardDefinition | undefined;
     protected inside: InsideModel | undefined;
     protected level: 'setup' | 'inside' = 'setup';
     protected insideSelection: InsideBlockId | undefined;
@@ -77,6 +78,8 @@ export class CanvasWidget extends ReactWidget {
     /** Keep writes and their event commits in order when the user moves quickly between workbenches. */
     protected persistence: Promise<void> = Promise.resolve();
     protected flow: ReactFlowInstance<Node<PartData>, Edge> | undefined;
+    protected readonly onDidChangeEmitter = new Emitter<void>();
+    readonly onDidChange = this.onDidChangeEmitter.event;
 
     @postConstruct()
     protected init(): void {
@@ -128,16 +131,19 @@ export class CanvasWidget extends ReactWidget {
             this.builds.lastBuild(folder).catch(() => undefined),
         ]);
         this.canvas = normaliseCanvas(canvas);
+        this.definition = definition;
         this.inside = definition ? insideModel(definition) : undefined;
         this.firmware = built ? `${built.identity.source_hash} ✓` : undefined;
         // The board of a new setup has no place yet: put it in the middle.
         this.canvas.nodes = this.canvas.nodes.map(n => n.x === undefined ? { ...n, x: 300, y: 40 } : n);
         this.syncNodes();
         this.update();
+        this.onDidChangeEmitter.fire();
     }
 
     /** For tests and the inspector: the canvas as it is now. */
     get model(): Canvas { return this.canvas; }
+    get boardDefinition(): BoardDefinition | undefined { return this.definition; }
 
     protected syncNodes(): void {
         this.rfNodes = this.canvas.nodes.flatMap(n => {
@@ -160,6 +166,7 @@ export class CanvasWidget extends ReactWidget {
         this.canvas = next;
         this.syncNodes();
         this.update();
+        this.onDidChangeEmitter.fire();
         if (!this.folder) {
             return;
         }

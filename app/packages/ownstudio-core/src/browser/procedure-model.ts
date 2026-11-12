@@ -9,6 +9,7 @@ import {
 } from '../common/procedure-protocol';
 import { MissionService } from './mission-service';
 import { BoardModel } from './board-model';
+import { LabChecklistModel } from './lab-checklist-model';
 
 export const RUN_PROCEDURE_COMMAND = { id: 'ownstudio.procedure.run', category: 'OwnStudio', label: 'Run a Procedure…' };
 export const SHOW_RECORD_COMMAND = { id: 'ownstudio.record.show', category: 'OwnStudio', label: 'Show a Test Record' };
@@ -48,6 +49,7 @@ export class ProcedureModel {
     @inject(BoardModel) protected readonly board: BoardModel;
     @inject(MissionService) protected readonly missions: MissionService;
     @inject(PreferenceService) protected readonly preferences: PreferenceService;
+    @inject(LabChecklistModel) protected readonly checklist: LabChecklistModel;
 
     procedures: ProcedureInfo[] = [];
     problem: string | undefined;
@@ -71,7 +73,7 @@ export class ProcedureModel {
 
     async refresh(): Promise<void> {
         const root = this.missions.root;
-        if (!root || !this.missions.mission) {
+        if (!root) {
             this.procedures = [];
         } else {
             try {
@@ -103,7 +105,14 @@ export class ProcedureModel {
             return false;
         }
         let board: string | undefined;
+        let powerToken: string | undefined;
         if (target === 'board') {
+            const blocker = this.checklist.blocker(info);
+            if (blocker) {
+                this.problem = blocker.sentence;
+                this.onDidChangeEmitter.fire();
+                return false;
+            }
             const running = this.board.boards.filter(b => !b.in_bootloader);
             board = this.board.link?.serial_number ?? (running.length === 1 ? running[0].serial_number : undefined);
             if (!board) {
@@ -114,8 +123,8 @@ export class ProcedureModel {
             if (info.power_on) {
                 const ok = await new ConfirmDialog({
                     title: 'Switch the converter on?',
-                    msg: `"${info.title}" switches the converter of board ${board} on. Check that the supply is `
-                        + 'current-limited and the load is connected, and stay at the bench. The procedure switches '
+                    msg: `${this.checklist.confirmationSummary(info)} "${info.title}" switches the converter of board ${board} on. `
+                        + 'Stay at the bench. The procedure switches '
                         + 'it off at the end or on any error.',
                     ok: 'Switch on and run',
                     cancel: 'Cancel',
@@ -123,6 +132,7 @@ export class ProcedureModel {
                 if (!ok) {
                     return false;
                 }
+                powerToken = await this.service.issuePowerToken();
             }
             this.restoreBoard = await this.board.release();
         }
@@ -132,7 +142,7 @@ export class ProcedureModel {
             this.current.runId = await this.service.start({
                 python: this.preferences.get<string>('ownstudio.python', ''),
                 mission: root.path.fsPath(), procedure: info.path, target, board,
-                allowPower: target === 'board' && info.power_on,
+                powerToken,
             });
         } catch (error) {
             this.finish({ status: 2, error: error instanceof Error ? error.message : String(error) });

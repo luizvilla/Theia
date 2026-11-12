@@ -493,6 +493,63 @@
   ]
  },
  {
+  "frame": "8",
+  "title": "The Lab checks before Run turns green",
+  "file": "frame-08-checklist.png",
+  "state": {
+   "workbench": "lab",
+   "left": "ownstudio.left.lab",
+   "right": "ownstudio.inspector",
+   "bottom": "ownstudio.canvas",
+   "main": "ownstudio.workbench.lab",
+   "centreScroll": null,
+   "leftTabs": [
+    "ownstudio.left.design",
+    "explorer-view-container",
+    "ownstudio.left.lab"
+   ],
+   "rightTabs": [
+    "ownstudio.parts",
+    "ownstudio.inspector",
+    "chat-view-widget"
+   ],
+   "bottomTabs": [
+    "Canvas",
+    "Terminal",
+    "Build output"
+   ],
+   "canvasTint": "lab",
+   "canvasLevel": "setup",
+   "canvasSelection": "dc-source",
+   "inspectorSelection": "DC source",
+   "canvasFirmware": "295a6058ce86d775 ✓",
+   "codeToolbar": [],
+   "buildOutput": [],
+   "timeline": true,
+   "leftOpen": true,
+   "rightOpen": true,
+   "bottomOpen": true,
+   "status": [
+    "",
+    "",
+    "",
+    "twist-buck",
+    "1↓ 3↑",
+    "0  0",
+    "Twist 1.4.2 ·  firmware matches",
+    "Lab checklist 5/6",
+    "",
+    ""
+   ],
+   "titleBar": "rgb(23, 51, 46)"
+  },
+  "differences": [
+   "The deterministic storyboard Twist reports HIGH = 0.2 V; all other live checks hold, so the one failing sentence is visible in the panel and on Run.",
+   "U12 fills the capture form in the centre; U11 lists its board procedure and enforces the checklist before it can start.",
+   "Timeline dots are committed now but their strip is drawn in U18."
+  ]
+ },
+ {
   "frame": "15",
   "title": "The eight menus",
   "file": "frame-15-menus.png",

@@ -244,6 +244,19 @@ class Twin(Fixture):
         self.assertEqual(len(fake.records), 1)
 
 
+class PowerToken(unittest.TestCase):
+    def test_missing_invented_and_reused_tokens_are_refused(self):
+        self.assertFalse(proc.consume_power_token(None, None))
+        with tempfile.TemporaryDirectory() as tmp:
+            path = pathlib.Path(tmp) / "token"
+            path.write_text("issued-by-dialog")
+            self.assertFalse(proc.consume_power_token(path, "invented"))
+            self.assertFalse(path.exists())
+            path.write_text("issued-by-dialog")
+            self.assertTrue(proc.consume_power_token(path, "issued-by-dialog"))
+            self.assertFalse(proc.consume_power_token(path, "issued-by-dialog"))
+
+
 class Json(unittest.TestCase):
     def test_ask_and_answer(self):
         out = io.StringIO()

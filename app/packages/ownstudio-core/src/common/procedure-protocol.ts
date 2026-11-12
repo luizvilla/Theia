@@ -28,7 +28,8 @@ export interface ProcedureStart {
     procedure: string;       // relative to the mission
     target: 'simulator' | 'board';
     board?: string;
-    allowPower: boolean;
+    /** One-use capability returned by issuePowerToken after the confirmation dialog. */
+    powerToken?: string;
 }
 
 export interface ProcedureClient {
@@ -37,6 +38,7 @@ export interface ProcedureClient {
 
 export interface ProcedureService {
     setClient(client: ProcedureClient | undefined): void;
+    issuePowerToken(): Promise<string>;
     start(options: ProcedureStart): Promise<number>;
     /** Answer a question; null cancels the procedure. */
     answer(runId: number, id: number, answer: number | boolean | null): Promise<void>;

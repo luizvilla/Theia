@@ -2,7 +2,12 @@
 import { injectable } from '@theia/core/shared/inversify';
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process';
 import * as readline from 'readline';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
+import { randomUUID } from 'crypto';
 import { ProcedureClient, ProcedureEvent, ProcedureService, ProcedureStart } from '../common/procedure-protocol';
+import { PowerTokenStore } from './power-token';
 
 /**
  * Spawns `python -m ownstudio_lab.procedure MISSION PROCEDURE --target T --json`
@@ -14,9 +19,14 @@ export class ProcedureServiceImpl implements ProcedureService {
     protected client: ProcedureClient | undefined;
     protected runs = new Map<number, ChildProcessWithoutNullStreams>();
     protected nextId = 1;
+    protected readonly powerTokens = new PowerTokenStore();
 
     setClient(client: ProcedureClient | undefined): void {
         this.client = client;
+    }
+
+    async issuePowerToken(): Promise<string> {
+        return this.powerTokens.issue();
     }
 
     async start(o: ProcedureStart): Promise<number> {
@@ -26,8 +36,16 @@ export class ProcedureServiceImpl implements ProcedureService {
         if (o.board) {
             args.push('--board', o.board);
         }
-        if (o.allowPower) {
-            args.push('--allow-power');
+        let tokenFolder: string | undefined;
+        if (o.powerToken) {
+            if (!this.powerTokens.consume(o.powerToken)) {
+                throw new Error('the power token is invalid, expired or was already used');
+            }
+            tokenFolder = fs.mkdtempSync(path.join(os.tmpdir(), 'ownstudio-power-'));
+            const tokenFile = path.join(tokenFolder, 'token');
+            const runnerToken = randomUUID();
+            fs.writeFileSync(tokenFile, runnerToken, { mode: 0o600 });
+            args.push('--power-token-file', tokenFile, '--power-token', runnerToken);
         }
         if (o.target === 'board') {
             // A board run brings its simulation, at the conditions it recorded.
@@ -54,6 +72,9 @@ export class ProcedureServiceImpl implements ProcedureService {
         child.on('error', err => send({ event: 'done', status: 2, error: `cannot start ${python}: ${err.message}` }));
         child.on('exit', code => {
             this.runs.delete(runId);
+            if (tokenFolder) {
+                fs.rmSync(tokenFolder, { recursive: true, force: true });
+            }
             if (!done) {
                 send({ event: 'done', status: code ?? 2, error: stderr.trim().split('\n').slice(-3).join('\n') || `stopped (exit ${code})` });
             }
@@ -74,5 +95,6 @@ export class ProcedureServiceImpl implements ProcedureService {
             child.kill();
         }
         this.runs.clear();
+        this.powerTokens.clear();
     }
 }

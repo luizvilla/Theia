@@ -1,9 +1,9 @@
 # Storyboard shots and the navigation test
 
-Two checks on the real OwnStudio window, written in plan step U2. Every later
+Checks on the real OwnStudio window, begun in plan step U2. Every later
 commit that changes the window runs both (docs/plan.md, "Commit plan for slice 1").
 
-Both start this checkout's built app with a throwaway profile under
+They start this checkout's built app with a throwaway profile under
 `/data/ownstudio/build/shots-<port>`, then stop exactly that app afterwards.
 
 ```sh
@@ -17,6 +17,8 @@ tools/storyboard-shots/run.sh 9482 $S tools/storyboard-shots/navigation-test.mjs
 tools/storyboard-shots/run.sh 9484 $S tools/storyboard-shots/shots.mjs     # frames on a setup
 tools/storyboard-shots/run.sh 9486 -  tools/storyboard-shots/shots.mjs     # frames without a folder (Start)
 tools/storyboard-shots/run.sh 9485 $S tools/storyboard-shots/menus-test.mjs
+OWNSTUDIO_STORYBOARD_BOARD=1 EXPECT_READY=0 \
+  tools/storyboard-shots/run.sh 9487 $S tools/storyboard-shots/checklist-test.mjs
 ```
 
 - **`navigation-test.mjs`**: clicks through every workbench × right-bar tab ×
@@ -35,5 +37,9 @@ tools/storyboard-shots/run.sh 9485 $S tools/storyboard-shots/menus-test.mjs
   and `OWNSTUDIO_BUILD_PYTHON` to drive installed tools instead.
 - **`menus-test.mjs`** (U3): opens each menu of the menu bar and compares it,
   item by item and separator by separator, with `common/menu-map.ts`.
+- **`checklist-test.mjs`** (U11): checks the six live rows, status count and
+  board Run button against the deterministic storyboard board. Set
+  `OWNSTUDIO_STORYBOARD_PRODUCT`, `OWNSTUDIO_STORYBOARD_HIGH` and
+  `EXPECT_READY` to exercise the wrong-board, mismatch and all-green states.
 - **`cdp.mjs`**: the small DevTools Protocol client both scripts use, and `STATE`,
   the window state read from the page.

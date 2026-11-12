@@ -51,6 +51,8 @@ export interface BoardLeg {
 }
 
 export interface BoardSensor { name: string; adc: string | null; enabled: boolean }
+export interface BoardThreshold { sensor: string; low: number; high: number; enabled: boolean }
+export interface PortSensorRating { sensor: string; low: number; high: number }
 export interface InsideBlockDescription { label: string; side: 'power' | 'control' | 'centre'; at: [number, number] }
 export interface BoardDefinition {
     name: string;
@@ -60,6 +62,8 @@ export interface BoardDefinition {
     min_frequency_hz: number;
     legs: BoardLeg[];
     sensors: BoardSensor[];
+    thresholds: BoardThreshold[];
+    port_ratings: Record<string, { voltage?: PortSensorRating; current?: PortSensorRating }>;
     description: {
         board: string;
         label: string;

@@ -6,6 +6,7 @@ import {
     BoardClient, BoardInfo, BoardService, FirmwareState, LinkInfo, MissionIdentity, firmwareState
 } from '../common/board-protocol';
 import { MissionService } from './mission-service';
+import { BuildService } from '../common/build-protocol';
 
 export const POLL_MS = 2000;
 const RETRY_MS = 10000;
@@ -31,6 +32,7 @@ export class BoardModel {
     @inject(BoardService) protected readonly service: BoardService;
     @inject(MissionService) protected readonly missions: MissionService;
     @inject(PreferenceService) protected readonly preferences: PreferenceService;
+    @inject(BuildService) protected readonly builds: BuildService;
 
     boards: BoardInfo[] = [];
     link: LinkInfo | undefined;
@@ -76,7 +78,23 @@ export class BoardModel {
     async refreshIdentity(): Promise<void> {
         const root = this.missions.root;
         try {
-            this.identity = root && this.missions.mission ? await this.service.identity(root.path.fsPath()) : undefined;
+            if (!root) {
+                this.identity = undefined;
+            } else {
+                const folder = root.path.fsPath();
+                try {
+                    const [sources, built] = await Promise.all([this.builds.identity(folder), this.builds.lastBuild(folder)]);
+                    this.identity = {
+                        sources,
+                        prebuilt: built ? {
+                            image: built.image, sha256: '', build: built.identity,
+                            shield: 'twist', shield_version: 'setup',
+                        } : null,
+                    };
+                } catch {
+                    this.identity = await this.service.identity(folder);
+                }
+            }
         } catch (error) {
             this.identity = undefined;
             this.problem = message(error);

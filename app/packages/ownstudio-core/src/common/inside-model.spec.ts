@@ -13,6 +13,7 @@ const board = (): BoardDefinition => ({
         { name: 'LEG2', pwm_devices: ['pwmc', 'pwmc'], dead_time_ns: [100, 100], modulation: 'UpDwn', pwm_pins: [2, 4], enabled: true },
     ],
     sensors: Array.from({ length: 9 }, (_, i) => ({ name: `S${i}`, adc: i % 2 ? 'ADC_2' : 'ADC_1', enabled: true })),
+    thresholds: [], port_ratings: {},
     description: {
         board: 'twist', label: 'Twist 1.4.2', controller: 'spin', ports: { HIGH: {}, LOW1: {}, LOW2: {} },
         inside: {

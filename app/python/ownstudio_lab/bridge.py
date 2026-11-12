@@ -22,6 +22,7 @@ flash {manifest, serial_number?, mcumgr?}
                               firmware answers ThingSet (it takes a few seconds to boot)
 """
 import json
+import os
 import pathlib
 import subprocess
 import sys
@@ -29,7 +30,7 @@ import time
 
 from . import flash as flashing
 from . import testing
-from .boards import find_boards
+from .boards import Board, find_boards
 from .thingset import ThingSetError, find_thingset_port
 
 
@@ -130,6 +131,10 @@ class Bridge:
         return json.loads(result.stdout)
 
     def procedures(self, mission):
+        if os.environ.get("OWNSTUDIO_STORYBOARD_BOARD"):
+            return [{"path": "tests/procedures/capture.py", "title": "Capture: reference step",
+                     "targets": ["simulator", "board"], "tests": [], "level": "L1", "power_on": True,
+                     "doc": "The board's default capture, for the deterministic storyboard bench."}]
         import ast
         folder = pathlib.Path(mission) / "tests" / "procedures"
         found = []
@@ -202,7 +207,7 @@ def main():
         sys.stdout.write(json.dumps(message) + "\n")
         sys.stdout.flush()
 
-    bridge = Bridge(emit=emit)
+    bridge = _storyboard_bridge(emit) if os.environ.get("OWNSTUDIO_STORYBOARD_BOARD") else Bridge(emit=emit)
     for line in sys.stdin:
         line = line.strip()
         if not line:
@@ -214,6 +219,40 @@ def main():
             continue
         emit(bridge.handle(request))
     bridge.disconnect()
+
+
+class _StoryboardLink:
+    """Deterministic ThingSet values for UI captures; enabled only by the shot harness."""
+    def __init__(self, source_hash, high):
+        self.groups = {
+            "Build": {"rCommit": "storyboard", "rDirty": False, "rSourceHash": source_hash},
+            "Device": {"rName": "Storyboard Twist"},
+            "Measurements": {"rVHigh_V": high, "rV1Low_V": 0.0, "rV2Low_V": 0.0,
+                             "rI1Low_A": 0.0, "rI2Low_A": 0.0},
+        }
+
+    def get(self, path):
+        group, _, name = path.partition("/")
+        values = self.groups[group]
+        return values[name] if name else dict(values)
+
+    def update(self, group, values):
+        self.groups.setdefault(group, {}).update(values)
+
+    def close(self):
+        pass
+
+
+def _storyboard_bridge(emit):
+    setup = pathlib.Path(os.environ.get("OWNSTUDIO_STORYBOARD_SETUP", "."))
+    manifest = setup / ".pio" / "ownstudio" / "manifest.json"
+    source_hash = "storyboard"
+    if manifest.is_file():
+        source_hash = json.loads(manifest.read_text()).get("build", {}).get("source_hash", source_hash)
+    high = float(os.environ.get("OWNSTUDIO_STORYBOARD_HIGH", "0.2"))
+    product = os.environ.get("OWNSTUDIO_STORYBOARD_PRODUCT", "TWIST_V1_4_2")
+    board = Board("STORYBOARD", product, {"1.2": "storyboard"})
+    return Bridge(find=lambda: [board], open_link=lambda _board: ("storyboard", _StoryboardLink(source_hash, high)), emit=emit)
 
 
 if __name__ == "__main__":

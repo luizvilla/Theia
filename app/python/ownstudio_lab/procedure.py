@@ -2,7 +2,7 @@
 """Run a mission procedure on a target and file its test record in a new campaign.
 
     python -m ownstudio_lab.procedure MISSION tests/procedures/step_response.py \\
-        --target simulator|board [--board SERIAL] [--allow-power] [--twin] [--campaign DIR] [--json]
+        --target simulator|board [--board SERIAL] [--twin] [--campaign DIR] [--json]
 
 A procedure is a Python file with
 
@@ -20,9 +20,9 @@ again on the simulator, at the conditions the board run recorded (mapped to
 the harness's options by PROCEDURE["twin"]), in the same campaign, and links
 each board record to its simulator record ("twin" in record.json).
 
-On the board, a procedure that switches power on runs only with --allow-power
-(OwnStudio passes it after the user confirms, each time; ADR 0010), and the
-target refuses that write otherwise.
+On the board, a procedure that switches power on runs only after it consumes
+the one-use token file made by OwnStudio after the user confirms (ADR 0010).
+The token arguments are an internal runner interface, not a user override.
 
 With --json the runner talks JSON lines, for the app:
     stdout  {"event": "log", "text"} | {"event": "ask", "id", "kind": "number"|"confirm", "question"}
@@ -32,6 +32,7 @@ With --json the runner talks JSON lines, for the app:
 from __future__ import annotations
 
 import argparse
+import hmac
 import importlib.util
 import json
 import pathlib
@@ -161,7 +162,7 @@ def power_guard(power_on, allowed):
     """A guard for BoardTarget: refuse the procedure's power-on write unless allowed."""
     def guard(group, values):
         if not allowed and power_on and group == power_on["group"] and values.get(power_on["name"]) == power_on["value"]:
-            raise TargetError("switching the converter on needs the user's confirmation (--allow-power)")
+            raise TargetError("switching the converter on needs a one-time token from OwnStudio's confirmation dialog")
     return guard
 
 
@@ -189,7 +190,7 @@ def run_procedure(mission, path, target_kind, io, board=None, allow_power=False,
         raise ProcedureError(f"{path.name} runs on {', '.join(meta.get('targets', []))}, not on the {target_kind}")
     power_on = meta.get("power_on")
     if target_kind == "board" and power_on and not allow_power:
-        raise ProcedureError(f"{path.name} switches the converter on: on the board it needs --allow-power")
+        raise ProcedureError(f"{path.name} switches the converter on: it needs a one-time power token from OwnStudio")
     if target is None:
         target = open_target(target_kind, mission, board, guard=power_guard(power_on, allow_power), **(options or {}))
     ctx = Context(mission, target, campaign, io, options)
@@ -231,13 +232,29 @@ def run_twin(mission, module, board_ctx, io, sim_target=None):
     link_twins(board_ctx.records, ctx.records, board_ctx.campaign)
 
 
+def consume_power_token(token_file, token):
+    """Consume an exact token once. Missing, invented and reused tokens all refuse power."""
+    if token_file is None or token is None:
+        return False
+    try:
+        expected = token_file.read_text()
+    except OSError:
+        return False
+    try:
+        token_file.unlink()
+    except OSError:
+        return False
+    return hmac.compare_digest(expected, token)
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description="Run a mission procedure on a target")
     parser.add_argument("mission", type=pathlib.Path)
     parser.add_argument("procedure", type=pathlib.Path, help="path to the procedure, relative to the mission or absolute")
     parser.add_argument("--target", choices=["simulator", "board"], default="simulator")
     parser.add_argument("--board", help="USB serial number of the board")
-    parser.add_argument("--allow-power", action="store_true")
+    parser.add_argument("--power-token-file", type=pathlib.Path, help=argparse.SUPPRESS)
+    parser.add_argument("--power-token", help=argparse.SUPPRESS)
     parser.add_argument("--twin", action="store_true", help="after a board run, the same procedure on the simulator")
     parser.add_argument("--campaign", type=pathlib.Path)
     parser.add_argument("--option", action="append", default=[], metavar="NAME=VALUE",
@@ -255,7 +272,8 @@ def main(argv=None) -> int:
         except ValueError:
             options[name] = value
     try:
-        status = run_procedure(mission, path, args.target, io, args.board, args.allow_power, args.campaign, options,
+        allow_power = consume_power_token(args.power_token_file, args.power_token)
+        status = run_procedure(mission, path, args.target, io, args.board, allow_power, args.campaign, options,
                                twin=args.twin)
         io.done(status)
         return status

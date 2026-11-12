@@ -61,6 +61,11 @@ export class BuildServiceImpl implements BuildService {
 
     setClient(client: BuildClient | undefined): void { this.client = client; }
 
+    async identity(folder: string): Promise<BuildIdentity> {
+        this.validate(folder);
+        return setupBuildIdentity(folder);
+    }
+
     async lastBuild(folder: string): Promise<BuildResult | undefined> {
         this.validate(folder);
         const manifestPath = path.join(folder, '.pio', 'ownstudio', 'manifest.json');

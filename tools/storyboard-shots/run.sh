@@ -18,6 +18,7 @@ rm -rf "$scratch"; mkdir -p "$scratch/config" "$scratch/home"
 export OWNSTUDIO_PYTHON="${OWNSTUDIO_PYTHON:-/data/ownstudio/build/venv-mission/bin/python}"
 export OWNSTUDIO_HOME="${OWNSTUDIO_HOME:-$scratch/home}"
 export OWNSTUDIO_BOARDS="${OWNSTUDIO_BOARDS:-$root/boards}"
+[ -n "$folder" ] && export OWNSTUDIO_STORYBOARD_SETUP="${OWNSTUDIO_STORYBOARD_SETUP:-$folder}"
 # Frame 7 needs deterministic progress without requiring a board. Callers can
 # override either tool when testing a real build or a real Twist.
 export OWNSTUDIO_PIO="${OWNSTUDIO_PIO:-$root/tools/storyboard-shots/fake-pio.mjs}"

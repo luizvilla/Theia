@@ -36,6 +36,8 @@ export interface BuildClient {
 
 export interface BuildService {
     setClient(client: BuildClient | undefined): void;
+    /** Identity of the setup's current PlatformIO inputs, whether built or not. */
+    identity(folder: string): Promise<BuildIdentity>;
     lastBuild(folder: string): Promise<BuildResult | undefined>;
     build(folder: string): Promise<BuildResult>;
     clean(folder: string): Promise<void>;

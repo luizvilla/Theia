@@ -12,6 +12,7 @@ import { BuildClient, BuildEvent, BuildResult, BuildService } from '../common/bu
 import { SetupService } from '../common/setup-protocol';
 import { BOTTOM_SLOTS } from '../common/window-layout';
 import { CanvasWidget } from './canvas-widget';
+import { BoardModel } from './board-model';
 
 export const BUILD_COMMAND = { id: 'ownstudio.setup.build', category: 'OwnStudio', label: 'Build' };
 export const UPLOAD_COMMAND = { id: 'ownstudio.setup.upload', category: 'OwnStudio', label: 'Upload' };
@@ -36,6 +37,7 @@ export class BuildContribution implements CommandContribution, TabBarToolbarCont
     @inject(TerminalService) protected readonly terminals: TerminalService;
     @inject(MessageService) protected readonly messages: MessageService;
     @inject(WidgetManager) protected readonly widgets: WidgetManager;
+    @inject(BoardModel) protected readonly board: BoardModel;
 
     protected busy = false;
     protected progress: { report(update: { message?: string; work?: { done: number; total: number } }): void; cancel(): void } | undefined;
@@ -60,6 +62,7 @@ export class BuildContribution implements CommandContribution, TabBarToolbarCont
         registry.registerCommand(CLEAN_COMMAND, {
             execute: () => this.perform('Cleaning the build', true, async folder => {
                 await this.builds.clean(folder);
+                await this.board.refreshIdentity();
                 this.messages.info('Build files cleaned.');
             }),
             isEnabled: () => !this.busy,
@@ -124,6 +127,7 @@ export class BuildContribution implements CommandContribution, TabBarToolbarCont
         const result = await this.builds.build(folder);
         this.canvas()?.setFirmware(`${result.identity.source_hash} ✓`);
         await this.setups.commitEvent(folder, 'build', `Build ${result.identity.source_hash} ✓`);
+        await this.board.refreshIdentity();
         this.messages.info(`Build ${result.identity.source_hash} finished in ${Math.round(result.duration_ms / 1000)} s.`);
         return result;
     }

@@ -4,11 +4,13 @@
 // inspector its details in U9, the timeline its dots in U18, the Lab panel its
 // checklist in U11, the Design panel its sheets in U16.
 import * as React from '@theia/core/shared/react';
-import { injectable, postConstruct } from '@theia/core/shared/inversify';
+import { inject, injectable, postConstruct } from '@theia/core/shared/inversify';
 import { ReactWidget } from '@theia/core/lib/browser/widgets/react-widget';
 import { Message } from '@theia/core/shared/@lumino/messaging';
 import { RIGHT_SLOTS, WORKBENCH_SLOTS, WindowSlot } from '../common/window-layout';
 import { iconClass } from './workbenches';
+import { LabChecklistModel } from './lab-checklist-model';
+import { ProcedureModel } from './procedure-model';
 
 abstract class WindowPanel extends ReactWidget {
     protected abstract readonly slot: WindowSlot<string>;
@@ -126,13 +128,32 @@ export class DesignPanelWidget extends WindowPanel {
 export class LabPanelWidget extends WindowPanel {
     protected readonly slot = WORKBENCH_SLOTS[2];
 
+    @inject(LabChecklistModel) protected readonly checklist: LabChecklistModel;
+    @inject(ProcedureModel) protected readonly procedures: ProcedureModel;
+
+    @postConstruct()
+    protected override init(): void {
+        super.init();
+        this.checklist.onDidChange(() => this.update());
+        this.procedures.onDidChange(() => this.update());
+    }
+
     protected render(): React.ReactNode {
+        const procedure = this.procedures.procedures.find(p => p.targets?.includes('board'));
+        const checks = this.checklist.checks(procedure);
         return <div className='ownstudio-panel-body'>
             <div className='ownstudio-panel-head'>Lab checklist</div>
-            <p className='ownstudio-muted'>Checked all the time once a setup is open: board, firmware, HIGH, outputs, load.
-                Run turns green only while every line holds.</p>
+            <div className='ownstudio-lab-checks' data-ready={checks.every(check => check.ok)}>
+                {checks.map(check => <div key={check.id} className={`ownstudio-lab-check ownstudio-lab-check-${check.ok ? 'ok' : 'bad'}`}
+                    data-check={check.id} data-ok={check.ok}>
+                    <span className='ownstudio-dot' /><span><b>{check.label}</b> · {check.sentence}</span>
+                </div>)}
+            </div>
             <div className='ownstudio-panel-head'>Procedures</div>
-            <p className='ownstudio-muted'>The setup's procedures and test sequences.</p>
+            {!this.procedures.procedures.length && <p className='ownstudio-muted'>No procedure yet. The default capture arrives with the next plan step.</p>}
+            {this.procedures.procedures.map(p => <div key={p.path} className='ownstudio-procedure-item'>
+                <span className='ownstudio-dot' /><span>{p.title}<small>{p.targets?.join(' · ')}</small></span>
+            </div>)}
         </div>;
     }
 }

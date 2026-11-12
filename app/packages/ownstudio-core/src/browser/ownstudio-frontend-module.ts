@@ -46,6 +46,9 @@ import { CONTROL_CENTER_WIDGET_ID, ControlCenterWidget } from './control-center-
 import { LabContribution } from './lab-contribution';
 import { BUILD_SERVICE_PATH, BuildService } from '../common/build-protocol';
 import { BuildClientImpl, BuildContribution } from './build-contribution';
+import { LabChecklistModel } from './lab-checklist-model';
+import { LabChecklistContribution } from './lab-checklist-contribution';
+import { CanvasState } from './canvas-state';
 
 export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
     bind(MissionService).toSelf().inSingletonScope();
@@ -73,7 +76,10 @@ export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
     bind(ProcedureService).toDynamicValue(ctx =>
         ServiceConnectionProvider.createProxy<ProcedureService>(ctx.container, PROCEDURE_SERVICE_PATH, ctx.container.get(ProcedureClientImpl))
     ).inSingletonScope();
+    bind(LabChecklistModel).toSelf().inSingletonScope();
     bind(ProcedureModel).toSelf().inSingletonScope();
+    bind(LabChecklistContribution).toSelf().inSingletonScope();
+    bind(FrontendApplicationContribution).toService(LabChecklistContribution);
 
     // The mission agent (SPEC §12): free-level tools only, nothing that reaches the board (ADR 0010).
     bind(OwnStudioMissionAgent).toSelf().inSingletonScope();
@@ -137,6 +143,7 @@ export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
         bind(widget).toSelf().inSingletonScope();
         bind(WidgetFactory).toDynamicValue(ctx => ({ id, createWidget: () => ctx.container.get(widget) })).inSingletonScope();
     }
+    bind(CanvasState).toService(CanvasWidget);
 
     // The eight menus (plan U3): the menu bar is common/menu-map.ts and nothing else.
     bind(OwnStudioMenuModelRegistry).toSelf().inSingletonScope();

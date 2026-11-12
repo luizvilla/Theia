@@ -70,6 +70,16 @@ body {
 .ownstudio-part.ownstudio-later { opacity: 0.5; cursor: default; }
 .ownstudio-dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
 .ownstudio-muted { opacity: 0.7; font-size: 12px; line-height: 1.45; }
+.ownstudio-lab-checks { display: grid; gap: 7px; margin-bottom: 14px; }
+.ownstudio-lab-check { display: flex; align-items: flex-start; gap: 7px; font-size: 12px; line-height: 1.35; }
+.ownstudio-lab-check .ownstudio-dot { width: 8px; height: 8px; margin-top: 4px; }
+.ownstudio-lab-check-ok .ownstudio-dot, .ownstudio-procedure-item .ownstudio-dot { background: #2F9E60; }
+.ownstudio-lab-check-bad .ownstudio-dot { background: #E5484D; }
+.ownstudio-lab-check-bad { color: #E5484D; }
+.ownstudio-procedure-item { display: flex; gap: 7px; align-items: flex-start; padding: 5px 0; font-size: 12px; }
+.ownstudio-procedure-item small { display: block; opacity: 0.65; }
+.theia-button.ownstudio-run-ready { background: #2F9E60; color: #FFFFFF; }
+.theia-button.ownstudio-run-blocked, .theia-button.ownstudio-run-blocked:disabled { background: #E5484D; color: #FFFFFF; opacity: 0.82; }
 
 /* The setup canvas, tinted by workbench (SPEC §6). */
 .ownstudio-canvas { position: relative; height: 100%; background: var(--ownstudio-canvas, #1f2427); color: #e2ebe8;
