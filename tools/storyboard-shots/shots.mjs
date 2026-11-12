@@ -53,7 +53,7 @@ const FRAMES = [
             await show('bottom', 'ownstudio.canvas');
         },
         differences: [
-            'This first-state capture has the setup\'s Twist only; frames 2 and 3 add and wire its source and load. Timeline dots come in U18.',
+            'This first-state capture has the setup\'s Twist only; frames 2 and 3 add and wire its source and load. The timeline strip shows the setup\'s first dots.',
             'The Code panel is Theia\'s explorer (open editors, the folder, the git timeline); "My files" and the libraries list come with setups.',
             'The status-bar icons and the Code toolbar run the same Build, Upload and Serial actions; board identity appears when a Twist is connected.',
         ],
@@ -78,9 +78,8 @@ const FRAMES = [
             await sleep(600);
         },
         differences: [
-            'The Lab panel shows what its checklist will check; the checklist itself comes in U11.',
+            'The Lab checklist turns red without a board: this frame is about the canvas.',
             'The frame shows the resistor mid-drag; this stable check captures the source and resistor after both drops.',
-            'The timeline dots come in U18.',
         ],
     },
     {
@@ -93,7 +92,6 @@ const FRAMES = [
         },
         differences: [
             'The refusal shows under the canvas for a few seconds; the frame draws it beside the wire.',
-            'The timeline dots come in U18.',
         ],
     },
     {
@@ -109,8 +107,8 @@ const FRAMES = [
         },
         after: async () => { await app.clickOn('.ownstudio-inside-breadcrumb button'); },
         differences: [
-            'The Design sheets in the centre arrive in U16; the selected Driver and its devicetree values are complete here.',
-            'The requirement badges come when a setup carries requirements, and timeline dots come in U18.',
+            'The centre shows the Design sheet of frame 13 (the frame drew a placeholder); the selected Driver and its devicetree values are complete.',
+            'Requirement badges come when a setup carries requirements (after slice 1).',
         ],
     },
     {
@@ -124,7 +122,6 @@ const FRAMES = [
         },
         differences: [
             'The canvas keeps the source, Twist and resistor wired in frames 2 and 3; the navigation test checks a drop from every workbench.',
-            'The timeline dots come in U18.',
         ],
     },
     {
@@ -145,7 +142,6 @@ const FRAMES = [
         },
         differences: [
             'The screenshot uses deterministic fake PlatformIO and mcumgr processes; the same service is gated below with a real buck build.',
-            'Timeline dots are committed now but their strip is drawn in U18.',
         ],
     },
     {
@@ -159,8 +155,7 @@ const FRAMES = [
         },
         differences: [
             'The deterministic storyboard Twist reports HIGH = 0.2 V; all other live checks hold, so the one failing sentence is visible in the panel and on Run.',
-            'U12 fills the capture form in the centre; U11 lists its board procedure and enforces the checklist before it can start.',
-            'Timeline dots are committed now but their strip is drawn in U18.',
+            'The capture form fills the centre; the checklist must be 6/6 before Run turns green.',
         ],
     },
     {
@@ -175,7 +170,6 @@ const FRAMES = [
         differences: [
             'The channels, reference step and capture window come from the Twist board description; the example adds nothing.',
             'The deterministic storyboard Twist reports the matching firmware and HIGH = 29.9 V, so all six checks hold and Capture is green.',
-            'Timeline dots come in U18.',
         ],
     },
     {
@@ -230,7 +224,7 @@ const FRAMES = [
         differences: [
             'The native switching model runs the same capture procedure only after Simulate at these conditions is pressed; the board result is visible first.',
             'The solid amber measurement and dashed blue simulation share a trigger-aligned time axis; the table compares every captured metric.',
-            'The Simulate-tint fidelity chips shown in the storyboard arrive with the simulation sheet in slice 2; timeline dots arrive in U18.',
+            'The Simulate-tint fidelity chips shown in the storyboard arrive with the simulation sheet in slice 2.',
         ],
     },
     {
@@ -250,8 +244,8 @@ const FRAMES = [
         },
         differences: [
             'The sheet is the setup\'s own ownstudio/design/output_filter.py; "Show the formulas" opens it. The frame\'s C of 61 µF counted the electrolytic; the sheet\'s C is the ceramics the plant calls C (14.1 µF), the electrolytic stays in the plant.',
-            'The frame\'s undershoot verdict needs the buck\'s requirements, which come with the example extras (E21); the sheet shows the passive dip for the load step instead.',
-            'The Inspector keeps its block selection; the frame selected Power. The design dot is committed now and drawn by the timeline in U18.',
+            'The frame\'s undershoot verdict needs the buck\'s requirements, which no setup carries yet; the sheet shows the passive dip for the load step instead.',
+            'The Inspector keeps its block selection; the frame selected Power. The design dot appears on the timeline.',
         ],
     },
     {
@@ -304,7 +298,7 @@ const FRAMES = [
         },
         differences: [
             'File › Examples › "Examples of the board…" opens a picker of the board\'s examples, grouped as the frame\'s submenu; the frame draws the list as a submenu.',
-            'The timeline\'s branch point and the inspector\'s Example field come with the timeline (U18) and the inspector (U9); the branch shows in the status bar.',
+            'The example\'s branch shows in the status bar and the timeline strip; branch lanes are slice 2.',
         ],
     },
     {

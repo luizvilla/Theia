@@ -8,7 +8,7 @@
    "left": "explorer-view-container",
    "right": "ownstudio.inspector",
    "bottom": "ownstudio.canvas",
-   "main": "code-editor-opener:file:///data/ownstudio/build/shots-setup/src/main.cpp:7641784864972719",
+   "main": "code-editor-opener:file:///data/ownstudio/build/u19-f1/src/main.cpp:5437298357068117",
    "centreScroll": "0px",
    "leftTabs": [
     "ownstudio.left.design",
@@ -46,20 +46,20 @@
     "",
     "",
     "",
-    "twist-buck",
-    "1↓ 0↑",
+    "buck-voltage-mode",
+    "",
     "0  0",
-    "Twist 1.4.2 ·  firmware differs",
+    "Twist 1.4.2 ·  firmware matches",
+    "Lab checklist 4/6",
     "Ln 1, Col 1",
     "LF",
     "UTF-8",
-    "Spaces: 4",
-    ""
+    "Spaces: 4"
    ],
    "titleBar": "rgb(23, 51, 46)"
   },
   "differences": [
-   "This first-state capture has the setup's Twist only; frames 2 and 3 add and wire its source and load. Timeline dots come in U18.",
+   "This first-state capture has the setup's Twist only; frames 2 and 3 add and wire its source and load. The timeline strip shows the setup's first dots.",
    "The Code panel is Theia's explorer (open editors, the folder, the git timeline); \"My files\" and the libraries list come with setups.",
    "The status-bar icons and the Code toolbar run the same Build, Upload and Serial actions; board identity appears when a Twist is connected."
   ]
@@ -91,6 +91,12 @@
     "Build output"
    ],
    "canvasTint": null,
+   "canvasLevel": null,
+   "canvasSelection": null,
+   "inspectorSelection": null,
+   "canvasFirmware": null,
+   "codeToolbar": [],
+   "buildOutput": [],
    "timeline": false,
    "leftOpen": true,
    "rightOpen": true,
@@ -100,7 +106,8 @@
     "",
     "",
     "0  0",
-    "Twist 1.4.2 ·  firmware differs",
+    "No board",
+    "Lab checklist 1/6",
     "",
     ""
    ],
@@ -156,17 +163,18 @@
     "buck-voltage-mode*",
     "",
     "0  0",
-    "No board",
-    "Lab checklist 2/6",
-    "",
-    ""
+    "Twist 1.4.2 ·  firmware matches",
+    "Lab checklist 4/6",
+    "Ln 1, Col 1",
+    "LF",
+    "UTF-8",
+    "Spaces: 4"
    ],
    "titleBar": "rgb(23, 51, 46)"
   },
   "differences": [
-   "The Lab panel shows what its checklist will check; the checklist itself comes in U11.",
-   "The frame shows the resistor mid-drag; this stable check captures the source and resistor after both drops.",
-   "The timeline dots come in U18."
+   "The Lab checklist turns red without a board: this frame is about the canvas.",
+   "The frame shows the resistor mid-drag; this stable check captures the source and resistor after both drops."
   ]
  },
  {
@@ -213,16 +221,17 @@
     "buck-voltage-mode*",
     "",
     "0  0",
-    "No board",
-    "Lab checklist 2/6",
-    "",
-    ""
+    "Twist 1.4.2 ·  firmware matches",
+    "Lab checklist 6/6",
+    "Ln 1, Col 1",
+    "LF",
+    "UTF-8",
+    "Spaces: 4"
    ],
    "titleBar": "rgb(23, 51, 46)"
   },
   "differences": [
-   "The refusal shows under the canvas for a few seconds; the frame draws it beside the wire.",
-   "The timeline dots come in U18."
+   "The refusal shows under the canvas for a few seconds; the frame draws it beside the wire."
   ]
  },
  {
@@ -269,16 +278,18 @@
     "buck-voltage-mode*",
     "",
     "0  0",
-    "No board",
-    "Lab checklist 2/6",
-    "",
-    ""
+    "Twist 1.4.2 ·  firmware matches",
+    "Lab checklist 6/6",
+    "Ln 1, Col 1",
+    "LF",
+    "UTF-8",
+    "Spaces: 4"
    ],
    "titleBar": "rgb(23, 51, 46)"
   },
   "differences": [
-   "The Design sheets in the centre arrive in U16; the selected Driver and its devicetree values are complete here.",
-   "The requirement badges come when a setup carries requirements, and timeline dots come in U18."
+   "The centre shows the Design sheet of frame 13 (the frame drew a placeholder); the selected Driver and its devicetree values are complete.",
+   "Requirement badges come when a setup carries requirements (after slice 1)."
   ]
  },
  {
@@ -286,12 +297,12 @@
   "title": "Load an example: it lands on its own branch",
   "file": "frame-05-example.png",
   "state": {
-   "workbench": "code",
-   "left": "explorer-view-container",
-   "right": "ownstudio.inspector",
+   "workbench": "lab",
+   "left": "ownstudio.left.lab",
+   "right": "chat-view-widget",
    "bottom": "ownstudio.canvas",
-   "main": "code-editor-opener:file:///data/ownstudio/build/shots-setup/src/main.cpp:7641784864972719",
-   "centreScroll": "0px",
+   "main": "ownstudio.workbench.lab",
+   "centreScroll": null,
    "leftTabs": [
     "ownstudio.left.design",
     "explorer-view-container",
@@ -305,24 +316,15 @@
    "bottomTabs": [
     "Canvas",
     "Terminal",
-    "Build output",
-    ""
+    "Build output"
    ],
-   "canvasTint": "code",
+   "canvasTint": "lab",
    "canvasLevel": "setup",
    "canvasSelection": null,
    "inspectorSelection": null,
-   "canvasFirmware": "295a6058ce86d775 ✓",
-   "codeToolbar": [
-    "Build",
-    "Upload",
-    "Build and upload",
-    "Clean",
-    "Serial"
-   ],
-   "buildOutput": [
-    "Board 58435001004B001E (MCUBOOT); image 5a5a5a5a5a5a5a5aUploading…Uploading 32768 / 163840 bytesUploading 65536 / 163840 bytesUploading 98304 / 163840 bytesUploading 131072 / 163840 bytesUploading 163840 / 163840 bytesRestarting the board…Done: board 58435001004B001E runs TWIST_V1_4_2Flash 295a6058ce86d775 ✓ 5 s"
-   ],
+   "canvasFirmware": null,
+   "codeToolbar": [],
+   "buildOutput": [],
    "timeline": true,
    "leftOpen": true,
    "rightOpen": true,
@@ -331,21 +333,21 @@
     "",
     "",
     "",
-    "twist-buck",
-    "1↓ 3↑",
+    "buck-voltage-mode",
+    "",
     "0  0",
-    "Twist 1.4.2 ·  firmware differs",
+    "Twist 1.4.2 ·  firmware matches",
+    "Lab checklist 6/6",
     "Ln 1, Col 1",
     "LF",
     "UTF-8",
-    "Spaces: 4",
-    ""
+    "Spaces: 4"
    ],
    "titleBar": "rgb(23, 51, 46)"
   },
   "differences": [
    "File › Examples › \"Examples of the board…\" opens a picker of the board's examples, grouped as the frame's submenu; the frame draws the list as a submenu.",
-   "The timeline's branch point and the inspector's Example field come with the timeline (U18) and the inspector (U9); the branch shows in the status bar."
+   "The example's branch shows in the status bar and the timeline strip; branch lanes are slice 2."
   ]
  },
  {
@@ -357,7 +359,7 @@
    "left": "explorer-view-container",
    "right": "ownstudio.parts",
    "bottom": "ownstudio.canvas",
-   "main": "code-editor-opener:file:///data/ownstudio/build/u16-frames/src/main.cpp:2905206903898932",
+   "main": "code-editor-opener:file:///data/ownstudio/build/u19-f1/src/main.cpp:5437298357068117",
    "centreScroll": "0px",
    "leftTabs": [
     "ownstudio.left.design",
@@ -398,8 +400,8 @@
     "buck-voltage-mode",
     "",
     "0  0",
-    "No board",
-    "Lab checklist 2/6",
+    "Twist 1.4.2 ·  firmware matches",
+    "Lab checklist 6/6",
     "Ln 1, Col 1",
     "LF",
     "UTF-8",
@@ -408,8 +410,7 @@
    "titleBar": "rgb(23, 51, 46)"
   },
   "differences": [
-   "The canvas keeps the source, Twist and resistor wired in frames 2 and 3; the navigation test checks a drop from every workbench.",
-   "The timeline dots come in U18."
+   "The canvas keeps the source, Twist and resistor wired in frames 2 and 3; the navigation test checks a drop from every workbench."
   ]
  },
  {
@@ -421,7 +422,7 @@
    "left": "explorer-view-container",
    "right": "chat-view-widget",
    "bottom": "ownstudio.canvas",
-   "main": "code-editor-opener:file:///data/ownstudio/build/u17-agents/src/control.cpp:8667969720874924",
+   "main": "code-editor-opener:file:///data/ownstudio/build/u19-f3/src/control.cpp:5614989276996873",
    "centreScroll": "0px",
    "leftTabs": [
     "ownstudio.left.design",
@@ -462,8 +463,8 @@
     "buck-voltage-mode",
     "",
     "0  0",
-    "No board",
-    "Lab checklist 2/6",
+    "Twist 1.4.2 ·  firmware matches",
+    "Lab checklist 6/6",
     "Ln 1, Col 1",
     "LF",
     "UTF-8",
@@ -486,7 +487,7 @@
    "left": "explorer-view-container",
    "right": "ownstudio.inspector",
    "bottom": "outputView",
-   "main": "code-editor-opener:file:///data/ownstudio/build/shots-setup/src/main.cpp:7641784864972719",
+   "main": "code-editor-opener:file:///data/ownstudio/build/u19-f1/src/main.cpp:5437298357068117",
    "centreScroll": "0px",
    "leftTabs": [
     "ownstudio.left.design",
@@ -518,8 +519,8 @@
    ],
    "buildOutput": [
     "Flash: [===       ]  30.1% (used 157804 bytes from 524288 bytes)",
-    "Build 295a6058ce86d775 ✓ 1 s",
-    "> /data/ownstudio/Theia/tools/storyboard-shots/fake-flash.mjs -m ownstudio_lab.flash /data/ownstudio/build/shots-setup/.pio/",
+    "Build d4c7e553b9c495a1 ✓ 1 s",
+    "> /data/ownstudio/Theia/tools/storyboard-shots/fake-flash.mjs -m ownstudio_lab.flash /data/ownstudio/build/u19-f1/.pio/",
     "ownstudio/manifest.json",
     "Board 58435001004B001E (MCUBOOT); image 5a5a5a5a5a5a5a5a",
     "Uploading…",
@@ -534,21 +535,20 @@
     "",
     "",
     "",
-    "twist-buck",
-    "1↓ 2↑",
+    "buck-voltage-mode",
+    "",
     "0  0",
-    "Twist 1.4.2 ·  firmware differs",
+    "Twist 1.4.2 ·  firmware matches",
+    "Lab checklist 6/6",
     "Ln 1, Col 1",
     "LF",
     "UTF-8",
-    "Spaces: 4",
-    ""
+    "Spaces: 4"
    ],
    "titleBar": "rgb(23, 51, 46)"
   },
   "differences": [
-   "The screenshot uses deterministic fake PlatformIO and mcumgr processes; the same service is gated below with a real buck build.",
-   "Timeline dots are committed now but their strip is drawn in U18."
+   "The screenshot uses deterministic fake PlatformIO and mcumgr processes; the same service is gated below with a real buck build."
   ]
  },
  {
@@ -575,15 +575,18 @@
    "bottomTabs": [
     "Canvas",
     "Terminal",
-    "Build output"
+    "Build output",
+    ""
    ],
    "canvasTint": "lab",
    "canvasLevel": "setup",
    "canvasSelection": "dc-source",
    "inspectorSelection": "DC source",
-   "canvasFirmware": "295a6058ce86d775 ✓",
+   "canvasFirmware": "d4c7e553b9c495a1 ✓",
    "codeToolbar": [],
-   "buildOutput": [],
+   "buildOutput": [
+    "Board 58435001004B001E (MCUBOOT); image 5a5a5a5a5a5a5a5aUploading…Uploading 32768 / 163840 bytesUploading 65536 / 163840 bytesUploading 98304 / 163840 bytesUploading 131072 / 163840 bytesUploading 163840 / 163840 bytesRestarting the board…Done: board 58435001004B001E runs TWIST_V1_4_2Flash d4c7e553b9c495a1 ✓ 5 s"
+   ],
    "timeline": true,
    "leftOpen": true,
    "rightOpen": true,
@@ -592,20 +595,21 @@
     "",
     "",
     "",
-    "twist-buck",
-    "1↓ 3↑",
+    "buck-voltage-mode",
+    "",
     "0  0",
     "Twist 1.4.2 ·  firmware matches",
-    "Lab checklist 5/6",
-    "",
-    ""
+    "Lab checklist 6/6",
+    "Ln 1, Col 1",
+    "LF",
+    "UTF-8",
+    "Spaces: 4"
    ],
    "titleBar": "rgb(23, 51, 46)"
   },
   "differences": [
    "The deterministic storyboard Twist reports HIGH = 0.2 V; all other live checks hold, so the one failing sentence is visible in the panel and on Run.",
-   "U12 fills the capture form in the centre; U11 lists its board procedure and enforces the checklist before it can start.",
-   "Timeline dots are committed now but their strip is drawn in U18."
+   "The capture form fills the centre; the checklist must be 6/6 before Run turns green."
   ]
  },
  {
@@ -632,15 +636,18 @@
    "bottomTabs": [
     "Canvas",
     "Terminal",
-    "Build output"
+    "Build output",
+    ""
    ],
    "canvasTint": "lab",
    "canvasLevel": "setup",
    "canvasSelection": "dc-source",
    "inspectorSelection": "DC source",
-   "canvasFirmware": null,
+   "canvasFirmware": "d4c7e553b9c495a1 ✓",
    "codeToolbar": [],
-   "buildOutput": [],
+   "buildOutput": [
+    "Board 58435001004B001E (MCUBOOT); image 5a5a5a5a5a5a5a5aUploading…Uploading 32768 / 163840 bytesUploading 65536 / 163840 bytesUploading 98304 / 163840 bytesUploading 131072 / 163840 bytesUploading 163840 / 163840 bytesRestarting the board…Done: board 58435001004B001E runs TWIST_V1_4_2Flash d4c7e553b9c495a1 ✓ 5 s"
+   ],
    "timeline": true,
    "leftOpen": true,
    "rightOpen": true,
@@ -649,20 +656,21 @@
     "",
     "",
     "",
-    "twist-buck*",
+    "buck-voltage-mode",
     "",
     "0  0",
     "Twist 1.4.2 ·  firmware matches",
     "Lab checklist 6/6",
-    "",
-    ""
+    "Ln 1, Col 1",
+    "LF",
+    "UTF-8",
+    "Spaces: 4"
    ],
    "titleBar": "rgb(23, 51, 46)"
   },
   "differences": [
    "The channels, reference step and capture window come from the Twist board description; the example adds nothing.",
-   "The deterministic storyboard Twist reports the matching firmware and HIGH = 29.9 V, so all six checks hold and Capture is green.",
-   "Timeline dots come in U18."
+   "The deterministic storyboard Twist reports the matching firmware and HIGH = 29.9 V, so all six checks hold and Capture is green."
   ]
  },
  {
@@ -689,15 +697,18 @@
    "bottomTabs": [
     "Canvas",
     "Terminal",
-    "Build output"
+    "Build output",
+    ""
    ],
    "canvasTint": "lab",
    "canvasLevel": "setup",
-   "canvasSelection": null,
-   "inspectorSelection": null,
-   "canvasFirmware": null,
+   "canvasSelection": "dc-source",
+   "inspectorSelection": "DC source",
+   "canvasFirmware": "d4c7e553b9c495a1 ✓",
    "codeToolbar": [],
-   "buildOutput": [],
+   "buildOutput": [
+    "Board 58435001004B001E (MCUBOOT); image 5a5a5a5a5a5a5a5aUploading…Uploading 32768 / 163840 bytesUploading 65536 / 163840 bytesUploading 98304 / 163840 bytesUploading 131072 / 163840 bytesUploading 163840 / 163840 bytesRestarting the board…Done: board 58435001004B001E runs TWIST_V1_4_2Flash d4c7e553b9c495a1 ✓ 5 s"
+   ],
    "timeline": true,
    "leftOpen": true,
    "rightOpen": true,
@@ -706,13 +717,15 @@
     "",
     "",
     "",
-    "pulsimgui-final-gate*",
+    "buck-voltage-mode*",
     "",
     "0  0",
     "Twist 1.4.2 ·  firmware matches",
     "Lab checklist 6/6",
-    "",
-    ""
+    "Ln 1, Col 1",
+    "LF",
+    "UTF-8",
+    "Spaces: 4"
    ],
    "titleBar": "rgb(23, 51, 46)"
   },
@@ -786,7 +799,7 @@
     "",
     "",
     "",
-    "pulsimgui-final-gate*",
+    "buck-voltage-mode*",
     "",
     "0  0",
     "Twist 1.4.2 ·  firmware matches",
@@ -799,7 +812,7 @@
   "differences": [
    "The native switching model runs the same capture procedure only after Simulate at these conditions is pressed; the board result is visible first.",
    "The solid amber measurement and dashed blue simulation share a trigger-aligned time axis; the table compares every captured metric.",
-   "The Simulate-tint fidelity chips shown in the storyboard arrive with the simulation sheet in slice 2; timeline dots arrive in U18."
+   "The Simulate-tint fidelity chips shown in the storyboard arrive with the simulation sheet in slice 2."
   ]
  },
  {
@@ -846,8 +859,8 @@
     "buck-voltage-mode",
     "",
     "0  0",
-    "No board",
-    "Lab checklist 2/6",
+    "Twist 1.4.2 ·  firmware matches",
+    "Lab checklist 6/6",
     "",
     ""
    ],
@@ -855,8 +868,8 @@
   },
   "differences": [
    "The sheet is the setup's own ownstudio/design/output_filter.py; \"Show the formulas\" opens it. The frame's C of 61 µF counted the electrolytic; the sheet's C is the ceramics the plant calls C (14.1 µF), the electrolytic stays in the plant.",
-   "The frame's undershoot verdict needs the buck's requirements, which come with the example extras (E21); the sheet shows the passive dip for the load step instead.",
-   "The Inspector keeps its block selection; the frame selected Power. The design dot is committed now and drawn by the timeline in U18."
+   "The frame's undershoot verdict needs the buck's requirements, which no setup carries yet; the sheet shows the passive dip for the load step instead.",
+   "The Inspector keeps its block selection; the frame selected Power. The design dot appears on the timeline."
   ]
  },
  {
@@ -903,10 +916,12 @@
     "buck-voltage-mode",
     "",
     "0  0",
-    "No board",
-    "Lab checklist 2/6",
-    "",
-    ""
+    "Twist 1.4.2 ·  firmware matches",
+    "Lab checklist 6/6",
+    "Ln 1, Col 1",
+    "LF",
+    "UTF-8",
+    "Spaces: 4"
    ],
    "titleBar": "rgb(23, 51, 46)"
   },
@@ -921,12 +936,12 @@
   "title": "The eight menus",
   "file": "frame-15-menus.png",
   "state": {
-   "workbench": "code",
-   "left": "explorer-view-container",
+   "workbench": "design",
+   "left": "ownstudio.left.design",
    "right": "ownstudio.inspector",
    "bottom": "ownstudio.canvas",
-   "main": "code-editor-opener:file:///data/ownstudio/build/shots-setup/src/main.cpp:7641784864972719",
-   "centreScroll": "0px",
+   "main": "ownstudio.timeline.preview",
+   "centreScroll": null,
    "leftTabs": [
     "ownstudio.left.design",
     "explorer-view-container",
@@ -940,24 +955,15 @@
    "bottomTabs": [
     "Canvas",
     "Terminal",
-    "Build output",
-    ""
+    "Build output"
    ],
-   "canvasTint": "code",
+   "canvasTint": "design",
    "canvasLevel": "setup",
    "canvasSelection": null,
-   "inspectorSelection": null,
-   "canvasFirmware": "295a6058ce86d775 ✓",
-   "codeToolbar": [
-    "Build",
-    "Upload",
-    "Build and upload",
-    "Clean",
-    "Serial"
-   ],
-   "buildOutput": [
-    "Board 58435001004B001E (MCUBOOT); image 5a5a5a5a5a5a5a5aUploading…Uploading 32768 / 163840 bytesUploading 65536 / 163840 bytesUploading 98304 / 163840 bytesUploading 131072 / 163840 bytesUploading 163840 / 163840 bytesRestarting the board…Done: board 58435001004B001E runs TWIST_V1_4_2Flash 295a6058ce86d775 ✓ 5 s"
-   ],
+   "inspectorSelection": "Dot · example: buck_voltage_mode",
+   "canvasFirmware": null,
+   "codeToolbar": [],
+   "buildOutput": [],
    "timeline": true,
    "leftOpen": true,
    "rightOpen": true,
@@ -966,15 +972,15 @@
     "",
     "",
     "",
-    "twist-buck",
-    "1↓ 3↑",
+    "buck-voltage-mode",
+    "",
     "0  0",
-    "Twist 1.4.2 ·  firmware differs",
+    "Twist 1.4.2 ·  firmware matches",
+    "Lab checklist 6/6",
     "Ln 1, Col 1",
     "LF",
     "UTF-8",
-    "Spaces: 4",
-    ""
+    "Spaces: 4"
    ],
    "titleBar": "rgb(23, 51, 46)"
   },
@@ -1028,8 +1034,8 @@
     "buck-voltage-mode",
     "",
     "0  0",
-    "No board",
-    "Lab checklist 2/6",
+    "Twist 1.4.2 ·  firmware matches",
+    "Lab checklist 6/6",
     "Ln 1, Col 1",
     "LF",
     "UTF-8",

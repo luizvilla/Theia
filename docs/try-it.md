@@ -1,45 +1,50 @@
-# Trying OwnStudio yourself
+# Trying OwnStudio 2.0 (slice 1)
 
-## Start it
+This is for your test session: the nine steps of SPEC §2, on the Twist, in one or two hours. The question at the end is the exit criterion of slice 1: **is it good enough**, functional with no problem you could have caught yourself?
+
+## Before you start
 
 ```sh
-cd /data/ownstudio/Theia
+cd ~/code/examples && git checkout ownstudio/buck-extras      # the buck example with OwnStudio's firmware (E21)
+cd /data/ownstudio/Theia && (cd app && npm run build)          # if the app changed since the last build
 scripts/try-ownstudio.sh
 ```
 
-The script works on a **fresh copy** of the buck mission, with a fresh profile, under `/data/ownstudio/try/<date-time>/`, so nothing you do touches the real mission repository. It prints where your copy and your `notes.md` are. Run it again for a clean start.
+The script gives you a fresh OwnStudio home and profile under `/data/ownstudio/try/<date-time>/`: your setups go to `home/setups/`, and it creates `notes.md` with one heading per step. Nothing touches `~/OwnStudio` or an earlier trial; run it again for a clean start.
 
-With the Twist on USB, the status bar shows the board on the right. Switch the supply on only for step 5, as at the bench session.
+The Twist on USB, the supply **off** until step 5 (30 V, 1 A limit, 33 Ω on LOW1, as at the bench session). Switching on happens only in step 5, only with you there.
 
-## A first pass: as a student (about an hour)
+Known limits, so you don't lose time on them:
+- **The AI.** Claude Code needs its agent SDK on the machine: `npm install -g @anthropic-ai/claude-agent-sdk`. Codex as Theia ships it (0.49) refuses your `~/.codex/config.toml` because of `model_reasoning_effort = "xhigh"`; set `high` while you try it, or skip the AI. See the U17 row of the plan.
+- **The simulator** compiles `control.cpp` against OwnTech's control library. The script points it at a cached copy; a setup does not yet find the copy PlatformIO downloads.
+- **Slice 2 and later** items say so in the menus ("(slice 2)"); clicking one tells you which step brings it.
 
-Click **"Step 1/5"** in the status bar (bottom left): the Mission steps panel opens. Follow the five steps without reading anything else, as a student would:
+## The nine steps
 
-1. **Read the requirements** (Home). Try the three layers: Specification, Build, Verification.
-2. **Size the output filter** (Design). The sizing table, then the Bode plot further down.
-3. **Run the tests in simulation** (Lab). BUCK-STEP-01 passes; BUCK-REF-01 fails REQ-TRACKING. That's the exercise.
-4. **Improve the control law** (Design, then Code). Tune Kp and Ti on the Bode plot, "Apply to control.cpp", run BUCK-REF-01 again. Can you get under 10 ms without peeking at `tests/test_mission_is_solvable.py`?
-5. **Run the reference step on the board** (Lab). This needs your firmware on the board. Build it from the Lab or the command line, or flash `bin/` for the shipped PI. Supply on, then "Run on the board". Open the result from the control center ("board run") to see measurement and simulation together.
+**1. Source, Twist and load.** On the Start page, click **New setup on the Twist** and give it a name. The window opens on the setup. In the **Parts** tab (right), drag a **DC source**, then a **Resistor** onto the canvas (bottom), and wire the source to **HIGH** and the resistor to **LOW1**. Try a wrong wire (a resistor on HIGH): it should refuse with one sentence. The parts come with your bench's values (30 V, 1 A limit, 33 Ω); selecting one shows them in the Inspector. Typing a value on the canvas is slice 2 (the editable inspector); in slice 1, Vin and Rload change through PulsimGui (step 6) and L and C through Design (step 8).
 
-You can also try the study's consent and questionnaire in that panel. The log goes to the trial folder, not anywhere else.
+**2. The inside of the Twist.** Double-click the Twist. Five blocks on your reference layout; click **Driver**: the Inspector shows the legs, 200 kHz, 100/100 ns, up-down, read from Core's devicetree. Read-only in slice 1.
 
-## A second pass: as the instructor
+**3. Load an example.** **File › Examples › Examples of the board…**, then **buck voltage mode**. It lands on its own branch (`buck-voltage-mode`, status bar and timeline); the previous `src/` stays on the setup's first branch.
 
-- **Control center** (Lab): does it tell you what has been tested, where, and what's broken?
-- **Home, Verification layer:** do the block colours and badges make sense?
-- **Safety panel and data object table** (Lab).
-- **Code with AI:** needs a key. Settings → search "AI" → enable, paste an Anthropic key (or point to a local Ollama), then ask the OwnStudio agent in the chat to help with REQ-TRACKING.
-- **The command line,** if you want: `docs/step-4-report.md`, "How to run things".
+**4. Build and flash.** In **Code**, open `src/main.cpp` or `src/control.cpp`: the toolbar above the editor has **Build**, **Upload**, **Build and upload**. Build takes about a minute (progress in **Build output**); then Upload. The Twist on the canvas shows the firmware's identity, and the Lab checklist's **Firmware** line turns green when the board reports the same build.
+
+**5. Switch on and capture.** Supply on. In **Lab**, the checklist (left) must reach 6/6: board, firmware, HIGH measured within 10 % of the canvas, outputs, load, procedure. Then **Capture from the board**, read the dialog, confirm. The reference steps from 10 to 12 V; the result opens on the step (drag to zoom, Shift+wheel to pan, **Whole run**).
+
+**6. The simulator, same parameters, its circuit.** On the result, **Open in PulsimGui**: the setup's own plant, with the canvas's 30 V, 33 Ω, L and C applied, and your `control.cpp` as its C-Block. Change a value there and save: the canvas follows.
+
+**7. Simulate over the measurement.** Back in the result, **Simulate at these conditions**: the simulation (dashed) is drawn over the measurement (solid), with the metrics side by side.
+
+**8. Change a parameter in Design.** **Design** (left): **Output filter**. Drag **L per leg**: the ripple and its curve follow live; releasing puts L on the Twist on the canvas and in the plant, and adds a dot to the timeline. **Control loop**: change Kp or Ti and watch the Bode plot and margins; **Apply to the code** writes them into `control.cpp`. **Show the formulas** opens the Python behind each sheet, in your setup.
+
+**9. Again, and back in time.** Build and upload, capture again, simulate again. Every change, build, run and simulation is a dot on the **timeline** (bottom). Click an earlier dot: the preview shows what differs from now; **Restore here** goes back (canvas, code, Lab all follow), **Back to latest** returns. Editing from a restored dot starts a branch; nothing is lost. **History › Milestone…** names the current state.
+
+**The AI (optional).** The **AI** tab (right): type `@` to pick **ClaudeCode** or **Codex**, signed in with your own account. They read the setup's `AGENTS.md`; neither can switch power on through OwnStudio, and Codex runs in a sandbox that cannot open the serial port. Claude Code asks before every shell command: the power limits are in ADR 0031's open point, which needs your decision.
 
 ## Taking notes
 
-Write in `notes.md` as you go: one line per remark, with where, what happened, what you expected, and a mark (**bug**, **friction**, **missing**, **idea**, **good**). Screenshots can go in the same folder. Don't sort or polish: the grilling afterwards turns them into decisions.
+Write in `notes.md` as you go, under the step you are on: where, what happened, what you expected, and a mark (**bug**, **friction**, **missing**, **idea**, **good**). Screenshots can go in the same folder. Don't sort or polish: the grilling afterwards turns them into decisions.
 
-## After testing: the grilling
+## After testing
 
-Send me the path of your `notes.md`. I'll grill you on it, one round of questions at a time, until we agree on:
-- the objective for the next step, what OwnStudio must do better first;
-- what changes in the specification and the ADRs;
-- the commit plan.
-
-[docs/architecture.md](architecture.md) lists the engineering choices I made on my own (section 5); mark any you want to revisit in your notes too.
+Send me the path of your `notes.md`. We go through it one round of questions at a time, until we agree whether slice 1 is good enough, and what slice 2 changes first. The slice report ([step-5-slice-1-report.md](step-5-slice-1-report.md)) puts every storyboard frame beside its screenshot, and lists what waits for you.
