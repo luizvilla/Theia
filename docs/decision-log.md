@@ -366,3 +366,5 @@ Facts found:
 | Q170 | A paper commit on its own branch; storyboard drafted? | Yes. | Yes; the storyboard stays local. | this commit |
 
 Luiz confirmed the shared understanding on 2026-11-13.
+
+Amendment (2026-11-13): Luiz moved the timing work after slice 4, as slice 5 (it was slice 3 in Q153 and Q168). The ST-Link developer slice (ADR 0035) moves after slice 5. Plan, SPEC §8 and §19, ADRs 0034 and 0035 updated.

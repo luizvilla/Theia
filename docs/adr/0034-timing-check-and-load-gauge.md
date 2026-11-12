@@ -1,5 +1,5 @@
 ---
-status: accepted, for slice 3
+status: accepted, for slice 5 (after slice 4)
 date: 2026-11-13
 ---
 
@@ -75,9 +75,9 @@ That one warning is covered by the legend and the table view that the Timing tab
 
 ## Consequences
 
-- The firmware side (T1 in the slice 3 plan) is Spin API work in Luiz's fork and has to be measured itself: the probe cost per read (Core2 measured about 2.5 µs for five reads with three sums each) is reported, and the baseline includes it.
-- The buck voltage-mode example already speaks ThingSet, so it gets the gauge as soon as the fork publishes the load objects. Most of the other examples still use serial menus: in slice 3 only the Twist examples the tutorials use are converted. A generic ThingSet example, and a few like it, may follow, because ThingSet by hand proved hard to use (Luiz's `thingset_examples` branch of the examples repository). Converting all 38 is OwnTech's work, not OwnStudio's.
-- Acceptance on the unpowered Twist (slice 3 plan):
+- The firmware side (T1 in the slice 5 plan) is Spin API work in Luiz's fork and has to be measured itself: the probe cost per read (Core2 measured about 2.5 µs for five reads with three sums each) is reported, and the baseline includes it.
+- The buck voltage-mode example already speaks ThingSet, so it gets the gauge as soon as the fork publishes the load objects. Most of the other examples still use serial menus: in slice 5 only the Twist examples the tutorials use are converted. A generic ThingSet example, and a few like it, may follow, because ThingSet by hand proved hard to use (Luiz's `thingset_examples` branch of the examples repository). Converting all 38 is OwnTech's work, not OwnStudio's.
+- Acceptance on the unpowered Twist (slice 5 plan):
   - a Timing check of the buck example finishes in under 2 minutes;
   - two runs of the same code agree within 0.1 µs on the means;
   - every bar adds up to its measured total;

@@ -1,5 +1,5 @@
 ---
-status: proposed, deferred to a developer slice after slice 4
+status: proposed, deferred to a developer slice after slice 5
 date: 2026-11-13
 ---
 
@@ -19,7 +19,7 @@ Luiz expects this to be needed in the long run (decision log round 22, Q13).
 - **Flash over SWD** into the MCUboot slot (`0x8047800`), leaving the bootloader in place. It can also write the bootloader itself to a board without one.
 - **Timing over SWD.** The same Timing check procedure and the same report layout as ADR 0034. Only the transport changes: the host finds the report symbol in the ELF and dumps it with OpenOCD while the core runs. The record states which transport was used.
 - **Debugging** through Theia's debug adapter protocol (a Cortex-Debug-style adapter with OpenOCD): breakpoints, registers and peripheral views. It is never available while the power token is held.
-- **Built in a developer slice after slice 4.** This ADR is written now so that the Timing check's report format and procedure stay transport-neutral.
+- **Built in a developer slice after slice 5.** This ADR is written now so that the Timing check's report format and procedure stay transport-neutral.
 
 ## Considered options
 

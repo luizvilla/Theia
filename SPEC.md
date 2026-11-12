@@ -148,7 +148,7 @@ Python still computes every number (the sheet's script runs on each change, abou
 - **Data objects** are declared in `data_objects.yaml`, from which the C is generated ([ADR 0021](docs/adr/0021-data-objects-yaml-generates-c.md)); ThingSet replaces the communication task ([ADR 0019](docs/adr/0019-thingset-replaces-the-communication-task.md)).
 - **Build identity** (commit, dirty flag, binary hash) is compiled in and reported by the board.
 - **Build and upload** from a toolbar above the editor (Build, Upload, Build and upload, Clean, Serial monitor), from the status bar or from the Board menu. PlatformIO's log goes to the Build output tab; progress shows compile steps, then bytes uploaded out of the total.
-- **Timing on the Spin** (slice 3, [ADR 0034](docs/adr/0034-timing-check-and-load-gauge.md); [storyboard T-1…T-9](docs/design/timing-storyboard.html), local). There are two levels:
+- **Timing on the Spin** (slice 5, after slice 4, [ADR 0034](docs/adr/0034-timing-check-and-load-gauge.md); [storyboard T-1…T-9](docs/design/timing-storyboard.html), local). There are two levels:
   - **The load gauge** in the status bar, also a badge on the Controller in the inside view. It shows the critical task's worst run as a % of the control period, from built-in ThingSet data objects: green under 60 %, amber up to the budget (80 % of the period), red above it, never colour alone.
   - **The Timing check** (build toolbar, Board menu, Lab procedures). It flashes a TIMING image of the same code over USB with PWM outputs inhibited and no power, walks the firmware's states, reads the report over ThingSet, files a record and puts the user's firmware back.
 
@@ -296,10 +296,11 @@ flowchart LR
   S0["Slice 0 · paper<br/>storyboards · glossary · ADRs ·<br/>this spec · menu map · commit plan"]
   S1["Slice 1 · the thread<br/>Start · canvas + palette · inside view ·<br/>example as branch · build/flash · capture procedure · Lab checklist ·<br/>Core2 simulation + PulsimGui · overlay ·<br/>Design sheet · timeline dots · AI integrations"]
   S2["Slice 2<br/>inspector editing · setup round-trip ·<br/>simulation chips · wiring export ·<br/>branch lanes"]
-  S3["Slice 3<br/>Blockly test sequences · Monitor ·<br/>instrument drivers · libraries dialog ·<br/>load gauge + Timing check (ADR 0034)"]
+  S3["Slice 3<br/>Blockly test sequences · Monitor ·<br/>instrument drivers · libraries dialog"]
   S4["Slice 4<br/>skills · AI takeover"]
   L["Later<br/>averaged simulator (ADR 0033) ·<br/>ST-Link developer slice (ADR 0035)"]
-  S0 --> S1 --> S2 --> S3 --> S4 --> L
+  S5["Slice 5<br/>load gauge + Timing check (ADR 0034)"]
+  S0 --> S1 --> S2 --> S3 --> S4 --> S5 --> L
 ```
 
 The 1.0 interface gets no more fixes (Q112); what it lacked (progress, language support, interactive plots, the checklist) is built into the new work.
@@ -341,5 +342,5 @@ The 1.0 interface gets no more fixes (Q112); what it lacked (progress, language 
 | [0031](docs/adr/0031-ai-agents-and-takeover.md) | The user's own AI agent; AI takeover token |
 | [0032](docs/adr/0032-boards-from-the-devicetree.md) | Boards from the devicetree; custom boards |
 | [0033](docs/adr/0033-averaged-simulator-for-fast-evaluation.md) | Averaged simulator for fast evaluation (deferred) |
-| [0034](docs/adr/0034-timing-check-and-load-gauge.md) | Load gauge and Timing check over USB and ThingSet (slice 3) |
+| [0034](docs/adr/0034-timing-check-and-load-gauge.md) | Load gauge and Timing check over USB and ThingSet (slice 5) |
 | [0035](docs/adr/0035-st-link-probe-support.md) | ST-Link probe support for developers (deferred) |

@@ -375,8 +375,9 @@ Decided in rounds 11–20 ([decision log](decision-log.md)), specified in [SPEC 
 | 0 | Paper: storyboards, glossary, ADRs 0025–0032, SPEC 2.0, menu map, this commit plan | Luiz has reviewed it |
 | 1 | The thread: shell and menus, language support, Start and boards, setups as Core clones, examples as branches, canvas and palette, inside view with a read-only inspector, build and flash with progress, Lab checklist and power token, capture procedure, interactive results, Core2 simulation and PulsimGui, overlay, Design sheets, timeline dots, AI integrations | The exit criterion |
 | 2 | Inspector editing, setup round-trip, simulation chips, wiring export, branch lanes | |
-| 3 | Blockly test sequences, Monitor mode and widgets, instrument-driver hook, libraries dialog and submodules, remotes and forks; after Monitor, the load gauge and the Timing check ([ADR 0034](adr/0034-timing-check-and-load-gauge.md), units T1–T8 below) | |
+| 3 | Blockly test sequences, Monitor mode and widgets, instrument-driver hook, libraries dialog and submodules, remotes and forks | |
 | 4 | Skills, AI takeover | |
+| 5 | Timing on the Spin: load gauge and Timing check ([ADR 0034](adr/0034-timing-check-and-load-gauge.md), units T1–T8 below) | T1–T8 done and the bench acceptance passed |
 | Later | Averaged simulator target for fast evaluation ([ADR 0033](adr/0033-averaged-simulator-for-fast-evaluation.md)), following Core2's ADR 0004; a developer slice with ST-Link support ([ADR 0035](adr/0035-st-link-probe-support.md)) | |
 
 ## Commit plan for slice 1
@@ -508,9 +509,9 @@ Slice 2–4 content; the Windows installer (#5); sensor calibration (#14); the P
 | E21 | Theia | `284fcdb` | lab: a setup build reports its identity to the board | The forced header defines the identity macros the firmware reports |
 | U19 | Theia | this commit | docs: slice 1 report and how to try it | Report with frames side by side, try-it for the nine steps, a fresh-trial script |
 
-## Slice 3 addition: timing on the Spin (planned)
+## Slice 5: timing on the Spin (planned)
 
-Decided in [round 22](decision-log.md#round-22-2026-11-13-timing-on-the-spin), specified in [ADR 0034](adr/0034-timing-check-and-load-gauge.md), drawn in storyboard frames T-1…T-9 (`docs/design/timing-storyboard.html`, kept local). These units come **after Monitor mode** in slice 3, because the gauge reads through Monitor's ThingSet polling. As in slice 1, every window commit is checked against its storyboard frames with `tools/storyboard-shots`, and the navigation test is rerun.
+Decided in [round 22](decision-log.md#round-22-2026-11-13-timing-on-the-spin), specified in [ADR 0034](adr/0034-timing-check-and-load-gauge.md), drawn in storyboard frames T-1…T-9 (`docs/design/timing-storyboard.html`, kept local). Moved after slice 4 at Luiz's request (2026-11-13; it was first planned in slice 3). It needs slice 3's Monitor mode, because the gauge reads through Monitor's ThingSet polling. As in slice 1, every window commit is checked against its storyboard frames with `tools/storyboard-shots`, and the navigation test is rerun.
 
 | # | Repository | Unit | Done when | Frames |
 |---|---|---|---|---|
@@ -523,4 +524,4 @@ Decided in [round 22](decision-log.md#round-22-2026-11-13-timing-on-the-spin), s
 | T7 | Theia | Firmware match "TIMING image", Lab checklist line, "Put my firmware back" on the next connection | Pulling the cable mid-run leaves a board that the next connection restores | T-8 |
 | T8 | Theia | Timing check recipe in the setup's `AGENTS.md`/`CLAUDE.md`; an agent run test | The agent runs a check and quotes the verdict lines and the step | T-9 |
 
-Also in slice 3: the Twist examples the tutorials use move to ThingSet (buck voltage mode already has), so they get the gauge. A generic ThingSet example, and a few like it, is a direction to keep in mind, not a slice 3 item.
+Also in slice 5: the Twist examples the tutorials use move to ThingSet (buck voltage mode already has), so they get the gauge. A generic ThingSet example, and a few like it, is a direction to keep in mind, not a slice 5 item.
