@@ -275,6 +275,9 @@ def run_twin(mission, module, board_ctx, io, sim_target=None):
     link_twins(board_ctx.records, ctx.records, board_ctx.campaign)
 
 
+DEFAULT_CAPTURE = "default-capture"   # the board's default capture, by name (for AGENTS.md and the terminal)
+
+
 def consume_power_token(token_file, token):
     """Consume an exact token once. Missing, invented and reused tokens all refuse power."""
     if token_file is None or token is None:
@@ -293,7 +296,8 @@ def consume_power_token(token_file, token):
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description="Run a mission procedure on a target")
     parser.add_argument("mission", type=pathlib.Path)
-    parser.add_argument("procedure", type=pathlib.Path, help="path to the procedure, relative to the mission or absolute")
+    parser.add_argument("procedure", type=pathlib.Path,
+                        help=f"path to the procedure, relative to the mission or absolute, or {DEFAULT_CAPTURE!r}")
     parser.add_argument("--target", choices=["simulator", "board"], default="simulator")
     parser.add_argument("--board", help="USB serial number of the board")
     parser.add_argument("--power-token-file", type=pathlib.Path, help=argparse.SUPPRESS)
@@ -309,7 +313,11 @@ def main(argv=None) -> int:
     args = parser.parse_args(argv)
     io = JsonIO() if args.json else ConsoleIO()
     mission = args.mission.resolve()
-    path = args.procedure if args.procedure.is_absolute() else mission / args.procedure
+    if str(args.procedure) == DEFAULT_CAPTURE:
+        from . import capture
+        path = pathlib.Path(capture.__file__).resolve()
+    else:
+        path = args.procedure if args.procedure.is_absolute() else mission / args.procedure
     options = {}
     for item in args.option:
         name, _, value = item.partition("=")

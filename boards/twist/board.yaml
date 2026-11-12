@@ -61,6 +61,9 @@ design:
   sheets:
     - {id: output_filter, label: Output filter}
     - {id: control_loop, label: Control loop}
+# Instructions for the user's own coding agents (plan U17), copied to the root
+# of each setup as AGENTS.md (Codex) with a CLAUDE.md that imports it (Claude Code).
+agents: AGENTS.md
 wiring_templates: []   # draw.io templates arrive in slice 2
 
 # Every Twist setup gets this procedure without adding files to an example.

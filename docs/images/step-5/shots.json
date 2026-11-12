@@ -413,6 +413,71 @@
   ]
  },
  {
+  "frame": "6",
+  "title": "Code: the student's files, with real language support",
+  "file": "frame-06-code.png",
+  "state": {
+   "workbench": "code",
+   "left": "explorer-view-container",
+   "right": "chat-view-widget",
+   "bottom": "ownstudio.canvas",
+   "main": "code-editor-opener:file:///data/ownstudio/build/u17-agents/src/control.cpp:8667969720874924",
+   "centreScroll": "0px",
+   "leftTabs": [
+    "ownstudio.left.design",
+    "explorer-view-container",
+    "ownstudio.left.lab"
+   ],
+   "rightTabs": [
+    "ownstudio.parts",
+    "ownstudio.inspector",
+    "chat-view-widget"
+   ],
+   "bottomTabs": [
+    "Canvas",
+    "Terminal",
+    "Build output"
+   ],
+   "canvasTint": "code",
+   "canvasLevel": "setup",
+   "canvasSelection": null,
+   "inspectorSelection": null,
+   "canvasFirmware": null,
+   "codeToolbar": [
+    "Build",
+    "Upload",
+    "Build and upload",
+    "Clean",
+    "Serial"
+   ],
+   "buildOutput": [],
+   "timeline": true,
+   "leftOpen": true,
+   "rightOpen": true,
+   "bottomOpen": true,
+   "status": [
+    "",
+    "",
+    "",
+    "buck-voltage-mode",
+    "",
+    "0  0",
+    "No board",
+    "Lab checklist 2/6",
+    "Ln 1, Col 1",
+    "LF",
+    "UTF-8",
+    "Spaces: 4"
+   ],
+   "titleBar": "rgb(23, 51, 46)"
+  },
+  "differences": [
+   "The question is typed, not sent: tests never use the user's Claude or ChatGPT account. The answer in the frame is the storyboard's.",
+   "Claude Code needs its agent SDK on the machine (`npm install -g @anthropic-ai/claude-agent-sdk`); the installer (#5) decides whether OwnStudio ships it.",
+   "The Code panel is Theia's explorer with AGENTS.md and CLAUDE.md at the setup's root; \"My files\" first and read-only libraries come later."
+  ]
+ },
+ {
   "frame": "7",
   "title": "Build and flash, with real progress",
   "file": "frame-07-build.png",
@@ -860,6 +925,65 @@
    "The frame draws all eight menus side by side as a map; the app opens one at a time (File here). menus-test.mjs checks every menu against the map.",
    "Items not built yet carry \"(slice N)\", including those of slice 1; each drops it when its plan step lands.",
    "File › Open recent opens Theia's recent-folders picker rather than a submenu."
+  ]
+ },
+ {
+  "frame": "16",
+  "title": "The AI: your own agent, and the takeover button",
+  "file": "frame-16-ai.png",
+  "state": {
+   "workbench": "lab",
+   "left": "ownstudio.left.lab",
+   "right": "chat-view-widget",
+   "bottom": "ownstudio.canvas",
+   "main": "ownstudio.workbench.lab",
+   "centreScroll": null,
+   "leftTabs": [
+    "ownstudio.left.design",
+    "explorer-view-container",
+    "ownstudio.left.lab"
+   ],
+   "rightTabs": [
+    "ownstudio.parts",
+    "ownstudio.inspector",
+    "chat-view-widget"
+   ],
+   "bottomTabs": [
+    "Canvas",
+    "Terminal",
+    "Build output"
+   ],
+   "canvasTint": "lab",
+   "canvasLevel": "setup",
+   "canvasSelection": null,
+   "inspectorSelection": null,
+   "canvasFirmware": null,
+   "codeToolbar": [],
+   "buildOutput": [],
+   "timeline": true,
+   "leftOpen": true,
+   "rightOpen": true,
+   "bottomOpen": true,
+   "status": [
+    "",
+    "",
+    "",
+    "buck-voltage-mode",
+    "",
+    "0  0",
+    "No board",
+    "Lab checklist 2/6",
+    "Ln 1, Col 1",
+    "LF",
+    "UTF-8",
+    "Spaces: 4"
+   ],
+   "titleBar": "rgb(23, 51, 46)"
+  },
+  "differences": [
+   "Codex is addressed and its sandbox menu shows Workspace (Read-Only is the other choice; Full Access is removed, plan U17). The question is not sent.",
+   "AI takeover and its token are slice 4; the Lab shows Run only.",
+   "Skills (owntech-setup, twist, buck-tuning) come later; the setup carries the Twist's AGENTS.md now."
   ]
  }
 ]

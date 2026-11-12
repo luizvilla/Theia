@@ -35,11 +35,9 @@ import { DATA_OBJECTS_WIDGET_ID, DataObjectsWidget } from './data-objects-widget
 import { LabWidget } from './lab-widget.js';
 import { DesignWidget } from './design-widget.js';
 import { DesignModel } from './design-model.js';
-import { Agent, bindToolProvider } from '@theia/ai-core';
-import { ChatAgent } from '@theia/ai-chat/lib/common';
-import {
-    LoopMarginsTool, OwnStudioMissionAgent, ProposeControlChangeTool, ReadMissionFileTool, RunOnSimulatorTool, TestStatesTool
-} from './ai/ownstudio-agent.js';
+import { ClaudeCodeChatAgent } from '@theia/ai-claude-code/lib/browser/claude-code-chat-agent';
+import { CodexChatAgent } from '@theia/ai-codex/lib/browser/codex-chat-agent';
+import { OwnStudioClaudeCodeChatAgent, OwnStudioCodexChatAgent } from './ai/agents.js';
 import { PROCEDURE_SERVICE_PATH, ProcedureService } from '../common/procedure-protocol.js';
 import { ProcedureClientImpl, ProcedureModel } from './procedure-model.js';
 import { PROCEDURE_WIDGET_ID, ProcedureWidget } from './procedure-widget.js';
@@ -83,13 +81,9 @@ export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
     bind(LabChecklistContribution).toSelf().inSingletonScope();
     bind(FrontendApplicationContribution).toService(LabChecklistContribution);
 
-    // The mission agent (SPEC §12): free-level tools only, nothing that reaches the board (ADR 0010).
-    bind(OwnStudioMissionAgent).toSelf().inSingletonScope();
-    bind(Agent).toService(OwnStudioMissionAgent);
-    bind(ChatAgent).toService(OwnStudioMissionAgent);
-    for (const tool of [ReadMissionFileTool, TestStatesTool, LoopMarginsTool, RunOnSimulatorTool, ProposeControlChangeTool]) {
-        bindToolProvider(tool, bind);
-    }
+    // The user's own agents (SPEC §12, plan U17), without the modes that skip approval or the sandbox.
+    rebind(ClaudeCodeChatAgent).to(OwnStudioClaudeCodeChatAgent).inSingletonScope();
+    rebind(CodexChatAgent).to(OwnStudioCodexChatAgent).inSingletonScope();
     bind(ProcedureWidget).toSelf();
     bind(WidgetFactory).toDynamicValue(ctx => ({
         id: PROCEDURE_WIDGET_ID,

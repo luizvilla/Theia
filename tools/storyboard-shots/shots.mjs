@@ -254,6 +254,40 @@ const FRAMES = [
         ],
     },
     {
+        id: 'code', num: '6', title: 'Code: the student\'s files, with real language support',
+        go: async () => {
+            await show('left', 'explorer-view-container');
+            await openFile('src/control.cpp');
+            await show('right', 'chat-view-widget');
+            await show('bottom', 'ownstudio.canvas');
+            await app.clickOn('#chat-view-widget .monaco-editor .view-lines');
+            await app.send('Input.insertText', { text: '@ClaudeCode How do I make LOW1 settle faster than 10 ms?' });
+            await sleep(600);
+            await key('Escape');
+        },
+        differences: [
+            'The question is typed, not sent: tests never use the user\'s Claude or ChatGPT account. The answer in the frame is the storyboard\'s.',
+            'Claude Code needs its agent SDK on the machine (`npm install -g @anthropic-ai/claude-agent-sdk`); the installer (#5) decides whether OwnStudio ships it.',
+            'The Code panel is Theia\'s explorer with AGENTS.md and CLAUDE.md at the setup\'s root; "My files" first and read-only libraries come later.',
+        ],
+    },
+    {
+        id: 'ai', num: '16', title: 'The AI: your own agent, and the takeover button',
+        go: async () => {
+            await show('left', 'ownstudio.left.lab');
+            await show('right', 'chat-view-widget');
+            await app.clickOn('#chat-view-widget .monaco-editor .view-lines');
+            await app.send('Input.insertText', { text: '@Codex Run the capture on the simulator with kp from 0.0006 to 0.0015 and tell me which settles under 10 ms.' });
+            await sleep(600);
+            await key('Escape');
+        },
+        differences: [
+            'Codex is addressed and its sandbox menu shows Workspace (Read-Only is the other choice; Full Access is removed, plan U17). The question is not sent.',
+            'AI takeover and its token are slice 4; the Lab shows Run only.',
+            'Skills (owntech-setup, twist, buck-tuning) come later; the setup carries the Twist\'s AGENTS.md now.',
+        ],
+    },
+    {
         id: 'example', num: '5', title: 'Load an example: it lands on its own branch',
         go: async () => {
             await app.clickOn('#theia-top-panel .lm-MenuBar-item:nth-child(1)');

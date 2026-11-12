@@ -195,3 +195,37 @@ class Install(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Agents(unittest.TestCase):
+    """Plan U17: every new setup tells the user's agents how to work in it, and their files stay out of git."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        mirror = os.path.join(self.tmp.name, "cache", "core.git")
+        su.update_mirror(fake_core(self.tmp.name), mirror)
+        self.setup = su.create_setup(mirror, os.path.join(self.tmp.name, "s"), "twist", board_root=str(BOARDS))
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_agents_md_and_claude_md_are_in_the_first_commit(self):
+        files = su.git(self.setup, "show", "--name-only", "--format=", "HEAD").split()
+        self.assertIn("AGENTS.md", files)
+        self.assertIn("CLAUDE.md", files)
+        text = pathlib.Path(self.setup, "AGENTS.md").read_text()
+        self.assertIn("never switch the converter on", text.lower())
+        self.assertEqual(pathlib.Path(self.setup, "CLAUDE.md").read_text(), "@AGENTS.md\n")
+
+    def test_claude_code_hooks_and_backups_do_not_dirty_the_setup(self):
+        for path in (".claude/hooks/file-backup-hook.js", ".claude/settings.local.json", ".claude/.edit-baks/s1/x.cpp"):
+            target = pathlib.Path(self.setup, path)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text("x")
+        self.assertFalse(su.is_dirty(self.setup))
+
+    def test_the_simulator_command_in_agents_md_names_a_real_procedure(self):
+        from ownstudio_lab import capture, procedure
+        self.assertIn(f"procedure . {procedure.DEFAULT_CAPTURE} --target simulator",
+                      pathlib.Path(self.setup, "AGENTS.md").read_text())
+        self.assertTrue(pathlib.Path(capture.__file__).is_file())

@@ -17,6 +17,8 @@
   ],
   "dependencies": {
     "@theia/ai-chat": "1.77.0",
+    "@theia/ai-claude-code": "1.77.0",
+    "@theia/ai-codex": "1.77.0",
     "@theia/ai-core": "1.77.0",
     "@theia/core": "1.77.0",
     "@theia/filesystem": "1.77.0",

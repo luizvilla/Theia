@@ -14,3 +14,20 @@ Coding agents run shell commands, so the confirmation rule of ADR 0010 cannot re
 
 - Amends ADR 0010: the "confirm each time" level is enforced by the token, and the campaign authorisation becomes the takeover token.
 - Amends ADR 0023: the user's own agent account comes first; a local model stays possible through Theia AI's Ollama support.
+
+## Open point for Luiz (2026-11-12, found while building U17)
+
+The token is not a boundary against a coding agent's shell. The runner checks a token file against a token argument, and the caller supplies both, so any command running as the user can write its own pair. More generally, nothing local is: a program running as the user can open the board's serial port and write `Converter/Mode` without OwnStudio. The token stops mistakes and keeps OwnStudio's own buttons honest; it does not stop an agent determined to switch power on.
+
+What U17 measured and enforces instead:
+
+- **Codex** runs every command, and its children, under Landlock and seccomp. In both modes OwnStudio offers ("Workspace", "Read-Only"; "Full Access" is removed), opening a serial device the user may open is refused, and so is writing outside the setup (`app/python/tests/test_agent_sandbox.py`).
+- **Claude Code** has no sandbox in OwnStudio yet. It asks before every shell command in every mode OwnStudio offers (`bypassPermissions` is removed), and the setup's `AGENTS.md` tells it never to switch power on or open the port. A prompt the user waves through remains possible, which this ADR rejected as a safety function.
+
+Options:
+
+1. **Keep it as it is**, and say plainly that the token is a guard against mistakes.
+2. **Sandbox Claude Code too** (its own sandbox setting, written into the setup's `.claude/settings.json`), so both agents are measured the same way. Cheap; needs the Claude agent SDK installed to test.
+3. **Make the port unreachable for the user's processes**: a small OwnStudio service owns the serial port (a udev rule on Linux, a service account on Windows), and only it accepts a token. A real boundary; it belongs with the installer (#5).
+
+Recommendation: 2 now, 3 with the installer; until 3, AI takeover (slice 4) should not be enabled on a bench without someone at it, as this ADR already requires.

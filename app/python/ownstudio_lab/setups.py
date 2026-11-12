@@ -159,6 +159,27 @@ def design_sheets(repo, board_root=None):
     return {"directory": design["directory"], "sheets": list(design.get("sheets") or []), "installed": installed}
 
 
+# What a setup never commits: raw records, and the hooks and backups Claude Code
+# writes into the folder it works in (plan U17).
+SETUP_IGNORES = ("ownstudio/records/", ".claude/hooks/", ".claude/settings.local.json", ".claude/.edit-baks/")
+
+
+def _copy_board_agents(dest, board_root, board, description):
+    """AGENTS.md at the setup's root for Codex, and a CLAUDE.md importing it for Claude Code."""
+    relative = description.get("agents")
+    if not relative:
+        return False
+    source = os.path.join(board_root, board, str(relative))
+    if not os.path.isfile(source):
+        raise SetupError(f"the {board} board's agent instructions are missing: {source}")
+    shutil.copy2(source, os.path.join(dest, "AGENTS.md"))
+    claude = os.path.join(dest, "CLAUDE.md")
+    if not os.path.exists(claude):
+        with open(claude, "w", encoding="utf-8") as f:
+            f.write("@AGENTS.md\n")
+    return True
+
+
 def create_setup(mirror, dest, board, name=None, ref=None, upstream=None, board_root=None):
     """Clone Core, copy the board plant, and commit ``ownstudio/setup.yaml``."""
     if os.path.exists(dest) and os.listdir(dest):
@@ -187,6 +208,8 @@ def create_setup(mirror, dest, board, name=None, ref=None, upstream=None, board_
     design = _copy_board_design(dest, board_root, board, description) if board_root else None
     if design:
         setup["design"] = design
+    if board_root:
+        _copy_board_agents(dest, board_root, board, description)
     with open(os.path.join(dest, SETUP_FILE), "w", encoding="utf-8") as f:
         yaml.safe_dump(setup, f, sort_keys=False)
     ignore = os.path.join(dest, ".gitignore")
@@ -195,9 +218,10 @@ def create_setup(mirror, dest, board, name=None, ref=None, upstream=None, board_
             text = f.read()
     else:
         text = ""
-    if "ownstudio/records/" not in text.splitlines():
+    missing = [line for line in SETUP_IGNORES if line not in text.splitlines()]
+    if missing:
         with open(ignore, "a", encoding="utf-8") as f:
-            f.write(("" if not text or text.endswith("\n") else "\n") + "ownstudio/records/\n")
+            f.write(("" if not text or text.endswith("\n") else "\n") + "".join(f"{line}\n" for line in missing))
     commit_event(dest, "create", f"setup: {setup['name']} on the {board}")
     return dest
 

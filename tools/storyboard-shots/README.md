@@ -60,5 +60,8 @@ tools/storyboard-shots/run.sh 9490 $S tools/storyboard-shots/design-test.mjs $S 
 - **`plugins-test.mjs`** (U1, run since U17a): a `.cpp` opens as C++ and is coloured,
   a `.py` as Python, and the git extension shows the branch: the bundled VS Code
   extensions start.
+- **`agents-test.mjs`** (U17): types "@" in the AI tab and checks that Claude Code
+  and Codex are offered and the old OwnStudio agent is not, that Codex's sandbox
+  menu has no Full Access, and that the setup carries AGENTS.md with the power rule.
 - **`cdp.mjs`**: the small DevTools Protocol client both scripts use, and `STATE`,
   the window state read from the page.
