@@ -2,8 +2,8 @@
 // The six continuous Lab checks of SPEC §9. This file is deliberately pure:
 // the browser model supplies the canvas, board and live ThingSet values, while
 // tests can exercise every unsafe bench state without a board.
-import { FirmwareState } from './board-protocol';
-import { Canvas, partDef } from './canvas-model';
+import { FirmwareState } from './board-protocol.js';
+import { Canvas, partDef } from './canvas-model.js';
 
 export type LabCheckId = 'board' | 'firmware' | 'high' | 'outputs' | 'load' | 'procedure';
 

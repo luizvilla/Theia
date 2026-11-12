@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: LGPL-2.1-only
 import { test } from 'node:test';
 import * as assert from 'node:assert/strict';
-import { filterArgs, fromSlider, gainsDiffer, loopArgs, toSlider } from './design-sheet';
-import { eng, parseEng } from './units';
+import { filterArgs, fromSlider, gainsDiffer, loopArgs, toSlider } from './design-sheet.js';
+import { eng, parseEng } from './units.js';
 
 test('the filter sheet sends the canvas values unless the user is trying others', () => {
     assert.deepEqual(filterArgs({ vOut: 12, stepA: 0.5, rippleMax: 0.1 }), ['--v-out', 12, '--step', 0.5, '--ripple-max', 0.1]);

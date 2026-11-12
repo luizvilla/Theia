@@ -2,7 +2,7 @@
 import { inject, injectable } from '@theia/core/shared/inversify';
 import { CommandContribution, CommandRegistry } from '@theia/core/lib/common';
 import { ApplicationShell, WidgetManager } from '@theia/core/lib/browser';
-import { SAFETY_WIDGET_ID } from './safety-widget';
+import { SAFETY_WIDGET_ID } from './safety-widget.js';
 
 export const OPEN_SAFETY_COMMAND = { id: 'ownstudio.safety.open', category: 'OwnStudio', label: 'Open the Safety Panel' };
 

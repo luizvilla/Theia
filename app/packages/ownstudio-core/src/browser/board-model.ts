@@ -4,9 +4,9 @@ import { Emitter } from '@theia/core/lib/common';
 import { PreferenceService } from '@theia/core/lib/common/preferences';
 import {
     BoardClient, BoardInfo, BoardService, FirmwareState, LinkInfo, MissionIdentity, firmwareState
-} from '../common/board-protocol';
-import { MissionService } from './mission-service';
-import { BuildService } from '../common/build-protocol';
+} from '../common/board-protocol.js';
+import { MissionService } from './mission-service.js';
+import { BuildService } from '../common/build-protocol.js';
 
 export const POLL_MS = 2000;
 const RETRY_MS = 10000;

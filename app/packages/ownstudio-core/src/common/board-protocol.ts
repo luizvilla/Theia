@@ -2,8 +2,8 @@
 // The board link between the OwnStudio frontend and backend. The backend
 // forwards each call to the Python bridge (app/python/ownstudio_lab/bridge.py).
 
-import { TestStates } from './test-states';
-import { ProcedureInfo } from './procedure-protocol';
+import { TestStates } from './test-states.js';
+import { ProcedureInfo } from './procedure-protocol.js';
 
 export const BOARD_SERVICE_PATH = '/services/ownstudio-board';
 export const BoardService = Symbol('BoardService');

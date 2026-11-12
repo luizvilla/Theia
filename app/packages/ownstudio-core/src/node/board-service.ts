@@ -7,9 +7,9 @@ import * as readline from 'readline';
 import { BackendApplicationPath } from '@theia/core/lib/node/backend-application';
 import {
     BoardClient, BoardInfo, BoardService, BoardStatus, LinkInfo, MissionIdentity
-} from '../common/board-protocol';
-import { TestStates } from '../common/test-states';
-import { ProcedureInfo } from '../common/procedure-protocol';
+} from '../common/board-protocol.js';
+import { TestStates } from '../common/test-states.js';
+import { ProcedureInfo } from '../common/procedure-protocol.js';
 
 interface Pending { resolve: (value: unknown) => void; reject: (error: Error) => void; }
 

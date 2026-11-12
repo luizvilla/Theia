@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-2.1-only
 // The Twist's inside view as UI-ready data (plan U9). Geometry and connections
 // come from board.yaml; hardware values come from the setup Core's devicetree.
-import { BoardDefinition, InsideBlockDescription } from './setup-protocol';
+import { BoardDefinition, InsideBlockDescription } from './setup-protocol.js';
 
 export const INSIDE_BLOCKS = ['power', 'measurement', 'feeder', 'driver', 'controller'] as const;
 export type InsideBlockId = typeof INSIDE_BLOCKS[number];

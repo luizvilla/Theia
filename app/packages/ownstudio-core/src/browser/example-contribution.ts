@@ -4,7 +4,7 @@ import { CommandContribution, CommandRegistry, MessageService } from '@theia/cor
 import { OpenerService, QuickInputService, QuickPickItem, QuickPickSeparator, open } from '@theia/core/lib/browser';
 import URI from '@theia/core/lib/common/uri';
 import { WorkspaceService } from '@theia/workspace/lib/browser';
-import { ExampleEntry, SetupService } from '../common/setup-protocol';
+import { ExampleEntry, SetupService } from '../common/setup-protocol.js';
 
 export const LOAD_EXAMPLE = { id: 'ownstudio.setup.loadExample', category: 'Setup', label: 'Load an Example…' };
 

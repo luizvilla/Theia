@@ -2,7 +2,7 @@
 // Plan U8: the first topology rules of the setup canvas (SPEC §6, Q82).
 import { test } from 'node:test';
 import * as assert from 'node:assert/strict';
-import { Canvas, addPart, canAdd, canConnect, normaliseCanvas } from './canvas-model';
+import { Canvas, addPart, canAdd, canConnect, normaliseCanvas } from './canvas-model.js';
 
 const setup = (): Canvas => ({
     nodes: [

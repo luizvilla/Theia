@@ -3,13 +3,13 @@ import { inject, injectable, postConstruct } from '@theia/core/shared/inversify'
 import { Emitter } from '@theia/core/lib/common';
 import { PreferenceService } from '@theia/core/lib/common/preferences';
 import { ConfirmDialog } from '@theia/core/lib/browser';
-import { BoardService } from '../common/board-protocol';
+import { BoardService } from '../common/board-protocol.js';
 import {
     ProcedureClient, ProcedureEvent, ProcedureInfo, ProcedureService
-} from '../common/procedure-protocol';
-import { MissionService } from './mission-service';
-import { BoardModel } from './board-model';
-import { LabChecklistModel } from './lab-checklist-model';
+} from '../common/procedure-protocol.js';
+import { MissionService } from './mission-service.js';
+import { BoardModel } from './board-model.js';
+import { LabChecklistModel } from './lab-checklist-model.js';
 
 export const RUN_PROCEDURE_COMMAND = { id: 'ownstudio.procedure.run', category: 'OwnStudio', label: 'Run a Procedure…' };
 export const RUN_SIMULATOR_COMMAND = { id: 'ownstudio.procedure.runSimulator', category: 'OwnStudio', label: 'Run on the Simulator…' };

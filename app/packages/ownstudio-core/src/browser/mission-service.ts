@@ -4,11 +4,11 @@ import { Emitter } from '@theia/core/lib/common';
 import URI from '@theia/core/lib/common/uri';
 import { FileService } from '@theia/filesystem/lib/browser/file-service';
 import { WorkspaceService } from '@theia/workspace/lib/browser/workspace-service';
-import { Mission, parseMission } from './mission';
-import { BoardPack, parseBoardPack } from '../common/board-pack';
-import { BoardService } from '../common/board-protocol';
-import { Requirement, parseRequirements } from '../common/verification';
-import { TestStates } from '../common/test-states';
+import { Mission, parseMission } from './mission.js';
+import { BoardPack, parseBoardPack } from '../common/board-pack.js';
+import { BoardService } from '../common/board-protocol.js';
+import { Requirement, parseRequirements } from '../common/verification.js';
+import { TestStates } from '../common/test-states.js';
 
 export const RECORDS_FOLDER = 'records';
 

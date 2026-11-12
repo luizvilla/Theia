@@ -18,14 +18,14 @@ import {
     Background, Connection, ConnectionMode, Edge, Handle, Node, NodeChange, NodeProps, Position, ReactFlow, ReactFlowInstance,
     ReactFlowProvider, applyNodeChanges
 } from '@xyflow/react';
-import { BOTTOM_SLOTS, CANVAS_TINT, WORKBENCH_SLOTS, WorkbenchId } from '../common/window-layout';
-import { Canvas, PartDef, addPart, canConnect, normaliseCanvas, partDef } from '../common/canvas-model';
-import { InsideBlockId, InsideModel, insideModel } from '../common/inside-model';
-import { BoardDefinition, SetupService } from '../common/setup-protocol';
-import { WORKBENCHES, commandId, iconClass } from './workbenches';
-import { InspectorAction, InspectorWidget } from './window-widgets';
-import { BuildService } from '../common/build-protocol';
-import { eng } from '../common/units';
+import { BOTTOM_SLOTS, CANVAS_TINT, WORKBENCH_SLOTS, WorkbenchId } from '../common/window-layout.js';
+import { Canvas, PartDef, addPart, canConnect, normaliseCanvas, partDef } from '../common/canvas-model.js';
+import { InsideBlockId, InsideModel, insideModel } from '../common/inside-model.js';
+import { BoardDefinition, SetupService } from '../common/setup-protocol.js';
+import { WORKBENCHES, commandId, iconClass } from './workbenches.js';
+import { InspectorAction, InspectorWidget } from './window-widgets.js';
+import { BuildService } from '../common/build-protocol.js';
+import { eng } from '../common/units.js';
 
 export const PART_MIME = 'application/ownstudio-part';
 const COMMIT_AFTER_MS = 10_000;

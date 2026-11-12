@@ -8,11 +8,11 @@ import { ReactWidget } from '@theia/core/lib/browser/widgets/react-widget';
 import { Message } from '@theia/core/shared/@lumino/messaging';
 import { QuickInputService } from '@theia/core/lib/browser';
 import { CommandService, MessageService } from '@theia/core/lib/common';
-import { LOAD_EXAMPLE } from './example-contribution';
+import { LOAD_EXAMPLE } from './example-contribution.js';
 import URI from '@theia/core/lib/common/uri';
 import { WorkspaceService } from '@theia/workspace/lib/browser';
-import { SetupService, StartBoard, StartInfo } from '../common/setup-protocol';
-import { BoardModel } from './board-model';
+import { SetupService, StartBoard, StartInfo } from '../common/setup-protocol.js';
+import { BoardModel } from './board-model.js';
 
 export const START_WIDGET_ID = 'ownstudio.start';
 

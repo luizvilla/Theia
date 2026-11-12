@@ -2,8 +2,8 @@
 // Plan U9: board.yaml lays out the five blocks; devicetree values fill the inspector.
 import { test } from 'node:test';
 import * as assert from 'node:assert/strict';
-import { BoardDefinition } from './setup-protocol';
-import { insideModel } from './inside-model';
+import { BoardDefinition } from './setup-protocol.js';
+import { insideModel } from './inside-model.js';
 
 const board = (): BoardDefinition => ({
     name: 'TWIST', version: 'v1.4.2', overlay: 'zephyr/boards/shields/twist/twist_v1_4_2.overlay',

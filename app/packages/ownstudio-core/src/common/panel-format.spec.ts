@@ -3,8 +3,12 @@ import { test } from 'node:test';
 import * as assert from 'node:assert/strict';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { panelPaths, parsePanel, splitPath } from './panel-format';
-import { parseDataObjects, parseInput } from './data-objects';
+import { panelPaths, parsePanel, splitPath } from './panel-format.js';
+import { parseDataObjects, parseInput } from './data-objects.js';
+import { fileURLToPath } from 'node:url';
+
+// ES module: where this file is (the bundle, for the backend).
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const data = (name: string) => fs.readFileSync(path.resolve(__dirname, 'testdata', name), 'utf8');
 

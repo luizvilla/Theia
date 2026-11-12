@@ -7,9 +7,9 @@ import { ApplicationShell, WidgetManager } from '@theia/core/lib/browser';
 import { WindowService } from '@theia/core/lib/browser/window/window-service';
 import {
     DOCUMENTATION_URL, MENU_MAP, MenuEntry, MenuItem, REPORT_PROBLEM_URL, comingMessage, placeholderCommand, shownLabel
-} from '../common/menu-map';
-import { BOTTOM_SLOTS, RIGHT_SLOTS } from '../common/window-layout';
-import { TimelineWidget } from './window-widgets';
+} from '../common/menu-map.js';
+import { BOTTOM_SLOTS, RIGHT_SLOTS } from '../common/window-layout.js';
+import { TimelineWidget } from './window-widgets.js';
 
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-$/, '');
 

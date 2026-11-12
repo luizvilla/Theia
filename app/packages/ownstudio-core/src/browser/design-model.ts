@@ -4,8 +4,8 @@
 import { inject, injectable, postConstruct } from '@theia/core/shared/inversify';
 import { Emitter } from '@theia/core/lib/common';
 import { WorkspaceService } from '@theia/workspace/lib/browser';
-import { SetupService } from '../common/setup-protocol';
-import { DesignSheetEntry } from '../common/design-sheet';
+import { SetupService } from '../common/setup-protocol.js';
+import { DesignSheetEntry } from '../common/design-sheet.js';
 
 @injectable()
 export class DesignModel {

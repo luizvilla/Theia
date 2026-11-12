@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-2.1-only
 import { test } from 'node:test';
 import * as assert from 'node:assert/strict';
-import { BuildIdentity, MissionIdentity, boardName, firmwareState } from './board-protocol';
+import { BuildIdentity, MissionIdentity, boardName, firmwareState } from './board-protocol.js';
 
 const build = (hash: string): BuildIdentity => ({ rCommit: 'c'.repeat(40), rDirty: false, rSourceHash: hash });
 const mission = (sources: string, prebuilt?: string): MissionIdentity => ({

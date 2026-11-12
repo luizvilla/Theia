@@ -2,14 +2,14 @@
 // OwnStudio backend module: the board link, the procedure runner and setups.
 import { ContainerModule } from '@theia/core/shared/inversify';
 import { ConnectionHandler, RpcConnectionHandler } from '@theia/core/lib/common/messaging';
-import { BOARD_SERVICE_PATH, BoardClient } from '../common/board-protocol';
-import { BoardServiceImpl } from './board-service';
-import { PROCEDURE_SERVICE_PATH, ProcedureClient } from '../common/procedure-protocol';
-import { ProcedureServiceImpl } from './procedure-service';
-import { SETUP_SERVICE_PATH } from '../common/setup-protocol';
-import { SetupServiceImpl } from './setup-service';
-import { BUILD_SERVICE_PATH, BuildClient } from '../common/build-protocol';
-import { BuildServiceImpl } from './build-service';
+import { BOARD_SERVICE_PATH, BoardClient } from '../common/board-protocol.js';
+import { BoardServiceImpl } from './board-service.js';
+import { PROCEDURE_SERVICE_PATH, ProcedureClient } from '../common/procedure-protocol.js';
+import { ProcedureServiceImpl } from './procedure-service.js';
+import { SETUP_SERVICE_PATH } from '../common/setup-protocol.js';
+import { SetupServiceImpl } from './setup-service.js';
+import { BUILD_SERVICE_PATH, BuildClient } from '../common/build-protocol.js';
+import { BuildServiceImpl } from './build-service.js';
 
 export default new ContainerModule(bind => {
     // One bridge per frontend connection (one per window).

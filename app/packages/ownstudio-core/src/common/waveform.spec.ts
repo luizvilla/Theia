@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-2.1-only
 import { test } from 'node:test';
 import * as assert from 'node:assert/strict';
-import { eventWindow, parseWaveform } from './waveform';
+import { eventWindow, parseWaveform } from './waveform.js';
 
 test('reads the first two columns and decimates', () => {
     const rows = Array.from({ length: 10 }, (_, i) => `${i * 1e-6},${12 + i},0.5`);

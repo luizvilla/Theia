@@ -6,10 +6,10 @@ import { ReactWidget } from '@theia/core/lib/browser/widgets/react-widget';
 import { OpenerService, codicon, open } from '@theia/core/lib/browser';
 import URI from '@theia/core/lib/common/uri';
 import { CommandService } from '@theia/core/lib/common';
-import { MissionService } from './mission-service';
-import { SHOW_RECORD_COMMAND } from './procedure-model';
-import { STATE_LABEL } from '../common/verification';
-import { TestEntry, countStates, formatMeasured, stateInfo } from '../common/test-states';
+import { MissionService } from './mission-service.js';
+import { SHOW_RECORD_COMMAND } from './procedure-model.js';
+import { STATE_LABEL } from '../common/verification.js';
+import { TestEntry, countStates, formatMeasured, stateInfo } from '../common/test-states.js';
 
 export const CONTROL_CENTER_WIDGET_ID = 'ownstudio.controlCenter';
 export const OPEN_CONTROL_CENTER_COMMAND = { id: 'ownstudio.controlCenter.open', category: 'OwnStudio', label: 'Open the Control Center' };

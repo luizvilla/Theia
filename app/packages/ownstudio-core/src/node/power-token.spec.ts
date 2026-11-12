@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-2.1-only
 import * as assert from 'assert';
 import { test } from 'node:test';
-import { PowerTokenStore } from './power-token';
+import { PowerTokenStore } from './power-token.js';
 
 test('a power token is required and can be consumed only once', () => {
     const store = new PowerTokenStore(() => 100, 1000, () => 'from-dialog');

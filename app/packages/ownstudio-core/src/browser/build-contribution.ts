@@ -8,11 +8,11 @@ import { TabBarToolbarContribution, TabBarToolbarRegistry } from '@theia/core/li
 import { WorkspaceService } from '@theia/workspace/lib/browser';
 import { OutputChannel, OutputChannelManager } from '@theia/output/lib/browser/output-channel';
 import { TerminalService } from '@theia/terminal/lib/browser/base/terminal-service';
-import { BuildClient, BuildEvent, BuildResult, BuildService } from '../common/build-protocol';
-import { SetupService } from '../common/setup-protocol';
-import { BOTTOM_SLOTS } from '../common/window-layout';
-import { CanvasWidget } from './canvas-widget';
-import { BoardModel } from './board-model';
+import { BuildClient, BuildEvent, BuildResult, BuildService } from '../common/build-protocol.js';
+import { SetupService } from '../common/setup-protocol.js';
+import { BOTTOM_SLOTS } from '../common/window-layout.js';
+import { CanvasWidget } from './canvas-widget.js';
+import { BoardModel } from './board-model.js';
 
 export const BUILD_COMMAND = { id: 'ownstudio.setup.build', category: 'OwnStudio', label: 'Build' };
 export const UPLOAD_COMMAND = { id: 'ownstudio.setup.upload', category: 'OwnStudio', label: 'Upload' };

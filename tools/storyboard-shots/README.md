@@ -57,5 +57,8 @@ tools/storyboard-shots/run.sh 9490 $S tools/storyboard-shots/design-test.mjs $S 
   in `setup.yaml` and in a `design` commit; on the control loop sheet, trying Kp
   must not write `control.cpp`, and Apply must change only the Kp line, add a
   `design` commit and leave the setup clean.
+- **`plugins-test.mjs`** (U1, run since U17a): a `.cpp` opens as C++ and is coloured,
+  a `.py` as Python, and the git extension shows the branch: the bundled VS Code
+  extensions start.
 - **`cdp.mjs`**: the small DevTools Protocol client both scripts use, and `STATE`,
   the window state read from the page.

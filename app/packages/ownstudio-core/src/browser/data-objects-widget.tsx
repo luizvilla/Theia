@@ -6,9 +6,9 @@ import { ReactWidget } from '@theia/core/lib/browser/widgets/react-widget';
 import { OpenerService, codicon, open } from '@theia/core/lib/browser';
 import { Disposable, DisposableCollection } from '@theia/core/lib/common';
 import { FileService } from '@theia/filesystem/lib/browser/file-service';
-import { DataObject, parseDataObjects, parseInput } from '../common/data-objects';
-import { LiveValues, formatValue } from './live-values';
-import { MissionService } from './mission-service';
+import { DataObject, parseDataObjects, parseInput } from '../common/data-objects.js';
+import { LiveValues, formatValue } from './live-values.js';
+import { MissionService } from './mission-service.js';
 
 export const DATA_OBJECTS_WIDGET_ID = 'ownstudio.dataObjects';
 

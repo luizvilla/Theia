@@ -9,8 +9,8 @@ import URI from '@theia/core/lib/common/uri';
 import { FileService } from '@theia/filesystem/lib/browser/file-service';
 import { FileChangesEvent } from '@theia/filesystem/lib/common/files';
 import { WorkspaceService } from '@theia/workspace/lib/browser/workspace-service';
-import { SetupService } from '../common/setup-protocol';
-import { CanvasWidget } from './canvas-widget';
+import { SetupService } from '../common/setup-protocol.js';
+import { CanvasWidget } from './canvas-widget.js';
 
 export const OPEN_PULSIMGUI_COMMAND = {
     id: 'ownstudio.setup.openPulsimGui', label: 'Open in PulsimGui', category: 'Setup',

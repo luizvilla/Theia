@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-only
 import * as React from '@theia/core/shared/react';
-import uPlot = require('uplot');
+import uPlot from 'uplot';
 import 'uplot/dist/uPlot.min.css';
 import { inject, injectable, postConstruct } from '@theia/core/shared/inversify';
 import { Message } from '@theia/core/shared/@lumino/messaging';
@@ -9,12 +9,12 @@ import { OpenerService, codicon, open } from '@theia/core/lib/browser';
 import URI from '@theia/core/lib/common/uri';
 import { FileService } from '@theia/filesystem/lib/browser/file-service';
 import { CommandService } from '@theia/core/lib/common';
-import { ProcedureModel } from './procedure-model';
-import { MissionService } from './mission-service';
-import { statusText } from '../common/procedure-protocol';
-import { eventWindow, Waveform, parseWaveform } from '../common/waveform';
-import { Band, TestRecord, bands, clip, compareCases, formatConditions, twinPath } from '../common/overlay';
-import { OPEN_PULSIMGUI_COMMAND } from './pulsimgui-contribution';
+import { ProcedureModel } from './procedure-model.js';
+import { MissionService } from './mission-service.js';
+import { statusText } from '../common/procedure-protocol.js';
+import { eventWindow, Waveform, parseWaveform } from '../common/waveform.js';
+import { Band, TestRecord, bands, clip, compareCases, formatConditions, twinPath } from '../common/overlay.js';
+import { OPEN_PULSIMGUI_COMMAND } from './pulsimgui-contribution.js';
 
 export const PROCEDURE_WIDGET_ID = 'ownstudio.procedure';
 // Theia's esbuild pipeline selects uPlot's ESM entry even for this CommonJS

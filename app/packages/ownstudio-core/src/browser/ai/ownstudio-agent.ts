@@ -5,10 +5,10 @@ import { ChatToolContext } from '@theia/ai-chat/lib/common/chat-tool-request-ser
 import { ChangeSetFileElementFactory } from '@theia/ai-chat/lib/browser/change-set-file-element';
 import { LanguageModelRequirement, ToolProvider, ToolRequest } from '@theia/ai-core';
 import { FileService } from '@theia/filesystem/lib/browser/file-service';
-import { MissionService } from '../mission-service';
-import { ProcedureModel } from '../procedure-model';
-import { BoardService } from '../../common/board-protocol';
-import { EDITABLE_FILES, editablePath, readablePath, summarizeRun, summarizeTestStates } from '../../common/agent-tools';
+import { MissionService } from '../mission-service.js';
+import { ProcedureModel } from '../procedure-model.js';
+import { BoardService } from '../../common/board-protocol.js';
+import { EDITABLE_FILES, editablePath, readablePath, summarizeRun, summarizeTestStates } from '../../common/agent-tools.js';
 
 export const READ_FILE_TOOL = 'ownstudio_readMissionFile';
 export const TEST_STATES_TOOL = 'ownstudio_testStates';

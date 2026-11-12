@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-2.1-only
 import { test } from 'node:test';
 import * as assert from 'node:assert/strict';
-import { TestRecord, bands, clip, compareCases, tolerance, twinPath } from './overlay';
+import { TestRecord, bands, clip, compareCases, tolerance, twinPath } from './overlay.js';
 
 const board: TestRecord = {
     procedure: 'BUCK-REF-01', target: 'board', verdict: 'PASS', twin: 'buck-ref-01-simulator',

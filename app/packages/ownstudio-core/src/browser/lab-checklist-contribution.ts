@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: LGPL-2.1-only
 import { inject, injectable } from '@theia/core/shared/inversify';
 import { FrontendApplicationContribution, StatusBar, StatusBarAlignment } from '@theia/core/lib/browser';
-import { LabChecklistModel } from './lab-checklist-model';
-import { ProcedureModel } from './procedure-model';
+import { LabChecklistModel } from './lab-checklist-model.js';
+import { ProcedureModel } from './procedure-model.js';
 
 /** Keeps the status bar's "Lab checklist n/6" entry in step with the panel. */
 @injectable()

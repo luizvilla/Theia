@@ -3,14 +3,14 @@ import { inject, injectable } from '@theia/core/shared/inversify';
 import { CommandContribution, CommandRegistry } from '@theia/core/lib/common';
 import { ApplicationShell, QuickInputService, Widget, WidgetManager } from '@theia/core/lib/browser';
 import { FileService } from '@theia/filesystem/lib/browser/file-service';
-import { MissionService } from './mission-service';
-import { OPEN_DATA_OBJECTS_COMMAND, OPEN_PANEL_COMMAND } from './lab-widget';
-import { PANEL_WIDGET_FACTORY, PanelWidgetOptions } from './panel-widget';
-import { DATA_OBJECTS_WIDGET_ID } from './data-objects-widget';
-import { CONTROL_CENTER_WIDGET_ID, OPEN_CONTROL_CENTER_COMMAND } from './control-center-widget';
-import { PROCEDURE_WIDGET_ID } from './procedure-widget';
-import { ProcedureModel, RUN_PROCEDURE_COMMAND, RUN_SIMULATOR_COMMAND, SHOW_RECORD_COMMAND } from './procedure-model';
-import { ProcedureInfo } from '../common/procedure-protocol';
+import { MissionService } from './mission-service.js';
+import { OPEN_DATA_OBJECTS_COMMAND, OPEN_PANEL_COMMAND } from './lab-widget.js';
+import { PANEL_WIDGET_FACTORY, PanelWidgetOptions } from './panel-widget.js';
+import { DATA_OBJECTS_WIDGET_ID } from './data-objects-widget.js';
+import { CONTROL_CENTER_WIDGET_ID, OPEN_CONTROL_CENTER_COMMAND } from './control-center-widget.js';
+import { PROCEDURE_WIDGET_ID } from './procedure-widget.js';
+import { ProcedureModel, RUN_PROCEDURE_COMMAND, RUN_SIMULATOR_COMMAND, SHOW_RECORD_COMMAND } from './procedure-model.js';
+import { ProcedureInfo } from '../common/procedure-protocol.js';
 
 
 @injectable()

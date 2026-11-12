@@ -7,7 +7,7 @@ import { promisify } from 'util';
 import { injectable } from '@theia/core/shared/inversify';
 import {
     BuildClient, BuildIdentity, BuildPhase, BuildResult, BuildService, SerialCommand
-} from '../common/build-protocol';
+} from '../common/build-protocol.js';
 
 const exec = promisify(execFile);
 const SOURCE_PATHS = ['src', 'platformio.ini', 'zephyr', 'owntech', 'libs'];

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: LGPL-2.1-only
 import { inject, injectable } from '@theia/core/shared/inversify';
 import { Disposable, Emitter } from '@theia/core/lib/common';
-import { BoardModel } from './board-model';
-import { splitPath } from '../common/panel-format';
+import { BoardModel } from './board-model.js';
+import { splitPath } from '../common/panel-format.js';
 
 export const LIVE_POLL_MS = 250;
 const HISTORY_MS = 60000;

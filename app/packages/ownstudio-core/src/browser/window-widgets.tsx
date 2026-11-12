@@ -7,11 +7,11 @@ import * as React from '@theia/core/shared/react';
 import { inject, injectable, postConstruct } from '@theia/core/shared/inversify';
 import { ReactWidget } from '@theia/core/lib/browser/widgets/react-widget';
 import { Message } from '@theia/core/shared/@lumino/messaging';
-import { RIGHT_SLOTS, WORKBENCH_SLOTS, WindowSlot } from '../common/window-layout';
-import { iconClass } from './workbenches';
-import { LabChecklistModel } from './lab-checklist-model';
-import { ProcedureModel } from './procedure-model';
-import { DesignModel } from './design-model';
+import { RIGHT_SLOTS, WORKBENCH_SLOTS, WindowSlot } from '../common/window-layout.js';
+import { iconClass } from './workbenches.js';
+import { LabChecklistModel } from './lab-checklist-model.js';
+import { ProcedureModel } from './procedure-model.js';
+import { DesignModel } from './design-model.js';
 
 abstract class WindowPanel extends ReactWidget {
     protected abstract readonly slot: WindowSlot<string>;

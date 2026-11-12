@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: LGPL-2.1-only
 import { test } from 'node:test';
 import * as assert from 'node:assert/strict';
-import { editablePath, readablePath, summarizeRun, summarizeTestStates } from './agent-tools';
-import { TestStates } from './test-states';
+import { editablePath, readablePath, summarizeRun, summarizeTestStates } from './agent-tools.js';
+import { TestStates } from './test-states.js';
 
 test('reads only inside the mission', () => {
     assert.equal(readablePath('firmware/control.cpp'), 'firmware/control.cpp');

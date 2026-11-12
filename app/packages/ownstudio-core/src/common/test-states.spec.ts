@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-2.1-only
 import { test } from 'node:test';
 import * as assert from 'node:assert/strict';
-import { BlockResult, TestEntry, blockCounts, blockInfo, caseVerdict, countStates, formatMeasured, stateInfo } from './test-states';
+import { BlockResult, TestEntry, blockCounts, blockInfo, caseVerdict, countStates, formatMeasured, stateInfo } from './test-states.js';
 
 const entry = (id: string, state: TestEntry['state']): TestEntry => ({
     id, tab: 'a', level: 'L1', title: 't', criterion: 'c', status: 'implemented', target: 'simulator', state,

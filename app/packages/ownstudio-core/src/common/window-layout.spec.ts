@@ -6,7 +6,11 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import {
     BOTTOM_SLOTS, CANVAS_TINT, REMOVED_WIDGETS, RIGHT_SLOTS, STATUS_ACTIONS, WORKBENCH_SLOTS, bottomSlotOf, rightSlotOf, workbenchOfLeftWidget
-} from './window-layout';
+} from './window-layout.js';
+import { fileURLToPath } from 'node:url';
+
+// ES module: where this file is (the bundle, for the backend).
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const css = fs.readFileSync(path.join(__dirname, '../../src/browser/style/ownstudio.css'), 'utf8');
 

@@ -2,7 +2,7 @@
 // A board run next to its simulation: requirement bands, both waveforms on one
 // time axis, and each case on both targets (records linked by "twin").
 
-import { Waveform } from './waveform';
+import { Waveform } from './waveform.js';
 
 export interface RecordCase {
     id: string;

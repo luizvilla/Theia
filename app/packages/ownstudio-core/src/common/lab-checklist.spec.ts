@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: LGPL-2.1-only
 import * as assert from 'assert';
 import { test } from 'node:test';
-import { Canvas } from './canvas-model';
-import { LabChecklistInput, labChecklist } from './lab-checklist';
+import { Canvas } from './canvas-model.js';
+import { LabChecklistInput, labChecklist } from './lab-checklist.js';
 
 const canvas: Canvas = {
     nodes: [

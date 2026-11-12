@@ -2,7 +2,7 @@
 // Where a mission's validation stands, as computed by ownstudio_lab.testing
 // (Python) from tests/catalogue.yaml, the test records and tests/findings.yaml.
 // The app only shows it; the states are computed in one place.
-import { RequirementState } from './verification';
+import { RequirementState } from './verification.js';
 
 export type TestState = 'fail' | 'known' | 'blocked_run' | 'pass' | 'info' | 'not_run' | 'blocked' | 'planned';
 

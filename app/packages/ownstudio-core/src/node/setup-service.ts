@@ -5,8 +5,12 @@ import * as os from 'os';
 import * as path from 'path';
 import { injectable } from '@theia/core/shared/inversify';
 import { dump, load } from 'js-yaml';
-import { BoardDefinition, ExampleLoaded, PlantSync, SetupService, SetupSummary, StartInfo, setupSlug } from '../common/setup-protocol';
-import { DesignSheets } from '../common/design-sheet';
+import { BoardDefinition, ExampleLoaded, PlantSync, SetupService, SetupSummary, StartInfo, setupSlug } from '../common/setup-protocol.js';
+import { DesignSheets } from '../common/design-sheet.js';
+import { fileURLToPath } from 'node:url';
+
+// ES module: where this file is (the bundle, for the backend).
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const CORE_UPSTREAM = 'https://github.com/owntech-foundation/Core.git';
 

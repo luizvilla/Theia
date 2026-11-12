@@ -3,9 +3,9 @@ import { inject, injectable } from '@theia/core/shared/inversify';
 import { CommandContribution, CommandRegistry, MessageService } from '@theia/core/lib/common';
 import { PreferenceContribution, PreferenceSchema } from '@theia/core/lib/common/preferences';
 import { ConfirmDialog, FrontendApplicationContribution, StatusBar, StatusBarAlignment } from '@theia/core/lib/browser';
-import { boardName } from '../common/board-protocol';
-import { BoardClientImpl, BoardModel } from './board-model';
-import { MissionService } from './mission-service';
+import { boardName } from '../common/board-protocol.js';
+import { BoardClientImpl, BoardModel } from './board-model.js';
+import { MissionService } from './mission-service.js';
 
 export const FLASH_COMMAND = { id: 'ownstudio.board.flash', category: 'OwnStudio', label: "Flash the Mission's Pre-built Firmware" };
 

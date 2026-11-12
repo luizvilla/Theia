@@ -3,11 +3,11 @@
 // into SPEC §9's continuously evaluated Lab checklist.
 import { inject, injectable, postConstruct } from '@theia/core/shared/inversify';
 import { Emitter } from '@theia/core/lib/common';
-import { ProcedureInfo } from '../common/procedure-protocol';
-import { LabCheck, LabChecklistInput, firstFailed, labChecklist } from '../common/lab-checklist';
-import { CanvasState } from './canvas-state';
-import { BoardModel } from './board-model';
-import { LiveValues } from './live-values';
+import { ProcedureInfo } from '../common/procedure-protocol.js';
+import { LabCheck, LabChecklistInput, firstFailed, labChecklist } from '../common/lab-checklist.js';
+import { CanvasState } from './canvas-state.js';
+import { BoardModel } from './board-model.js';
+import { LiveValues } from './live-values.js';
 
 const PATHS = [
     'Measurements/rVHigh_V', 'Measurements/rV1Low_V', 'Measurements/rV2Low_V',

@@ -7,9 +7,9 @@ import { ConfirmDialog, codicon } from '@theia/core/lib/browser';
 import { Disposable, DisposableCollection } from '@theia/core/lib/common';
 import URI from '@theia/core/lib/common/uri';
 import { FileService } from '@theia/filesystem/lib/browser/file-service';
-import { Gauge, NumberDisplay, Panel, PanelWidget as Item, Plot, Setpoint, Toggle, panelPaths, parsePanel } from '../common/panel-format';
-import { LiveValues, formatValue } from './live-values';
-import { MissionService } from './mission-service';
+import { Gauge, NumberDisplay, Panel, PanelWidget as Item, Plot, Setpoint, Toggle, panelPaths, parsePanel } from '../common/panel-format.js';
+import { LiveValues, formatValue } from './live-values.js';
+import { MissionService } from './mission-service.js';
 
 export const PANEL_WIDGET_FACTORY = 'ownstudio.panel';
 export interface PanelWidgetOptions { uri: string; }

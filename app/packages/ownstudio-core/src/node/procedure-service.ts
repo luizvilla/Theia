@@ -6,8 +6,8 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import { randomUUID } from 'crypto';
-import { ProcedureClient, ProcedureEvent, ProcedureService, ProcedureStart } from '../common/procedure-protocol';
-import { PowerTokenStore } from './power-token';
+import { ProcedureClient, ProcedureEvent, ProcedureService, ProcedureStart } from '../common/procedure-protocol.js';
+import { PowerTokenStore } from './power-token.js';
 
 /**
  * Spawns `python -m ownstudio_lab.procedure MISSION PROCEDURE --target T --json`

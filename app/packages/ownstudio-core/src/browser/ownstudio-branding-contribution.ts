@@ -2,7 +2,7 @@
 import { inject, injectable } from '@theia/core/shared/inversify';
 import { FrontendApplicationContribution } from '@theia/core/lib/browser';
 import { MonacoThemingService } from '@theia/monaco/lib/browser/monaco-theming-service';
-import { OWNSTUDIO_DARK, OWNSTUDIO_LIGHT } from './ownstudio-themes';
+import { OWNSTUDIO_DARK, OWNSTUDIO_LIGHT } from './ownstudio-themes.js';
 
 /** Registers the OwnStudio light and dark themes before the first render. */
 @injectable()

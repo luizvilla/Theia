@@ -6,14 +6,14 @@ import {
     StatusBar, StatusBarAlignment, Widget, WidgetManager, codicon
 } from '@theia/core/lib/browser';
 import { TabBarToolbarContribution, TabBarToolbarRegistry } from '@theia/core/lib/browser/shell/tab-bar-toolbar';
-import { WORKBENCHES, Workbench, commandId, iconClass, widgetId } from './workbenches';
-import { BOTTOM_SLOTS, RIGHT_SLOTS, STATUS_ACTIONS, WorkbenchId, bottomSlotOf, workbenchOfLeftWidget } from '../common/window-layout';
-import { CanvasWidget } from './canvas-widget';
+import { WORKBENCHES, Workbench, commandId, iconClass, widgetId } from './workbenches.js';
+import { BOTTOM_SLOTS, RIGHT_SLOTS, STATUS_ACTIONS, WorkbenchId, bottomSlotOf, workbenchOfLeftWidget } from '../common/window-layout.js';
+import { CanvasWidget } from './canvas-widget.js';
 import { TabBar } from '@theia/core/shared/@lumino/widgets';
 import { WorkspaceService } from '@theia/workspace/lib/browser';
-import { SetupService } from '../common/setup-protocol';
-import { START_WIDGET_ID } from './start-widget';
-import { TimelineWidget } from './window-widgets';
+import { SetupService } from '../common/setup-protocol.js';
+import { START_WIDGET_ID } from './start-widget.js';
+import { TimelineWidget } from './window-widgets.js';
 
 const THEIA_NEW_TERMINAL = 'terminal:new';
 type Side = 'left' | 'right';

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-2.1-only
 import { test } from 'node:test';
 import * as assert from 'node:assert/strict';
-import { StudyEvent, parseLog, stepTimes, stepTimesCsv, susScore, validParticipant } from './study';
+import { StudyEvent, parseLog, stepTimes, stepTimesCsv, susScore, validParticipant } from './study.js';
 
 const ev = (t: string, kind: StudyEvent['kind'], step?: string): StudyEvent =>
     ({ t: `2026-11-20T10:${t}Z`, participant: 'P01', mission: 'm', kind, step });

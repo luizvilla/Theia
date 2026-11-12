@@ -5,9 +5,9 @@ import { Message } from '@theia/core/shared/@lumino/messaging';
 import { ReactWidget } from '@theia/core/lib/browser/widgets/react-widget';
 import { OpenerService, codicon } from '@theia/core/lib/browser';
 import { FileService } from '@theia/filesystem/lib/browser/file-service';
-import { MissionService } from './mission-service';
-import { BRIDGE_BLOCKS } from '../common/board-pack';
-import { Coverage, EnvelopeLimits, LIMITS, LimitCheck, checkEnvelope, firmwareEnablesSafety, setEnvelopeValue } from '../common/safety';
+import { MissionService } from './mission-service.js';
+import { BRIDGE_BLOCKS } from '../common/board-pack.js';
+import { Coverage, EnvelopeLimits, LIMITS, LimitCheck, checkEnvelope, firmwareEnablesSafety, setEnvelopeValue } from '../common/safety.js';
 
 export const SAFETY_WIDGET_ID = 'ownstudio.safety';
 

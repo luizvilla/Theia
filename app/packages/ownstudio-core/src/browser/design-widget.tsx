@@ -6,17 +6,17 @@ import { ReactWidget } from '@theia/core/lib/browser/widgets/react-widget';
 import { OpenerService, codicon, open } from '@theia/core/lib/browser';
 import { MessageService } from '@theia/core/lib/common';
 import URI from '@theia/core/lib/common/uri';
-import { WORKBENCHES, widgetId } from './workbenches';
-import { SetupService } from '../common/setup-protocol';
+import { WORKBENCHES, widgetId } from './workbenches.js';
+import { SetupService } from '../common/setup-protocol.js';
 import {
     BodeCurve, ControlLoopSheet, FilterTrial, OutputFilterSheet, SheetResult,
     filterArgs, fromSlider, gainsDiffer, loopArgs, toSlider
-} from '../common/design-sheet';
-import { eng, parseEng } from '../common/units';
-import { DesignModel } from './design-model';
-import { CanvasWidget } from './canvas-widget';
+} from '../common/design-sheet.js';
+import { eng, parseEng } from '../common/units.js';
+import { DesignModel } from './design-model.js';
+import { CanvasWidget } from './canvas-widget.js';
 
-export { eng } from '../common/units';
+export { eng } from '../common/units.js';
 
 const CURVES: { key: 'plant' | 'controller' | 'loop'; label: string; color: string }[] = [
     { key: 'plant', label: 'Plant G', color: '#6C8AFF' },

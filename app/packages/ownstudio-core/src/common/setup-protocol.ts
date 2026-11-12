@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-2.1-only
 // Setups and the Start page (ADR 0025, ADR 0030): the backend runs
 // ownstudio_lab.start and ownstudio_lab.setups and returns their JSON.
-import { DesignSheets } from './design-sheet';
+import { DesignSheets } from './design-sheet.js';
 
 export const SETUP_SERVICE_PATH = '/services/ownstudio-setup';
 export const SetupService = Symbol('SetupService');

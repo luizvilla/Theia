@@ -2,7 +2,7 @@
 // The safety panel's checks (SPEC §10, ADR 0009): the mission's envelope
 // against the board's ratings, and each envelope limit against the
 // protection chains that enforce it.
-import { BoardPack, ProtectionChain, Quantity } from './board-pack';
+import { BoardPack, ProtectionChain, Quantity } from './board-pack.js';
 
 export interface EnvelopeLimits { v_max_V?: number; i_max_A?: number; }
 export type Envelope = Record<string, EnvelopeLimits>;

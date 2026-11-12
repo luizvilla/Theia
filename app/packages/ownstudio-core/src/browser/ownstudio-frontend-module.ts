@@ -7,50 +7,50 @@ import {
     ApplicationShell, FrontendApplicationContribution, KeybindingContribution, WidgetFactory
 } from '@theia/core/lib/browser';
 import { TabBarToolbarContribution } from '@theia/core/lib/browser/shell/tab-bar-toolbar';
-import { OwnStudioBrandingContribution, OwnStudioMonacoThemingService } from './ownstudio-branding-contribution';
+import { OwnStudioBrandingContribution, OwnStudioMonacoThemingService } from './ownstudio-branding-contribution.js';
 import { MonacoThemingService } from '@theia/monaco/lib/browser/monaco-theming-service';
-import { WorkbenchContribution } from './workbench-contribution';
-import { OwnStudioApplicationShell } from './ownstudio-shell';
-import { MenuMapContribution, OwnStudioMenuModelRegistry } from './menu-map-contribution';
-import { SETUP_SERVICE_PATH, SetupService } from '../common/setup-protocol';
-import { START_WIDGET_ID, StartWidget } from './start-widget';
-import { ExampleContribution } from './example-contribution';
+import { WorkbenchContribution } from './workbench-contribution.js';
+import { OwnStudioApplicationShell } from './ownstudio-shell.js';
+import { MenuMapContribution, OwnStudioMenuModelRegistry } from './menu-map-contribution.js';
+import { SETUP_SERVICE_PATH, SetupService } from '../common/setup-protocol.js';
+import { START_WIDGET_ID, StartWidget } from './start-widget.js';
+import { ExampleContribution } from './example-contribution.js';
 import {
     DesignPanelWidget, InspectorWidget, LabPanelWidget, PartsWidget, TimelineWidget
-} from './window-widgets';
-import { CanvasWidget } from './canvas-widget';
-import { BOTTOM_SLOTS, RIGHT_SLOTS, WORKBENCH_SLOTS } from '../common/window-layout';
-import { WORKBENCHES, widgetId } from './workbenches';
+} from './window-widgets.js';
+import { CanvasWidget } from './canvas-widget.js';
+import { BOTTOM_SLOTS, RIGHT_SLOTS, WORKBENCH_SLOTS } from '../common/window-layout.js';
+import { WORKBENCHES, widgetId } from './workbenches.js';
 import { ServiceConnectionProvider } from '@theia/core/lib/browser/messaging/service-connection-provider';
 import { PreferenceContribution } from '@theia/core/lib/common/preferences';
-import { BOARD_SERVICE_PATH, BoardService } from '../common/board-protocol';
-import { MissionService } from './mission-service';
-import { BoardClientImpl, BoardModel } from './board-model';
-import { BoardContribution, BoardPreferenceContribution } from './board-contribution';
-import { SAFETY_WIDGET_ID, SafetyWidget } from './safety-widget';
-import { SafetyContribution } from './safety-contribution';
-import { LiveValues } from './live-values';
-import { PANEL_WIDGET_FACTORY, PanelWidget, PanelWidgetOptions } from './panel-widget';
-import { DATA_OBJECTS_WIDGET_ID, DataObjectsWidget } from './data-objects-widget';
-import { LabWidget } from './lab-widget';
-import { DesignWidget } from './design-widget';
-import { DesignModel } from './design-model';
+import { BOARD_SERVICE_PATH, BoardService } from '../common/board-protocol.js';
+import { MissionService } from './mission-service.js';
+import { BoardClientImpl, BoardModel } from './board-model.js';
+import { BoardContribution, BoardPreferenceContribution } from './board-contribution.js';
+import { SAFETY_WIDGET_ID, SafetyWidget } from './safety-widget.js';
+import { SafetyContribution } from './safety-contribution.js';
+import { LiveValues } from './live-values.js';
+import { PANEL_WIDGET_FACTORY, PanelWidget, PanelWidgetOptions } from './panel-widget.js';
+import { DATA_OBJECTS_WIDGET_ID, DataObjectsWidget } from './data-objects-widget.js';
+import { LabWidget } from './lab-widget.js';
+import { DesignWidget } from './design-widget.js';
+import { DesignModel } from './design-model.js';
 import { Agent, bindToolProvider } from '@theia/ai-core';
 import { ChatAgent } from '@theia/ai-chat/lib/common';
 import {
     LoopMarginsTool, OwnStudioMissionAgent, ProposeControlChangeTool, ReadMissionFileTool, RunOnSimulatorTool, TestStatesTool
-} from './ai/ownstudio-agent';
-import { PROCEDURE_SERVICE_PATH, ProcedureService } from '../common/procedure-protocol';
-import { ProcedureClientImpl, ProcedureModel } from './procedure-model';
-import { PROCEDURE_WIDGET_ID, ProcedureWidget } from './procedure-widget';
-import { CONTROL_CENTER_WIDGET_ID, ControlCenterWidget } from './control-center-widget';
-import { LabContribution } from './lab-contribution';
-import { BUILD_SERVICE_PATH, BuildService } from '../common/build-protocol';
-import { BuildClientImpl, BuildContribution } from './build-contribution';
-import { LabChecklistModel } from './lab-checklist-model';
-import { LabChecklistContribution } from './lab-checklist-contribution';
-import { CanvasState } from './canvas-state';
-import { PulsimGuiContribution } from './pulsimgui-contribution';
+} from './ai/ownstudio-agent.js';
+import { PROCEDURE_SERVICE_PATH, ProcedureService } from '../common/procedure-protocol.js';
+import { ProcedureClientImpl, ProcedureModel } from './procedure-model.js';
+import { PROCEDURE_WIDGET_ID, ProcedureWidget } from './procedure-widget.js';
+import { CONTROL_CENTER_WIDGET_ID, ControlCenterWidget } from './control-center-widget.js';
+import { LabContribution } from './lab-contribution.js';
+import { BUILD_SERVICE_PATH, BuildService } from '../common/build-protocol.js';
+import { BuildClientImpl, BuildContribution } from './build-contribution.js';
+import { LabChecklistModel } from './lab-checklist-model.js';
+import { LabChecklistContribution } from './lab-checklist-contribution.js';
+import { CanvasState } from './canvas-state.js';
+import { PulsimGuiContribution } from './pulsimgui-contribution.js';
 
 export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
     bind(MissionService).toSelf().inSingletonScope();

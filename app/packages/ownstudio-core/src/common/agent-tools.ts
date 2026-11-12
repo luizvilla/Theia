@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-2.1-only
 // The pure parts of the OwnStudio agent's tools: which files it may read or
 // change, and how results are told back to the model (plain, short text).
-import { TestStates, caseVerdict, formatMeasured, stateInfo } from './test-states';
+import { TestStates, caseVerdict, formatMeasured, stateInfo } from './test-states.js';
 
 /** Files the agent may propose changes to (ADR 0010: the control law, nothing that touches safety). */
 export const EDITABLE_FILES = ['firmware/control.cpp', 'firmware/control.h'];

@@ -6,8 +6,8 @@ import { execFileSync } from 'child_process';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import { BuildClient, BuildEvent } from '../common/build-protocol';
-import { BuildServiceImpl, byteProgress, setupBuildIdentity } from './build-service';
+import { BuildClient, BuildEvent } from '../common/build-protocol.js';
+import { BuildServiceImpl, byteProgress, setupBuildIdentity } from './build-service.js';
 
 class TestBuildService extends BuildServiceImpl {
     constructor(protected readonly fakePio: string, protected readonly fakePython: string) { super(); }

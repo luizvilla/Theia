@@ -3,7 +3,11 @@ import { test } from 'node:test';
 import * as assert from 'node:assert/strict';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { STATE_LABEL, parseRequirements } from './verification';
+import { STATE_LABEL, parseRequirements } from './verification.js';
+import { fileURLToPath } from 'node:url';
+
+// ES module: where this file is (the bundle, for the backend).
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 test('parses the mission requirements', () => {
     const file = path.resolve(__dirname, 'testdata/requirements.yaml');

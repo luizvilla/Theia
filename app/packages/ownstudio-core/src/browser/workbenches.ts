@@ -2,7 +2,7 @@
 // The three workbenches of OwnStudio 2.0: views of the same setup (SPEC §3, §5).
 // Their place in the window is in common/window-layout.ts; this adds what the
 // centre views say about themselves.
-import { WORKBENCH_SLOTS, WorkbenchId, WorkbenchSlot } from '../common/window-layout';
+import { WORKBENCH_SLOTS, WorkbenchId, WorkbenchSlot } from '../common/window-layout.js';
 
 export interface Workbench extends WorkbenchSlot {
     id: WorkbenchId;
