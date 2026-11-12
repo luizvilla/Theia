@@ -9,6 +9,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { execFileSync } from 'node:child_process';
 import { connect, dropPart, waitForWindow, wire, STATE, sleep } from './cdp.mjs';
 
 const [port, only] = process.argv.slice(2);
@@ -304,6 +305,33 @@ const FRAMES = [
         differences: [
             'File › Examples › "Examples of the board…" opens a picker of the board\'s examples, grouped as the frame\'s submenu; the frame draws the list as a submenu.',
             'The timeline\'s branch point and the inspector\'s Example field come with the timeline (U18) and the inspector (U9); the branch shows in the status bar.',
+        ],
+    },
+    {
+        id: 'timeline', num: '14', title: 'Run again; go back in time; branch',
+        go: async () => {
+            // A design change and a build after the example, then the example's dot previewed.
+            await key('1', 2, 'Digit1');
+            await sleep(800);
+            for (let n = 0; n < 40 && !await app.evaluate(`!!document.querySelector('[data-field="L"] input.ownstudio-number')`); n++) await sleep(300);
+            await app.evaluate(`(() => { const i = document.querySelector('[data-field="L"] input.ownstudio-number'); i.focus(); i.select(); })()`);
+            await app.send('Input.insertText', { text: '47u' });
+            await key('Enter');
+            const dots = () => app.evaluate(`Number(document.querySelector('.ownstudio-timeline-body')?.dataset.dots ?? 0)`);
+            const before = await dots();
+            for (let n = 0; n < 40 && await dots() <= before; n++) await sleep(300);
+            execFileSync(process.env.OWNSTUDIO_PYTHON || '/data/ownstudio/build/venv-mission/bin/python',
+                ['-m', 'ownstudio_lab.setups', 'event', process.env.OWNSTUDIO_STORYBOARD_SETUP, 'build', 'Build 2f0e1b4 ✓']);
+            for (let n = 0; n < 40 && await dots() <= before + 1; n++) await sleep(300);
+            await app.clickOn('.ownstudio-timeline-dot[data-event="example"]');
+            for (let n = 0; n < 40 && !await app.evaluate(`!!document.querySelector('[data-preview]')`); n++) await sleep(300);
+            await show('right', 'ownstudio.inspector');
+            await show('bottom', 'ownstudio.canvas');
+        },
+        differences: [
+            'The preview opens in the centre and the dot\'s details in the Inspector, as drawn; the frame\'s kp row comes from the diff here (src/control.cpp differs when the code changed).',
+            'Open its report waits for run dots that name their report; reports are listed in the Lab. Milestone… shows on the current dot only.',
+            'Branches follow the strip (a restore then an edit starts one, and the strip shows it); lanes under the strip are slice 2.',
         ],
     },
     {

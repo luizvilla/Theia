@@ -5,7 +5,9 @@ import * as os from 'os';
 import * as path from 'path';
 import { injectable } from '@theia/core/shared/inversify';
 import { dump, load } from 'js-yaml';
-import { BoardDefinition, ExampleLoaded, PlantSync, SetupService, SetupSummary, StartInfo, setupSlug } from '../common/setup-protocol.js';
+import {
+    BoardDefinition, DotPreview, ExampleLoaded, PlantSync, SetupHead, SetupService, SetupSummary, StartInfo, TimelineStrip, setupSlug
+} from '../common/setup-protocol.js';
 import { DesignSheets } from '../common/design-sheet.js';
 import { fileURLToPath } from 'node:url';
 
@@ -142,6 +144,37 @@ export class SetupServiceImpl implements SetupService {
             await this.commitEvent(folder, 'simulate', summary);
         }
         return result;
+    }
+
+    async timelineStrip(folder: string): Promise<TimelineStrip> {
+        return await this.run('ownstudio_lab.setups', ['strip', folder]) as TimelineStrip;
+    }
+
+    head(folder: string): Promise<SetupHead> {
+        const git = (...args: string[]) => new Promise<string>(resolve =>
+            execFile('git', ['-C', folder, ...args], { timeout: 5000 }, (error, stdout) => resolve(error ? '' : stdout.trim())));
+        return Promise.all([git('rev-parse', 'HEAD'), git('symbolic-ref', '--quiet', '--short', 'HEAD')])
+            .then(([head, branch]) => ({ head, branch: branch || null }));
+    }
+
+    async previewDot(folder: string, commit: string): Promise<DotPreview> {
+        return await this.run('ownstudio_lab.setups', ['preview', folder, commit]) as DotPreview;
+    }
+
+    async restoreDot(folder: string, commit: string): Promise<void> {
+        await this.run('ownstudio_lab.setups', ['restore', folder, commit]);
+    }
+
+    async backToLatest(folder: string): Promise<string | null> {
+        return (await this.run('ownstudio_lab.setups', ['back', folder]) as { branch: string | null }).branch;
+    }
+
+    async milestone(folder: string, name: string): Promise<void> {
+        await this.run('ownstudio_lab.setups', ['milestone', folder, name]);
+    }
+
+    async newBranch(folder: string, name: string): Promise<string> {
+        return (await this.run('ownstudio_lab.setups', ['branch', folder, name]) as { branch: string }).branch;
     }
 
     async designSheets(folder: string): Promise<DesignSheets> {

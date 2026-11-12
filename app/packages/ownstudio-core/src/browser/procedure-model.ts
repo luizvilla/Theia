@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: LGPL-2.1-only
+import { TimelineModel } from './timeline-model.js';
 import { inject, injectable, postConstruct } from '@theia/core/shared/inversify';
 import { Emitter } from '@theia/core/lib/common';
 import { PreferenceService } from '@theia/core/lib/common/preferences';
@@ -46,6 +47,7 @@ export interface ProcedureRun {
  */
 @injectable()
 export class ProcedureModel {
+    @inject(TimelineModel) protected readonly timeline: TimelineModel;
     @inject(ProcedureService) protected readonly service: ProcedureService;
     @inject(ProcedureClientImpl) protected readonly client: ProcedureClientImpl;
     @inject(BoardService) protected readonly boards: BoardService;
@@ -67,6 +69,7 @@ export class ProcedureModel {
         this.client.onEvent(({ runId, event }) => this.receive(runId, event));
         this.missions.onDidChange(() => this.refresh());
         this.missions.onDidChangeFiles(uris => uris.some(u => u.path.toString().includes('/tests/procedures/')) && this.refresh());
+        this.timeline.onDidMove(event => event.waitUntil(this.refresh()));
         this.refresh();
     }
 

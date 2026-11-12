@@ -9,7 +9,7 @@ import {
     DOCUMENTATION_URL, MENU_MAP, MenuEntry, MenuItem, REPORT_PROBLEM_URL, comingMessage, placeholderCommand, shownLabel
 } from '../common/menu-map.js';
 import { BOTTOM_SLOTS, RIGHT_SLOTS } from '../common/window-layout.js';
-import { TimelineWidget } from './window-widgets.js';
+import { TimelineWidget } from './timeline-widget.js';
 
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-$/, '');
 

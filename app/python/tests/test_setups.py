@@ -176,6 +176,77 @@ class Setups(unittest.TestCase):
         self.assertEqual(self.ohm(), 24)
 
 
+class Strip(unittest.TestCase):
+    """Plan U18: what the timeline strip draws, a dot's preview, milestones and new branches."""
+
+    setUp = Setups.setUp
+    tearDown = Setups.tearDown
+    edit_canvas = Setups.edit_canvas
+    ohm = Setups.ohm
+    branches = Setups.branches
+
+    def test_the_strip_keeps_the_whole_branch_while_an_old_dot_is_restored(self):
+        self.edit_canvas(33)
+        first = su.commit_event(self.setup, "canvas", "33 ohm")
+        self.edit_canvas(10)
+        last = su.commit_event(self.setup, "canvas", "10 ohm")
+        strip = su.strip(self.setup)
+        self.assertEqual((strip["head"], strip["branch"], strip["detached"]), (last.commit, "twist-buck", False))
+        self.assertEqual([d["event"] for d in strip["dots"]], ["create", "canvas", "canvas"])
+        su.restore(self.setup, first.commit)
+        strip = su.strip(self.setup)
+        self.assertEqual((strip["head"], strip["detached"], strip["restored_from"]), (first.commit, True, "twist-buck"))
+        self.assertEqual(strip["dots"][-1]["commit"], last.commit)       # the latest dot stays reachable
+
+    def test_after_a_branch_from_a_restore_the_strip_follows_the_new_branch(self):
+        self.edit_canvas(33)
+        first = su.commit_event(self.setup, "canvas", "33 ohm")
+        self.edit_canvas(10)
+        su.commit_event(self.setup, "canvas", "10 ohm")
+        su.restore(self.setup, first.commit)
+        self.edit_canvas(22)
+        dot = su.commit_event(self.setup, "canvas", "22 ohm")
+        strip = su.strip(self.setup)
+        self.assertEqual(strip["branch"], dot.branch)
+        self.assertEqual([d["summary"] for d in strip["dots"]][-2:], ["33 ohm", "22 ohm"])
+
+    def test_a_preview_compares_the_dot_with_now(self):
+        self.edit_canvas(33)
+        first = su.commit_event(self.setup, "canvas", "33 ohm")
+        self.edit_canvas(10)
+        su.commit_event(self.setup, "canvas", "10 ohm")
+        p = su.preview(self.setup, first.commit)
+        self.assertEqual((p["summary"], p["event"], p["head"]), ("33 ohm", "canvas", False))
+        self.assertIn({"id": "load", "part": "resistor", "ohm": 33}, p["canvas"]["nodes"])
+        self.assertEqual(p["files"], ["ownstudio/setup.yaml"])
+        self.assertIn("-    ohm: 33", p["diff"])
+        self.assertIn("+    ohm: 10", p["diff"])
+        self.assertTrue(su.preview(self.setup, "HEAD")["head"])
+
+    def test_records_and_reports_stay_out_of_the_preview(self):
+        first = su.timeline(self.setup)[0]
+        for folder in ("ownstudio/reports", "ownstudio/records"):
+            os.makedirs(os.path.join(self.setup, folder), exist_ok=True)
+            with open(os.path.join(self.setup, folder, "r.html"), "w") as f:
+                f.write("x")
+        su.commit_event(self.setup, "run", "a run")
+        self.assertEqual(su.preview(self.setup, first.commit)["files"], [])
+
+    def test_a_milestone_is_a_named_dot_and_needs_a_name(self):
+        dot = su.milestone(self.setup, "  kp   tuned ")
+        self.assertEqual((dot.event, dot.summary), ("milestone", "milestone: kp tuned"))
+        with self.assertRaises(su.SetupError):
+            su.milestone(self.setup, "   ")
+
+    def test_a_new_branch_keeps_unsaved_work_on_the_old_one(self):
+        self.edit_canvas(47)
+        self.assertEqual(su.new_branch(self.setup, "Try 47 ohm"), "try-47-ohm")
+        self.assertEqual(su.timeline(self.setup, ref="twist-buck")[-1].event, "save")
+        self.assertEqual(su.current_branch(self.setup), "try-47-ohm")
+        with self.assertRaises(su.SetupError):
+            su.new_branch(self.setup, "try 47 ohm")
+
+
 REAL_EXAMPLES = os.environ.get("OWNSTUDIO_EXAMPLES")
 
 

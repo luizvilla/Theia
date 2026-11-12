@@ -3,7 +3,7 @@ import { inject, injectable } from '@theia/core/shared/inversify';
 import { ApplicationShell, Layout, Widget } from '@theia/core/lib/browser';
 import { BoxPanel } from '@theia/core/shared/@lumino/widgets';
 import { TheiaSplitPanel } from '@theia/core/lib/browser/shell/theia-split-panel';
-import { TIMELINE_WIDGET_ID, TimelineWidget } from './window-widgets.js';
+import { TIMELINE_WIDGET_ID, TimelineWidget } from './timeline-widget.js';
 
 /**
  * Theia's shell with the timeline strip (SPEC §13) under the centre and the

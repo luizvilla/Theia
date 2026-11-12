@@ -47,10 +47,39 @@ export interface SetupService {
     openPulsimGui(folder: string): Promise<void>;
     /** Copies a saved plant's named Vin/Rload/L/C values back to the canvas. */
     syncPlantValues(folder: string): Promise<PlantSync>;
+    /** The timeline strip: the dots of the line being worked on, and where HEAD is (plan U18). */
+    timelineStrip(folder: string): Promise<TimelineStrip>;
+    /** HEAD and branch only, cheap enough to poll. */
+    head(folder: string): Promise<SetupHead>;
+    /** One dot compared with now: details, its canvas, the diff to the working tree. */
+    previewDot(folder: string, commit: string): Promise<DotPreview>;
+    /** Shows the setup as it was at a dot (S7): unsaved work is committed first, no branch until an edit. */
+    restoreDot(folder: string, commit: string): Promise<void>;
+    /** Leaves a restored dot for the latest dot of the branch it came from. */
+    backToLatest(folder: string): Promise<string | null>;
+    milestone(folder: string, name: string): Promise<void>;
+    newBranch(folder: string, name: string): Promise<string>;
     /** The setup's design sheets; a setup made before them gets its board's, committed (plan U16). */
     designSheets(folder: string): Promise<DesignSheets>;
     /** Runs ownstudio/design/<sheet>.py --json in the setup with these arguments; its JSON. */
     runDesignSheet(folder: string, sheet: string, args: (string | number)[]): Promise<unknown>;
+}
+
+export interface TimelineDot { commit: string; event: string; summary: string; date: string }
+export interface SetupHead { head: string; branch: string | null }
+export interface TimelineStrip extends SetupHead {
+    restored_from: string | null;
+    detached: boolean;
+    dirty: boolean;
+    dots: TimelineDot[];
+}
+export interface DotPreview {
+    commit: string; short: string; summary: string; event: string; date: string;
+    head: boolean;
+    canvas: unknown;
+    files: string[];
+    diff: string;
+    truncated: boolean;
 }
 
 export interface SetupSummary { name: string; board: string; branch: string | null }

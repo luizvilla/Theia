@@ -91,26 +91,6 @@ export class InspectorWidget extends WindowPanel {
 
 export interface InspectorAction { label: string; run: () => void }
 
-export const TIMELINE_WIDGET_ID = 'ownstudio.timeline';
-
-/** The timeline strip under the bottom panel (SPEC §13), always visible. */
-@injectable()
-export class TimelineWidget extends ReactWidget {
-    @postConstruct()
-    protected init(): void {
-        this.id = TIMELINE_WIDGET_ID;
-        this.addClass('ownstudio-timeline');
-        this.update();
-    }
-
-    protected render(): React.ReactNode {
-        return <div className='ownstudio-timeline-body'>
-            <span className='ownstudio-timeline-line' />
-            <span className='ownstudio-muted'>Timeline</span>
-        </div>;
-    }
-}
-
 @injectable()
 export class DesignPanelWidget extends WindowPanel {
     protected readonly slot = WORKBENCH_SLOTS[0];

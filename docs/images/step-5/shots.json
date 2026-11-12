@@ -860,6 +860,63 @@
   ]
  },
  {
+  "frame": "14",
+  "title": "Run again; go back in time; branch",
+  "file": "frame-14-timeline.png",
+  "state": {
+   "workbench": "design",
+   "left": "ownstudio.left.design",
+   "right": "ownstudio.inspector",
+   "bottom": "ownstudio.canvas",
+   "main": "ownstudio.timeline.preview",
+   "centreScroll": null,
+   "leftTabs": [
+    "ownstudio.left.design",
+    "explorer-view-container",
+    "ownstudio.left.lab"
+   ],
+   "rightTabs": [
+    "ownstudio.parts",
+    "ownstudio.inspector",
+    "chat-view-widget"
+   ],
+   "bottomTabs": [
+    "Canvas",
+    "Terminal",
+    "Build output"
+   ],
+   "canvasTint": "design",
+   "canvasLevel": "setup",
+   "canvasSelection": null,
+   "inspectorSelection": "Dot · example: buck_voltage_mode",
+   "canvasFirmware": null,
+   "codeToolbar": [],
+   "buildOutput": [],
+   "timeline": true,
+   "leftOpen": true,
+   "rightOpen": true,
+   "bottomOpen": true,
+   "status": [
+    "",
+    "",
+    "",
+    "buck-voltage-mode",
+    "",
+    "0  0",
+    "No board",
+    "Lab checklist 2/6",
+    "",
+    ""
+   ],
+   "titleBar": "rgb(23, 51, 46)"
+  },
+  "differences": [
+   "The preview opens in the centre and the dot's details in the Inspector, as drawn; the frame's kp row comes from the diff here (src/control.cpp differs when the code changed).",
+   "Open its report waits for run dots that name their report; reports are listed in the Lab. Milestone… shows on the current dot only.",
+   "Branches follow the strip (a restore then an edit starts one, and the strip shows it); lanes under the strip are slice 2."
+  ]
+ },
+ {
   "frame": "15",
   "title": "The eight menus",
   "file": "frame-15-menus.png",

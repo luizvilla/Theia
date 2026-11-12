@@ -26,6 +26,7 @@ import { WORKBENCHES, commandId, iconClass } from './workbenches.js';
 import { InspectorAction, InspectorWidget } from './window-widgets.js';
 import { BuildService } from '../common/build-protocol.js';
 import { eng } from '../common/units.js';
+import { TimelineModel } from './timeline-model.js';
 
 export const PART_MIME = 'application/ownstudio-part';
 const COMMIT_AFTER_MS = 10_000;
@@ -60,6 +61,7 @@ export class CanvasWidget extends ReactWidget {
     @inject(ApplicationShell) protected readonly shell: ApplicationShell;
     @inject(CommandRegistry) protected readonly commands: CommandRegistry;
     @inject(BuildService) protected readonly builds: BuildService;
+    @inject(TimelineModel) protected readonly timeline: TimelineModel;
 
     protected readonly slot = BOTTOM_SLOTS[0];
     protected workbench: WorkbenchId = 'code';
@@ -93,6 +95,9 @@ export class CanvasWidget extends ReactWidget {
         this.node.tabIndex = 0;
         this.load();
         this.update();
+        // U18: a restore or a branch moves the setup under the canvas.
+        this.timeline.onWillMove(event => event.waitUntil(this.flushPending()));
+        this.timeline.onDidMove(event => event.waitUntil(this.reload()));
     }
 
     protected override onActivateRequest(msg: Message): void {
@@ -140,6 +145,20 @@ export class CanvasWidget extends ReactWidget {
         this.syncNodes();
         this.update();
         this.onDidChangeEmitter.fire();
+    }
+
+    /** U18: commit pending canvas edits now and wait for every write (before a restore). */
+    async flushPending(): Promise<void> {
+        this.commitNow();
+        await this.persistence;
+    }
+
+    /** U18: the setup changed under the canvas (a restore, a branch): read it again after our own writes. */
+    async reload(): Promise<void> {
+        await this.persistence;
+        clearTimeout(this.commitTimer);
+        this.pendingSummary = undefined;
+        await this.load();
     }
 
     /** For tests and the inspector: the canvas as it is now. */

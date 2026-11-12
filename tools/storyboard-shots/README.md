@@ -63,5 +63,9 @@ tools/storyboard-shots/run.sh 9490 $S tools/storyboard-shots/design-test.mjs $S 
 - **`agents-test.mjs`** (U17): types "@" in the AI tab and checks that Claude Code
   and Codex are offered and the old OwnStudio agent is not, that Codex's sandbox
   menu has no Full Access, and that the setup carries AGENTS.md with the power rule.
+- **`timeline-test.mjs`** (U18): makes three dots in the window (L, Kp, an outside build),
+  previews the dot before them, restores it (canvas, file and open editor), returns, then
+  times 200 restores and returns (each within 2 s, no new branch) and checks that an edit
+  from a restored dot starts a branch the strip follows. Third argument: cycles (default 100).
 - **`cdp.mjs`**: the small DevTools Protocol client both scripts use, and `STATE`,
   the window state read from the page.

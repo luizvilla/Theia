@@ -89,9 +89,9 @@ export const MENU_MAP: Menu[] = [
     },
     {
         label: 'History', items: [
-            later('Milestone…', 1, 'U18'),
-            later('Restore…', 1, 'U18'),
-            later('New branch…', 1, 'U18'),
+            { label: 'Milestone…', command: 'ownstudio.history.milestone' },
+            { label: 'Restore…', command: 'ownstudio.history.restore' },
+            { label: 'New branch…', command: 'ownstudio.history.newBranch' },
             '-',
             later('Pull', 3),
             later('Push', 3),

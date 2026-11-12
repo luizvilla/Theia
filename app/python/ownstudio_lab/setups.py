@@ -22,7 +22,7 @@ import re
 import shutil
 import subprocess
 import sys
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 
 import yaml
 
@@ -161,7 +161,7 @@ def design_sheets(repo, board_root=None):
 
 # What a setup never commits: raw records, and the hooks and backups Claude Code
 # writes into the folder it works in (plan U17).
-SETUP_IGNORES = ("ownstudio/records/", ".claude/hooks/", ".claude/settings.local.json", ".claude/.edit-baks/")
+SETUP_IGNORES = ("ownstudio/records/", ".claude/hooks/", ".claude/settings.local.json", ".claude/.edit-baks/", "__pycache__/")
 
 
 def _copy_board_agents(dest, board_root, board, description):
@@ -353,6 +353,71 @@ def _branch_from_restore(repo):
     return name
 
 
+# --- the timeline strip (plan U18, storyboard frame 14) ----------------------------
+
+PREVIEW_LINES = 400
+PREVIEW_EXCLUDES = (":(exclude)ownstudio/records", ":(exclude)ownstudio/reports")
+
+
+def strip(repo):
+    """What the timeline strip draws: the dots of the line being worked on, and where HEAD is.
+
+    After a restore HEAD is detached on an old dot; the strip still shows the
+    whole branch the restore left, so the user can go back to its latest dot.
+    """
+    head = git(repo, "rev-parse", "HEAD").strip()
+    branch = current_branch(repo)
+    restored_from = None if branch else _restored_from(repo)
+    tip = branch or restored_from or "HEAD"
+    dots = timeline(repo, tip)
+    if not any(d.commit == head for d in dots):
+        dots = timeline(repo, "HEAD")      # a hand-made branch point: show HEAD's own line
+    return {"head": head, "branch": branch, "restored_from": restored_from, "detached": branch is None,
+            "dirty": is_dirty(repo), "dots": [asdict(d) for d in dots]}
+
+
+def preview(repo, commit):
+    """One dot compared with now: its details, the canvas it had, and the diff from it to the working tree."""
+    commit = git(repo, "rev-parse", "--verify", f"{commit}^{{commit}}").strip()
+    fmt = "\x1f".join(["%H", "%h", "%s", f"%(trailers:key={EVENT_TRAILER},valueonly,separator=%x2C)", "%cI"])
+    full, short, summary, event, date = git(repo, "log", "-1", f"--format={fmt}", commit).strip("\n").split("\x1f")
+    try:
+        setup = yaml.safe_load(git(repo, "show", f"{commit}:{SETUP_FILE}")) or {}
+    except SetupError:
+        setup = {}
+    diff = git(repo, "diff", "--no-color", "--no-ext-diff", commit, "--", ".", *PREVIEW_EXCLUDES)
+    lines = diff.splitlines()
+    files = [line.split("\t", 2)[-1] for line in
+             git(repo, "diff", "--name-status", commit, "--", ".", *PREVIEW_EXCLUDES).splitlines() if line]
+    return {"commit": full, "short": short, "summary": summary, "event": event.strip(), "date": date,
+            "head": git(repo, "rev-parse", "HEAD").strip() == full,
+            "canvas": setup.get("canvas") or {"nodes": [], "wires": []},
+            "files": files, "diff": "\n".join(lines[:PREVIEW_LINES]), "truncated": len(lines) > PREVIEW_LINES}
+
+
+def milestone(repo, name):
+    """A named dot on the current state (S5), for the user's own landmarks."""
+    name = " ".join(str(name).split())
+    if not name:
+        raise SetupError("a milestone needs a name")
+    return commit_event(repo, "milestone", f"milestone: {name}")
+
+
+def new_branch(repo, name):
+    """Continue on a new branch from here; unsaved work is committed first on the branch it was made on."""
+    branch = slug(name)
+    if git(repo, "rev-parse", "--verify", "--quiet", f"refs/heads/{branch}", check=False).strip():
+        raise SetupError(f"a branch named {branch} exists already")
+    if is_dirty(repo):
+        commit_event(repo, "save", f"unsaved work, kept before starting {branch}")
+    git(repo, "checkout", "--quiet", "-b", branch)
+    try:
+        os.unlink(os.path.join(_git_dir(repo), RESTORED_FROM))
+    except FileNotFoundError:
+        pass
+    return branch
+
+
 # --- examples (plan U7, storyboard frame 5) -----------------------------------------
 
 ORIGIN_FILE = "ownstudio/origin.yaml"
@@ -437,6 +502,10 @@ def main(argv):
     back <setup>
     example <setup> <examples root> <example path>
     design <setup> [boards root]
+    strip <setup>
+    preview <setup> <commit>
+    milestone <setup> <name>
+    branch <setup> <name>
     """
     import json
     from dataclasses import asdict
@@ -460,6 +529,14 @@ def main(argv):
             out = {"restored": args[1]}
         elif cmd == "example":
             out = load_example(args[0], args[1], args[2])
+        elif cmd == "strip":
+            out = strip(args[0])
+        elif cmd == "preview":
+            out = preview(args[0], args[1])
+        elif cmd == "milestone":
+            out = asdict(milestone(args[0], args[1]))
+        elif cmd == "branch":
+            out = {"branch": new_branch(args[0], args[1])}
         elif cmd == "design":
             out = design_sheets(args[0], args[1] if len(args) > 1 else None)
         elif cmd == "back":

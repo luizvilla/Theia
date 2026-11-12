@@ -13,7 +13,7 @@ import { TabBar } from '@theia/core/shared/@lumino/widgets';
 import { WorkspaceService } from '@theia/workspace/lib/browser';
 import { SetupService } from '../common/setup-protocol.js';
 import { START_WIDGET_ID } from './start-widget.js';
-import { TimelineWidget } from './window-widgets.js';
+import { TimelineWidget } from './timeline-widget.js';
 
 const THEIA_NEW_TERMINAL = 'terminal:new';
 type Side = 'left' | 'right';

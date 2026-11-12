@@ -16,7 +16,7 @@ import { SETUP_SERVICE_PATH, SetupService } from '../common/setup-protocol.js';
 import { START_WIDGET_ID, StartWidget } from './start-widget.js';
 import { ExampleContribution } from './example-contribution.js';
 import {
-    DesignPanelWidget, InspectorWidget, LabPanelWidget, PartsWidget, TimelineWidget
+    DesignPanelWidget, InspectorWidget, LabPanelWidget, PartsWidget
 } from './window-widgets.js';
 import { CanvasWidget } from './canvas-widget.js';
 import { BOTTOM_SLOTS, RIGHT_SLOTS, WORKBENCH_SLOTS } from '../common/window-layout.js';
@@ -38,6 +38,10 @@ import { DesignModel } from './design-model.js';
 import { ClaudeCodeChatAgent } from '@theia/ai-claude-code/lib/browser/claude-code-chat-agent';
 import { CodexChatAgent } from '@theia/ai-codex/lib/browser/codex-chat-agent';
 import { OwnStudioClaudeCodeChatAgent, OwnStudioCodexChatAgent } from './ai/agents.js';
+import { TimelineWidget } from './timeline-widget.js';
+import { TimelineModel } from './timeline-model.js';
+import { TimelineContribution } from './timeline-contribution.js';
+import { TIMELINE_PREVIEW_ID, TimelinePreviewWidget } from './timeline-preview-widget.js';
 import { PROCEDURE_SERVICE_PATH, ProcedureService } from '../common/procedure-protocol.js';
 import { ProcedureClientImpl, ProcedureModel } from './procedure-model.js';
 import { PROCEDURE_WIDGET_ID, ProcedureWidget } from './procedure-widget.js';
@@ -129,6 +133,15 @@ export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
 
     // The window of 2.0 (plan U2): the timeline strip under the centre, the panels of frame 0.
     bind(TimelineWidget).toSelf().inSingletonScope();
+    // The timeline (plan U18): model, preview in the centre, History menu.
+    bind(TimelineModel).toSelf().inSingletonScope();
+    bind(TimelineContribution).toSelf().inSingletonScope();
+    bind(CommandContribution).toService(TimelineContribution);
+    bind(TimelinePreviewWidget).toSelf().inSingletonScope();
+    bind(WidgetFactory).toDynamicValue(ctx => ({
+        id: TIMELINE_PREVIEW_ID,
+        createWidget: () => ctx.container.get(TimelinePreviewWidget),
+    })).inSingletonScope();
     bind(OwnStudioApplicationShell).toSelf().inSingletonScope();
     rebind(ApplicationShell).toService(OwnStudioApplicationShell);
     const panels = [
