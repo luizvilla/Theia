@@ -87,3 +87,12 @@ test('a fake build and flash stream progress and carry a stable source identity'
     assert.equal(await service.lastBuild(folder), undefined);
     assert.equal(fs.existsSync(path.join(folder, '.pio', 'ownstudio')), false);
 });
+
+test('the forced header gives the firmware its identity macros for ThingSet (E21, U11)', async () => {
+    const { buildIdentityHeader } = await import('./build-service.js');
+    const header = buildIdentityHeader({ commit: 'c2f17421be7dfa4ac2f17421be7dfa4ac2f17421', dirty: false, source_hash: 'c2f17421be7dfa4a' });
+    assert.match(header, /#define BUILD_COMMIT "c2f17421be7dfa4ac2f17421be7dfa4ac2f17421"/);
+    assert.match(header, /#define BUILD_DIRTY false/);
+    assert.match(header, /#define BUILD_SOURCE_HASH "c2f17421be7dfa4a"/);
+    assert.match(header, /ownstudio_build_identity\[\] = "\{\\"commit\\":/);
+});
