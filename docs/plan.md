@@ -375,9 +375,9 @@ Decided in rounds 11–20 ([decision log](decision-log.md)), specified in [SPEC 
 | 0 | Paper: storyboards, glossary, ADRs 0025–0032, SPEC 2.0, menu map, this commit plan | Luiz has reviewed it |
 | 1 | The thread: shell and menus, language support, Start and boards, setups as Core clones, examples as branches, canvas and palette, inside view with a read-only inspector, build and flash with progress, Lab checklist and power token, capture procedure, interactive results, Core2 simulation and PulsimGui, overlay, Design sheets, timeline dots, AI integrations | The exit criterion |
 | 2 | Inspector editing, setup round-trip, simulation chips, wiring export, branch lanes | |
-| 3 | Blockly test sequences, Monitor mode and widgets, instrument-driver hook, libraries dialog and submodules, remotes and forks | |
+| 3 | Blockly test sequences, Monitor mode and widgets, instrument-driver hook, libraries dialog and submodules, remotes and forks; after Monitor, the load gauge and the Timing check ([ADR 0034](adr/0034-timing-check-and-load-gauge.md), units T1–T8 below) | |
 | 4 | Skills, AI takeover | |
-| Later | Averaged simulator target for fast evaluation ([ADR 0033](adr/0033-averaged-simulator-for-fast-evaluation.md)), following Core2's ADR 0004 | |
+| Later | Averaged simulator target for fast evaluation ([ADR 0033](adr/0033-averaged-simulator-for-fast-evaluation.md)), following Core2's ADR 0004; a developer slice with ST-Link support ([ADR 0035](adr/0035-st-link-probe-support.md)) | |
 
 ## Commit plan for slice 1
 
@@ -507,3 +507,20 @@ Slice 2–4 content; the Windows installer (#5); sensor calibration (#14); the P
 | E21 | examples | `4a180f7` | buck example: OwnStudio extras | Firmware for the Lab in the example; branch `ownstudio/buck-extras` |
 | E21 | Theia | `284fcdb` | lab: a setup build reports its identity to the board | The forced header defines the identity macros the firmware reports |
 | U19 | Theia | this commit | docs: slice 1 report and how to try it | Report with frames side by side, try-it for the nine steps, a fresh-trial script |
+
+## Slice 3 addition: timing on the Spin (planned)
+
+Decided in [round 22](decision-log.md#round-22-2026-11-13-timing-on-the-spin), specified in [ADR 0034](adr/0034-timing-check-and-load-gauge.md), drawn in storyboard frames T-1…T-9 (`docs/design/timing-storyboard.html`, kept local). These units come **after Monitor mode** in slice 3, because the gauge reads through Monitor's ThingSet polling. As in slice 1, every window commit is checked against its storyboard frames with `tools/storyboard-shots`, and the navigation test is rerun.
+
+| # | Repository | Unit | Done when | Frames |
+|---|---|---|---|---|
+| T1 | Luiz's Spin API fork | Built-in load objects (`load_max_us`, `load_mean_us`, `lost`, `gap_max_us`), `OWN_TIMING` macro, task-API and data-path probes (from Core2), `TIMING` env, PWM output inhibit, report in RAM served over ThingSet after DONE | On the unpowered Twist: the buck example publishes the load objects; a TIMING image reports every section; the pins stay low (checked with a probe on one leg); the probe cost is measured and stated | — |
+| T2 | Theia | `ownstudio_lab.timing`: build TIMING, flash, walk the states by ThingSet writes, read, criteria `.a`–`.d`, record `reports/timing/<date>_<commit>/`, restore the user's firmware | Two runs of the same code agree within 0.1 µs on the means; the whole check takes under 2 min; the firmware match is the user's at the end | — |
+| T3 | Theia | Load gauge in the status bar, badge on the Controller in the inside view, grey "no data" state | Gauge worst case within 5 % of T2's worst tick for the same state | T-1, T-2 |
+| T4 | Theia | Timing bottom tab: overview (verdict first, one bar per state), detailed view at 40 px/µs, table, ADR 0034 palette | Every bar adds up to its measured total; the palette rerun through the validator on the three tints | T-3, T-4, T-5 |
+| T5 | Theia | CodeLens above `OWN_TIMING` lines, click opens the section in the Timing tab | Values match the newest record | T-6 |
+| T6 | Theia | Timing dots on the timeline (stopwatch, green or red), previous run paired, "Compare with…", restore brings the record back | Before/after step equals the difference of the two records | T-7 |
+| T7 | Theia | Firmware match "TIMING image", Lab checklist line, "Put my firmware back" on the next connection | Pulling the cable mid-run leaves a board that the next connection restores | T-8 |
+| T8 | Theia | Timing check recipe in the setup's `AGENTS.md`/`CLAUDE.md`; an agent run test | The agent runs a check and quotes the verdict lines and the step | T-9 |
+
+Also in slice 3: the Twist examples the tutorials use move to ThingSet (buck voltage mode already has), so they get the gauge. A generic ThingSet example, and a few like it, is a direction to keep in mind, not a slice 3 item.

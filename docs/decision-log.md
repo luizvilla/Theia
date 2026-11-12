@@ -323,3 +323,46 @@ Luiz confirmed the shared understanding and asked for slice 0 (2026-11-10).
 | Q143 | (Luiz) The inside of the Twist | — | Too heavy: blocks show their names only, the inspector shows the details on click; keep the labels (sides, signals, isolation, ports). | SPEC §6, storyboard 4 |
 | Q144 | Requirement layers: badges on the inside view and a list in the inspector? | Yes. | Yes. | SPEC §6 |
 | Q145 | (Luiz) An averaged-model simulator, as in Core2, later | — | Recorded as a deferred third target for fast evaluation, following Core2's ADR 0004: never a verdict, only at the user's request, level D, INFO. | [ADR 0033](adr/0033-averaged-simulator-for-fast-evaluation.md) |
+
+## Round 22 (2026-11-13): timing on the Spin
+
+Luiz asked whether Core2's on-target timing work could become an OwnStudio feature, with a storyboard.
+
+Facts found:
+- Core2 ADR 0005: DWT probes compiled only in a `TIMING` PlatformIO env, results in RAM read over SWD with an ST-Link, an 80 µs budget, baseline +10 % + 50 cycles. TIM-03 runs the real firmware and reads the USB console.
+- The control center's rules: one hue per group; bars add up to the measured total, with the unprobed rest in grey; worst mark; budget and period lines; overview and detailed view; always a table.
+- OwnStudio flashes over USB only (MCUboot and mcumgr).
+- The buck example already speaks ThingSet (ADR 0019).
+- `ownstudio_lab/thingset.py` exists.
+- The workbench tints are Design `#1f2a3a`, Code `#1f2427`, Lab `#2a2419`.
+- The timeline uses violet for design events and green for runs.
+
+| # | Question | Recommendation | Answer | Recorded in |
+|---|---|---|---|---|
+| Q146 | For whom? | Both students and developers, the student's view first. | Yes: a default first, the details come naturally. | ADR 0034 |
+| Q147 | USB only at first, ST-Link later? | Yes. | Yes; ST-Link will be needed by developers in the long run. | ADR 0034, ADR 0035 |
+| Q148 | A live load gauge and a Timing check on request? | Yes. | Yes; a light return shown as a coloured gauge. Over ThingSet? | Q154 |
+| Q149 | Automatic groups, user-named sections, or both? | Both. | Both. | ADR 0034 |
+| Q150 | Budget 80 % of the setup's control period, editable? | Yes. | Yes. | ADR 0034 |
+| Q151 | Probes in the Spin API through Luiz's fork? | Yes, then upstream. | Fork for now: try it, see how the integration renders, then upstream. | ADR 0034 |
+| Q152 | May agents run a Timing check? | Yes. | Yes; the agent needs a procedure for testing and reporting, as in Core2, or the data is hard to interpret. | ADR 0034 (AGENTS.md recipe) |
+| Q153 | Which slice? | Slice 3, next to Monitor. | Slice 3. | plan |
+| Q154 | Load as built-in ThingSet objects, worst case, green/amber/red? | Yes. | Yes. | ADR 0034 |
+| Q155 | Timing report over ThingSet? | Yes. | Yes. | ADR 0034 |
+| Q156 | The user's firmware unchanged, outputs inhibited, states walked by ThingSet writes; trace replay deferred? | Yes. | Yes. | ADR 0034 |
+| Q157 | A Timing check procedure with criteria and a record, and an agent recipe? | Yes. | Yes. | ADR 0034 |
+| Q158 | Write the ST-Link ADR now, build later? | Yes. | Yes, write it now. | ADR 0035 |
+| Q159 | Status-bar gauge, inside-view badge, toolbar button, Timing tab, CodeLens? | All five. | Yes to all, shown properly in a storyboard. | storyboard T-1…T-9 |
+| Q160 | Core2's hues without amber and blue? | Yes. | Yes; does it render well with the workbench colours? The validator rejected slate; the order aqua, violet, magenta, green passes on all three tints. | Q161 |
+| Q161 | Aqua, violet, magenta for the user's code, green, grey; accept the overlap with the timeline's violet and green? | Yes. | Yes; document the choice. | ADR 0034 (Colours) |
+| Q162 | Timing dots and before/after pairing? | Yes. | Yes. | ADR 0034 |
+| Q163 | Firmware match "TIMING image", checklist block, "put it back"? | Yes. | Yes; a user easily forgets to flash the right code. | ADR 0034 |
+| Q164 | Grey gauge for firmware without the load objects? | Grey, with a tooltip. | Isn't this slice 3 anyway? Answer: partly. The buck example already speaks ThingSet and gets the gauge as soon as the fork publishes the objects; most other examples don't. | ADR 0034 |
+| Q165 | Nine storyboard frames? | Yes. | Yes, for now. | storyboard |
+| Q166 | Convert only the tutorials' Twist examples to ThingSet? | Yes. | Yes. ThingSet proved hard to use when converting the examples (`thingset_examples` branch); a generic example, and a few like it, is a direction, but not all 38. | plan, ADR 0034 |
+| Q167 | Core2's review page structure for the record? | Yes. | The pages were too verbose: the figure is what matters. Figure first; tables and text in collapsible sections. | ADR 0034 |
+| Q168 | Units T1–T8 after Monitor in slice 3? | Yes. | Yes. | plan |
+| Q169 | Bench acceptance (under 2 min, 0.1 µs, bars add up, gauge within 5 %, firmware back)? | Yes. | Yes. | plan, ADR 0034 |
+| Q170 | A paper commit on its own branch; storyboard drafted? | Yes. | Yes; the storyboard stays local. | this commit |
+
+Luiz confirmed the shared understanding on 2026-11-13.

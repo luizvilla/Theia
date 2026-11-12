@@ -154,6 +154,30 @@ _Avoid_: logging, streaming, telemetry
 The fast way of observing a probe: a triggered recording by the firmware scope, read after the event, for step responses and other fast transients.
 _Avoid_: snapshot, acquisition (unqualified), recording (unqualified)
 
+**Control period**:
+The time between two runs of the critical task, set by the setup function (100 µs in the Twist examples).
+_Avoid_: sample time (unqualified), tick (that is one run)
+
+**Budget**:
+The share of the control period the critical task may use in its worst run: 80 % by default, editable per setup.
+_Avoid_: deadline, limit (unqualified)
+
+**Load gauge**:
+The status-bar reading of the critical task's worst run as a percentage of the control period, live from built-in ThingSet data objects; green, amber or red against the budget.
+_Avoid_: CPU usage, load (unqualified, when meaning the converter's load)
+
+**Timing check**:
+The procedure that flashes a TIMING image, walks the firmware's states, reads the cycle counts per section and files a record with verdicts against the budget and the previous run.
+_Avoid_: profiling, benchmark, timing test (that is Core2's L0-TIM)
+
+**TIMING image**:
+The setup's own firmware built with timing probes compiled in and PWM outputs inhibited; on the board only during a Timing check.
+_Avoid_: test firmware, debug build
+
+**Section**:
+A named part of the critical task whose cycles a Timing check reports: an automatic group (task API, sensor reads, PWM writes) or a block marked with `OWN_TIMING("name")`.
+_Avoid_: probe (that is the canvas term), span, region
+
 ## Workbenches
 
 **Workbench**:
