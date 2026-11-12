@@ -4,7 +4,7 @@ Slice 1 is built as far as it can be without you: the nine steps of SPEC §2 run
 
 **Nothing switched the converter on in slice 1.** Every board run was tested against the deterministic fake board; the real board was not connected during this session. The only real-hardware evidence is the PlatformIO build of a setup loaded from the buck example (E21).
 
-**Nothing is pushed.** `step-5/slice-1-thread` on `luizvilla/Theia` stops at U7; the 14 commits after it, and `ownstudio/buck-extras` on `luizvilla/examples`, are local until you say so.
+**Pushed on 2026-11-12:** `step-5/slice-1-thread` on `luizvilla/Theia` and `ownstudio/buck-extras` on `luizvilla/examples`.
 
 The exit criterion is yours: **your test session** ([try-it.md](try-it.md)), and whether you find it good enough.
 
@@ -37,7 +37,7 @@ The gates, all passing on the final build, each on a fresh setup: navigation (65
 ## Waiting for you
 
 1. **Your test session**, with `scripts/try-ownstudio.sh` and [try-it.md](try-it.md). The supply on only for step 5.
-2. **Push**: `step-5/slice-1-thread` (14 commits after U7) and `luizvilla/examples` `ownstudio/buck-extras`.
+2. ~~**Push**~~: done on 2026-11-12.
 3. **Power and agents** (ADR 0031's open point): keep the token as a guard against mistakes, sandbox Claude Code too (my recommendation for now), and/or a service that owns the serial port (with the installer).
 4. **Claude Code's SDK**: install it on your machine (`npm install -g @anthropic-ai/claude-agent-sdk`), and decide whether the installer ships it (it is under Anthropic's own terms, not an open-source licence).
 5. **Codex's version**: Theia 1.77 pins Codex 0.49, which refuses your `~/.codex/config.toml` (`xhigh`). Keep it and set `high`, or let OwnStudio use your own `codex` (0.92). Either needs one real conversation with your account to confirm.
