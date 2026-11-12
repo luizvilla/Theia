@@ -49,6 +49,7 @@ import { BuildClientImpl, BuildContribution } from './build-contribution';
 import { LabChecklistModel } from './lab-checklist-model';
 import { LabChecklistContribution } from './lab-checklist-contribution';
 import { CanvasState } from './canvas-state';
+import { PulsimGuiContribution } from './pulsimgui-contribution';
 
 export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
     bind(MissionService).toSelf().inSingletonScope();
@@ -144,6 +145,9 @@ export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
         bind(WidgetFactory).toDynamicValue(ctx => ({ id, createWidget: () => ctx.container.get(widget) })).inSingletonScope();
     }
     bind(CanvasState).toService(CanvasWidget);
+    bind(PulsimGuiContribution).toSelf().inSingletonScope();
+    bind(CommandContribution).toService(PulsimGuiContribution);
+    bind(FrontendApplicationContribution).toService(PulsimGuiContribution);
 
     // The eight menus (plan U3): the menu bar is common/menu-map.ts and nothing else.
     bind(OwnStudioMenuModelRegistry).toSelf().inSingletonScope();

@@ -21,6 +21,8 @@ OWNSTUDIO_STORYBOARD_BOARD=1 EXPECT_READY=0 \
   tools/storyboard-shots/run.sh 9487 $S tools/storyboard-shots/checklist-test.mjs
 OWNSTUDIO_STORYBOARD_BOARD=1 OWNSTUDIO_STORYBOARD_HIGH=29.9 \
   tools/storyboard-shots/run.sh 9488 $S tools/storyboard-shots/capture-test.mjs
+OWNSTUDIO_PYTHON=$PWD/app/python/.venv/bin/python \
+  tools/storyboard-shots/run.sh 9489 $S tools/storyboard-shots/pulsimgui-sync-test.mjs $S
 ```
 
 - **`navigation-test.mjs`**: clicks through every workbench × right-bar tab ×
@@ -46,5 +48,8 @@ OWNSTUDIO_STORYBOARD_BOARD=1 OWNSTUDIO_STORYBOARD_HIGH=29.9 \
 - **`capture-test.mjs`** (U12): runs the board-supplied reference-step capture
   on the deterministic fake Twist, checks its record and HTML report on disk,
   then checks uPlot's event viewport, channels, whole-run control and metrics.
+- **`pulsimgui-sync-test.mjs`** (U14): saves a changed named `Rload` value in
+  the setup's `.pulsim` project, then checks that the running app's watcher
+  persists 27.5 Ω to `setup.yaml` and redraws the already-open canvas.
 - **`cdp.mjs`**: the small DevTools Protocol client both scripts use, and `STATE`,
   the window state read from the page.

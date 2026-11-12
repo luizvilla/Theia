@@ -84,13 +84,29 @@ def _connected_node(setup: dict, board_port: str) -> dict | None:
     return None
 
 
-def apply_setup_values(project, setup: dict) -> dict[str, float]:
-    """Apply the setup's named Vin/Rload/L/C values to a loaded project."""
+def project_values(project) -> dict[str, float]:
+    """Read the four canvas-facing values from their named plant components."""
     parts = _components(project)
     required = {"Vin", "Rload", "L", "C"}
     missing = sorted(required - parts.keys())
     if missing:
         raise SimulationError(f"the plant is missing named component(s): {', '.join(missing)}")
+    values = {
+        "Vin": float(parts["Vin"].parameters["waveform"]["value"]),
+        "Rload": float(parts["Rload"].parameters["resistance"]),
+        "L": float(parts["L"].parameters["inductance"]),
+        "C": float(parts["C"].parameters["capacitance"]),
+    }
+    for name, value in values.items():
+        if not math.isfinite(value) or value <= 0:
+            raise SimulationError(f"the plant's {name} value must be positive")
+    return values
+
+
+def apply_setup_values(project, setup: dict) -> dict[str, float]:
+    """Apply the setup's named Vin/Rload/L/C values to a loaded project."""
+    parts = _components(project)
+    defaults = project_values(project)
 
     source, load = _connected_node(setup, "HIGH"), _connected_node(setup, "LOW1")
     source_values = (source or {}).get("values") or {}
@@ -101,12 +117,12 @@ def apply_setup_values(project, setup: dict) -> dict[str, float]:
     overrides = setup.get("simulation") or {}
 
     values = {
-        "Vin": float(source_values.get("voltage", parts["Vin"].parameters["waveform"]["value"])),
-        "Rload": float(load_values.get("ohm", parts["Rload"].parameters["resistance"])),
+        "Vin": float(source_values.get("voltage", defaults["Vin"])),
+        "Rload": float(load_values.get("ohm", defaults["Rload"])),
         "L": float(board_values.get("inductance_H", board_values.get("inductance",
-                   parts["L"].parameters["inductance"]))),
+                   defaults["L"]))),
         "C": float(board_values.get("capacitance_F", board_values.get("capacitance",
-                   parts["C"].parameters["capacitance"]))),
+                   defaults["C"]))),
     }
     for name in tuple(values):
         if name in overrides:
@@ -128,6 +144,55 @@ def load_project(mission: pathlib.Path):
     project = Project.load(path)
     values = apply_setup_values(project, setup)
     return project, config, path, values
+
+
+def sync_plant_values(mission: pathlib.Path) -> dict:
+    """Copy saved Vin/Rload/L/C values from the plant back to setup.yaml.
+
+    The external editor owns the ``.pulsim`` save.  OwnStudio owns the canvas,
+    so this deliberately updates only the four stable named-value contracts and
+    leaves positions, wires, limits, probes and every other canvas field alone.
+    """
+    mission = pathlib.Path(mission).resolve()
+    _, Project, _, _, _ = _runtime()
+    setup = _setup(mission)
+    _, path = _plant_config(mission, setup)
+    values = project_values(Project.load(path))
+
+    canvas = setup.get("canvas")
+    if not isinstance(canvas, dict):
+        raise SimulationError("the setup canvas is missing")
+    nodes = canvas.get("nodes")
+    if not isinstance(nodes, list):
+        raise SimulationError("the setup canvas has no nodes")
+    source = _connected_node(setup, "HIGH")
+    load = _connected_node(setup, "LOW1")
+    board = next((node for node in nodes if isinstance(node, dict)
+                  and node.get("part") == setup.get("board")), None)
+    if source is None or load is None or board is None:
+        raise SimulationError("connect a source to HIGH and a resistor to LOW1 before syncing the plant")
+
+    changed: dict[str, float] = {}
+
+    def put(node: dict, key: str, name: str) -> None:
+        current = node.get("values")
+        if not isinstance(current, dict):
+            current = {}
+            node["values"] = current
+        value = values[name]
+        if current.get(key) != value:
+            current[key] = value
+            changed[name] = value
+
+    put(source, "voltage", "Vin")
+    put(load, "ohm", "Rload")
+    put(board, "inductance_H", "L")
+    put(board, "capacitance_F", "C")
+    if changed:
+        (mission / "ownstudio" / "setup.yaml").write_text(
+            yaml.safe_dump(setup, sort_keys=False), encoding="utf-8")
+    return {"changed": changed, "values": values, "canvas": canvas,
+            "plant": str(path.relative_to(mission))}
 
 
 def _find_dependency(mission: pathlib.Path, header: str) -> pathlib.Path | None:
@@ -245,11 +310,17 @@ class Harness:
     """A setup's native C-Block and Twist circuit behind the Target interface."""
 
     def __init__(self, mission, v_in: float | None = None, load_ohm: float | None = None,
-                 step_load_ohm: float | None = None, build_dir: str | None = None, store_every: int = 4):
+                 step_load_ohm: float | None = None, build_dir: str | None = None, store_every: int = 4,
+                 project=None):
         self.mission = pathlib.Path(mission).resolve()
         p, Project, ComponentType, build_node_map, build_node_alias_map = _runtime()
         self.p = p
-        project, config, self.plant_path, values = load_project(self.mission)
+        if project is None:
+            project, config, self.plant_path, values = load_project(self.mission)
+        else:
+            setup = _setup(self.mission)
+            config, self.plant_path = _plant_config(self.mission, setup)
+            values = project_values(project)
         parts = _components(project)
         if v_in is not None:
             parts["Vin"].parameters["waveform"]["value"] = values["Vin"] = float(v_in)

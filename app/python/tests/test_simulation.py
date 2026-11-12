@@ -4,6 +4,8 @@ import importlib.util
 import os
 import pathlib
 import shutil
+import subprocess
+import sys
 import tempfile
 import textwrap
 import unittest
@@ -11,7 +13,8 @@ from unittest import mock
 
 import yaml
 
-from ownstudio_lab.simulation import Harness, load_project
+from ownstudio_lab.gui import backend
+from ownstudio_lab.simulation import Harness, load_project, sync_plant_values
 from ownstudio_lab.target import load_harness
 
 
@@ -70,6 +73,60 @@ class NativePlant(unittest.TestCase):
         self.assertEqual(values, {"Vin": 36.0, "Rload": 12.0, "L": 44e-6, "C": 14.1e-6})
         self.assertEqual(parts["Vin"].parameters["waveform"]["value"], 36.0)
         self.assertEqual(parts["Rload"].parameters["resistance"], 12.0)
+
+    def test_saved_named_values_sync_back_to_the_canvas(self):
+        from pulsimgui.models.project import Project
+
+        plant = self.setup / "ownstudio" / "plant" / "twist_buck.pulsim"
+        project = Project.load(plant)
+        parts = {part.name: part for part in project.get_active_circuit().components.values()}
+        parts["Vin"].parameters["waveform"]["value"] = 31.0
+        parts["Rload"].parameters["resistance"] = 27.0
+        parts["L"].parameters["inductance"] = 55e-6
+        parts["C"].parameters["capacitance"] = 22e-6
+        project.save()
+
+        result = sync_plant_values(self.setup)
+        setup = yaml.safe_load((self.setup / "ownstudio" / "setup.yaml").read_text())
+        nodes = {node["id"]: node for node in setup["canvas"]["nodes"]}
+        self.assertEqual(result["changed"], {"Vin": 31.0, "Rload": 27.0, "L": 55e-6, "C": 22e-6})
+        self.assertEqual(nodes["source"]["values"]["voltage"], 31.0)
+        self.assertEqual(nodes["load"]["values"]["ohm"], 27.0)
+        self.assertEqual(nodes["board"]["values"]["inductance_H"], 55e-6)
+        self.assertEqual(nodes["board"]["values"]["capacitance_F"], 22e-6)
+
+    def test_pulsimgui_backend_uses_the_same_native_harness(self):
+        from pulsimgui.services.simulation_service import SimulationService, SimulationSettings
+
+        project, _, _, _ = load_project(self.setup)
+        service = SimulationService()
+        data = service.convert_gui_circuit(project)
+        settings = SimulationSettings(t_stop=0.0005, t_step=project.simulation_settings.dt, output_points=500)
+        progress = []
+
+        class Callbacks:
+            check_cancelled = staticmethod(lambda: False)
+            wait_if_paused = staticmethod(lambda: None)
+            data_point = staticmethod(lambda _time, _values: None)
+            progress = staticmethod(lambda value, _message: progress.append(value))
+
+        info, implementation = backend(self.setup)
+        result = implementation().run_transient(data, settings, Callbacks())
+        self.assertEqual(info.identifier, "ownstudio-runner")
+        self.assertFalse(result.error_message)
+        self.assertTrue(result.statistics["ownstudio_runner"])
+        self.assertTrue(result.statistics["native_cblock"])
+        self.assertIn("rV1Low_V", result.signals)
+        self.assertEqual(len(result.time), len(result.signals["rV1Low_V"]))
+        self.assertEqual(progress[-1], 100)
+
+    def test_headless_pulsimgui_run_action_uses_ownstudio_backend(self):
+        env = dict(os.environ, QT_QPA_PLATFORM="offscreen")
+        result = subprocess.run(
+            [sys.executable, "-m", "ownstudio_lab.gui", "open", str(self.setup), "--check-run"],
+            capture_output=True, text=True, env=env, timeout=60)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("GUI Run executed the OwnStudio runner", result.stdout)
 
     def test_native_block_drives_the_plant_and_exact_edges_are_not_quantized(self):
         harness = Harness(self.setup, store_every=40)

@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: LGPL-2.1-only
-import { execFile } from 'child_process';
+import { execFile, spawn } from 'child_process';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import { injectable } from '@theia/core/shared/inversify';
 import { dump, load } from 'js-yaml';
-import { BoardDefinition, ExampleLoaded, SetupService, SetupSummary, StartInfo, setupSlug } from '../common/setup-protocol';
+import { BoardDefinition, ExampleLoaded, PlantSync, SetupService, SetupSummary, StartInfo, setupSlug } from '../common/setup-protocol';
 
 const CORE_UPSTREAM = 'https://github.com/owntech-foundation/Core.git';
 
@@ -102,6 +102,41 @@ export class SetupServiceImpl implements SetupService {
             throw new Error(`No board description for ${setup.board}.`);
         }
         return await this.run('ownstudio_lab.board_definition', [description, folder]) as BoardDefinition;
+    }
+
+    async openPulsimGui(folder: string): Promise<void> {
+        if (!await this.isSetup(folder)) {
+            throw new Error('Open an OwnStudio setup before opening PulsimGui.');
+        }
+        // Fail in the OwnStudio window, with the Python error, rather than
+        // claiming success for a detached process that exits during imports.
+        await this.run('ownstudio_lab.gui', ['check', folder]);
+        await new Promise<void>((resolve, reject) => {
+            const child = spawn(this.python, ['-m', 'ownstudio_lab.gui', 'open', folder], {
+                detached: true, stdio: 'ignore', env: { ...process.env, PYTHONUNBUFFERED: '1' },
+            });
+            child.once('error', reject);
+            child.once('spawn', () => {
+                child.unref();
+                resolve();
+            });
+        });
+    }
+
+    async syncPlantValues(folder: string): Promise<PlantSync> {
+        const result = await this.run('ownstudio_lab.gui', ['sync', folder]) as PlantSync;
+        const names = Object.keys(result.changed);
+        const dirty = await new Promise<boolean>((resolve, reject) => {
+            execFile('git', ['-C', folder, 'status', '--porcelain', '--', result.plant, 'ownstudio/setup.yaml'],
+                (error, stdout, stderr) => error ? reject(new Error(stderr.trim() || String(error))) : resolve(!!stdout.trim()));
+        });
+        if (dirty) {
+            const summary = names.length
+                ? `simulation: PulsimGui changed ${names.join(', ')}`
+                : `simulation: PulsimGui saved ${path.basename(result.plant)}`;
+            await this.commitEvent(folder, 'simulate', summary);
+        }
+        return result;
     }
 
     async loadExample(folder: string, example: string): Promise<ExampleLoaded> {

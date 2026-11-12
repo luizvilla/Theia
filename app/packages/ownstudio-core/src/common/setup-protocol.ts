@@ -8,6 +8,12 @@ export const SetupService = Symbol('SetupService');
 export interface StartBoard { board: string; label: string; summary: string; controller?: string; defined: boolean }
 export interface RecentSetup { name: string; board: string; path: string; modified: number }
 export interface ExampleEntry { board: string; group: string; name: string; title: string; path: string; extras: boolean }
+export interface PlantSync {
+    changed: Record<string, number>;
+    values: Record<'Vin' | 'Rload' | 'L' | 'C', number>;
+    canvas: unknown;
+    plant: string;
+}
 
 export interface StartInfo {
     boards: StartBoard[];
@@ -36,6 +42,10 @@ export interface SetupService {
     commitEvent(folder: string, event: string, summary: string): Promise<void>;
     /** Board description plus the setup Core clone's devicetree values (plan U9). */
     boardDefinition(folder: string): Promise<BoardDefinition>;
+    /** Opens the setup-owned plant in the pip-installed PulsimGui (plan U14). */
+    openPulsimGui(folder: string): Promise<void>;
+    /** Copies a saved plant's named Vin/Rload/L/C values back to the canvas. */
+    syncPlantValues(folder: string): Promise<PlantSync>;
 }
 
 export interface SetupSummary { name: string; board: string; branch: string | null }

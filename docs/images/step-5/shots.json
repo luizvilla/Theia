@@ -664,6 +664,29 @@
   ]
  },
  {
+  "frame": "11",
+  "title": "Open in PulsimGui: the simulator's circuit",
+  "file": "frame-11-pulsimgui.png",
+  "state": {
+   "application": "PulsimGui 1.1.1",
+   "project": "twist_buck.pulsim",
+   "backend": "OwnStudio runner 1.0",
+   "namedValues": {
+    "Vin": 30.0,
+    "Rload": 33.0,
+    "L": 0.000033,
+    "C": 0.0000141
+   },
+   "cBlock": "control_step · 7 inputs → 1 duty output",
+   "pwm": "200 kHz · 100 ns dead time"
+  },
+  "differences": [
+   "This is the real PulsimGui 1.1.1 native window, so its current toolbar and dock layout replace the storyboard's illustrative chrome.",
+   "The stable load capture keeps the circuit full width; Properties opens when a part is selected and Waveforms opens after Run.",
+   "The C-Block and PWM markers are visible below the physical circuit; OwnStudio's runner supplies their native control and hardware-adapter behavior."
+  ]
+ },
+ {
   "frame": "15",
   "title": "The eight menus",
   "file": "frame-15-menus.png",

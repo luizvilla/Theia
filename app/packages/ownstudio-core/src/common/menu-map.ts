@@ -60,7 +60,7 @@ export const MENU_MAP: Menu[] = [
             '-',
             later('Wiring diagram', 2),
             later('Simulation sheet', 2),
-            later('Open in PulsimGui', 1, 'U14'),
+            { label: 'Open in PulsimGui', command: 'ownstudio.setup.openPulsimGui' },
         ],
     },
     {

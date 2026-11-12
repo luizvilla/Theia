@@ -228,7 +228,7 @@
             "implementation": "source",
             "source": "control_block.cpp",
             "lib_path": "ownstudio/build/libcontrol_block.so",
-            "source_code": "// OwnStudio compiles ownstudio/plant/control_block.cpp with src/control.cpp.",
+            "source_code": "",
             "extra_cflags": [],
             "sample_time": 0.0001,
             "n_states": 1

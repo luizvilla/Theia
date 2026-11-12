@@ -145,6 +145,17 @@ export class CanvasWidget extends ReactWidget {
     get model(): Canvas { return this.canvas; }
     get boardDefinition(): BoardDefinition | undefined { return this.definition; }
 
+    /** U14: reflect a plant save without treating the external edit as another canvas edit. */
+    replaceFromPlant(raw: unknown): void {
+        this.canvas = normaliseCanvas(raw);
+        this.syncNodes();
+        if (this.selected) {
+            this.select(this.selected);
+        }
+        this.update();
+        this.onDidChangeEmitter.fire();
+    }
+
     protected syncNodes(): void {
         this.rfNodes = this.canvas.nodes.flatMap(n => {
             const def = partDef(n.part);
