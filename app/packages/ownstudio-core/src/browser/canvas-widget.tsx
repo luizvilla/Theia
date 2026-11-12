@@ -25,6 +25,7 @@ import { BoardDefinition, SetupService } from '../common/setup-protocol';
 import { WORKBENCHES, commandId, iconClass } from './workbenches';
 import { InspectorAction, InspectorWidget } from './window-widgets';
 import { BuildService } from '../common/build-protocol';
+import { eng } from '../common/units';
 
 export const PART_MIME = 'application/ownstudio-part';
 const COMMIT_AFTER_MS = 10_000;
@@ -39,7 +40,7 @@ function PartNode({ data, selected }: NodeProps<Node<PartData>>): React.ReactEle
     return <div className={'ownstudio-node' + (selected ? ' ownstudio-node-selected' : '')} data-node-part={def.part}>
         <div className='ownstudio-node-head' style={{ background: def.colour }}>{def.label}</div>
         <div className='ownstudio-node-rows'>
-            {def.values.map(v => <div key={v.key}><span>{v.label}</span><b>{values[v.key] ?? v.default} {v.unit}</b></div>)}
+            {def.values.map(v => <div key={v.key} data-value={v.key}><span>{v.label}</span><b>{eng(values[v.key] ?? v.default, v.unit)}</b></div>)}
             {def.kind === 'board' && <div className='ownstudio-node-ports'><span>HIGH</span><span>LOW1 · LOW2</span></div>}
             {def.kind === 'board' && data.firmware && <div className='ownstudio-node-firmware'>{data.firmware}</div>}
         </div>
@@ -154,6 +155,38 @@ export class CanvasWidget extends ReactWidget {
         }
         this.update();
         this.onDidChangeEmitter.fire();
+    }
+
+    /**
+     * U16: the Design sheets change the board's values through the canvas, the one
+     * writer of setup.yaml's canvas; the plant reads them by name (L, C). Earlier
+     * canvas edits are committed first, then the change is saved and committed
+     * as its own `design` dot, so the timeline says what the designer chose.
+     */
+    setBoardValues(values: Record<string, number>, summary: string): Promise<void> {
+        const board = this.canvas.nodes.find(n => partDef(n.part)?.kind === 'board');
+        if (!board) {
+            return Promise.reject(new Error('The setup has no board on its canvas.'));
+        }
+        const current = board.values ?? {};
+        if (Object.entries(values).every(([key, value]) => current[key] === value)) {
+            return this.persistence;
+        }
+        this.commitNow();
+        this.canvas = { ...this.canvas, nodes: this.canvas.nodes.map(n => n === board ? { ...n, values: { ...current, ...values } } : n) };
+        this.syncNodes();
+        if (this.selected === board.id) {
+            this.select(board.id);
+        }
+        this.update();
+        this.onDidChangeEmitter.fire();
+        const folder = this.folder;
+        if (folder) {
+            const snapshot = this.canvas;
+            this.enqueuePersistence(() => this.setups.writeCanvas(folder, snapshot), 'canvas not saved');
+            this.enqueuePersistence(() => this.setups.commitEvent(folder, 'design', `design: ${summary}`), 'design not committed');
+        }
+        return this.persistence;
     }
 
     protected syncNodes(): void {
@@ -283,7 +316,7 @@ export class CanvasWidget extends ReactWidget {
         const node = this.canvas.nodes.find(n => n.id === id);
         const def = node && partDef(node.part);
         if (node && def) {
-            this.inspector.select(def.label, def.values.map(v => [v.label, `${node.values?.[v.key] ?? v.default} ${v.unit}`]));
+            this.inspector.select(def.label, def.values.map(v => [v.label, eng(node.values?.[v.key] ?? v.default, v.unit)]));
         }
     }
 

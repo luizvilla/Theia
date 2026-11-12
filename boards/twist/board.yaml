@@ -53,6 +53,14 @@ plant:
   wrapper: plant/control_block.cpp
   control_source: src/control.cpp
   host_include_dirs: [plant/shim]
+
+# Readable Python calculations behind the Design workbench. They are copied
+# into each setup so a result can always be reproduced from that setup alone.
+design:
+  directory: design
+  sheets:
+    - {id: output_filter, label: Output filter}
+    - {id: control_loop, label: Control loop}
 wiring_templates: []   # draw.io templates arrive in slice 2
 
 # Every Twist setup gets this procedure without adding files to an example.

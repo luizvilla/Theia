@@ -11,6 +11,7 @@ import { RIGHT_SLOTS, WORKBENCH_SLOTS, WindowSlot } from '../common/window-layou
 import { iconClass } from './workbenches';
 import { LabChecklistModel } from './lab-checklist-model';
 import { ProcedureModel } from './procedure-model';
+import { DesignModel } from './design-model';
 
 abstract class WindowPanel extends ReactWidget {
     protected abstract readonly slot: WindowSlot<string>;
@@ -114,15 +115,29 @@ export class TimelineWidget extends ReactWidget {
 export class DesignPanelWidget extends WindowPanel {
     protected readonly slot = WORKBENCH_SLOTS[0];
 
+    @inject(DesignModel) protected readonly design: DesignModel;
+
+    @postConstruct()
+    protected override init(): void {
+        super.init();
+        this.design.onDidChange(() => this.update());
+        void this.design.ready();
+    }
+
     protected render(): React.ReactNode {
         return <div className='ownstudio-panel-body'>
             <div className='ownstudio-panel-head'>Design sheets</div>
-            <div className='ownstudio-part'>Output filter<small>L, C, ripple</small></div>
-            <div className='ownstudio-part'>Control loop<small>PI, Bode</small></div>
-            <p className='ownstudio-muted'>Live sheets over the board's design scripts. Their values reach the canvas and the plant.</p>
+            {this.design.sheets.map(sheet => <div key={sheet.id} role='button' tabIndex={0} data-sheet={sheet.id}
+                className={`ownstudio-part ownstudio-sheet-item${sheet.id === this.design.selected ? ' ownstudio-selected' : ''}`}
+                onClick={() => this.design.select(sheet.id)} onKeyDown={e => e.key === 'Enter' && this.design.select(sheet.id)}>
+                {sheet.label}<small>{SHEET_NOTES[sheet.id] ?? ''}</small></div>)}
+            {!this.design.sheets.length && <p className='ownstudio-muted'>{this.design.problem ?? 'Open a setup to see its design sheets.'}</p>}
+            <p className='ownstudio-muted'>Live sheets over the setup's own Python files in ownstudio/design/. Their L and C reach the canvas and the plant.</p>
         </div>;
     }
 }
+
+const SHEET_NOTES: Record<string, string> = { output_filter: 'L, C, ripple', control_loop: 'PI, Bode, margins' };
 
 @injectable()
 export class LabPanelWidget extends WindowPanel {

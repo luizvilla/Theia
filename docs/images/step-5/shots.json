@@ -153,14 +153,12 @@
     "",
     "",
     "",
-    "twist-buck*",
-    "1↓ 0↑",
+    "buck-voltage-mode*",
+    "",
     "0  0",
-    "Twist 1.4.2 ·  firmware differs",
-    "Ln 1, Col 1",
-    "LF",
-    "UTF-8",
-    "Spaces: 4",
+    "No board",
+    "Lab checklist 2/6",
+    "",
     ""
    ],
    "titleBar": "rgb(23, 51, 46)"
@@ -212,14 +210,12 @@
     "",
     "",
     "",
-    "twist-buck*",
-    "1↓ 0↑",
+    "buck-voltage-mode*",
+    "",
     "0  0",
-    "Twist 1.4.2 ·  firmware differs",
-    "Ln 1, Col 1",
-    "LF",
-    "UTF-8",
-    "Spaces: 4",
+    "No board",
+    "Lab checklist 2/6",
+    "",
     ""
    ],
    "titleBar": "rgb(23, 51, 46)"
@@ -270,14 +266,12 @@
     "",
     "",
     "",
-    "twist-buck*",
-    "1↓ 0↑",
+    "buck-voltage-mode*",
+    "",
     "0  0",
-    "Twist 1.4.2 ·  firmware differs",
-    "Ln 1, Col 1",
-    "LF",
-    "UTF-8",
-    "Spaces: 4",
+    "No board",
+    "Lab checklist 2/6",
+    "",
     ""
    ],
    "titleBar": "rgb(23, 51, 46)"
@@ -363,7 +357,7 @@
    "left": "explorer-view-container",
    "right": "ownstudio.parts",
    "bottom": "ownstudio.canvas",
-   "main": "code-editor-opener:file:///data/ownstudio/build/shots-setup/src/main.cpp:7641784864972719",
+   "main": "code-editor-opener:file:///data/ownstudio/build/u16-frames/src/main.cpp:2905206903898932",
    "centreScroll": "0px",
    "leftTabs": [
     "ownstudio.left.design",
@@ -401,15 +395,15 @@
     "",
     "",
     "",
-    "twist-buck",
-    "1↓ 1↑",
+    "buck-voltage-mode",
+    "",
     "0  0",
-    "Twist 1.4.2 ·  firmware differs",
+    "No board",
+    "Lab checklist 2/6",
     "Ln 1, Col 1",
     "LF",
     "UTF-8",
-    "Spaces: 4",
-    ""
+    "Spaces: 4"
    ],
    "titleBar": "rgb(23, 51, 46)"
   },
@@ -741,6 +735,63 @@
    "The native switching model runs the same capture procedure only after Simulate at these conditions is pressed; the board result is visible first.",
    "The solid amber measurement and dashed blue simulation share a trigger-aligned time axis; the table compares every captured metric.",
    "The Simulate-tint fidelity chips shown in the storyboard arrive with the simulation sheet in slice 2; timeline dots arrive in U18."
+  ]
+ },
+ {
+  "frame": "13",
+  "title": "Design: change a parameter on a live sheet",
+  "file": "frame-13-design.png",
+  "state": {
+   "workbench": "design",
+   "left": "ownstudio.left.design",
+   "right": "ownstudio.inspector",
+   "bottom": "ownstudio.canvas",
+   "main": "ownstudio.workbench.design",
+   "centreScroll": null,
+   "leftTabs": [
+    "ownstudio.left.design",
+    "explorer-view-container",
+    "ownstudio.left.lab"
+   ],
+   "rightTabs": [
+    "ownstudio.parts",
+    "ownstudio.inspector",
+    "chat-view-widget"
+   ],
+   "bottomTabs": [
+    "Canvas",
+    "Terminal",
+    "Build output"
+   ],
+   "canvasTint": "design",
+   "canvasLevel": "setup",
+   "canvasSelection": null,
+   "inspectorSelection": null,
+   "canvasFirmware": null,
+   "codeToolbar": [],
+   "buildOutput": [],
+   "timeline": true,
+   "leftOpen": true,
+   "rightOpen": true,
+   "bottomOpen": true,
+   "status": [
+    "",
+    "",
+    "",
+    "buck-voltage-mode",
+    "",
+    "0  0",
+    "No board",
+    "Lab checklist 2/6",
+    "",
+    ""
+   ],
+   "titleBar": "rgb(23, 51, 46)"
+  },
+  "differences": [
+   "The sheet is the setup's own ownstudio/design/output_filter.py; \"Show the formulas\" opens it. The frame's C of 61 µF counted the electrolytic; the sheet's C is the ceramics the plant calls C (14.1 µF), the electrolytic stays in the plant.",
+   "The frame's undershoot verdict needs the buck's requirements, which come with the example extras (E21); the sheet shows the passive dip for the load step instead.",
+   "The Inspector keeps its block selection; the frame selected Power. The design dot is committed now and drawn by the timeline in U18."
   ]
  },
  {

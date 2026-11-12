@@ -23,6 +23,7 @@ OWNSTUDIO_STORYBOARD_BOARD=1 OWNSTUDIO_STORYBOARD_HIGH=29.9 \
   tools/storyboard-shots/run.sh 9488 $S tools/storyboard-shots/capture-test.mjs
 OWNSTUDIO_PYTHON=$PWD/app/python/.venv/bin/python \
   tools/storyboard-shots/run.sh 9489 $S tools/storyboard-shots/pulsimgui-sync-test.mjs $S
+tools/storyboard-shots/run.sh 9490 $S tools/storyboard-shots/design-test.mjs $S   # needs src/control.cpp and a wired canvas
 ```
 
 - **`navigation-test.mjs`**: clicks through every workbench × right-bar tab ×
@@ -51,5 +52,10 @@ OWNSTUDIO_PYTHON=$PWD/app/python/.venv/bin/python \
 - **`pulsimgui-sync-test.mjs`** (U14): saves a changed named `Rload` value in
   the setup's `.pulsim` project, then checks that the running app's watcher
   persists 27.5 Ω to `setup.yaml` and redraws the already-open canvas.
+- **`design-test.mjs`** (U16): drags L on the output filter sheet and times the
+  ripple update (limit 0.5 s), then checks that the release puts L on the Twist,
+  in `setup.yaml` and in a `design` commit; on the control loop sheet, trying Kp
+  must not write `control.cpp`, and Apply must change only the Kp line, add a
+  `design` commit and leave the setup clean.
 - **`cdp.mjs`**: the small DevTools Protocol client both scripts use, and `STATE`,
   the window state read from the page.

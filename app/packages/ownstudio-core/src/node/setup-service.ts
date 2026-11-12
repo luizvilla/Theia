@@ -6,6 +6,7 @@ import * as path from 'path';
 import { injectable } from '@theia/core/shared/inversify';
 import { dump, load } from 'js-yaml';
 import { BoardDefinition, ExampleLoaded, PlantSync, SetupService, SetupSummary, StartInfo, setupSlug } from '../common/setup-protocol';
+import { DesignSheets } from '../common/design-sheet';
 
 const CORE_UPSTREAM = 'https://github.com/owntech-foundation/Core.git';
 
@@ -137,6 +138,36 @@ export class SetupServiceImpl implements SetupService {
             await this.commitEvent(folder, 'simulate', summary);
         }
         return result;
+    }
+
+    async designSheets(folder: string): Promise<DesignSheets> {
+        return await this.run('ownstudio_lab.setups', ['design', folder, this.boards]) as DesignSheets;
+    }
+
+    async runDesignSheet(folder: string, sheet: string, args: (string | number)[]): Promise<unknown> {
+        if (!/^[a-z][a-z0-9_]*$/.test(sheet)) {
+            throw new Error(`not a design sheet name: ${sheet}`);
+        }
+        const setup = (load(fs.readFileSync(this.setupFile(folder), 'utf8')) ?? {}) as { design?: { directory?: string } };
+        const script = path.join(folder, setup.design?.directory ?? 'ownstudio/design', `${sheet}.py`);
+        if (!fs.existsSync(script)) {
+            throw new Error(`This setup has no design sheet ${sheet} (${path.relative(folder, script)}).`);
+        }
+        return new Promise((resolve, reject) => {
+            execFile(this.python, [script, '--json', '--setup', folder, ...args.map(String)],
+                { cwd: folder, timeout: 60000, maxBuffer: 16 * 1024 * 1024, env: { ...process.env, PYTHONDONTWRITEBYTECODE: '1' } }, (error, stdout, stderr) => {
+                    if (error) {
+                        const last = stderr.trim().split('\n').pop() ?? String(error);
+                        reject(new Error(`${sheet}.py: ${last.replace(/^error: /, '')}`));
+                        return;
+                    }
+                    try {
+                        resolve(JSON.parse(stdout));
+                    } catch {
+                        reject(new Error(`${sheet}.py did not print JSON`));
+                    }
+                });
+        });
     }
 
     async loadExample(folder: string, example: string): Promise<ExampleLoaded> {

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-2.1-only
 // Setups and the Start page (ADR 0025, ADR 0030): the backend runs
 // ownstudio_lab.start and ownstudio_lab.setups and returns their JSON.
+import { DesignSheets } from './design-sheet';
 
 export const SETUP_SERVICE_PATH = '/services/ownstudio-setup';
 export const SetupService = Symbol('SetupService');
@@ -46,6 +47,10 @@ export interface SetupService {
     openPulsimGui(folder: string): Promise<void>;
     /** Copies a saved plant's named Vin/Rload/L/C values back to the canvas. */
     syncPlantValues(folder: string): Promise<PlantSync>;
+    /** The setup's design sheets; a setup made before them gets its board's, committed (plan U16). */
+    designSheets(folder: string): Promise<DesignSheets>;
+    /** Runs ownstudio/design/<sheet>.py --json in the setup with these arguments; its JSON. */
+    runDesignSheet(folder: string, sheet: string, args: (string | number)[]): Promise<unknown>;
 }
 
 export interface SetupSummary { name: string; board: string; branch: string | null }

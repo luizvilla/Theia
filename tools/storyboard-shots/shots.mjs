@@ -233,6 +233,27 @@ const FRAMES = [
         ],
     },
     {
+        id: 'design', num: '13', title: 'Design: change a parameter on a live sheet',
+        go: async () => {
+            await show('left', 'ownstudio.left.design');
+            await app.clickOn('.ownstudio-sheet-item[data-sheet="output_filter"]');
+            for (let n = 0; n < 40 && !await app.evaluate(`!!document.querySelector('[data-sheet="output_filter"] [data-result="ripple_v"]')`); n++) await sleep(300);
+            // Type 47 µH as the frame does; the value goes to the canvas and a design dot.
+            await app.evaluate(`(() => { const i = document.querySelector('[data-field="L"] input.ownstudio-number'); i.focus(); i.select(); })()`);
+            await app.send('Input.insertText', { text: '47u' });
+            await key('Enter');
+            for (let n = 0; n < 40 && !/47 µH/.test(await app.evaluate(`document.querySelector('.react-flow__node[data-id="board"] [data-value="inductance_H"]')?.textContent ?? ''`)); n++) await sleep(300);
+            await show('right', 'ownstudio.inspector');
+            await show('bottom', 'ownstudio.canvas');
+            await app.evaluate(`document.querySelector('[data-sheet="output_filter"]')?.scrollIntoView({ block: 'start' }); true`);
+        },
+        differences: [
+            'The sheet is the setup\'s own ownstudio/design/output_filter.py; "Show the formulas" opens it. The frame\'s C of 61 µF counted the electrolytic; the sheet\'s C is the ceramics the plant calls C (14.1 µF), the electrolytic stays in the plant.',
+            'The frame\'s undershoot verdict needs the buck\'s requirements, which come with the example extras (E21); the sheet shows the passive dip for the load step instead.',
+            'The Inspector keeps its block selection; the frame selected Power. The design dot is committed now and drawn by the timeline in U18.',
+        ],
+    },
+    {
         id: 'example', num: '5', title: 'Load an example: it lands on its own branch',
         go: async () => {
             await app.clickOn('#theia-top-panel .lm-MenuBar-item:nth-child(1)');
@@ -271,7 +292,7 @@ const FRAMES = [
 const report = [];
 // A run opens either a setup or no folder (the Start page): each frame says which it needs.
 const noFolder = await app.evaluate(`document.body.dataset.ownstudioWorkbench === 'start'`);
-for (const f of FRAMES.filter(x => (!only || x.id === only) && !!x.noFolder === noFolder)) {
+for (const f of FRAMES.filter(x => (!only || only.split(',').includes(x.id)) && !!x.noFolder === noFolder)) {
     await f.go();
     // Notifications (such as clangd's download offer) are transient: they are not part of the frame.
     await app.evaluate(`document.querySelectorAll('.theia-notification-toasts .theia-notification-list-item .codicon-close').forEach(b => b.click()); true`);

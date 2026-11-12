@@ -58,7 +58,7 @@ export interface BoardService {
     flash(manifestPath: string, serialNumber?: string): Promise<BoardInfo>;
     /** Where the mission's validation stands (ownstudio_lab.testing). Rejects without tests/catalogue.yaml. */
     tests(missionPath: string): Promise<TestStates>;
-    /** Run the mission's design/<script>.py --json with args; its JSON output. */
+    /** Run a mission's design/<script>.py with --json (setups use SetupService.runDesignSheet). */
     design(missionPath: string, script: string, args: (string | number)[]): Promise<unknown>;
     /** The mission's procedures (tests/procedures/*.py), read without running them. */
     procedures(missionPath: string): Promise<ProcedureInfo[]>;

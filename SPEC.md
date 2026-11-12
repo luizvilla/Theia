@@ -213,7 +213,7 @@ Remotes: `owntech` (OwnTech's Core), the user's fork, colleagues' cores, added f
 
 ([ADR 0030](docs/adr/0030-setups-are-git-repos.md))
 
-- **Timeline.** A strip under the canvas shows the setup's commits as dots, with icons for what happened: example loaded, build, flash, run (pass or fail), simulation, setup change, and named **milestones**. OwnStudio commits automatically at those moments. A click previews that state (canvas, code diff, records); "Restore here" returns to it; editing from an old dot starts a branch. Branches are supported from the start; lanes in the interface come in slice 2.
+- **Timeline.** A strip under the canvas shows the setup's commits as dots, with icons for what happened: example loaded, build, flash, run (pass or fail), simulation, setup change, design change (a value or gains chosen on a Design sheet), and named **milestones**. OwnStudio commits automatically at those moments. A click previews that state (canvas, code diff, records); "Restore here" returns to it; editing from an old dot starts a branch. Branches are supported from the start; lanes in the interface come in slice 2.
 - **Libraries as submodules**, managed by OwnStudio, so each dot pins the library commits too. A library can have several remotes (upstream, your fork, colleagues' forks): fetch them, see their branches, cherry-pick, import a clone already on disk as a remote, propose upstream as a fork and pull request (the AI can prepare it), create a local library from a template.
 - **Examples load as branches;** the previous work stays one click away. No `old/` folder.
 - **Records stay out of git;** reports go in. Reproduce from the commit, share the report (Q123).

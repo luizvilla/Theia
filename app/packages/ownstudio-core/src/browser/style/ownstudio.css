@@ -391,3 +391,26 @@ body.theia-dark .ownstudio-start-body h1 { color: var(--ownstudio-yellow); }
 .theia-tabBar-toolbar [id="toolbar.ownstudio.setup.clean"],
 .theia-tabBar-toolbar [id="toolbar.ownstudio.setup.serial"] { width: auto; padding: 0 7px; }
 .theia-tabBar-toolbar [id="toolbar.ownstudio.setup.buildUpload"] { color: #17201e; background: var(--ownstudio-yellow); border-radius: 4px; }
+
+/* U16: the Design sheets (frame 13) */
+.ownstudio-sheet-item { cursor: pointer; }
+.ownstudio-sheet-item.ownstudio-selected { background: var(--theia-list-activeSelectionBackground, rgba(108,138,255,0.25)); }
+.ownstudio-sheet-head { display: flex; align-items: baseline; gap: 12px; }
+.ownstudio-sheet-formulas { margin-left: auto; font-size: 12px; }
+.ownstudio-sheet-grid { display: grid; grid-template-columns: minmax(240px, 300px) minmax(320px, 1fr); gap: 18px; max-width: 1100px; margin: 8px 0 16px; }
+.ownstudio-sheet-controls { display: grid; gap: 10px; align-content: start; }
+.ownstudio-sheet-slider label, .ownstudio-sheet-field, .ownstudio-sheet-fixed, .ownstudio-sheet-verdict {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12px; }
+.ownstudio-sheet-slider .ownstudio-number, .ownstudio-sheet-field .ownstudio-number { width: 96px; text-align: right; }
+.ownstudio-sheet-range { position: relative; }
+.ownstudio-sheet-range input[type=range] { width: 100%; accent-color: #f0dc55; }
+.ownstudio-sheet-marker { position: absolute; top: -2px; width: 2px; height: 18px; margin-left: -1px; pointer-events: none;
+    background: var(--theia-descriptionForeground, #8A8F98); }
+.ownstudio-sheet-fixed { flex-wrap: wrap; }
+.ownstudio-sheet-fixed small { flex-basis: 100%; opacity: 0.6; font-size: 11px; }
+.ownstudio-sheet-verdict { border-top: 1px solid var(--theia-widget-border, rgba(128,128,128,0.25)); padding-top: 8px; font-weight: 600; }
+.ownstudio-sheet-margins { align-content: start; }
+.ownstudio-ripple-curve { background: rgba(0,0,0,0.12); border-radius: 6px; }
+.ownstudio-ripple-curve .os-limit { stroke: #ef6b5b; stroke-dasharray: 4 3; }
+.ownstudio-ripple-curve .os-limit-label { fill: #ef6b5b; }
+.ownstudio-ripple-curve .os-point-label { fill: #f0dc55; }

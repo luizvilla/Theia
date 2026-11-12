@@ -34,6 +34,7 @@ import { PANEL_WIDGET_FACTORY, PanelWidget, PanelWidgetOptions } from './panel-w
 import { DATA_OBJECTS_WIDGET_ID, DataObjectsWidget } from './data-objects-widget';
 import { LabWidget } from './lab-widget';
 import { DesignWidget } from './design-widget';
+import { DesignModel } from './design-model';
 import { Agent, bindToolProvider } from '@theia/ai-core';
 import { ChatAgent } from '@theia/ai-chat/lib/common';
 import {
@@ -165,6 +166,7 @@ export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
         id: widgetId(WORKBENCHES.find(wb => wb.id === 'lab')!),
         createWidget: () => ctx.container.get(LabWidget),
     })).inSingletonScope();
+    bind(DesignModel).toSelf().inSingletonScope();
     bind(DesignWidget).toSelf().inSingletonScope();
     bind(WidgetFactory).toDynamicValue(ctx => ({
         id: widgetId(WORKBENCHES.find(wb => wb.id === 'design')!),

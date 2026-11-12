@@ -27,6 +27,9 @@ if (!before.fields.some(text => text.includes('100 ms') && text.includes('20 ms'
 if (!before.run || before.run.disabled || before.run.ready !== 'true') failures.push(`board capture is not ready: ${JSON.stringify(before.run)}`);
 
 if (!failures.length) {
+    // Since U15 the procedure view is taller: bring the button on screen before clicking it, as a user would.
+    await app.evaluate(`document.querySelector('[data-run-target="board"]')?.scrollIntoView({ block: 'center' }); true`);
+    await sleep(300);
     await app.clickOn('[data-run-target="board"]');
     await sleep(500);
     const confirmed = await app.evaluate(`(() => { const button = [...document.querySelectorAll('button')]
@@ -40,7 +43,7 @@ const result = await app.evaluate(`(() => ({
     viewport: (() => { const e = document.querySelector('.ownstudio-capture-result'); return e && [e.dataset.viewStart, e.dataset.viewEnd]; })(),
     controls: [...document.querySelectorAll('.ownstudio-plot-controls button')].map(e => e.textContent.trim()),
     metrics: [...document.querySelectorAll('.ownstudio-overlay-table tbody tr')].map(e => e.textContent.trim()),
-    report: [...document.querySelectorAll('button')].some(e => e.textContent.includes('Open HTML report')),
+    report: [...document.querySelectorAll('button')].some(e => e.textContent.trim() === 'Report' || e.textContent.includes('Open HTML report')),
     error: document.querySelector('.ownstudio-problem')?.textContent?.trim()
 }))()`);
 if (!result.plot) failures.push(`uPlot did not open${result.error ? `: ${result.error}` : ''}`);

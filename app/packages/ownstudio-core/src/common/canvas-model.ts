@@ -38,7 +38,9 @@ export const PARTS: PartDef[] = [
             { id: 'LOW1', label: 'LOW1', type: 'power', side: 'right', accepts: ['load'] },
             { id: 'LOW2', label: 'LOW2', type: 'power', side: 'right', accepts: ['load'] },
         ],
-        values: [],
+        // The defaults are the board plant's (boards/twist/plant/README.md); the Design sheets change them.
+        values: [{ key: 'inductance_H', label: 'L per leg', unit: 'H', default: 33e-6 },
+            { key: 'capacitance_F', label: 'C per leg', unit: 'F', default: 14.1e-6 }],
     },
     {
         part: 'resistor', kind: 'load', label: 'Resistor', colour: '#2c6f9e',

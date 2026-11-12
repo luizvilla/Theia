@@ -122,14 +122,17 @@ class Bridge:
         mission = pathlib.Path(mission)
         if not script.replace("_", "").isalnum():
             raise BridgeError(f"not a design script name: {script!r}")
-        path = mission / "design" / f"{script}.py"
-        if not path.is_file():
-            raise BridgeError(f"this mission has no design/{script}.py")
+        directories = [mission / "ownstudio" / "design", mission / "design"]
+        path = next((folder / f"{script}.py" for folder in directories
+                     if (folder / f"{script}.py").is_file()), None)
+        if path is None:
+            raise BridgeError(f"this setup or mission has no design/{script}.py")
         args = [str(a) for a in (args or [])]
         result = subprocess.run([sys.executable, str(path), "--json", *args], cwd=mission,
                                 capture_output=True, text=True, timeout=120)
         if result.returncode != 0:
-            raise BridgeError(f"design/{script}.py: {(result.stderr or result.stdout).strip().splitlines()[-1:]}")
+            detail = (result.stderr or result.stdout).strip().splitlines()[-1:]
+            raise BridgeError(f"design/{script}.py: {detail}")
         return json.loads(result.stdout)
 
     def procedures(self, mission):

@@ -29,7 +29,8 @@ import yaml
 EVENT_TRAILER = "OwnStudio-Event"
 SETUP_FILE = "ownstudio/setup.yaml"
 RESTORED_FROM = "ownstudio-restored-from"      # in .git: the branch a restore left
-EVENTS = ("create", "example", "canvas", "code", "build", "flash", "run", "simulate", "milestone", "save", "restore")
+EVENTS = ("create", "example", "canvas", "code", "design", "build", "flash", "run", "simulate", "milestone", "save",
+          "restore")
 
 
 class SetupError(Exception):
@@ -103,6 +104,61 @@ def _copy_board_plant(dest, board_root, board):
     return installed
 
 
+def _copy_board_design(dest, board_root, board, description):
+    """Install a board's readable design sheets beside the setup metadata."""
+    design = description.get("design")
+    if design is None:
+        return None
+    if isinstance(design, str):
+        design = {"directory": design}
+    if not isinstance(design, dict) or not design.get("directory"):
+        raise SetupError(f"the {board} board's design declaration needs a directory")
+    relative = str(design["directory"])
+    source = os.path.join(board_root, board, relative)
+    if not os.path.isdir(source):
+        raise SetupError(f"the {board} board's design directory is missing: {source}")
+    target = os.path.join(dest, "ownstudio", "design")
+    shutil.copytree(source, target, dirs_exist_ok=True, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+    installed = dict(design)
+    installed["directory"] = os.path.relpath(target, dest).replace(os.sep, "/")
+    return installed
+
+
+def _board_description(board_root, board):
+    path = os.path.join(board_root, board, "board.yaml")
+    if not os.path.isfile(path):
+        raise SetupError(f"no board description for {board}: {path}")
+    with open(path, encoding="utf-8") as f:
+        return yaml.safe_load(f) or {}
+
+
+def design_sheets(repo, board_root=None):
+    """The setup's design sheets, installed from its board first if a setup predates them (plan U16).
+
+    Returns ``{"directory", "sheets": [{id, label}], "installed": bool}``. Installing
+    writes ``ownstudio/design/`` and the ``design`` entry of setup.yaml and commits
+    a ``design`` event, so the sheets are part of the setup from then on.
+    """
+    path = os.path.join(repo, SETUP_FILE)
+    with open(path, encoding="utf-8") as f:
+        setup = yaml.safe_load(f) or {}
+    design = setup.get("design")
+    installed = False
+    if not (isinstance(design, dict) and os.path.isdir(os.path.join(repo, str(design.get("directory", ""))))):
+        if not board_root:
+            raise SetupError("this setup has no design sheets and no board folder to take them from")
+        board = setup.get("board")
+        design = _copy_board_design(repo, board_root, board, _board_description(board_root, board))
+        if design is None:
+            raise SetupError(f"the {board} board has no design sheets")
+        setup["design"] = design
+        with open(path, "w", encoding="utf-8") as f:
+            yaml.safe_dump(setup, f, sort_keys=False)
+        commit_event(repo, "design", "design: the board's design sheets added")
+        installed = True
+    return {"directory": design["directory"], "sheets": list(design.get("sheets") or []), "installed": installed}
+
+
 def create_setup(mirror, dest, board, name=None, ref=None, upstream=None, board_root=None):
     """Clone Core, copy the board plant, and commit ``ownstudio/setup.yaml``."""
     if os.path.exists(dest) and os.listdir(dest):
@@ -124,9 +180,13 @@ def create_setup(mirror, dest, board, name=None, ref=None, upstream=None, board_
         "canvas": {"nodes": [{"id": "board", "part": board}], "wires": []},
     }
     os.makedirs(os.path.join(dest, "ownstudio"), exist_ok=True)
+    description = _board_description(board_root, board) if board_root else {}
     plant = _copy_board_plant(dest, board_root, board)
     if plant:
         setup["plant"] = plant
+    design = _copy_board_design(dest, board_root, board, description) if board_root else None
+    if design:
+        setup["design"] = design
     with open(os.path.join(dest, SETUP_FILE), "w", encoding="utf-8") as f:
         yaml.safe_dump(setup, f, sort_keys=False)
     ignore = os.path.join(dest, ".gitignore")
@@ -352,6 +412,7 @@ def main(argv):
     restore <setup> <commit>
     back <setup>
     example <setup> <examples root> <example path>
+    design <setup> [boards root]
     """
     import json
     from dataclasses import asdict
@@ -375,6 +436,8 @@ def main(argv):
             out = {"restored": args[1]}
         elif cmd == "example":
             out = load_example(args[0], args[1], args[2])
+        elif cmd == "design":
+            out = design_sheets(args[0], args[1] if len(args) > 1 else None)
         elif cmd == "back":
             out = {"branch": back_to_latest(args[0])}
         else:
