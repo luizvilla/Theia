@@ -8,11 +8,13 @@ import { ReactWidget } from '@theia/core/lib/browser/widgets/react-widget';
 import { OpenerService, codicon, open } from '@theia/core/lib/browser';
 import URI from '@theia/core/lib/common/uri';
 import { FileService } from '@theia/filesystem/lib/browser/file-service';
+import { CommandService } from '@theia/core/lib/common';
 import { ProcedureModel } from './procedure-model';
 import { MissionService } from './mission-service';
 import { statusText } from '../common/procedure-protocol';
 import { eventWindow, Waveform, parseWaveform } from '../common/waveform';
 import { Band, TestRecord, bands, clip, compareCases, formatConditions, twinPath } from '../common/overlay';
+import { OPEN_PULSIMGUI_COMMAND } from './pulsimgui-contribution';
 
 export const PROCEDURE_WIDGET_ID = 'ownstudio.procedure';
 // Theia's esbuild pipeline selects uPlot's ESM entry even for this CommonJS
@@ -139,10 +141,12 @@ export class ProcedureWidget extends ReactWidget {
     @inject(OpenerService) protected readonly opener: OpenerService;
     @inject(FileService) protected readonly files: FileService;
     @inject(MissionService) protected readonly missions: MissionService;
+    @inject(CommandService) protected readonly commands: CommandService;
 
     protected waveforms = new Map<string, Waveform | null>();
     protected recordFiles = new Map<string, TestRecord | null>();
     protected numberAnswer = '';
+    protected reloadedSimulation = -1;
 
     @postConstruct()
     protected init(): void {
@@ -170,6 +174,16 @@ export class ProcedureWidget extends ReactWidget {
     }
 
     protected async loadWaveforms(): Promise<void> {
+        const run = this.model.current;
+        // The simulator record event is emitted while the procedure is still
+        // writing it; after done, reread both linked record.json files once.
+        if (run?.simulationOf && run.done && run.runId !== this.reloadedSimulation) {
+            this.reloadedSimulation = run.runId;
+            for (const record of run.records) {
+                this.recordFiles.delete(record.path);
+                this.waveforms.delete(record.path);
+            }
+        }
         for (const r of this.model.current?.records ?? []) {
             await this.load(r.path);
             const rec = this.recordFiles.get(r.path);
@@ -213,13 +227,14 @@ export class ProcedureWidget extends ReactWidget {
                 <p className='ownstudio-workbench-purpose'>No procedure has run yet. Start one from the Lab.</p></div>;
         }
         const state = !run.done ? 'running…' : statusText(run.done.status);
+        const where = run.simulationOf ? 'Board and simulation' : `On the ${run.target}`;
         const first = this.recordFiles.get(run.records[0]?.path ?? '');
         return <div className='ownstudio-workbench-body'>
             <h1 className='ownstudio-title'>{run.past ? first?.procedure ?? run.info.title : run.info.title}</h1>
             {run.past
                 ? <p className='ownstudio-workbench-purpose'>Filed {first?.date ? new Date(first.date).toLocaleString() : 'earlier'}.{' '}
                     {first?.twin ? 'A board run and its simulation at the same conditions.' : `Run on the ${first?.target ?? run.target}.`}</p>
-                : <p className='ownstudio-workbench-purpose'>On the {run.target} · started {run.started.toLocaleTimeString()} ·{' '}
+                : <p className='ownstudio-workbench-purpose'>{where} · started {run.started.toLocaleTimeString()} ·{' '}
                     <b className={run.done ? (run.done.status === 0 ? 'os-test-pass' : 'os-test-fail') : ''}>{state}</b>{' '}
                     {!run.done && <button className='theia-button secondary' onClick={() => this.model.stop()}>
                         <span className={codicon('debug-stop')} /> Stop</button>}</p>}
@@ -243,6 +258,7 @@ export class ProcedureWidget extends ReactWidget {
     }
 
     protected renderRecord(path: string, verdict: string): React.ReactNode {
+        const run = this.model.current;
         const shown = this.recordFiles.get(path);
         if (shown?.target === 'simulator' && shown.twin) {
             // A board run's simulation: show it through its board record, where the two are compared.
@@ -260,13 +276,23 @@ export class ProcedureWidget extends ReactWidget {
                 {rec?.board?.serial_number && <span className='ownstudio-muted'> · board {rec.board.serial_number}</span>}
             </div>
             {rec?.conditions && <div className='ownstudio-muted'>Conditions: {formatConditions(rec.conditions)}</div>}
+            {rec?.target === 'board' && <div className='ownstudio-button-row ownstudio-result-actions'>
+                {!twin && run?.done && run.info.targets.includes('simulator') &&
+                    <button className='theia-button' data-simulate-record={path} onClick={() => this.model.simulateRecord(path)}>
+                        <span className={codicon('play')} /> Simulate at these conditions</button>}
+                {!twin && run?.simulationOf === path && !run.done && <span className='ownstudio-muted'>Simulating at these conditions…</span>}
+                <button className='theia-button secondary' onClick={() => this.commands.executeCommand(OPEN_PULSIMGUI_COMMAND.id)}>
+                    <span className={codicon('circuit-board')} /> Open in PulsimGui</button>
+                {rec.report && <button className='theia-button secondary' onClick={() => this.openReport(rec.report!)}>
+                    <span className={codicon('report')} /> Report</button>}
+            </div>}
             {twin
                 ? <>
                     <div className='ownstudio-muted'>Simulated at the same conditions: {sim ? <>{this.renderVerdict(sim.verdict)} {this.renderLink(twin)}</> : 'reading…'}</div>
                     {this.renderPlot(this.waveforms.get(path), this.waveforms.get(twin), rec ? rec.cases : [])}
                     {rec && this.renderComparison(rec, sim)}</>
                 : <>{this.renderPlot(this.waveforms.get(path), undefined, rec?.cases ?? [])}{rec && this.renderMetrics(rec)}</>}
-            {rec?.report && <div className='ownstudio-button-row'><button className='theia-button secondary' onClick={() => this.openReport(rec.report!)}>
+            {rec?.target !== 'board' && rec?.report && <div className='ownstudio-button-row'><button className='theia-button secondary' onClick={() => this.openReport(rec.report!)}>
                 <span className={codicon('report')} /> Open HTML report</button></div>}
         </div>;
     }

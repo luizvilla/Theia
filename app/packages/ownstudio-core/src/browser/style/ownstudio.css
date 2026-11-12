@@ -277,6 +277,7 @@ body.theia-dark .os-trace-board { stroke: var(--ownstudio-yellow); }
 .ownstudio-overlay-table td, .ownstudio-overlay-table th { padding: 2px 8px; }
 .ownstudio-capture-result { max-width: 940px; margin: 10px 0; border-top: 3px solid var(--ownstudio-persimmon); padding-top: 8px; }
 .ownstudio-plot-controls { align-items: center; margin-bottom: 5px; }
+.ownstudio-result-actions { align-items: center; margin: 8px 0 4px; }
 .ownstudio-plot-controls .os-channel-off { opacity: 0.5; text-decoration: line-through; }
 .ownstudio-uplot { min-height: 300px; max-width: 940px; background: var(--theia-editor-background); }
 .ownstudio-uplot .u-legend { font-family: var(--theia-ui-font-family); }

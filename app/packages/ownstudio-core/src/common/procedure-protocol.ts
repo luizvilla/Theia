@@ -36,6 +36,8 @@ export interface ProcedureStart {
     procedure: string;       // relative to the mission
     target: 'simulator' | 'board';
     board?: string;
+    /** Filed board-record folder: rerun only its simulator phase and link the records. */
+    fromRecord?: string;
     /** One-use capability returned by issuePowerToken after the confirmation dialog. */
     powerToken?: string;
 }

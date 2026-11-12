@@ -19,10 +19,11 @@ import yaml
 
 PROCEDURE = {
     "title": "Capture: reference step",
-    "targets": ["board"],
+    "targets": ["board", "simulator"],
     "tests": [],
     "level": "L1",
     "power_on": {"group": "Converter", "name": "Mode", "value": 1},
+    "twin": {"v_in": "v_high_V", "load_ohm": "load_ohm"},
 }
 
 
@@ -74,7 +75,7 @@ def procedure_info(mission: pathlib.Path) -> dict | None:
     return {
         "path": str(pathlib.Path(__file__).resolve()),
         "title": config.get("title", PROCEDURE["title"]),
-        "targets": ["board"],
+        "targets": ["board", "simulator"],
         "tests": [],
         "level": "L1",
         "power_on": True,
@@ -113,6 +114,30 @@ def waveform_csv(wave: dict, channels: list[dict]) -> str:
     return output.getvalue()
 
 
+def _aligned_waveform(wave: dict, sample_period_s: float) -> dict:
+    """Put the trigger at t=0 and limit a native simulation to scope-rate samples."""
+    out = dict(wave)
+    time = np.asarray(wave["t"], dtype=float)
+    trigger = float(wave.get("t_trigger") or 0.0)
+    time = time - trigger
+    indices = np.arange(len(time))
+    if len(time) > 1 and sample_period_s > 0 and np.median(np.diff(time)) < sample_period_s * 0.75:
+        wanted = np.arange(time[0], time[-1] + sample_period_s * 0.25, sample_period_s)
+        indices = np.unique(np.searchsorted(time, wanted).clip(max=len(time) - 1))
+    out["t"] = time[indices]
+    for name, values in wave.items():
+        if name in ("t", "t_trigger"):
+            continue
+        try:
+            array = np.asarray(values)
+        except (TypeError, ValueError):
+            continue
+        if array.ndim == 1 and len(array) == len(time):
+            out[name] = array[indices]
+    out["t_trigger"] = 0.0
+    return out
+
+
 def _metrics(wave: dict, channel: str, before: float, after: float) -> list[dict]:
     values = np.asarray(wave[channel], dtype=float)
     time = np.asarray(wave["t"], dtype=float)
@@ -148,13 +173,19 @@ def run(target, ctx):
     target.arm()
     target.update(reference["group"], {reference["name"]: after})
     target.wait(max(0.0, float(config["duration_s"]) - float(config["pretrigger_s"])))
-    wave = target.capture()
+    wave = _aligned_waveform(target.capture(), float(config["sample_period_s"]))
     available = next((c["object"] for c in config["channels"] if c.get("object") in wave), None)
     if available is None:
         raise CaptureError("the firmware scope returned none of the configured probe channels")
     files = {"waveform.csv": waveform_csv(wave, config["channels"])}
     conditions = {**_canvas_conditions(ctx.mission), "reference_from_V": before, "reference_to_V": after,
                   "sample_period_s": float(wave.get("period_s", config["sample_period_s"]))}
-    ctx.record("capture-board", "CAPTURE", "L1", _metrics(wave, available, before, after),
+    if target.kind == "board" and "rVHigh_V" in wave:
+        conditions["v_high_V"] = float(np.asarray(wave["rVHigh_V"], dtype=float)[-1])
+    elif target.kind == "simulator":
+        conditions["v_high_V"] = ctx.options.get("v_in", conditions.get("v_high_V"))
+        conditions["load_ohm"] = ctx.options.get("load_ohm", conditions.get("load_ohm"))
+    conditions = {key: value for key, value in conditions.items() if value is not None}
+    ctx.record(f"capture-{target.kind}", "CAPTURE", "L1", _metrics(wave, available, before, after),
                conditions=conditions, files=files)
     ctx.log(f"Filed {len(wave['t'])} samples; power is switching off.")

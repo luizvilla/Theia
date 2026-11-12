@@ -70,7 +70,7 @@ class Methods(Fixture):
                 found = self.call("procedures", mission=tmp)["result"]
             self.assertEqual(len(found), 1)
             self.assertEqual(found[0]["title"], "Capture: reference step")
-            self.assertEqual(found[0]["targets"], ["board"])
+            self.assertEqual(found[0]["targets"], ["board", "simulator"])
             self.assertEqual([c["label"] for c in found[0]["capture"]["channels"]], ["V_LOW1", "I_LOW1"])
             self.assertEqual(found[0]["capture"]["reference"]["to"], 12.0)
 

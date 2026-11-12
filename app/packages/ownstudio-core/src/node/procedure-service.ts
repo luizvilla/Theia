@@ -36,6 +36,9 @@ export class ProcedureServiceImpl implements ProcedureService {
         if (o.board) {
             args.push('--board', o.board);
         }
+        if (o.fromRecord) {
+            args.push('--from-record', o.fromRecord);
+        }
         let tokenFolder: string | undefined;
         if (o.powerToken) {
             if (!this.powerTokens.consume(o.powerToken)) {
@@ -46,10 +49,6 @@ export class ProcedureServiceImpl implements ProcedureService {
             const runnerToken = randomUUID();
             fs.writeFileSync(tokenFile, runnerToken, { mode: 0o600 });
             args.push('--power-token-file', tokenFile, '--power-token', runnerToken);
-        }
-        if (o.target === 'board') {
-            // A board run brings its simulation, at the conditions it recorded.
-            args.push('--twin');
         }
         const child = spawn(python, args, { cwd: o.mission, env: { ...process.env, PYTHONUNBUFFERED: '1' } });
         this.runs.set(runId, child);

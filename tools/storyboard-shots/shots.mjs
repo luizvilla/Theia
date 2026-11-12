@@ -181,7 +181,9 @@ const FRAMES = [
         id: 'result', num: '10', title: 'The capture result, opened on the event',
         go: async () => {
             await show('left', 'ownstudio.left.lab');
-            await sleep(3500);
+            for (let n = 0; n < 40 && !await app.evaluate(`document.querySelector('[data-run-target="board"]')?.dataset.ready === 'true'`); n++) await sleep(400);
+            await app.evaluate(`document.querySelector('[data-run-target="board"]')?.scrollIntoView({ block: 'center' }); true`);
+            await sleep(300);
             const clicked = await app.clickOn('[data-run-target="board"]');
             if (!clicked) { throw new Error('board capture button not found'); }
             await sleep(500);
@@ -192,11 +194,42 @@ const FRAMES = [
             if (!await app.evaluate(`!!document.querySelector('.ownstudio-uplot canvas')`)) { throw new Error('capture result did not open'); }
             const state = await app.evaluate(STATE);
             if (state.bottom) { await key('j', 2, 'KeyJ'); await sleep(500); }
+            await app.evaluate(`document.querySelector('#ownstudio\\.procedure .ownstudio-workbench-body')?.scrollIntoView({ block: 'start' }); true`);
+            await sleep(300);
         },
         differences: [
             'uPlot opens at −5 to +40 ms around the step; Whole run restores the complete −20 to +82 ms firmware-scope window.',
             'Drag zooms, Shift+wheel pans, the legend is the cursor readout, and each channel button turns its trace on or off.',
-            'The simulation and PulsimGui actions shown in the storyboard arrive in U14–U15; this frame is the measured result only.',
+            'Simulate at these conditions deliberately leaves this measured-only result first; Open in PulsimGui and Report are beside it.',
+        ],
+    },
+    {
+        id: 'overlay', num: '12', title: 'Simulation over the measurement, at the same conditions',
+        go: async () => {
+            await show('left', 'ownstudio.left.lab');
+            for (let n = 0; n < 40 && !await app.evaluate(`document.querySelector('[data-run-target="board"]')?.dataset.ready === 'true'`); n++) await sleep(400);
+            await app.evaluate(`document.querySelector('[data-run-target="board"]')?.scrollIntoView({ block: 'center' }); true`);
+            await sleep(300);
+            if (!await app.clickOn('[data-run-target="board"]')) { throw new Error('board capture button not found'); }
+            await sleep(500);
+            const confirmed = await app.evaluate(`(() => { const button = [...document.querySelectorAll('button')]
+                .find(e => e.textContent.trim() === 'Switch on and run'); button?.click(); return !!button; })()`);
+            if (!confirmed) { throw new Error('power confirmation did not open'); }
+            for (let n = 0; n < 80 && !await app.evaluate(`!!document.querySelector('[data-simulate-record]')`); n++) await sleep(400);
+            await app.evaluate(`document.querySelector('[data-simulate-record]')?.scrollIntoView({ block: 'center' }); true`);
+            await sleep(300);
+            if (!await app.clickOn('[data-simulate-record]')) { throw new Error('Simulate at these conditions did not appear'); }
+            for (let n = 0; n < 200 && !await app.evaluate(`!!document.querySelector('.os-trace-sim')`); n++) await sleep(500);
+            if (!await app.evaluate(`!!document.querySelector('.os-trace-sim')`)) { throw new Error('simulation overlay did not appear'); }
+            const state = await app.evaluate(STATE);
+            if (state.bottom) { await key('j', 2, 'KeyJ'); await sleep(500); }
+            await app.evaluate(`document.querySelector('#ownstudio\\.procedure .ownstudio-workbench-body')?.scrollIntoView({ block: 'start' }); true`);
+            await sleep(300);
+        },
+        differences: [
+            'The native switching model runs the same capture procedure only after Simulate at these conditions is pressed; the board result is visible first.',
+            'The solid amber measurement and dashed blue simulation share a trigger-aligned time axis; the table compares every captured metric.',
+            'The Simulate-tint fidelity chips shown in the storyboard arrive with the simulation sheet in slice 2; timeline dots arrive in U18.',
         ],
     },
     {

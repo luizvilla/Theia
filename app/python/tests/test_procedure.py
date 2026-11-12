@@ -287,6 +287,30 @@ class Twin(Fixture):
                            target=fake_board_target(load_harness(self.m)))
         self.assertEqual(len(fake.records), 1)
 
+    def test_a_filed_board_record_can_be_simulated_later(self):
+        (self.m / "twin.py").write_text(TWIN_PROCEDURE)
+        board_io = FakeIO([])
+        proc.run_procedure(self.m, self.m / "twin.py", "board", board_io, allow_power=True,
+                           target=fake_board_target(load_harness(self.m)))
+        board_path, _ = board_io.records[0]
+        self.assertNotIn("twin", json.loads((board_path / "record.json").read_text()))
+
+        sim_io = FakeIO([])
+        status = proc.simulate_record(self.m, self.m / "twin.py", board_path, sim_io,
+                                      SimTarget(load_harness(self.m, tau=0.05)))
+        self.assertEqual(status, 0)
+        sim_path, _ = sim_io.records[0]
+        board, sim = (json.loads((p / "record.json").read_text()) for p in (board_path, sim_path))
+        self.assertEqual(board["twin"], sim_path.name)
+        self.assertEqual(sim["twin"], board_path.name)
+        self.assertEqual(sim["conditions"], {"tau_s": 0.05})
+
+    def test_a_simulator_record_cannot_be_replayed_as_a_board_run(self):
+        fake = FakeIO([True])
+        proc.run_procedure(self.m, self.m / "step.py", "simulator", fake)
+        with self.assertRaisesRegex(proc.ProcedureError, "only a board record"):
+            proc.simulate_record(self.m, self.m / "step.py", fake.records[0][0], FakeIO([]))
+
 
 class PowerToken(unittest.TestCase):
     def test_missing_invented_and_reused_tokens_are_refused(self):

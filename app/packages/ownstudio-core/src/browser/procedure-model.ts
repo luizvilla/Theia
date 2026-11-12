@@ -12,6 +12,7 @@ import { BoardModel } from './board-model';
 import { LabChecklistModel } from './lab-checklist-model';
 
 export const RUN_PROCEDURE_COMMAND = { id: 'ownstudio.procedure.run', category: 'OwnStudio', label: 'Run a Procedure…' };
+export const RUN_SIMULATOR_COMMAND = { id: 'ownstudio.procedure.runSimulator', category: 'OwnStudio', label: 'Run on the Simulator…' };
 export const SHOW_RECORD_COMMAND = { id: 'ownstudio.record.show', category: 'OwnStudio', label: 'Show a Test Record' };
 
 @injectable()
@@ -34,6 +35,8 @@ export interface ProcedureRun {
     done?: { status: number; error?: string };
     /** A record filed earlier, shown again (from the control center): no process runs. */
     past?: boolean;
+    /** Board record being replayed on the simulator after its result-level action. */
+    simulationOf?: string;
 }
 
 /**
@@ -143,6 +146,38 @@ export class ProcedureModel {
                 python: this.preferences.get<string>('ownstudio.python', ''),
                 mission: root.path.fsPath(), procedure: info.path, target, board,
                 powerToken,
+            });
+        } catch (error) {
+            this.finish({ status: 2, error: error instanceof Error ? error.message : String(error) });
+            return false;
+        }
+        return true;
+    }
+
+    /** Rerun the current board record on the simulator, at its filed conditions. */
+    async simulateRecord(path: string): Promise<boolean> {
+        const root = this.missions.root;
+        const previous = this.current;
+        const ownsBoardRecord = previous?.target === 'board' || previous?.simulationOf === path;
+        if (!root || this.running || !previous?.done || !ownsBoardRecord
+            || !previous.records.some(record => record.path === path)) {
+            return false;
+        }
+        if (!previous.info.path || !previous.info.targets.includes('simulator')) {
+            this.problem = 'This result does not name a procedure that can run on the simulator.';
+            this.onDidChangeEmitter.fire();
+            return false;
+        }
+        this.current = {
+            runId: -1, info: previous.info, target: 'simulator', started: new Date(), log: [],
+            records: [{ path, verdict: previous.records.find(record => record.path === path)?.verdict ?? '' }],
+            simulationOf: path,
+        };
+        this.onDidChangeEmitter.fire();
+        try {
+            this.current.runId = await this.service.start({
+                python: this.preferences.get<string>('ownstudio.python', ''),
+                mission: root.path.fsPath(), procedure: previous.info.path, target: 'simulator', fromRecord: path,
             });
         } catch (error) {
             this.finish({ status: 2, error: error instanceof Error ? error.message : String(error) });

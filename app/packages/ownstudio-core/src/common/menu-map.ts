@@ -79,7 +79,7 @@ export const MENU_MAP: Menu[] = [
         label: 'Lab', items: [
             later('Run procedure', 1, 'U12'),
             later('Stop', 1, 'U12'),
-            later('Run on the simulator', 1, 'U15'),
+            { label: 'Run on the simulator', command: 'ownstudio.procedure.runSimulator' },
             '-',
             later('New procedure', 3),
             { ...later('AI takeover', 4), when: 'ownstudio.aiTakeoverEnabled' },

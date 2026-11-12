@@ -103,7 +103,7 @@ export class LabWidget extends ReactWidget {
                         {(p.capture.pretrigger_s * 1e3).toFixed(0)} ms before · {(p.capture.sample_period_s * 1e6).toFixed(0)} µs/sample</div>
                 </div> : <div className='ownstudio-muted'>Tests {p.tests.join(', ')} · <code>{p.path}</code></div>}
                 <div className='ownstudio-button-row'>
-                    {p.targets.map(t => <button key={t} className={`theia-button${t === 'board' ? ` ownstudio-run-${ready ? 'ready' : 'blocked'}` : ' secondary'}`}
+                    {(p.capture ? p.targets.filter(t => t === 'board') : p.targets).map(t => <button key={t} className={`theia-button${t === 'board' ? ` ownstudio-run-${ready ? 'ready' : 'blocked'}` : ' secondary'}`}
                         data-run-target={t} data-ready={t === 'board' ? ready : true}
                         disabled={this.procedures.running || (t === 'board' && !ready)}
                         title={t === 'board' && blocker ? blocker.sentence : `Run on the ${t}`}
@@ -122,7 +122,7 @@ export class LabWidget extends ReactWidget {
                     <span className={codicon('checklist')} /> Control center</button>
             </div>
             <p className='ownstudio-muted'>A capture is filed under <code>ownstudio/records/</code>; its portable HTML report is in{' '}
-                <code>ownstudio/reports/</code>. Open the result for cursors, channel controls, zoom and pan. Simulation overlay arrives in U15.</p>
+                <code>ownstudio/reports/</code>. Open the result for cursors, channel controls, zoom and pan, then simulate it at the recorded conditions.</p>
         </div>;
     }
 }

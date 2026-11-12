@@ -647,7 +647,7 @@
     "",
     "",
     "",
-    "twist-buck*",
+    "pulsimgui-final-gate*",
     "",
     "0  0",
     "Twist 1.4.2 ·  firmware matches",
@@ -660,7 +660,7 @@
   "differences": [
    "uPlot opens at −5 to +40 ms around the step; Whole run restores the complete −20 to +82 ms firmware-scope window.",
    "Drag zooms, Shift+wheel pans, the legend is the cursor readout, and each channel button turns its trace on or off.",
-   "The simulation and PulsimGui actions shown in the storyboard arrive in U14–U15; this frame is the measured result only."
+   "Simulate at these conditions deliberately leaves this measured-only result first; Open in PulsimGui and Report are beside it."
   ]
  },
  {
@@ -672,8 +672,8 @@
    "project": "twist_buck.pulsim",
    "backend": "OwnStudio runner 1.0",
    "namedValues": {
-    "Vin": 30.0,
-    "Rload": 33.0,
+    "Vin": 30,
+    "Rload": 33,
     "L": 0.000033,
     "C": 0.0000141
    },
@@ -684,6 +684,63 @@
    "This is the real PulsimGui 1.1.1 native window, so its current toolbar and dock layout replace the storyboard's illustrative chrome.",
    "The stable load capture keeps the circuit full width; Properties opens when a part is selected and Waveforms opens after Run.",
    "The C-Block and PWM markers are visible below the physical circuit; OwnStudio's runner supplies their native control and hardware-adapter behavior."
+  ]
+ },
+ {
+  "frame": "12",
+  "title": "Simulation over the measurement, at the same conditions",
+  "file": "frame-12-overlay.png",
+  "state": {
+   "workbench": "lab",
+   "left": "ownstudio.left.lab",
+   "right": "ownstudio.inspector",
+   "bottom": "ownstudio.canvas",
+   "main": "ownstudio.procedure",
+   "centreScroll": null,
+   "leftTabs": [
+    "ownstudio.left.design",
+    "explorer-view-container",
+    "ownstudio.left.lab"
+   ],
+   "rightTabs": [
+    "ownstudio.parts",
+    "ownstudio.inspector",
+    "chat-view-widget"
+   ],
+   "bottomTabs": [
+    "Canvas",
+    "Terminal",
+    "Build output"
+   ],
+   "canvasTint": "lab",
+   "canvasLevel": "setup",
+   "canvasSelection": null,
+   "inspectorSelection": null,
+   "canvasFirmware": null,
+   "codeToolbar": [],
+   "buildOutput": [],
+   "timeline": true,
+   "leftOpen": true,
+   "rightOpen": true,
+   "bottomOpen": false,
+   "status": [
+    "",
+    "",
+    "",
+    "pulsimgui-final-gate*",
+    "",
+    "0  0",
+    "Twist 1.4.2 ·  firmware matches",
+    "Lab checklist 6/6",
+    "",
+    ""
+   ],
+   "titleBar": "rgb(23, 51, 46)"
+  },
+  "differences": [
+   "The native switching model runs the same capture procedure only after Simulate at these conditions is pressed; the board result is visible first.",
+   "The solid amber measurement and dashed blue simulation share a trigger-aligned time axis; the table compares every captured metric.",
+   "The Simulate-tint fidelity chips shown in the storyboard arrive with the simulation sheet in slice 2; timeline dots arrive in U18."
   ]
  },
  {

@@ -9,7 +9,7 @@ import { PANEL_WIDGET_FACTORY, PanelWidgetOptions } from './panel-widget';
 import { DATA_OBJECTS_WIDGET_ID } from './data-objects-widget';
 import { CONTROL_CENTER_WIDGET_ID, OPEN_CONTROL_CENTER_COMMAND } from './control-center-widget';
 import { PROCEDURE_WIDGET_ID } from './procedure-widget';
-import { ProcedureModel, RUN_PROCEDURE_COMMAND, SHOW_RECORD_COMMAND } from './procedure-model';
+import { ProcedureModel, RUN_PROCEDURE_COMMAND, RUN_SIMULATOR_COMMAND, SHOW_RECORD_COMMAND } from './procedure-model';
 import { ProcedureInfo } from '../common/procedure-protocol';
 
 
@@ -27,6 +27,7 @@ export class LabContribution implements CommandContribution {
         registry.registerCommand(RUN_PROCEDURE_COMMAND, {
             execute: (info?: ProcedureInfo, target?: 'simulator' | 'board') => this.runProcedure(info, target),
         });
+        registry.registerCommand(RUN_SIMULATOR_COMMAND, { execute: () => this.runProcedure(undefined, 'simulator') });
         registry.registerCommand(SHOW_RECORD_COMMAND, {
             execute: async (path: string, target: 'simulator' | 'board', title?: string) => {
                 this.procedures.showRecord(path, target, title);
@@ -61,7 +62,9 @@ export class LabContribution implements CommandContribution {
     /** Without arguments, pick the procedure and the target. */
     protected async runProcedure(info?: ProcedureInfo, target?: 'simulator' | 'board'): Promise<void> {
         if (!info) {
-            const pick = await this.quickInput.showQuickPick(this.procedures.procedures.map(p => ({ label: p.title, detail: p.path, info: p })),
+            const requested = target;
+            const procedures = requested ? this.procedures.procedures.filter(p => p.targets.includes(requested)) : this.procedures.procedures;
+            const pick = await this.quickInput.showQuickPick(procedures.map(p => ({ label: p.title, detail: p.path, info: p })),
                 { placeholder: 'Procedure to run' });
             info = pick?.info;
         }
