@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OwnStudio Bench Checklist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a step rail on the left (the nine steps of SPEC §2), one step at a time on the right, so the tester keeps to the step at hand. */
+:root {
+  --bg: #f3f6f4; --panel: #ffffff; --ink: #14201c; --muted: #5b6b66; --line: #d6dfdb;
+  --brand: #1f5a46; --brand-ink: #ffffff; --accent: #8a7400; --accent-soft: #fbf3c4;
+  --good: #23824f; --friction: #a86a00; --bug: #c4372b; --missing: #5a55b8;
+  --quote: #eef4f1;
+  --f-display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --f-body: "Inter", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #101a17; --panel: #16231f; --ink: #e4ece9; --muted: #93a6a0; --line: #2a3a35;
+  --brand: #2f7a5f; --brand-ink: #ffffff; --accent: #f0dc55; --accent-soft: #3a3514;
+  --good: #5cc489; --friction: #e7a64a; --bug: #ef6b5b; --missing: #a9a4f5; --quote: #1c2c27; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #101a17; --panel: #16231f; --ink: #e4ece9; --muted: #93a6a0; --line: #2a3a35;
+  --brand: #2f7a5f; --brand-ink: #ffffff; --accent: #f0dc55; --accent-soft: #3a3514;
+  --good: #5cc489; --friction: #e7a64a; --bug: #ef6b5b; --missing: #a9a4f5; --quote: #1c2c27; color-scheme: dark }
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.55 var(--f-body); }
+.top { background: var(--brand); color: var(--brand-ink); }
+.top-in { max-width: 1180px; margin: 0 auto; padding-block: 14px; padding-left: 16px; padding-right: 16px;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; }
+.top h1 { font: 600 20px/1.2 var(--f-display); margin: 0; letter-spacing: 0.01em; }
+.top .rule { font-size: 13px; opacity: 0.92; flex: 1 1 320px; min-width: 0; }
+.meter { display: flex; align-items: center; gap: 10px; font: 500 13px var(--f-mono); }
+.meter .bar { width: 120px; height: 6px; border-radius: 3px; background: rgba(255,255,255,0.25); overflow: hidden; }
+.meter .bar i { display: block; height: 100%; background: #f0dc55; width: 0; transition: width .3s; }
+.save { font: 12px var(--f-mono); opacity: 0.85; }
+
+.wrap { max-width: 1180px; margin: 0 auto; padding-block: 20px 48px; padding-left: 16px; padding-right: 16px;
+  display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 24px; align-items: start; }
+@media (max-width: 820px) { .wrap { grid-template-columns: minmax(0, 1fr); } .rail { position: static !important; } }
+
+.rail { position: sticky; top: 12px; display: grid; gap: 4px; }
+.rail button { all: unset; cursor: pointer; display: grid; grid-template-columns: 28px 1fr auto; gap: 8px; align-items: center;
+  padding: 8px 10px; border-radius: 8px; color: var(--ink); }
+.rail button:hover { background: var(--quote); }
+.rail button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.rail button[aria-current="step"] { background: var(--panel); box-shadow: inset 3px 0 0 var(--brand); }
+.rail .n { font: 600 13px var(--f-mono); color: var(--muted); text-align: center; }
+.rail .t { font-size: 14px; min-width: 0; }
+.rail .c { font: 12px var(--f-mono); color: var(--muted); }
+.rail .v { width: 9px; height: 9px; border-radius: 50%; display: inline-block; margin-left: 6px; vertical-align: middle; }
+.rail .sep { font: 600 11px var(--f-body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding: 12px 10px 4px; }
+
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 22px clamp(16px, 3vw, 30px); display: grid; gap: 20px; min-width: 0; }
+.eyebrow { font: 600 12px var(--f-body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.card h2 { font: 600 clamp(22px, 2.6vw, 28px)/1.2 var(--f-display); margin: 4px 0 0; text-wrap: balance; }
+.sub { color: var(--muted); margin: 6px 0 0; max-width: 68ch; }
+h3 { font: 600 14px var(--f-display); letter-spacing: 0.02em; margin: 0 0 8px; }
+
+.do { margin: 0; padding-left: 20px; display: grid; gap: 4px; max-width: 72ch; }
+.said { display: grid; gap: 8px; }
+.said blockquote { margin: 0; background: var(--quote); border-radius: 8px; padding: 10px 14px; display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; }
+.said .q { font: 500 12px var(--f-mono); color: var(--brand); padding-top: 2px; white-space: nowrap; }
+:root[data-theme="dark"] .said .q { color: var(--good); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .said .q { color: var(--good); } }
+.said p { margin: 0; }
+
+.checks { display: grid; gap: 2px; }
+.check { display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: start; padding: 9px 8px; border-radius: 8px; cursor: pointer; }
+.check:hover { background: var(--quote); }
+.check input { width: 18px; height: 18px; margin: 2px 0 0; accent-color: var(--brand); cursor: pointer; }
+.check .ref { font: 12px var(--f-mono); color: var(--muted); margin-left: 6px; white-space: nowrap; }
+.check input:checked + span { color: var(--muted); }
+.warn { background: var(--accent-soft); border-radius: 8px; padding: 10px 14px; max-width: 72ch; }
+
+.verdict { display: flex; flex-wrap: wrap; gap: 8px; }
+.verdict button { all: unset; cursor: pointer; font: 500 13px var(--f-body); padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); display: inline-flex; gap: 6px; align-items: center; }
+.verdict button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.verdict button i { width: 9px; height: 9px; border-radius: 50%; }
+.verdict button[aria-pressed="true"] { border-color: currentColor; font-weight: 600; }
+.good { color: var(--good); } .friction { color: var(--friction); } .bug { color: var(--bug); } .missing { color: var(--missing); }
+.verdict button span { color: var(--ink); }
+
+textarea { width: 100%; min-height: 110px; resize: vertical; font: 14px/1.5 var(--f-body); color: var(--ink); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+textarea:focus { outline: 2px solid var(--brand); outline-offset: 0; border-color: transparent; }
+
+.nav { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; border-top: 1px solid var(--line); padding-top: 16px; }
+.btn { all: unset; cursor: pointer; font: 500 14px var(--f-body); padding: 8px 16px; border-radius: 8px; border: 1px solid var(--line); }
+.btn.primary { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); }
+.btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.btn[disabled] { opacity: 0.4; cursor: default; }
+.foot { color: var(--muted); font-size: 13px; }
+.notice { font-size: 13px; color: var(--friction); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <h1>OwnStudio bench checklist</h1>
+  <div class="rule">Good enough means functional, not perfect, and no problem you could have caught yourself (your Q114).</div>
+  <div class="meter"><span id="count">0 / 0</span><span class="bar"><i id="bar"></i></span></div>
+  <span class="save" id="save">Saved in this browser</span>
+</div></header>
+
+<main class="wrap">
+  <nav class="rail" id="rail" aria-label="Steps"></nav>
+  <section class="card" id="card" aria-live="polite"></section>
+</main>
+
+<script>
+const STEPS = [
+  { id: "s0", n: "0", title: "Before you start", group: "Bench",
+    sub: "Five minutes. The supply stays off until step 5.",
+    do: ["In ~/code/examples: git checkout ownstudio/buck-extras", "cd /data/ownstudio/Theia && (cd app && npm run build)", "scripts/try-ownstudio.sh", "Twist on USB. Supply off (30 V, 1 A limit, 33 Ω on LOW1)."],
+    said: [["Q124", "Start and board choice, Arduino-style; ready for custom boards."], ["Q117", "Start replaces Home; look at Arduino's board choice."]],
+    checks: [["The Start page opens, not a mission or a file tree.", "Q117"], ["The Twist is highlighted with its serial number.", "Q124"], ["You know where your notes go: this page saves as you type.", ""]] },
+  { id: "s1", n: "1", title: "Source, Twist and load", group: "The nine steps",
+    sub: "New setup on the Twist, then drag a DC source and a resistor and wire them.",
+    do: ["Start › New setup on the Twist, give it a name.", "Parts tab (right): drag a DC source and a Resistor onto the canvas.", "Wire the source to HIGH and the resistor to LOW1. Try a resistor on HIGH."],
+    said: [["Q72", "Palette now; the setup starts empty; the simplest case refuses source–Twist–source and load–Twist–load."], ["Q71", "One canvas, two zoom levels, always visible at the bottom. Propose better-looking designs."], ["Q142", "Parts works the same from every workbench, without switching; test all the clicking back and forth."], ["10 Nov trial", "The 5 blocks should be something all the parts touch, but it disappears once you leave Home."]],
+    checks: [["The setup starts with the Twist alone, and you add the rest.", "Q72"], ["A wrong wire does not snap, and one sentence says why.", "Q82"], ["The canvas stays at the bottom in Design, Code and Lab, with its tint.", "Q71, Q80"], ["Dragging a part works from every workbench without the window jumping.", "Q142"], ["It looks good enough to show a colleague.", "Q71"]],
+    warn: "Known limit: you cannot type a value on the canvas yet (slice 2). The parts come with your bench's 30 V, 1 A and 33 Ω." },
+  { id: "s2", n: "2", title: "The inside of the Twist", group: "The nine steps",
+    sub: "Double-click the Twist, then click Driver.",
+    do: ["Double-click the Twist.", "Click Driver: read the Inspector (right).", "Switch to Design, Code and Lab: the inside view and selection should stay."],
+    said: [["Q143", "Too heavy: blocks show their names only; the inspector shows the details on click; keep the labels (sides, signals, isolation, ports)."], ["Q73", "A block click opens an inspector, with Design, Code and Tests as buttons."], ["10 Nov trial", "When we click on any of the blocks, that sends us to code. This is not OK."], ["Q131", "Board = devicetree overlay + a small OwnStudio file."]],
+    checks: [["The blocks show names only, on your reference layout.", "Q143"], ["Driver shows 200 kHz, 100/100 ns, up-down, read from Core's devicetree.", "Q131"], ["Clicking a block opens the Inspector and does not throw you into Code.", "trial"], ["The Inspector offers Design, Code and Tests.", "Q73"]] },
+  { id: "s3", n: "3", title: "Load an example", group: "The nine steps",
+    sub: "File › Examples › Examples of the board…, then buck voltage mode.",
+    do: ["File › Examples › Examples of the board…", "Pick buck voltage mode.", "Open Code: look at src/."],
+    said: [["Q79", "The board is the base: it opens examples, the design sheet and lab procedures."], ["Q119", "Loading an example like Arduino; the previous one filed away as today."], ["Q125", "An example loads as a branch."], ["Q76", "Code shows the student files only, with language support, main.cpp included."]],
+    checks: [["The examples come from the board, without searching folders.", "Q79"], ["It lands on its own branch (status bar and timeline).", "Q125"], ["Your previous work is still there (a timeline dot, nothing lost).", "Q119"], ["src/ has main.cpp and control.cpp and you can tell them from the rest.", "Q76"]] },
+  { id: "s4", n: "4", title: "Build and flash", group: "The nine steps",
+    sub: "From the Code toolbar above the editor.",
+    do: ["Open src/control.cpp. Ctrl+click on Pid or control_step.", "Build (about a minute), watch Build output.", "Upload. Watch the Twist on the canvas and the checklist's Firmware line."],
+    said: [["10 Nov trial", "In VS Code there are coloring, snippets, Ctrl+click to follow the code. All of this is missing here."], ["10 Nov trial", "When flashing, there is no progress bar, just a bar that moves back and forth."], ["10 Nov trial", "The side explorer shows too much; I do not know what relates to the code."], ["Q77", "Real progress."]],
+    checks: [["control.cpp is coloured and Ctrl+click follows the code.", "trial"], ["Build shows real progress, line by line.", "Q77"], ["Upload shows bytes going over, not a bouncing bar.", "trial"], ["After upload, the Twist shows the firmware and the Lab says Firmware ✓.", "E21"], ["The file tree no longer confuses you.", "trial"]],
+    warn: "If Firmware never turns green on the real board, write it down: that link was only ever tested on a fake board until today's fix." },
+  { id: "s5", n: "5", title: "Switch on and capture", group: "The nine steps",
+    sub: "The only step with power. Supply on now, one run at a time.",
+    do: ["Supply on.", "Lab: watch the checklist (left) reach 6/6.", "Capture from the board, read the dialog, confirm.", "On the result: drag to zoom, Shift+wheel to pan, Whole run."],
+    said: [["Q86", "The Lab checks automatically before Run goes green."], ["Q93", "And it keeps checking: back to red if something goes off."], ["Q78", "Refuse a dead HIGH and the wrong board."], ["Q83, Q90", "Scope captures retrieved into a data folder, through ThingSet, rendered nicely."], ["10 Nov trial", "I don't see the step. The result is an image I cannot interact with."]],
+    checks: [["Run stays red with a clear sentence until all six checks pass.", "Q86"], ["With the supply off before running, Run turns red again (try it once).", "Q93"], ["The dialog says what will happen (source, output, load).", "ADR 0031"], ["The result opens zoomed on the step, and zoom and pan work.", "Q77, trial"], ["The record and an HTML report exist (Report button).", "Q83"]],
+    warn: "Supply on only now, only with you at the bench. If anything looks wrong, Stop and supply off." },
+  { id: "s6", n: "6", title: "The simulator and its circuit", group: "The nine steps",
+    sub: "Open in PulsimGui, from the result.",
+    do: ["On the result: Open in PulsimGui.", "Look at the circuit and press Run in PulsimGui.", "Change Rload there and save: look at the canvas."],
+    said: [["Q91", "Too much work to re-create PulsimGui; a button, and room for PLECS or MATLAB later."], ["Q100", "Could Simulate happen in PulsimGui, with save changes exported to the model?"], ["Q85", "Tell the user what the harness feeds and what Pulsim models."]],
+    checks: [["PulsimGui opens on your setup's plant with 30 V and 33 Ω.", "Q107"], ["Run in PulsimGui uses your control.cpp.", "Q100"], ["A saved change shows on the canvas.", "Q100"], ["You can tell what is modelled and what is not.", "Q85"]] },
+  { id: "s7", n: "7", title: "Simulate over the measurement", group: "The nine steps",
+    sub: "Simulate at these conditions, from the result.",
+    do: ["Back on the result: Simulate at these conditions.", "Compare the dashed simulation with the solid measurement, and the table."],
+    said: [["Q70", "Simulate with the same parameters, overlaid."], ["10 Nov trial", "When I run the simulation I just get a log. There is no progress bar. It says running, but that is not enough."]],
+    checks: [["You can see that the simulation is running and roughly how long it takes.", "trial"], ["Simulation and measurement share one time axis, aligned at the step.", "Q70"], ["The metrics side by side tell you something useful.", ""], ["It used the measured HIGH and the canvas's load, not defaults.", "Q70"]] },
+  { id: "s8", n: "8", title: "Change a parameter in Design", group: "The nine steps",
+    sub: "Output filter, then Control loop.",
+    do: ["Design (left) › Output filter: drag L per leg.", "Release it: look at the Twist on the canvas and the timeline.", "Control loop: change Kp, watch the Bode plot; Apply to the code.", "Show the formulas."],
+    said: [["Q75", "Design as a live form, Python computing."], ["10 Nov trial", "Sizing the output filter just gives me code. Sizing a filter needs a simple GUI that shows the impact of the choices (ripple, etc.)."], ["Q75", "He never saw the Bode plot."]],
+    checks: [["The ripple and its curve move while you drag L.", "trial"], ["Releasing puts L on the Twist on the canvas and adds a dot.", "Q75"], ["The Bode plot and margins move with Kp.", "Q75"], ["Apply writes only Kp and Ti into control.cpp.", ""], ["Show the formulas opens readable Python, in your setup.", "Q75"]] },
+  { id: "s9", n: "9", title: "Again, and back in time", group: "The nine steps",
+    sub: "Build, upload, capture and simulate again; then use the timeline.",
+    do: ["Build and upload the new gains, capture again (supply on), simulate again.", "Click an earlier dot on the timeline: read the preview.", "Restore here, look around, Back to latest.", "Restore an old dot and change L: a branch starts. History › Milestone…"],
+    said: [["Q117", "A timeline at the bottom like Fusion 360, git-based with branches and resets."], ["Q141", "Restore makes a branch only at the first edit; 200 restores each under 2 s."], ["Q123", "Records out of git: reproduce, don't share heavy results; share light reports."]],
+    checks: [["Every change, build, run and simulation is a dot.", "Q117"], ["The preview tells you what differs from now.", "Q117"], ["Restore brings back the canvas and the code; Back to latest returns.", "Q141"], ["An edit from an old dot starts a branch and nothing is lost.", "Q141"], ["Restoring feels fast enough (about a second).", "Q141"]] },
+  { id: "sw", n: "W", title: "The window", group: "Across the steps",
+    sub: "Things you asked for that every step touches.",
+    do: ["Look at the window as a whole, between steps."],
+    said: [["Q74", "Workbenches on the left icon bar; green title bar."], ["Q130", "Eight menus, without Theia's at all, but with a terminal."], ["Q136", "Terminal as a bottom tab, with a button at the bottom."], ["10 Nov trial", "It is nice to have something on the right-hand side, but it is poorly exploited. OwnStudio should be way more visual."]],
+    checks: [["Design, Code and Lab are the left icons, and the title bar is green.", "Q74"], ["The eight menus, and nothing of Theia's in the way.", "Q130"], ["Terminal is a bottom tab with its button.", "Q136"], ["Parts, Inspector and AI on the right are worth their space.", "trial"], ["Overall, it is visual enough.", "trial"]] },
+  { id: "sa", n: "AI", title: "The AI, if you try it", group: "Across the steps",
+    sub: "Optional. Needs the Claude agent SDK, or Codex with reasoning effort set to high.",
+    do: ["AI tab: type @ and pick ClaudeCode or Codex.", "Ask it to explain control.cpp, or to try Kp values on the simulator.", "Ask it to run the capture on the board, and watch what it does."],
+    said: [["(Round 12)", "Like VS Code: link a ChatGPT or Claude account; OwnTech and power-electronics skills."], ["Q95", "Power only through OwnStudio's dialog, with an AI takeover button later."], ["Q110", "Core is the API's source of truth, as in VS Code today."]],
+    checks: [["Your own account works, without an API key.", "Q94"], ["It knows it is in a Twist setup (it read AGENTS.md).", "Q110"], ["Claude Code asks before every shell command.", "U17"], ["Asked to switch power on, it refuses or sends you to the Lab.", "Q95"]],
+    warn: "ADR 0031 has an open point for you: the power token stops mistakes, not an agent's shell. Note what you see here." },
+  { id: "sz", n: "✓", title: "Good enough?", group: "Verdict",
+    sub: "The exit criterion of slice 1.",
+    do: ["Read your notes on the other steps once.", "Answer the three checks below honestly."],
+    said: [["Q114", "PhD students try it only once Luiz has used it end to end and finds it good enough, not perfect."], ["Q70", "A colleague or PhD student, with a Twist on the bench, simply finds out how to do the nine steps, all in the same tool."], ["10 Nov trial", "Overall it is really cumbersome to use."]],
+    checks: [["You did the nine steps end to end in this session.", "Q70"], ["You hit no problem you could have caught yourself.", "Q114"], ["You would hand it to a PhD student tomorrow.", "Q114"]],
+    notePrompt: "If not good enough: what must slice 2 fix first?" },
+];
+const VERDICTS = [["good", "Good"], ["friction", "Friction"], ["bug", "Bug"], ["missing", "Missing"]];
+
+const state = {};            // stepId -> { checks: {i: bool}, verdict, note }
+const KEY = "ownstudio-bench-checklist";
+let current = 0, storable = true;
+try { Object.assign(state, JSON.parse(localStorage.getItem(KEY) || "{}")); } catch { storable = false; }
+try { current = Math.max(0, STEPS.findIndex(s => s.id === localStorage.getItem(KEY + "-step"))); } catch { /* fine */ }
+if (location.hash) { const i = STEPS.findIndex(s => "#" + s.id === location.hash); if (i >= 0) current = i; }
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const entry = id => (state[id] ??= { checks: {}, verdict: "", note: "" });
+
+function totals() {
+  let done = 0, all = 0;
+  for (const s of STEPS) { all += s.checks.length; done += Object.values(entry(s.id).checks).filter(Boolean).length; }
+  return { done, all };
+}
+function renderTop() {
+  const t = totals();
+  $("count").textContent = `${t.done} / ${t.all} checks`;
+  $("bar").style.width = `${t.all ? 100 * t.done / t.all : 0}%`;
+  $("save").textContent = storable ? "Saved in this browser" : "This browser does not keep data here: download your notes before closing";
+}
+function renderRail() {
+  let group = "", html = "";
+  STEPS.forEach((s, i) => {
+    if (s.group !== group) { group = s.group; html += `<div class="sep">${esc(group)}</div>`; }
+    const e = entry(s.id), done = Object.values(e.checks).filter(Boolean).length;
+    const dot = e.verdict ? `<i class="v ${e.verdict}" style="background:currentColor"></i>` : "";
+    html += `<button type="button" data-i="${i}" ${i === current ? 'aria-current="step"' : ""}><span class="n">${esc(s.n)}</span><span class="t">${esc(s.title)}${dot}</span><span class="c">${done}/${s.checks.length}</span></button>`;
+  });
+  $("rail").innerHTML = html;
+}
+function renderCard() {
+  const s = STEPS[current], e = entry(s.id);
+  $("card").innerHTML = `
+    <div><div class="eyebrow">${esc(s.group)} · ${esc(s.n)}</div><h2>${esc(s.title)}</h2><p class="sub">${esc(s.sub)}</p></div>
+    <div><h3>Do</h3><ol class="do">${s.do.map(d => `<li>${esc(d)}</li>`).join("")}</ol></div>
+    ${s.warn ? `<div class="warn">${esc(s.warn)}</div>` : ""}
+    <div class="said"><h3>What you told me</h3>${s.said.map(([q, t]) => `<blockquote><span class="q">${esc(q)}</span><p>${esc(t)}</p></blockquote>`).join("")}</div>
+    <div><h3>Check</h3><div class="checks">${s.checks.map(([t, ref], i) => `
+      <label class="check" for="c-${s.id}-${i}"><input type="checkbox" id="c-${s.id}-${i}" data-c="${i}" ${e.checks[i] ? "checked" : ""}>
+      <span>${esc(t)}${ref ? `<span class="ref">${esc(ref)}</span>` : ""}</span></label>`).join("")}</div></div>
+    <div><h3>Your verdict on this step</h3><div class="verdict">${VERDICTS.map(([k, l]) => `
+      <button type="button" class="${k}" data-v="${k}" aria-pressed="${e.verdict === k}"><i style="background:currentColor"></i><span>${l}</span></button>`).join("")}</div></div>
+    <div><h3><label for="note-${s.id}">${esc(s.notePrompt || "Notes: where, what happened, what you expected")}</label></h3>
+      <textarea id="note-${s.id}" data-note placeholder="One remark per line.">${esc(e.note)}</textarea></div>
+    <div class="nav">
+      <button type="button" class="btn" data-go="-1" ${current === 0 ? "disabled" : ""}>Previous</button>
+      <span style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn" data-download>Download notes.md</button><button type="button" class="btn" data-copy>Copy as Markdown</button></span>
+      <button type="button" class="btn primary" data-go="1" ${current === STEPS.length - 1 ? "disabled" : ""}>Next step</button>
+    </div>
+    <p class="foot" id="copied">Everything you tick and type is kept in this browser. At the end, download notes.md into your trial folder and send Claude its path.</p>`;
+}
+function render() { renderTop(); renderRail(); renderCard(); }
+
+function go(i) {
+  current = Math.min(STEPS.length - 1, Math.max(0, i));
+  try { localStorage.setItem(KEY + "-step", STEPS[current].id); } catch { /* fine */ }
+  history.replaceState(null, "", "#" + STEPS[current].id);
+  render(); window.scrollTo({ top: 0 });
+}
+
+function persist() {
+  try { localStorage.setItem(KEY, JSON.stringify(state)); storable = true; } catch { storable = false; }
+  renderTop();
+}
+
+function markdown() {
+  return ["# OwnStudio bench test, " + new Date().toISOString().slice(0, 10), ""].concat(STEPS.flatMap(s => {
+    const e = entry(s.id);
+    return [`## ${s.n}. ${s.title}${e.verdict ? ` (${e.verdict})` : ""}`, ...s.checks.map(([t], i) => `- [${e.checks[i] ? "x" : " "}] ${t}`), ...(e.note ? ["", e.note] : []), ""];
+  })).join("\n");
+}
+
+$("rail").addEventListener("click", ev => { const b = ev.target.closest("button[data-i]"); if (b) go(+b.dataset.i); });
+$("card").addEventListener("change", ev => {
+  const c = ev.target.closest("input[data-c]"); if (!c) return;
+  const s = STEPS[current]; entry(s.id).checks[c.dataset.c] = c.checked; renderRail(); persist();
+});
+$("card").addEventListener("input", ev => {
+  if (!ev.target.matches("[data-note]")) return;
+  const s = STEPS[current]; entry(s.id).note = ev.target.value; persist();
+});
+$("card").addEventListener("click", async ev => {
+  const v = ev.target.closest("[data-v]"), g = ev.target.closest("[data-go]"), cp = ev.target.closest("[data-copy]");
+  if (v) { const s = STEPS[current], e = entry(s.id); e.verdict = e.verdict === v.dataset.v ? "" : v.dataset.v;
+    $("card").querySelectorAll("[data-v]").forEach(b => b.setAttribute("aria-pressed", b.dataset.v === e.verdict)); renderRail(); persist(); }
+  if (g) go(current + +g.dataset.go);
+  if (ev.target.closest("[data-download]")) {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([markdown()], { type: "text/markdown" }));
+    a.download = "notes.md"; a.click(); URL.revokeObjectURL(a.href);
+    $("copied").textContent = "Downloaded notes.md. Move it into your trial folder and send Claude its path.";
+  }
+  if (cp) {
+    try { await navigator.clipboard.writeText(markdown()); $("copied").textContent = "Copied. Paste it into notes.md."; }
+    catch { $("copied").textContent = "Copy was refused. Use Download notes.md instead."; }
+  }
+});
+document.addEventListener("keydown", ev => {
+  if (ev.target.matches("textarea, input")) return;
+  if (ev.key === "ArrowRight" || ev.key === "j") go(current + 1);
+  if (ev.key === "ArrowLeft" || ev.key === "k") go(current - 1);
+});
+
+render();
+</script>
+</body>
+</html>

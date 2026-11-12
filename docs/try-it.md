@@ -10,6 +10,8 @@ cd /data/ownstudio/Theia && (cd app && npm run build)          # if the app chan
 scripts/try-ownstudio.sh
 ```
 
+**To keep focus while testing**, open [bench-checklist.html](bench-checklist.html) in a browser (`xdg-open docs/bench-checklist.html`): one step at a time, what to do, what you told me in the grilling rounds, a few checks, a verdict and notes. It keeps your answers in that browser; at the end, **Download notes.md** into your trial folder.
+
 The script gives you a fresh OwnStudio home and profile under `/data/ownstudio/try/<date-time>/`: your setups go to `home/setups/`, and it creates `notes.md` with one heading per step. Nothing touches `~/OwnStudio` or an earlier trial; run it again for a clean start.
 
 The Twist on USB, the supply **off** until step 5 (30 V, 1 A limit, 33 Ω on LOW1, as at the bench session). Switching on happens only in step 5, only with you there.
