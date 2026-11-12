@@ -15,9 +15,9 @@ objects): a fixed window around the trigger, its channels named after the data
 objects they record. In the simulator it returns every waveform since the
 last capture; the mission's harness names them.
 
-The board target speaks ThingSet. The simulator target loads the mission's
-tests/sim_harness.py, whose Harness plays main.cpp's part (mode, reference,
-measurements) around the unchanged control.cpp and the plant model.
+The board target speaks ThingSet. A setup's simulator loads its board-copied
+``.pulsim`` plant and native control C-Block. Legacy missions can still supply
+``tests/sim_harness.py`` while they are migrated.
 """
 from __future__ import annotations
 
@@ -166,9 +166,27 @@ class SimTarget(Target):
     def identity(self):
         return self.harness.identity()
 
+    def close(self):
+        close = getattr(self.harness, "close", None)
+        if close:
+            close()
+
 
 def load_harness(mission: pathlib.Path, **options):
-    """Harness(mission, **options) from the mission's tests/sim_harness.py."""
+    """Load a setup's board plant, or a legacy mission simulator harness."""
+    setup_path = mission / "ownstudio" / "setup.yaml"
+    if setup_path.is_file():
+        try:
+            import yaml
+            setup = yaml.safe_load(setup_path.read_text()) or {}
+        except Exception as err:  # noqa: BLE001 - turn a malformed setup into a target error
+            raise TargetError(f"cannot read {setup_path}: {err}") from err
+        if setup.get("plant"):
+            try:
+                from .simulation import Harness
+                return Harness(mission, **options)
+            except Exception as err:  # noqa: BLE001 - compiler/model errors are target failures
+                raise TargetError(str(err)) from err
     path = mission / "tests" / "sim_harness.py"
     if not path.is_file():
         raise TargetError("this mission has no simulator harness (tests/sim_harness.py)")

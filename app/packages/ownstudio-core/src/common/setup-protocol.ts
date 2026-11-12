@@ -20,7 +20,7 @@ export interface StartInfo {
 
 export interface SetupService {
     startInfo(): Promise<StartInfo>;
-    /** Creates a setup on `board` from the Core mirror, under <home>/setups; returns its folder. */
+    /** Creates a setup from Core plus the board's plant, under <home>/setups; returns its folder. */
     createSetup(board: string, name: string): Promise<string>;
     /** True when `folder` holds ownstudio/setup.yaml. */
     isSetup(folder: string): Promise<boolean>;

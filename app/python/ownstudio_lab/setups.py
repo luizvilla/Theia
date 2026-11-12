@@ -62,8 +62,49 @@ def update_mirror(upstream, mirror):
 
 # --- creating a setup ---------------------------------------------------------
 
-def create_setup(mirror, dest, board, name=None, ref=None, upstream=None):
-    """Clones Core from the mirror into ``dest`` and commits ``ownstudio/setup.yaml``."""
+def _copy_board_plant(dest, board_root, board):
+    """Copy the plant artifacts declared by a board into the new setup."""
+    if not board_root:
+        return None
+    description = os.path.join(board_root, board, "board.yaml")
+    if not os.path.isfile(description):
+        raise SetupError(f"no board description for {board}: {description}")
+    with open(description, encoding="utf-8") as f:
+        plant = (yaml.safe_load(f) or {}).get("plant")
+    if plant is None:
+        return None
+    if isinstance(plant, str):
+        plant = {"file": plant}
+    if not isinstance(plant, dict) or not plant.get("file"):
+        raise SetupError(f"the {board} board's plant declaration needs a file")
+    installed = dict(plant)
+    target_dir = os.path.join(dest, "ownstudio", "plant")
+    os.makedirs(target_dir, exist_ok=True)
+    for field in ("file", "wrapper"):
+        relative = plant.get(field)
+        if not relative:
+            continue
+        source = os.path.join(board_root, board, relative)
+        if not os.path.isfile(source):
+            raise SetupError(f"the {board} board's {field} is missing: {source}")
+        target = os.path.join(target_dir, os.path.basename(relative))
+        shutil.copy2(source, target)
+        installed[field] = os.path.relpath(target, dest).replace(os.sep, "/")
+    include_dirs = []
+    for relative in plant.get("host_include_dirs", []):
+        source = os.path.join(board_root, board, relative)
+        if not os.path.isdir(source):
+            raise SetupError(f"the {board} board's host include directory is missing: {source}")
+        target = os.path.join(target_dir, os.path.basename(relative.rstrip("/")))
+        shutil.copytree(source, target, dirs_exist_ok=True)
+        include_dirs.append(os.path.relpath(target, dest).replace(os.sep, "/"))
+    if include_dirs:
+        installed["host_include_dirs"] = include_dirs
+    return installed
+
+
+def create_setup(mirror, dest, board, name=None, ref=None, upstream=None, board_root=None):
+    """Clone Core, copy the board plant, and commit ``ownstudio/setup.yaml``."""
     if os.path.exists(dest) and os.listdir(dest):
         raise SetupError(f"{dest} exists and is not empty")
     args = ["clone", "--quiet"] + (["--branch", ref] if ref else []) + [mirror, dest]
@@ -83,6 +124,9 @@ def create_setup(mirror, dest, board, name=None, ref=None, upstream=None):
         "canvas": {"nodes": [{"id": "board", "part": board}], "wires": []},
     }
     os.makedirs(os.path.join(dest, "ownstudio"), exist_ok=True)
+    plant = _copy_board_plant(dest, board_root, board)
+    if plant:
+        setup["plant"] = plant
     with open(os.path.join(dest, SETUP_FILE), "w", encoding="utf-8") as f:
         yaml.safe_dump(setup, f, sort_keys=False)
     ignore = os.path.join(dest, ".gitignore")
@@ -302,7 +346,7 @@ def main(argv):
     """python -m ownstudio_lab.setups <command> ... ; prints JSON.
 
     mirror <upstream> <mirror>
-    create <mirror> <dest> <board> [name]
+    create <mirror> <dest> <board> [name] [boards root]
     event <setup> <event> <summary>
     timeline <setup> [ref]
     restore <setup> <commit>
@@ -319,7 +363,9 @@ def main(argv):
         if cmd == "mirror":
             out = {"updated": update_mirror(*args)}
         elif cmd == "create":
-            out = {"setup": create_setup(args[0], args[1], args[2], *args[3:4])}
+            out = {"setup": create_setup(args[0], args[1], args[2],
+                                          name=args[3] if len(args) > 3 else None,
+                                          board_root=args[4] if len(args) > 4 else None)}
         elif cmd == "event":
             out = asdict(commit_event(args[0], args[1], args[2]))
         elif cmd == "timeline":

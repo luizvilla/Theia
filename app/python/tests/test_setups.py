@@ -73,6 +73,27 @@ class Setups(unittest.TestCase):
             self.assertIn("ownstudio/records/", f.read().splitlines())
         self.assertFalse(su.is_dirty(self.setup))
 
+    def test_create_copies_the_board_plant_into_the_setup_commit(self):
+        boards = os.path.join(self.root, "boards")
+        plant = os.path.join(boards, "twist", "plant")
+        os.makedirs(plant)
+        with open(os.path.join(boards, "twist", "board.yaml"), "w") as f:
+            f.write("plant:\n  file: plant/twist_buck.pulsim\n  wrapper: plant/control_block.cpp\n  control_source: src/control.cpp\n")
+        with open(os.path.join(plant, "twist_buck.pulsim"), "w") as f:
+            f.write("{\"version\": \"1.0\"}\n")
+        with open(os.path.join(plant, "control_block.cpp"), "w") as f:
+            f.write("// wrapper\n")
+        dest = os.path.join(self.root, "with-plant")
+        su.create_setup(self.mirror, dest, "twist", "with plant", board_root=boards)
+        with open(os.path.join(dest, su.SETUP_FILE)) as f:
+            setup = yaml.safe_load(f)
+        self.assertEqual(setup["plant"]["file"], "ownstudio/plant/twist_buck.pulsim")
+        self.assertEqual(setup["plant"]["wrapper"], "ownstudio/plant/control_block.cpp")
+        self.assertTrue(os.path.isfile(os.path.join(dest, setup["plant"]["file"])))
+        self.assertTrue(os.path.isfile(os.path.join(dest, setup["plant"]["wrapper"])))
+        self.assertIn("ownstudio/plant/twist_buck.pulsim", su.git(dest, "show", "--name-only", "--format=", "HEAD"))
+        self.assertFalse(su.is_dirty(dest))
+
     def test_the_mirror_works_offline(self):
         os.rename(self.upstream, self.upstream + ".gone")
         self.assertFalse(su.update_mirror(self.upstream, self.mirror))      # fetch fails, the mirror stays

@@ -48,7 +48,11 @@ inside:
   ports_on: power
   isolation: true
 
-plant: null        # the .pulsim plant arrives with U13
+plant:
+  file: plant/twist_buck.pulsim
+  wrapper: plant/control_block.cpp
+  control_source: src/control.cpp
+  host_include_dirs: [plant/shim]
 wiring_templates: []   # draw.io templates arrive in slice 2
 
 # Every Twist setup gets this procedure without adding files to an example.

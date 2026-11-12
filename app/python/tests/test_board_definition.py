@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-2.1
 """Plan U4: the Twist 1.4.2's board definition, read from Core's devicetree overlay."""
+import json
 import os
 import pathlib
 import tempfile
@@ -102,6 +103,22 @@ class OverlayFragments(unittest.TestCase):
         d = yaml.safe_load(BOARD.read_text())
         self.assertEqual(list(d["ports"]), ["HIGH", "LOW1", "LOW2"])
         self.assertEqual(list(d["inside"]["blocks"]), ["power", "measurement", "feeder", "driver", "controller"])
+
+    def test_the_board_ships_one_named_pulsim_plant_and_its_cblock_wrapper(self):
+        board = yaml.safe_load(BOARD.read_text())
+        root = BOARD.parent
+        plant = json.loads((root / board["plant"]["file"]).read_text())
+        self.assertTrue((root / board["plant"]["wrapper"]).is_file())
+        self.assertTrue(all((root / folder).is_dir() for folder in board["plant"]["host_include_dirs"]))
+        parts = {part["name"]: part for part in plant["circuits"]["main"]["components"]}
+        self.assertEqual(parts["Vin"]["parameters"]["waveform"]["value"], 40.0)
+        self.assertEqual(parts["L"]["parameters"]["inductance"], 33e-6)
+        self.assertEqual(parts["C"]["parameters"]["capacitance"], 14.1e-6)
+        self.assertEqual(parts["Rload"]["parameters"]["resistance"], 6.0)
+        self.assertEqual(parts["PWM"]["parameters"]["frequency"], 200_000.0)
+        self.assertEqual(parts["control_step"]["parameters"]["sample_time"], 100e-6)
+        self.assertEqual((parts["control_step"]["parameters"]["n_inputs"],
+                          parts["control_step"]["parameters"]["n_outputs"]), (7, 1))
 
 
 if __name__ == "__main__":

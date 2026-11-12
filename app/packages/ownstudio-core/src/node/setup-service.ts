@@ -55,7 +55,7 @@ export class SetupServiceImpl implements SetupService {
         for (let n = 2; fs.existsSync(dest); n++) {
             dest = `${base}-${n}`;
         }
-        const out = await this.run('ownstudio_lab.setups', ['create', this.mirror, dest, board, name]) as { setup: string };
+        const out = await this.run('ownstudio_lab.setups', ['create', this.mirror, dest, board, name, this.boards]) as { setup: string };
         return out.setup;
     }
 
