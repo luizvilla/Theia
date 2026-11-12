@@ -14,6 +14,14 @@ export interface ProcedureInfo {
     power_on: boolean;
     doc: string;
     problem?: string;
+    /** Board-supplied default capture, shown as a form in the Lab. */
+    capture?: {
+        channels: { label: string; object: string; unit: string }[];
+        reference: { group: string; name: string; from: number; to: number; unit: string };
+        duration_s: number;
+        pretrigger_s: number;
+        sample_period_s: number;
+    };
 }
 
 export type ProcedureEvent =

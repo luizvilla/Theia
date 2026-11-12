@@ -26,6 +26,7 @@ export interface TestRecord {
     date?: string;
     conditions?: Record<string, number | string>;
     twin?: string;
+    report?: string;
     board?: { serial_number?: string; commit?: string };
     cases: RecordCase[];
 }

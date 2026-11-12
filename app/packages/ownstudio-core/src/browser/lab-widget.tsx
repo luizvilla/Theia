@@ -86,7 +86,7 @@ export class LabWidget extends ReactWidget {
             </div>
             <h2 className='ownstudio-emphasis'>Procedures</h2>
             {this.procedures.problem && <p className='ownstudio-problem'>{this.procedures.problem}</p>}
-            {!this.procedures.procedures.length && <p className='ownstudio-muted'>This setup has no procedures (tests/procedures/*.py).</p>}
+            {!this.procedures.procedures.length && <p className='ownstudio-muted'>This board offers no default procedure and the setup has none of its own.</p>}
             {this.procedures.procedures.map(p => {
                 const ready = this.checklist.ready(p);
                 const blocker = this.checklist.blocker(p);
@@ -95,14 +95,20 @@ export class LabWidget extends ReactWidget {
                     {p.power_on && <span className='ownstudio-muted' title='Switches the converter on: on the board it asks first'>
                         <span className={codicon('zap')} /> switches power on</span>}</div>
                 <div className='ownstudio-muted'>{p.doc}</div>
-                <div className='ownstudio-muted'>Tests {p.tests.join(', ')} · <code>{p.path}</code></div>
+                {p.capture ? <div className='ownstudio-capture-form'>
+                    <div><span className='ownstudio-field-label'>Channels</span> {p.capture.channels.map(c => c.label).join(' · ')}</div>
+                    <div><span className='ownstudio-field-label'>Trigger</span> {p.capture.reference.name.replace(/^w/, '')}{' '}
+                        {p.capture.reference.from} → {p.capture.reference.to} {p.capture.reference.unit}</div>
+                    <div><span className='ownstudio-field-label'>Window</span> {(p.capture.duration_s * 1e3).toFixed(0)} ms ·{' '}
+                        {(p.capture.pretrigger_s * 1e3).toFixed(0)} ms before · {(p.capture.sample_period_s * 1e6).toFixed(0)} µs/sample</div>
+                </div> : <div className='ownstudio-muted'>Tests {p.tests.join(', ')} · <code>{p.path}</code></div>}
                 <div className='ownstudio-button-row'>
                     {p.targets.map(t => <button key={t} className={`theia-button${t === 'board' ? ` ownstudio-run-${ready ? 'ready' : 'blocked'}` : ' secondary'}`}
                         data-run-target={t} data-ready={t === 'board' ? ready : true}
                         disabled={this.procedures.running || (t === 'board' && !ready)}
                         title={t === 'board' && blocker ? blocker.sentence : `Run on the ${t}`}
                         onClick={() => this.commands.executeCommand(RUN_PROCEDURE_COMMAND.id, p, t)}>
-                        <span className={codicon(t === 'board' ? 'circuit-board' : 'play')} /> Run on the {t}
+                        <span className={codicon(t === 'board' ? 'circuit-board' : 'play')} /> {p.capture ? 'Capture from' : 'Run on'} the {t}
                         {t === 'board' && blocker ? ` · ${blocker.sentence}` : ''}</button>)}
                 </div>
             </div>;
@@ -115,9 +121,8 @@ export class LabWidget extends ReactWidget {
                 <button className='theia-button' onClick={() => this.commands.executeCommand(OPEN_CONTROL_CENTER_COMMAND.id)}>
                     <span className={codicon('checklist')} /> Control center</button>
             </div>
-            <p className='ownstudio-muted'>A run on the board records its waveform with the firmware scope, then runs the
-                same procedure on the simulator at the conditions it measured: open it from the control center to see
-                requirement, simulation and measurement together.</p>
+            <p className='ownstudio-muted'>A capture is filed under <code>ownstudio/records/</code>; its portable HTML report is in{' '}
+                <code>ownstudio/reports/</code>. Open the result for cursors, channel controls, zoom and pan. Simulation overlay arrives in U15.</p>
         </div>;
     }
 }

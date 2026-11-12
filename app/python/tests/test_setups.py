@@ -69,6 +69,8 @@ class Setups(unittest.TestCase):
         self.assertEqual(data["canvas"]["nodes"], [{"id": "board", "part": "twist"}])
         self.assertEqual([d.event for d in su.timeline(self.setup)], ["create"])
         self.assertIn("core", su.git(self.setup, "remote").split())
+        with open(os.path.join(self.setup, ".gitignore")) as f:
+            self.assertIn("ownstudio/records/", f.read().splitlines())
         self.assertFalse(su.is_dirty(self.setup))
 
     def test_the_mirror_works_offline(self):

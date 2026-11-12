@@ -7,8 +7,10 @@ import subprocess
 import tempfile
 import textwrap
 import unittest
+from unittest import mock
 
 from ownstudio_lab import procedure as proc
+from ownstudio_lab import capture
 from ownstudio_lab.fakes import fake_board_target
 from ownstudio_lab.target import BoardTarget, SimTarget, TargetError, load_harness
 
@@ -205,6 +207,48 @@ class Waveforms(Fixture):
         target.arm()
         with self.assertRaises(TargetError):
             target.capture(timeout=0.05)
+
+
+class DefaultCapture(Fixture):
+    def test_fake_board_capture_files_setup_record_report_and_waveform(self):
+        ownstudio = self.m / "ownstudio"
+        ownstudio.mkdir()
+        (ownstudio / "setup.yaml").write_text(textwrap.dedent("""
+            name: fake bench
+            board: twist
+            canvas:
+              nodes:
+                - {id: source, part: dc-source, values: {voltage: 30, limit: 1}}
+                - {id: board, part: twist}
+                - {id: load, part: resistor, values: {ohm: 33}}
+              wires: []
+            """))
+        subprocess.run(["git", "-C", str(self.m), "add", "-A"], check=True)
+        subprocess.run(["git", "-C", str(self.m), "-c", "user.name=test", "-c", "user.email=test@example.invalid",
+                        "commit", "-qm", "fixture"], check=True)
+        boards = pathlib.Path(__file__).resolve().parents[3] / "boards"
+        fake = FakeIO([])
+        target = fake_board_target(load_harness(self.m))
+        with mock.patch.dict("os.environ", {"OWNSTUDIO_BOARDS": str(boards)}):
+            status = proc.run_procedure(self.m, pathlib.Path(capture.__file__), "board", fake,
+                                        allow_power=True, target=target)
+        self.assertEqual(status, 0)
+        record_folder, verdict = fake.records[0]
+        self.assertEqual(verdict, "PASS")
+        self.assertEqual(record_folder.parents[1], ownstudio / "records")
+        waveform = (record_folder / "waveform.csv").read_text().splitlines()
+        self.assertEqual(waveform[0], "t_s,V_LOW1_V,I_LOW1_A")
+        self.assertEqual(len(waveform), 1025)
+        record = json.loads((record_folder / "record.json").read_text())
+        self.assertEqual(record["conditions"]["load_ohm"], 33)
+        report = self.m / record["report"]
+        self.assertTrue(report.is_file())
+        self.assertIn("Captured waveform", report.read_text())
+        status_lines = subprocess.run(["git", "-C", str(self.m), "status", "--porcelain"],
+                                      capture_output=True, text=True, check=True).stdout
+        self.assertNotIn("ownstudio/records", status_lines)
+        self.assertIn("ownstudio/reports", status_lines)
+        self.assertEqual(target.link.writes[-1], ("Converter", {"Mode": 0}))
 
 
 TWIN_PROCEDURE = '''

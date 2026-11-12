@@ -13,6 +13,7 @@ that into a page.
 from __future__ import annotations
 
 import datetime
+import csv
 import hashlib
 import html
 import json
@@ -143,6 +144,36 @@ def finding_for(case_id: str, findings: list[dict]) -> dict | None:
 
 # Campaigns and records -----------------------------------------------------
 
+def records_root(mission: pathlib.Path) -> pathlib.Path:
+    """Raw records are inside ``ownstudio/`` for a setup, legacy missions stay unchanged."""
+    return mission / ("ownstudio/records" if (mission / "ownstudio/setup.yaml").is_file() else "records")
+
+
+def reports_root(mission: pathlib.Path) -> pathlib.Path:
+    """Reports are reproducible setup files and therefore live beside setup.yaml."""
+    return mission / ("ownstudio/reports" if (mission / "ownstudio/setup.yaml").is_file() else "reports")
+
+
+def _ignore_setup_records(mission: pathlib.Path) -> None:
+    """Keep an existing setup's raw captures out of git without changing a tracked file."""
+    if not (mission / "ownstudio/setup.yaml").is_file():
+        return
+    result = subprocess.run(["git", "-C", str(mission), "rev-parse", "--git-path", "info/exclude"],
+                            capture_output=True, text=True)
+    if result.returncode != 0 or not result.stdout.strip():
+        return
+    exclude = pathlib.Path(result.stdout.strip())
+    if not exclude.is_absolute():
+        exclude = mission / exclude
+    try:
+        text = exclude.read_text() if exclude.exists() else ""
+        rule = "ownstudio/records/"
+        if rule not in text.splitlines():
+            exclude.parent.mkdir(parents=True, exist_ok=True)
+            exclude.write_text(text + ("" if not text or text.endswith("\n") else "\n") + rule + "\n")
+    except OSError:
+        pass
+
 def mission_identity(mission: pathlib.Path) -> dict:
     def git(*args):
         return subprocess.run(["git", "-C", str(mission), *args], capture_output=True, text=True).stdout.strip()
@@ -153,7 +184,8 @@ def mission_identity(mission: pathlib.Path) -> dict:
 def new_campaign(mission: pathlib.Path, records: pathlib.Path | None = None,
                  now: datetime.datetime | None = None) -> pathlib.Path:
     """A fresh campaign folder: records/<date>_<commit>[-dirty]_<time>. Never reused."""
-    records = records or mission / "records"
+    records = records or records_root(mission)
+    _ignore_setup_records(mission)
     now = now or datetime.datetime.now()
     ident = mission_identity(mission)
     stem = f"{now:%Y-%m-%d}_{ident['commit'][:7]}{'-dirty' if ident['dirty'] else ''}_{now:%H%M%S}"
@@ -240,6 +272,71 @@ def write_record(out: pathlib.Path, procedure: str, level: str, target: str, cas
     return verdict != "FAIL"
 
 
+def _waveform_svg(path: pathlib.Path) -> str:
+    """A dependency-free preview for the light report; the app remains the interactive viewer."""
+    if not path.is_file():
+        return ""
+    with path.open(newline="") as source:
+        rows = list(csv.reader(source))
+    values = []
+    for row in rows[1:]:
+        try:
+            values.append((float(row[0]), float(row[1])))
+        except (IndexError, ValueError):
+            continue
+    if len(values) < 2:
+        return ""
+    step = max(1, len(values) // 800)
+    values = values[::step]
+    t0, t1 = values[0][0], values[-1][0]
+    lo, hi = min(v for _, v in values), max(v for _, v in values)
+    span_t, span_v = t1 - t0 or 1.0, hi - lo or 1.0
+    points = " ".join(f"{40 + (t - t0) / span_t * 720:.1f},{15 + (hi - v) / span_v * 180:.1f}"
+                      for t, v in values)
+    trigger = 40 + (0 - t0) / span_t * 720
+    return (f'<svg viewBox="0 0 780 220" role="img" aria-label="Captured waveform">'
+            f'<line x1="{trigger:.1f}" x2="{trigger:.1f}" y1="10" y2="200" class="trigger"/>'
+            f'<polyline points="{points}" class="trace"/><text x="40" y="216">{t0 * 1e3:.1f} ms</text>'
+            f'<text x="760" y="216" text-anchor="end">{t1 * 1e3:.1f} ms</text></svg>')
+
+
+def write_report(mission: pathlib.Path, record_folder: pathlib.Path) -> pathlib.Path:
+    """Write a portable, light HTML report and link it from record.json."""
+    record_path = record_folder / "record.json"
+    record = json.loads(record_path.read_text())
+    root = reports_root(mission)
+    root.mkdir(parents=True, exist_ok=True)
+    campaign = record_folder.parent.name
+    report = root / f"{campaign}-{record_folder.name}.html"
+    try:
+        record["report"] = report.relative_to(mission).as_posix()
+    except ValueError:
+        record["report"] = str(report)
+    record_path.write_text(json.dumps(record, indent=2) + "\n")
+    rows = []
+    for case in record.get("cases", []):
+        verdict = case_verdict(case)
+        measured = f"{_show(case.get('measured', '—'))} {case.get('unit', '')}".strip()
+        rows.append("<tr>" + "".join(f"<td>{html.escape(str(value))}</td>" for value in
+                    (case.get("id", ""), case.get("title", ""), measured, case.get("criterion", ""), verdict)) + "</tr>")
+    conditions = " · ".join(f"{html.escape(str(k))} = {html.escape(_show(v))}" for k, v in record.get("conditions", {}).items())
+    svg = _waveform_svg(record_folder / "waveform.csv")
+    try:
+        raw_path = record_folder.relative_to(mission).as_posix()
+    except ValueError:
+        raw_path = str(record_folder)
+    document = f"""<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>{html.escape(record.get('procedure', 'OwnStudio report'))}</title><style>
+:root{{--green:#234d45;--amber:#d99128;--line:#d8dedb;color-scheme:light dark}}body{{font:15px/1.45 system-ui,sans-serif;max-width:980px;margin:auto;padding:24px}}header{{border-left:7px solid var(--green);padding-left:14px}}h1{{margin:.1em 0}}.meta{{opacity:.72}}table{{border-collapse:collapse;width:100%;margin:18px 0}}th,td{{text-align:left;border-bottom:1px solid var(--line);padding:7px}}svg{{width:100%;height:auto;border:1px solid var(--line)}}.trace{{fill:none;stroke:var(--amber);stroke-width:2}}.trigger{{stroke:var(--green);stroke-dasharray:5 4}}code{{font-family:ui-monospace,monospace}}
+</style></head><body><header><h1>{html.escape(record.get('procedure', 'Capture'))}</h1>
+<div class="meta">{html.escape(record.get('date', ''))} · {html.escape(record.get('target', ''))} · <strong>{html.escape(record.get('verdict', ''))}</strong></div></header>
+<p>{conditions}</p>{svg}<table><thead><tr><th>Case</th><th>Metric</th><th>Measured</th><th>Criterion</th><th>Verdict</th></tr></thead>
+<tbody>{''.join(rows)}</tbody></table><p class="meta">Raw data: <code>{html.escape(raw_path)}</code></p></body></html>"""
+    report.write_text(document)
+    return report
+
+
 def load_records(records: pathlib.Path) -> list[dict]:
     """Every record under records/, newest first. Each gets 'path' and 'campaign'."""
     found = []
@@ -305,7 +402,7 @@ def states(mission: pathlib.Path, records: pathlib.Path | None = None) -> dict:
     """Where the validation stands: one entry per catalogued test, per requirement, per finding."""
     catalogue = load_catalogue(mission)
     findings = load_findings(mission)
-    recs = load_records(records or mission / "records")
+    recs = load_records(records or records_root(mission))
     by_case: dict[str, list] = {}
     stray = set()
     ids = {t["id"] for t in catalogue["tests"]}

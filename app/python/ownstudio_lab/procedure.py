@@ -83,6 +83,7 @@ class Context:
             versions.update({k: str(v) for k, v in identity.items()})
         passed = testing.write_record(out, procedure, level, self.target.kind, cases, self.mission,
                                       inputs, versions, board, operator, conditions)
+        testing.write_report(self.mission, out)
         verdict = json.loads((out / "record.json").read_text())["verdict"]
         self.records.append((out, verdict))
         self.conditions.append(dict(conditions or {}))

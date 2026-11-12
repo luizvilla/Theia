@@ -5,6 +5,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 from fake_board import FakeShellPort
 from ownstudio_lab.boards import Board
@@ -58,6 +59,32 @@ class Methods(Fixture):
             found = self.call("procedures", mission=tmp)["result"]
             self.assertEqual(found, [{"path": "tests/procedures/step.py", "title": "Step", "targets": ["simulator"],
                                       "tests": ["T1"], "level": "", "power_on": True, "doc": "Step."}])
+
+    def test_a_setup_gets_its_boards_default_capture_without_example_extras(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            mission = pathlib.Path(tmp)
+            (mission / "ownstudio").mkdir()
+            (mission / "ownstudio" / "setup.yaml").write_text("board: twist\n")
+            boards = pathlib.Path(__file__).resolve().parents[3] / "boards"
+            with mock.patch.dict("os.environ", {"OWNSTUDIO_BOARDS": str(boards)}):
+                found = self.call("procedures", mission=tmp)["result"]
+            self.assertEqual(len(found), 1)
+            self.assertEqual(found[0]["title"], "Capture: reference step")
+            self.assertEqual(found[0]["targets"], ["board"])
+            self.assertEqual([c["label"] for c in found[0]["capture"]["channels"]], ["V_LOW1", "I_LOW1"])
+            self.assertEqual(found[0]["capture"]["reference"]["to"], 12.0)
+
+    def test_capture_probes_on_the_canvas_override_the_board_defaults(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            mission = pathlib.Path(tmp)
+            (mission / "ownstudio").mkdir()
+            (mission / "ownstudio" / "setup.yaml").write_text(
+                "board: twist\ncanvas:\n  probes:\n    - {kind: capture, label: Duty, object: rDuty, unit: '%'}\n"
+                "    - {kind: monitor, label: Slow voltage, object: rV1Low_V, unit: V}\n")
+            boards = pathlib.Path(__file__).resolve().parents[3] / "boards"
+            with mock.patch.dict("os.environ", {"OWNSTUDIO_BOARDS": str(boards)}):
+                capture = self.call("procedures", mission=tmp)["result"][0]["capture"]
+            self.assertEqual(capture["channels"], [{"label": "Duty", "object": "rDuty", "unit": "%"}])
 
     def test_tests_gives_states(self):
         with tempfile.TemporaryDirectory() as tmp:

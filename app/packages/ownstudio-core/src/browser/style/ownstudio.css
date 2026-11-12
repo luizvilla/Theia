@@ -259,6 +259,10 @@ body.theia-dark .ownstudio-diagram .os-block rect { stroke: var(--ownstudio-ligh
 
 /* Procedures */
 .ownstudio-procedure-card { max-width: 900px; }
+.ownstudio-capture-form { display: grid; grid-template-columns: repeat(3, minmax(180px, 1fr)); gap: 10px; margin: 10px 0;
+    padding: 10px; border: 1px solid var(--theia-widget-border, rgba(128,128,128,0.35)); border-radius: 5px; }
+.ownstudio-capture-form > div { display: flex; flex-direction: column; }
+.ownstudio-field-label { color: var(--theia-descriptionForeground); font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
 .ownstudio-procedure-log { font-family: var(--theia-code-font-family, monospace); font-size: 12px; white-space: pre-wrap; max-height: 360px; overflow: auto;
     border: 1px solid var(--theia-widget-border, rgba(128,128,128,0.35)); border-radius: 6px; padding: 8px; max-width: 900px; }
 .ownstudio-procedure-ask { border-color: var(--ownstudio-persimmon); max-width: 900px; }
@@ -271,6 +275,11 @@ body.theia-dark .os-trace-board { stroke: var(--ownstudio-yellow); }
 .os-band { fill: #3BA55D; fill-opacity: 0.16; stroke: #3BA55D; stroke-opacity: 0.45; stroke-dasharray: 2 2; }
 .ownstudio-overlay-table { margin-top: 6px; }
 .ownstudio-overlay-table td, .ownstudio-overlay-table th { padding: 2px 8px; }
+.ownstudio-capture-result { max-width: 940px; margin: 10px 0; border-top: 3px solid var(--ownstudio-persimmon); padding-top: 8px; }
+.ownstudio-plot-controls { align-items: center; margin-bottom: 5px; }
+.ownstudio-plot-controls .os-channel-off { opacity: 0.5; text-decoration: line-through; }
+.ownstudio-uplot { min-height: 300px; max-width: 940px; background: var(--theia-editor-background); }
+.ownstudio-uplot .u-legend { font-family: var(--theia-ui-font-family); }
 
 /* Verification layer: each block outlined in its state's colour, with a badge in words. */
 body .ownstudio-diagram .os-block-verified .os-block rect,

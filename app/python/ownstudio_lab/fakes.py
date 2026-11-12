@@ -22,6 +22,48 @@ class FakeBoard:
     product = "fake board (simulator behind a ThingSet link)"
 
 
+class StoryboardHarness:
+    """Small deterministic converter used only when the shot harness opts in."""
+    def __init__(self, high=29.9, tau=0.008):
+        self.t, self.v, self.i = 0.0, 0.0, 0.0
+        self.mode, self.ref, self.high, self.tau = 0, 10.0, high, tau
+        self.trace = []
+
+    def get(self, group):
+        if group == "Converter":
+            return {"Mode": self.mode, "wVoltageRef_V": self.ref, "rDuty": self.v / self.high if self.high else 0.0}
+        if group == "Measurements":
+            return {"rVHigh_V": self.high, "rV1Low_V": self.v, "rV2Low_V": 0.0,
+                    "rI1Low_A": self.i, "rI2Low_A": 0.0}
+        raise KeyError(group)
+
+    def update(self, group, values):
+        if group != "Converter":
+            raise KeyError(group)
+        self.mode = int(values.get("Mode", self.mode))
+        self.ref = float(values.get("wVoltageRef_V", self.ref))
+
+    def advance(self, seconds):
+        for _ in range(max(1, int(round(seconds / 1e-4)))):
+            wanted = self.ref if self.mode else 0.0
+            previous = self.v
+            self.v += (wanted - self.v) * 1e-4 / self.tau
+            self.i = 0.25 + (self.v - previous) * 8.0 if self.mode else 0.0
+            self.t += 1e-4
+            self.trace.append((self.t, self.v))
+
+    def now(self):
+        return self.t
+
+    def capture(self):
+        t, v = zip(*self.trace) if self.trace else ((), ())
+        self.trace = []
+        return {"t": list(t), "rV1Low_V": list(v)}
+
+    def identity(self):
+        return {"model": "storyboard first order", "tau_s": self.tau}
+
+
 class SimulatedBoardLink:
     """The mission firmware's data objects and Scope group, over a simulator harness."""
 

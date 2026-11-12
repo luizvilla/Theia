@@ -6,9 +6,11 @@ export async function connect(port) {
     const ws = new WebSocket(page.webSocketDebuggerUrl);
     let id = 0;
     const pending = new Map();
+    const listeners = new Map();
     ws.onmessage = e => {
         const m = JSON.parse(e.data);
         if (m.id && pending.has(m.id)) { pending.get(m.id)(m); pending.delete(m.id); }
+        else if (m.method && listeners.has(m.method)) { for (const listener of listeners.get(m.method)) listener(m.params); }
     };
     await new Promise(r => ws.onopen = r);
     const send = (method, params = {}) => new Promise(r => { const i = ++id; pending.set(i, r); ws.send(JSON.stringify({ id: i, method, params })); });
@@ -43,7 +45,11 @@ export async function connect(port) {
         return true;
     };
     const screenshot = async () => Buffer.from((await send('Page.captureScreenshot', { format: 'png' })).result.data, 'base64');
-    return { send, evaluate, click, clickOn, doubleClickOn, screenshot, close: () => ws.close() };
+    const on = (method, listener) => {
+        const found = listeners.get(method) ?? [];
+        found.push(listener); listeners.set(method, found);
+    };
+    return { send, evaluate, click, clickOn, doubleClickOn, screenshot, on, close: () => ws.close() };
 }
 
 export const sleep = ms => new Promise(r => setTimeout(r, ms));

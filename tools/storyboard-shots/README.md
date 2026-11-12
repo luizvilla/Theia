@@ -19,6 +19,8 @@ tools/storyboard-shots/run.sh 9486 -  tools/storyboard-shots/shots.mjs     # fra
 tools/storyboard-shots/run.sh 9485 $S tools/storyboard-shots/menus-test.mjs
 OWNSTUDIO_STORYBOARD_BOARD=1 EXPECT_READY=0 \
   tools/storyboard-shots/run.sh 9487 $S tools/storyboard-shots/checklist-test.mjs
+OWNSTUDIO_STORYBOARD_BOARD=1 OWNSTUDIO_STORYBOARD_HIGH=29.9 \
+  tools/storyboard-shots/run.sh 9488 $S tools/storyboard-shots/capture-test.mjs
 ```
 
 - **`navigation-test.mjs`**: clicks through every workbench × right-bar tab ×
@@ -41,5 +43,8 @@ OWNSTUDIO_STORYBOARD_BOARD=1 EXPECT_READY=0 \
   board Run button against the deterministic storyboard board. Set
   `OWNSTUDIO_STORYBOARD_PRODUCT`, `OWNSTUDIO_STORYBOARD_HIGH` and
   `EXPECT_READY` to exercise the wrong-board, mismatch and all-green states.
+- **`capture-test.mjs`** (U12): runs the board-supplied reference-step capture
+  on the deterministic fake Twist, checks its record and HTML report on disk,
+  then checks uPlot's event viewport, channels, whole-run control and metrics.
 - **`cdp.mjs`**: the small DevTools Protocol client both scripts use, and `STATE`,
   the window state read from the page.

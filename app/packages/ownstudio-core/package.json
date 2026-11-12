@@ -24,7 +24,8 @@
     "@theia/terminal": "1.76.0",
     "@theia/workspace": "1.76.0",
     "@xyflow/react": "12.12.0",
-    "js-yaml": "^4.1.0"
+    "js-yaml": "^4.1.0",
+    "uplot": "1.6.32"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",

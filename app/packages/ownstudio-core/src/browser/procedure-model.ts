@@ -201,6 +201,12 @@ export class ProcedureModel {
 
     protected receive(runId: number, event: ProcedureEvent): void {
         const run = this.current;
+        // A very short procedure may emit before start()'s RPC response carries
+        // its id back. There is only one run at a time, so its first event owns
+        // the pending (-1) run; later events still require the exact id.
+        if (run?.runId === -1) {
+            run.runId = runId;
+        }
         if (!run || run.runId !== runId) {
             return;
         }

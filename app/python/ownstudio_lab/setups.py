@@ -85,6 +85,15 @@ def create_setup(mirror, dest, board, name=None, ref=None, upstream=None):
     os.makedirs(os.path.join(dest, "ownstudio"), exist_ok=True)
     with open(os.path.join(dest, SETUP_FILE), "w", encoding="utf-8") as f:
         yaml.safe_dump(setup, f, sort_keys=False)
+    ignore = os.path.join(dest, ".gitignore")
+    if os.path.isfile(ignore):
+        with open(ignore, encoding="utf-8") as f:
+            text = f.read()
+    else:
+        text = ""
+    if "ownstudio/records/" not in text.splitlines():
+        with open(ignore, "a", encoding="utf-8") as f:
+            f.write(("" if not text or text.endswith("\n") else "\n") + "ownstudio/records/\n")
     commit_event(dest, "create", f"setup: {setup['name']} on the {board}")
     return dest
 

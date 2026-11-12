@@ -550,6 +550,120 @@
   ]
  },
  {
+  "frame": "9",
+  "title": "The default capture from the board",
+  "file": "frame-09-capture.png",
+  "state": {
+   "workbench": "lab",
+   "left": "ownstudio.left.lab",
+   "right": "ownstudio.inspector",
+   "bottom": "ownstudio.canvas",
+   "main": "ownstudio.workbench.lab",
+   "centreScroll": null,
+   "leftTabs": [
+    "ownstudio.left.design",
+    "explorer-view-container",
+    "ownstudio.left.lab"
+   ],
+   "rightTabs": [
+    "ownstudio.parts",
+    "ownstudio.inspector",
+    "chat-view-widget"
+   ],
+   "bottomTabs": [
+    "Canvas",
+    "Terminal",
+    "Build output"
+   ],
+   "canvasTint": "lab",
+   "canvasLevel": "setup",
+   "canvasSelection": "dc-source",
+   "inspectorSelection": "DC source",
+   "canvasFirmware": null,
+   "codeToolbar": [],
+   "buildOutput": [],
+   "timeline": true,
+   "leftOpen": true,
+   "rightOpen": true,
+   "bottomOpen": true,
+   "status": [
+    "",
+    "",
+    "",
+    "twist-buck*",
+    "",
+    "0  0",
+    "Twist 1.4.2 ·  firmware matches",
+    "Lab checklist 6/6",
+    "",
+    ""
+   ],
+   "titleBar": "rgb(23, 51, 46)"
+  },
+  "differences": [
+   "The channels, reference step and capture window come from the Twist board description; the example adds nothing.",
+   "The deterministic storyboard Twist reports the matching firmware and HIGH = 29.9 V, so all six checks hold and Capture is green.",
+   "Timeline dots come in U18."
+  ]
+ },
+ {
+  "frame": "10",
+  "title": "The capture result, opened on the event",
+  "file": "frame-10-result.png",
+  "state": {
+   "workbench": "lab",
+   "left": "ownstudio.left.lab",
+   "right": "ownstudio.inspector",
+   "bottom": "ownstudio.canvas",
+   "main": "ownstudio.procedure",
+   "centreScroll": null,
+   "leftTabs": [
+    "ownstudio.left.design",
+    "explorer-view-container",
+    "ownstudio.left.lab"
+   ],
+   "rightTabs": [
+    "ownstudio.parts",
+    "ownstudio.inspector",
+    "chat-view-widget"
+   ],
+   "bottomTabs": [
+    "Canvas",
+    "Terminal",
+    "Build output"
+   ],
+   "canvasTint": "lab",
+   "canvasLevel": "setup",
+   "canvasSelection": null,
+   "inspectorSelection": null,
+   "canvasFirmware": null,
+   "codeToolbar": [],
+   "buildOutput": [],
+   "timeline": true,
+   "leftOpen": true,
+   "rightOpen": true,
+   "bottomOpen": false,
+   "status": [
+    "",
+    "",
+    "",
+    "twist-buck*",
+    "",
+    "0  0",
+    "Twist 1.4.2 ·  firmware matches",
+    "Lab checklist 6/6",
+    "",
+    ""
+   ],
+   "titleBar": "rgb(23, 51, 46)"
+  },
+  "differences": [
+   "uPlot opens at −5 to +40 ms around the step; Whole run restores the complete −20 to +82 ms firmware-scope window.",
+   "Drag zooms, Shift+wheel pans, the legend is the cursor readout, and each channel button turns its trace on or off.",
+   "The simulation and PulsimGui actions shown in the storyboard arrive in U14–U15; this frame is the measured result only."
+  ]
+ },
+ {
   "frame": "15",
   "title": "The eight menus",
   "file": "frame-15-menus.png",

@@ -21,6 +21,7 @@ flash {manifest, serial_number?, mcumgr?}
                               close the link, flash, then link again once the new
                               firmware answers ThingSet (it takes a few seconds to boot)
 """
+import hashlib
 import json
 import os
 import pathlib
@@ -30,6 +31,7 @@ import time
 
 from . import flash as flashing
 from . import testing
+from . import capture
 from .boards import Board, find_boards
 from .thingset import ThingSetError, find_thingset_port
 
@@ -131,13 +133,11 @@ class Bridge:
         return json.loads(result.stdout)
 
     def procedures(self, mission):
-        if os.environ.get("OWNSTUDIO_STORYBOARD_BOARD"):
-            return [{"path": "tests/procedures/capture.py", "title": "Capture: reference step",
-                     "targets": ["simulator", "board"], "tests": [], "level": "L1", "power_on": True,
-                     "doc": "The board's default capture, for the deterministic storyboard bench."}]
         import ast
-        folder = pathlib.Path(mission) / "tests" / "procedures"
-        found = []
+        mission = pathlib.Path(mission)
+        folder = mission / "tests" / "procedures"
+        default = capture.procedure_info(mission)
+        found = [default] if default else []
         for path in sorted(folder.glob("*.py")) if folder.is_dir() else []:
             try:
                 tree = ast.parse(path.read_text())
@@ -249,6 +249,29 @@ def _storyboard_bridge(emit):
     source_hash = "storyboard"
     if manifest.is_file():
         source_hash = json.loads(manifest.read_text()).get("build", {}).get("source_hash", source_hash)
+    else:
+        identity = setup / "tools" / "build_identity.py"
+        if identity.is_file():
+            result = subprocess.run([sys.executable, str(identity), "--json"], cwd=setup,
+                                    capture_output=True, text=True, timeout=30)
+            if result.returncode == 0:
+                source_hash = (json.loads(result.stdout) or {}).get("source_hash", source_hash)
+        else:
+            # Match node/build-service.ts's setupBuildIdentity so a fake board
+            # can truthfully report the exact setup sources it stands in for.
+            source_paths = ["src", "platformio.ini", "zephyr", "owntech", "libs"]
+            result = subprocess.run(["git", "-C", str(setup), "ls-files", "-co", "--exclude-standard", "--", *source_paths],
+                                    capture_output=True, text=True, timeout=30)
+            if result.returncode == 0:
+                digest = hashlib.sha256()
+                for relative in sorted(filter(None, result.stdout.splitlines())):
+                    path = setup / relative
+                    if path.is_file():
+                        digest.update(relative.replace(os.sep, "/").encode())
+                        digest.update(b"\0")
+                        digest.update(path.read_bytes())
+                        digest.update(b"\0")
+                source_hash = digest.hexdigest()[:16]
     high = float(os.environ.get("OWNSTUDIO_STORYBOARD_HIGH", "0.2"))
     product = os.environ.get("OWNSTUDIO_STORYBOARD_PRODUCT", "TWIST_V1_4_2")
     board = Board("STORYBOARD", product, {"1.2": "storyboard"})

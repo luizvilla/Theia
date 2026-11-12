@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: LGPL-2.1-only
 import * as React from '@theia/core/shared/react';
+import uPlot = require('uplot');
+import 'uplot/dist/uPlot.min.css';
 import { inject, injectable, postConstruct } from '@theia/core/shared/inversify';
 import { Message } from '@theia/core/shared/@lumino/messaging';
 import { ReactWidget } from '@theia/core/lib/browser/widgets/react-widget';
@@ -7,11 +9,123 @@ import { OpenerService, codicon, open } from '@theia/core/lib/browser';
 import URI from '@theia/core/lib/common/uri';
 import { FileService } from '@theia/filesystem/lib/browser/file-service';
 import { ProcedureModel } from './procedure-model';
+import { MissionService } from './mission-service';
 import { statusText } from '../common/procedure-protocol';
-import { Waveform, parseWaveform } from '../common/waveform';
+import { eventWindow, Waveform, parseWaveform } from '../common/waveform';
 import { Band, TestRecord, bands, clip, compareCases, formatConditions, twinPath } from '../common/overlay';
 
 export const PROCEDURE_WIDGET_ID = 'ownstudio.procedure';
+// Theia's esbuild pipeline selects uPlot's ESM entry even for this CommonJS
+// TypeScript output, so the constructor is its default export at runtime.
+const UPlot = ((uPlot as unknown as { default?: typeof uPlot }).default ?? uPlot) as typeof uPlot;
+
+interface PlotProps { waveform: Waveform; }
+
+/** uPlot owns its canvas: React only gives it a mount and the accessible controls around it. */
+class InteractiveCapturePlot extends React.Component<PlotProps> {
+    protected readonly mount = React.createRef<HTMLDivElement>();
+    protected plot: uPlot | undefined;
+    protected visible: boolean[] = [];
+
+    componentDidMount(): void { this.build(); }
+    componentDidUpdate(previous: PlotProps): void {
+        if (previous.waveform !== this.props.waveform) {
+            this.plot?.destroy();
+            this.build();
+        }
+    }
+    componentWillUnmount(): void { this.plot?.destroy(); }
+
+    protected build(): void {
+        const mount = this.mount.current;
+        const series = this.props.waveform.series?.filter(channel => channel.values.length === this.props.waveform.t.length) ?? [];
+        if (!mount || !series.length) {
+            return;
+        }
+        this.visible = series.map(() => true);
+        const initial = eventWindow(this.props.waveform.t);
+        const colours = ['#d99128', '#2c8dbf', '#2f9e60', '#9b6dcc'];
+        const scaleOf = (name: string) => name.endsWith('_A') ? 'current' : 'voltage';
+        const options: uPlot.Options = {
+            width: Math.max(520, Math.min(920, mount.clientWidth || 760)), height: 300,
+            scales: { x: { time: false }, voltage: { auto: true }, current: { auto: true } },
+            axes: [
+                { values: (_u, ticks) => ticks.map(value => `${(value * 1e3).toFixed(1)} ms`) },
+                { scale: 'voltage', label: 'V' },
+                { scale: 'current', side: 1, label: 'A', grid: { show: false } },
+            ],
+            cursor: { drag: { x: true, y: false, setScale: true } },
+            legend: { show: true },
+            series: [{ label: 'Time' }, ...series.map((channel, index) => ({
+                label: channel.name, scale: scaleOf(channel.name), stroke: colours[index % colours.length], width: 2,
+            }))],
+            hooks: {
+                ready: [plot => {
+                    this.addWheelNavigation(plot);
+                    plot.setScale('x', { min: initial[0], max: initial[1] });
+                }],
+                setScale: [(plot, key) => { if (key === 'x') { this.markScale(plot); } }],
+            },
+        };
+        this.plot = new UPlot(options, [this.props.waveform.t, ...series.map(channel => channel.values)] as uPlot.AlignedData, mount);
+    }
+
+    /** Wheel zooms around the cursor; Shift+wheel pans. Drag selects a zoom window. */
+    protected addWheelNavigation(plot: uPlot): void {
+        plot.over.addEventListener('wheel', event => {
+            event.preventDefault();
+            const scale = plot.scales.x;
+            if (scale.min === undefined || scale.max === undefined) {
+                return;
+            }
+            const span = scale.max - scale.min;
+            if (event.shiftKey) {
+                const shift = span * Math.sign(event.deltaY) * 0.12;
+                plot.setScale('x', { min: scale.min + shift, max: scale.max + shift });
+            } else {
+                const rect = plot.over.getBoundingClientRect();
+                const fraction = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
+                const centre = scale.min + span * fraction;
+                const factor = event.deltaY > 0 ? 1.2 : 0.8;
+                plot.setScale('x', { min: centre - span * factor * fraction, max: centre + span * factor * (1 - fraction) });
+            }
+        }, { passive: false });
+    }
+
+    protected markScale(plot: uPlot): void {
+        const holder = this.mount.current?.parentElement;
+        const scale = plot.scales.x;
+        if (holder && scale.min !== undefined && scale.max !== undefined) {
+            holder.dataset.currentStart = String(scale.min);
+            holder.dataset.currentEnd = String(scale.max);
+        }
+    }
+
+    protected wholeRun(): void {
+        const t = this.props.waveform.t;
+        this.plot?.setScale('x', { min: t[0], max: t[t.length - 1] });
+    }
+
+    protected toggle(index: number): void {
+        this.visible[index] = !this.visible[index];
+        this.plot?.setSeries(index + 1, { show: this.visible[index] });
+        this.forceUpdate();
+    }
+
+    render(): React.ReactNode {
+        const series = this.props.waveform.series ?? [];
+        const initial = eventWindow(this.props.waveform.t);
+        return <div className='ownstudio-capture-result' data-view-start={initial[0]} data-view-end={initial[1]}>
+            <div className='ownstudio-button-row ownstudio-plot-controls'>
+                <button className='theia-button secondary' onClick={() => this.wholeRun()}>Whole run</button>
+                {series.map((channel, index) => <button key={channel.name} className={`theia-button secondary${this.visible[index] === false ? ' os-channel-off' : ''}`}
+                    aria-pressed={this.visible[index] !== false} onClick={() => this.toggle(index)}>{channel.name}</button>)}
+                <span className='ownstudio-muted'>Drag to zoom · Shift+wheel to pan · cursor values in the legend</span>
+            </div>
+            <div ref={this.mount} className='ownstudio-uplot' />
+        </div>;
+    }
+}
 
 /**
  * The procedure run in progress or last run: its log, its questions, its records
@@ -24,6 +138,7 @@ export class ProcedureWidget extends ReactWidget {
     @inject(ProcedureModel) protected readonly model: ProcedureModel;
     @inject(OpenerService) protected readonly opener: OpenerService;
     @inject(FileService) protected readonly files: FileService;
+    @inject(MissionService) protected readonly missions: MissionService;
 
     protected waveforms = new Map<string, Waveform | null>();
     protected recordFiles = new Map<string, TestRecord | null>();
@@ -118,8 +233,8 @@ export class ProcedureWidget extends ReactWidget {
     }
 
     protected renderVerdict(verdict: string): React.ReactNode {
-        return <span className={verdict === 'PASS' ? 'os-test-pass' : verdict === 'FAIL' ? 'os-test-fail' : 'os-test-blocked'}>
-            {verdict === 'PASS' ? '✓' : verdict === 'FAIL' ? '✗' : '–'} {verdict || '…'}</span>;
+        return <span className={verdict === 'PASS' || verdict === 'INFO' ? 'os-test-pass' : verdict === 'FAIL' ? 'os-test-fail' : 'os-test-blocked'}>
+            {verdict === 'PASS' ? '✓' : verdict === 'FAIL' ? '✗' : verdict === 'INFO' ? 'i' : '–'} {verdict || '…'}</span>;
     }
 
     protected renderLink(path: string): React.ReactNode {
@@ -150,8 +265,26 @@ export class ProcedureWidget extends ReactWidget {
                     <div className='ownstudio-muted'>Simulated at the same conditions: {sim ? <>{this.renderVerdict(sim.verdict)} {this.renderLink(twin)}</> : 'reading…'}</div>
                     {this.renderPlot(this.waveforms.get(path), this.waveforms.get(twin), rec ? rec.cases : [])}
                     {rec && this.renderComparison(rec, sim)}</>
-                : this.renderPlot(this.waveforms.get(path), undefined, rec?.cases ?? [])}
+                : <>{this.renderPlot(this.waveforms.get(path), undefined, rec?.cases ?? [])}{rec && this.renderMetrics(rec)}</>}
+            {rec?.report && <div className='ownstudio-button-row'><button className='theia-button secondary' onClick={() => this.openReport(rec.report!)}>
+                <span className={codicon('report')} /> Open HTML report</button></div>}
         </div>;
+    }
+
+    protected openReport(report: string): void {
+        const uri = report.startsWith('/') ? URI.fromFilePath(report) : this.missions.resolve(report);
+        if (uri) {
+            open(this.opener, uri);
+        }
+    }
+
+    protected renderMetrics(record: TestRecord): React.ReactNode {
+        if (!record.cases.length) {
+            return undefined;
+        }
+        return <table className='ownstudio-table ownstudio-overlay-table'><thead><tr><th>Metric</th><th>Measured</th><th>Verdict</th></tr></thead>
+            <tbody>{record.cases.map(c => <tr key={c.id}><td>{c.title}</td><td>{typeof c.measured === 'number' ? Number(c.measured.toPrecision(4)) : c.measured ?? c.reason ?? '—'} {c.unit ?? ''}</td>
+                <td>{this.renderVerdict(c.verdict ?? (c.passed ? 'PASS' : c.passed === false ? 'FAIL' : 'INFO'))}</td></tr>)}</tbody></table>;
     }
 
     protected renderComparison(board: TestRecord, sim: TestRecord | undefined): React.ReactNode {
@@ -202,6 +335,9 @@ export class ProcedureWidget extends ReactWidget {
     protected renderPlot(w: Waveform | null | undefined, sim: Waveform | null | undefined, cases: TestRecord['cases']): React.ReactNode {
         if (!w || w.t.length < 2) {
             return undefined;
+        }
+        if (!sim && w.series?.length) {
+            return <InteractiveCapturePlot waveform={w} />;
         }
         const W = 720, H = 200, left = 48, right = 10, top = 22, bottom = 22;
         const t0 = w.t[0], t1 = w.t[w.t.length - 1];

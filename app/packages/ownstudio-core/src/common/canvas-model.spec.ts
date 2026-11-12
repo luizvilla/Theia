@@ -2,7 +2,7 @@
 // Plan U8: the first topology rules of the setup canvas (SPEC §6, Q82).
 import { test } from 'node:test';
 import * as assert from 'node:assert/strict';
-import { Canvas, addPart, canAdd, canConnect } from './canvas-model';
+import { Canvas, addPart, canAdd, canConnect, normaliseCanvas } from './canvas-model';
 
 const setup = (): Canvas => ({
     nodes: [
@@ -58,4 +58,9 @@ test('one board; adding a part gives it an id, a place and its default values', 
         { id: 'resistor-2', part: 'resistor', x: 410, y: 200, values: { ohm: 33 } },
     ]);
     assert.deepEqual(addPart(c, 'flux-capacitor', 0, 0), { reason: 'flux-capacitor is not a part OwnStudio knows.' });
+});
+
+test('capture and monitor probes survive canvas normalisation', () => {
+    const probes = [{ kind: 'capture' as const, label: 'V_LOW1', object: 'rV1Low_V', unit: 'V' }];
+    assert.deepEqual(normaliseCanvas({ nodes: [], wires: [], probes }).probes, probes);
 });

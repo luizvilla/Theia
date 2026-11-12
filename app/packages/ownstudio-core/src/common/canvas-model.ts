@@ -50,7 +50,8 @@ export const PARTS: PartDef[] = [
 export interface CanvasNode { id: string; part: string; x?: number; y?: number; values?: Record<string, number> }
 export interface WireEnd { node: string; port: string }
 export interface CanvasWire { from: WireEnd; to: WireEnd }
-export interface Canvas { nodes: CanvasNode[]; wires: CanvasWire[] }
+export interface CanvasProbe { kind: 'monitor' | 'capture'; label: string; object: string; unit?: string; }
+export interface Canvas { nodes: CanvasNode[]; wires: CanvasWire[]; probes?: CanvasProbe[] }
 
 export type Verdict = { ok: true } | { ok: false; reason: string };
 const ok: Verdict = { ok: true };
@@ -148,5 +149,6 @@ export function addPart(canvas: Canvas, part: string, x: number, y: number): { c
 /** The canvas of a new setup: the board alone (U5 writes `{id: board, part: twist}`). */
 export function normaliseCanvas(raw: unknown): Canvas {
     const c = (raw ?? {}) as Partial<Canvas>;
-    return { nodes: Array.isArray(c.nodes) ? c.nodes : [], wires: Array.isArray(c.wires) ? c.wires : [] };
+    return { nodes: Array.isArray(c.nodes) ? c.nodes : [], wires: Array.isArray(c.wires) ? c.wires : [],
+        ...(Array.isArray(c.probes) ? { probes: c.probes } : {}) };
 }

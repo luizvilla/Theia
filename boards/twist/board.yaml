@@ -50,3 +50,22 @@ inside:
 
 plant: null        # the .pulsim plant arrives with U13
 wiring_templates: []   # draw.io templates arrive in slice 2
+
+# Every Twist setup gets this procedure without adding files to an example.
+# Channels are data-object names reported by the firmware scope; the labels are
+# the probe names shown on the setup canvas and in the result viewer.
+default_capture:
+  title: "Capture: reference step"
+  channels:
+    - {label: V_LOW1, object: rV1Low_V, unit: V}
+    - {label: I_LOW1, object: rI1Low_A, unit: A}
+  reference:
+    group: Converter
+    name: wVoltageRef_V
+    from: 10.0
+    to: 12.0
+    unit: V
+  power_on: {group: Converter, name: Mode, value: 1}
+  duration_s: 0.100
+  pretrigger_s: 0.020
+  sample_period_s: 0.0001

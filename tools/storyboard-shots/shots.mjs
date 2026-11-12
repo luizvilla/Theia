@@ -163,6 +163,43 @@ const FRAMES = [
         ],
     },
     {
+        id: 'capture', num: '9', title: 'The default capture from the board',
+        go: async () => {
+            await show('left', 'ownstudio.left.lab');
+            await show('right', 'ownstudio.inspector');
+            await show('bottom', 'ownstudio.canvas');
+            await app.clickOn('.react-flow__node[data-id="dc-source"]');
+            await sleep(3500);
+        },
+        differences: [
+            'The channels, reference step and capture window come from the Twist board description; the example adds nothing.',
+            'The deterministic storyboard Twist reports the matching firmware and HIGH = 29.9 V, so all six checks hold and Capture is green.',
+            'Timeline dots come in U18.',
+        ],
+    },
+    {
+        id: 'result', num: '10', title: 'The capture result, opened on the event',
+        go: async () => {
+            await show('left', 'ownstudio.left.lab');
+            await sleep(3500);
+            const clicked = await app.clickOn('[data-run-target="board"]');
+            if (!clicked) { throw new Error('board capture button not found'); }
+            await sleep(500);
+            const confirmed = await app.evaluate(`(() => { const button = [...document.querySelectorAll('button')]
+                .find(e => e.textContent.trim() === 'Switch on and run'); button?.click(); return !!button; })()`);
+            if (!confirmed) { throw new Error('power confirmation did not open'); }
+            for (let n = 0; n < 50 && !await app.evaluate(`!!document.querySelector('.ownstudio-uplot canvas')`); n++) await sleep(400);
+            if (!await app.evaluate(`!!document.querySelector('.ownstudio-uplot canvas')`)) { throw new Error('capture result did not open'); }
+            const state = await app.evaluate(STATE);
+            if (state.bottom) { await key('j', 2, 'KeyJ'); await sleep(500); }
+        },
+        differences: [
+            'uPlot opens at −5 to +40 ms around the step; Whole run restores the complete −20 to +82 ms firmware-scope window.',
+            'Drag zooms, Shift+wheel pans, the legend is the cursor readout, and each channel button turns its trace on or off.',
+            'The simulation and PulsimGui actions shown in the storyboard arrive in U14–U15; this frame is the measured result only.',
+        ],
+    },
+    {
         id: 'example', num: '5', title: 'Load an example: it lands on its own branch',
         go: async () => {
             await app.clickOn('#theia-top-panel .lm-MenuBar-item:nth-child(1)');

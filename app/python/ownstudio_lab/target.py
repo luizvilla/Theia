@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import importlib.util
 import math
+import os
 import pathlib
 import sys
 import time
@@ -182,6 +183,10 @@ def open_target(kind: str, mission: pathlib.Path, board_serial: str | None = Non
     if kind == "simulator":
         return SimTarget(load_harness(mission, **options))
     if kind == "board":
+        if os.environ.get("OWNSTUDIO_STORYBOARD_BOARD"):
+            from .fakes import StoryboardHarness, fake_board_target
+            high = float(os.environ.get("OWNSTUDIO_STORYBOARD_HIGH", "29.9"))
+            return fake_board_target(StoryboardHarness(high=high), guard=guard)
         from .boards import find_boards
         from .thingset import find_thingset_port
         boards = [b for b in find_boards() if not b.in_bootloader and (not board_serial or b.serial_number == board_serial)]
