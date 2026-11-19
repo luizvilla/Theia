@@ -6,8 +6,8 @@
   "active_circuit": "main",
   "simulation_settings": {
     "tstop": 0.1,
-    "dt": 2.5e-8,
-    "max_step": 2.5e-8,
+    "dt": 1e-7,
+    "max_step": 1e-7,
     "solver": "bdf1",
     "step_mode": "fixed",
     "output_points": 100000,
