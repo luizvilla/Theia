@@ -11,9 +11,12 @@ import { SetupServiceImpl } from './setup-service.js';
 import { BUILD_SERVICE_PATH, BuildClient } from '../common/build-protocol.js';
 import { BuildServiceImpl } from './build-service.js';
 import { addBundledToolsToPath } from './bundled-tools.js';
+import { preferBundledClaudeSdk } from './claude-sdk.js';
 
 // F5: before any extension host starts, so the clangd extension finds the shipped clangd.
 addBundledToolsToPath();
+// F7: Claude Code uses the agent SDK that comes with OwnStudio.
+preferBundledClaudeSdk();
 
 export default new ContainerModule(bind => {
     // One bridge per frontend connection (one per window).
