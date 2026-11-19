@@ -209,6 +209,27 @@ class Strip(unittest.TestCase):
         self.assertEqual((strip["head"], strip["detached"], strip["restored_from"]), (first.commit, True, "twist-buck"))
         self.assertEqual(strip["dots"][-1]["commit"], last.commit)       # the latest dot stays reachable
 
+    def test_restore_and_back_bring_their_strip_and_preview_from_one_process(self):
+        # F17: a move used to start Python three times (move, strip, preview); now once.
+        import contextlib, io, json as _json
+        self.edit_canvas(33)
+        first = su.commit_event(self.setup, "canvas", "33 ohm")
+        self.edit_canvas(10)
+        last = su.commit_event(self.setup, "canvas", "10 ohm")
+
+        def run(*args):
+            out = io.StringIO()
+            with contextlib.redirect_stdout(out):
+                su.main(["setups", *args])
+            return _json.loads(out.getvalue())
+
+        restored = run("restore", str(self.setup), first.commit, first.commit)
+        self.assertEqual((restored["strip"]["head"], restored["strip"]["detached"]), (first.commit, True))
+        self.assertEqual(restored["preview"], su.preview(self.setup, first.commit))
+        back = run("back", str(self.setup))
+        self.assertEqual((back["strip"]["head"], back["strip"]["detached"]), (last.commit, False))
+        self.assertNotIn("preview", back)
+
     def test_after_a_branch_from_a_restore_the_strip_follows_the_new_branch(self):
         self.edit_canvas(33)
         first = su.commit_event(self.setup, "canvas", "33 ohm")

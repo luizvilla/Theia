@@ -69,7 +69,7 @@ export class ProcedureModel {
         this.client.onEvent(({ runId, event }) => this.receive(runId, event));
         this.missions.onDidChange(() => this.refresh());
         this.missions.onDidChangeFiles(uris => uris.some(u => u.path.toString().includes('/tests/procedures/')) && this.refresh());
-        this.timeline.onDidMove(event => event.waitUntil(this.refresh()));
+        this.timeline.onDidMove(() => void this.refresh());     // F17: a restore rarely changes the procedures: not on the move's path
         this.refresh();
     }
 

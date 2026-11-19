@@ -7,7 +7,7 @@ import * as path from 'path';
 import { injectable } from '@theia/core/shared/inversify';
 import { dump, load } from 'js-yaml';
 import {
-    BoardDefinition, DotPreview, ExampleLoaded, PlantSync, SetupHead, SetupService, SetupSummary, StartInfo, TimelineStrip, setupSlug
+    BoardDefinition, DotPreview, ExampleLoaded, MoveResult, PlantSync, SetupHead, SetupService, SetupSummary, StartInfo, TimelineStrip, setupSlug
 } from '../common/setup-protocol.js';
 import { DesignSheets } from '../common/design-sheet.js';
 import { fileURLToPath } from 'node:url';
@@ -238,12 +238,12 @@ export class SetupServiceImpl implements SetupService {
         return await this.run('ownstudio_lab.setups', ['preview', folder, commit]) as DotPreview;
     }
 
-    async restoreDot(folder: string, commit: string): Promise<void> {
-        await this.run('ownstudio_lab.setups', ['restore', folder, commit]);
+    async restoreDot(folder: string, commit: string, previewOf?: string): Promise<MoveResult> {
+        return await this.run('ownstudio_lab.setups', ['restore', folder, commit, ...(previewOf ? [previewOf] : [])]) as MoveResult;
     }
 
-    async backToLatest(folder: string): Promise<string | null> {
-        return (await this.run('ownstudio_lab.setups', ['back', folder]) as { branch: string | null }).branch;
+    async backToLatest(folder: string, previewOf?: string): Promise<MoveResult & { branch: string | null }> {
+        return await this.run('ownstudio_lab.setups', ['back', folder, ...(previewOf ? [previewOf] : [])]) as MoveResult & { branch: string | null };
     }
 
     async milestone(folder: string, name: string): Promise<void> {

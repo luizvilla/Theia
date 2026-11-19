@@ -25,6 +25,8 @@ export interface StartInfo {
     home: string;
 }
 
+export interface MoveResult { strip: TimelineStrip; preview?: DotPreview }
+
 export interface SetupService {
     startInfo(): Promise<StartInfo>;
     /** F13: fetches OwnTech Core into the local mirror; offline, the mirror as it is serves (updated false). */
@@ -67,9 +69,10 @@ export interface SetupService {
     /** One dot compared with now: details, its canvas, the diff to the working tree. */
     previewDot(folder: string, commit: string): Promise<DotPreview>;
     /** Shows the setup as it was at a dot (S7): unsaved work is committed first, no branch until an edit. */
-    restoreDot(folder: string, commit: string): Promise<void>;
+    /** F17: the move returns the new strip, and the preview of `previewOf` (the selected dot), from one process. */
+    restoreDot(folder: string, commit: string, previewOf?: string): Promise<MoveResult>;
     /** Leaves a restored dot for the latest dot of the branch it came from. */
-    backToLatest(folder: string): Promise<string | null>;
+    backToLatest(folder: string, previewOf?: string): Promise<MoveResult & { branch: string | null }>;
     milestone(folder: string, name: string): Promise<void>;
     newBranch(folder: string, name: string): Promise<string>;
     /** The setup's design sheets; a setup made before them gets its board's, committed (plan U16). */

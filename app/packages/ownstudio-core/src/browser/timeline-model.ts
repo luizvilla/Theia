@@ -7,7 +7,7 @@ import { inject, injectable, postConstruct } from '@theia/core/shared/inversify'
 import { AsyncEmitter, CommandService, Emitter, MessageService, WaitUntilEvent } from '@theia/core/lib/common';
 import { CommonCommands } from '@theia/core/lib/browser';
 import { WorkspaceService } from '@theia/workspace/lib/browser';
-import { DotPreview, SetupService, TimelineDot, TimelineStrip } from '../common/setup-protocol.js';
+import { DotPreview, MoveResult, SetupService, TimelineDot, TimelineStrip } from '../common/setup-protocol.js';
 
 const POLL_MS = 1500;
 
@@ -116,6 +116,7 @@ export class TimelineModel {
 
     /** Saves editors and canvas, then runs a git move; the views follow. */
     protected async move(what: string, action: (folder: string) => Promise<unknown>): Promise<boolean> {
+        let moved: Partial<MoveResult> = {};
         if (!this.folder || this.busy) {
             return false;
         }
@@ -124,7 +125,7 @@ export class TimelineModel {
         try {
             await this.commands.executeCommand(CommonCommands.SAVE_ALL.id);
             await this.onWillMoveEmitter.fire({});
-            await action(this.folder);
+            moved = (await action(this.folder) ?? {}) as Partial<MoveResult>;
             return true;
         } catch (error) {
             this.messages.error(`${what} failed: ${error instanceof Error ? error.message : error}`);
@@ -132,23 +133,23 @@ export class TimelineModel {
         } finally {
             this.busy = false;
             const before = this.strip;
-            this.strip = await this.setups.timelineStrip(this.folder).catch(() => this.strip);
-            if (before?.head !== this.strip?.head || before?.branch !== this.strip?.branch) {
-                await this.reloadViews();
-            }
-            if (this.selected) {
-                await this.select(this.selected, false);
-            }
+            // F17: a restore or a return brings its strip and preview back with it; other moves read them.
+            this.strip = moved.strip ?? await this.setups.timelineStrip(this.folder).catch(() => this.strip);
+            const previewed = moved.preview && this.selected
+                ? Promise.resolve(void (this.preview = moved.preview))
+                : this.selected ? this.select(this.selected, false) : Promise.resolve();
+            const views = before?.head !== this.strip?.head || before?.branch !== this.strip?.branch ? this.reloadViews() : Promise.resolve();
+            await Promise.all([views, previewed]);
             this.onDidChangeEmitter.fire();
         }
     }
 
     restore(commit: string): Promise<boolean> {
-        return this.move('Restore', folder => this.setups.restoreDot(folder, commit));
+        return this.move('Restore', folder => this.setups.restoreDot(folder, commit, this.selected));
     }
 
     back(): Promise<boolean> {
-        return this.move('Back to latest', folder => this.setups.backToLatest(folder));
+        return this.move('Back to latest', folder => this.setups.backToLatest(folder, this.selected));
     }
 
     milestone(name: string): Promise<boolean> {

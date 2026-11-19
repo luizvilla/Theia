@@ -501,8 +501,8 @@ def main(argv):
     create <mirror> <dest> <board> [name] [boards root]
     event <setup> <event> <summary>
     timeline <setup> [ref]
-    restore <setup> <commit>
-    back <setup>
+    restore <setup> <commit> [preview commit]
+    back <setup> [preview commit]
     example <setup> <examples root> <example path>
     design <setup> [boards root]
     strip <setup>
@@ -528,8 +528,11 @@ def main(argv):
         elif cmd == "timeline":
             out = [asdict(d) for d in timeline(*args)]
         elif cmd == "restore":
+            # F17: the strip, and the preview of the selected dot, come back with the move (one process).
             restore(args[0], args[1])
-            out = {"restored": args[1]}
+            out = {"restored": args[1], "strip": strip(args[0])}
+            if len(args) > 2:
+                out["preview"] = preview(args[0], args[2])
         elif cmd == "example":
             out = load_example(args[0], args[1], args[2])
         elif cmd == "strip":
@@ -543,7 +546,9 @@ def main(argv):
         elif cmd == "design":
             out = design_sheets(args[0], args[1] if len(args) > 1 else None)
         elif cmd == "back":
-            out = {"branch": back_to_latest(args[0])}
+            out = {"branch": back_to_latest(args[0]), "strip": strip(args[0])}
+            if len(args) > 1:
+                out["preview"] = preview(args[0], args[1])
         else:
             print(main.__doc__, file=sys.stderr)
             return 2

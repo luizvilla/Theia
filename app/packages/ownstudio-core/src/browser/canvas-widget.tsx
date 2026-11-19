@@ -145,20 +145,28 @@ export class CanvasWidget extends ReactWidget {
             return;
         }
         this.folder = folder;
-        const [canvas, definition, built] = await Promise.all([
-            this.setups.readCanvas(folder),
+        // F17: the canvas is drawn from setup.yaml at once; the board's devicetree (a Python parse) and
+        // the last build follow, so a restore shows the canvas it brings back without waiting for them.
+        const details = Promise.all([
             this.setups.boardDefinition(folder).catch(error => {
                 console.error('board inside not loaded', error);
                 return undefined;
             }),
             this.builds.lastBuild(folder).catch(() => undefined),
         ]);
-        this.canvas = normaliseCanvas(canvas);
+        this.canvas = normaliseCanvas(await this.setups.readCanvas(folder));
+        // The board of a new setup has no place yet: put it in the middle.
+        this.canvas.nodes = this.canvas.nodes.map(n => n.x === undefined ? { ...n, x: 300, y: 40 } : n);
+        this.syncNodes();
+        this.update();
+        this.onDidChangeEmitter.fire();
+        const [definition, built] = await details;
+        if (this.folder !== folder) {
+            return;
+        }
         this.definition = definition;
         this.inside = definition ? insideModel(definition) : undefined;
         this.firmware = built ? `${built.identity.source_hash} ✓` : undefined;
-        // The board of a new setup has no place yet: put it in the middle.
-        this.canvas.nodes = this.canvas.nodes.map(n => n.x === undefined ? { ...n, x: 300, y: 40 } : n);
         this.syncNodes();
         this.update();
         this.onDidChangeEmitter.fire();
