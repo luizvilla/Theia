@@ -164,14 +164,17 @@ def sync_plant_values(mission: pathlib.Path) -> dict:
                               "on the canvas yet: add a source on HIGH and a load on LOW1, then save again")
 
     changed: dict[str, float] = {}
+    before = _committed_plant_values(mission, path)
 
     def put(node: dict, key: str, name: str) -> None:
         current = node.get("values")
         if not isinstance(current, dict):
             current = {}
-            node["values"] = current
         value = values[name]
+        if key not in current and before is not None and math.isclose(before.get(name, math.nan), value, rel_tol=1e-9):
+            return      # the canvas keeps its default, and PulsimGui's save left this value as OwnStudio wrote it
         if current.get(key) != value:
+            node["values"] = current
             current[key] = value
             changed[name] = value
 
@@ -184,6 +187,23 @@ def sync_plant_values(mission: pathlib.Path) -> dict:
             yaml.safe_dump(setup, sort_keys=False), encoding="utf-8")
     return {"changed": changed, "values": values, "canvas": canvas,
             "plant": str(path.relative_to(mission))}
+
+
+def _committed_plant_values(mission: pathlib.Path, path: pathlib.Path) -> dict | None:
+    """The named values of the plant at the setup's last dot (as OwnStudio wrote it from the canvas), or None."""
+    _, Project, _, _, _ = _runtime()
+    relative = path.relative_to(mission).as_posix()
+    out = subprocess.run(["git", "-C", str(mission), "show", f"HEAD:{relative}"], capture_output=True)
+    if out.returncode != 0:
+        return None
+    with tempfile.NamedTemporaryFile("wb", suffix=".pulsim", delete=False) as f:
+        f.write(out.stdout)
+    try:
+        return project_values(Project.load(f.name))
+    except Exception:  # an older or broken plant at that dot: compare with nothing
+        return None
+    finally:
+        os.unlink(f.name)
 
 
 def _find_dependency(mission: pathlib.Path, header: str) -> pathlib.Path | None:

@@ -121,6 +121,31 @@ class NativePlant(unittest.TestCase):
         self.assertEqual(nodes["board"]["values"]["inductance_H"], 55e-6)
         self.assertEqual(nodes["board"]["values"]["capacitance_F"], 22e-6)
 
+    def test_a_save_that_changes_only_rload_is_one_change_when_the_twist_keeps_its_defaults(self):
+        # F14: the trial's setup has no L or C on the Twist (the canvas shows the defaults). A PulsimGui
+        # save of Rload alone named "Rload, L, C" and wrote the defaults in as if they had changed.
+        from pulsimgui.models.project import Project
+        from ownstudio_lab.plant_values import write_plant
+
+        setup_file = self.setup / "ownstudio" / "setup.yaml"
+        setup = yaml.safe_load(setup_file.read_text())
+        board = next(node for node in setup["canvas"]["nodes"] if node["id"] == "board")
+        board.pop("values", None)
+        setup_file.write_text(yaml.safe_dump(setup, sort_keys=False))
+        write_plant(self.setup)
+        for args in (["init", "-q"], ["add", "-A"], ["-c", "user.name=t", "-c", "user.email=t@t", "commit", "-qm", "canvas"]):
+            subprocess.run(["git", "-C", str(self.setup), *args], check=True)
+        plant = self.setup / "ownstudio" / "plant" / "twist_buck.pulsim"
+        project = Project.load(plant)
+        parts = {part.name: part for part in project.get_active_circuit().components.values()}
+        parts["Rload"].parameters["resistance"] = 22.0
+        project.save()
+
+        result = sync_plant_values(self.setup)
+        board = next(node for node in yaml.safe_load(setup_file.read_text())["canvas"]["nodes"] if node["id"] == "board")
+        self.assertEqual(result["changed"], {"Rload": 22.0})
+        self.assertNotIn("values", board)
+
     def test_a_simulated_run_reports_its_progress_and_can_be_cancelled(self):
         # F4 (Q175): simulated time over the total the procedure expects, with the time left.
         from ownstudio_lab import procedure

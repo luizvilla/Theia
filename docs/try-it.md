@@ -28,7 +28,7 @@ Known limits, so you don't lose time on them:
 
 **2. The inside of the Twist.** Double-click the Twist. Five blocks on your reference layout; click **Driver**: the Inspector shows the legs, 200 kHz, 100/100 ns, up-down, read from Core's devicetree. Read-only in slice 1.
 
-**3. Load an example.** **File › Examples › Examples of the board…**, then **buck voltage mode**. It lands on its own branch (`buck-voltage-mode`, status bar and timeline); the previous `src/` stays on the setup's first branch.
+**3. Load an example.** **File › Examples › Examples of the board…**, then **Buck with PID controlled output voltage** (marked + OwnStudio extras). It lands on its own branch (`buck-voltage-mode`, status bar and timeline); the previous `src/` stays on the setup's first branch.
 
 **4. Build and flash.** In **Code**, **Setup files** lists **Your code** (`main.cpp`, `control.cpp`) and the **App** files; **Show all files** brings back the whole tree (F9). Open `src/main.cpp` or `src/control.cpp`: the toolbar above the editor has **Build**, **Upload**, **Build and upload**. Build takes about a minute (progress in **Build output**); then Upload. The Twist on the canvas shows the firmware's identity, and the Lab checklist's **Firmware** line turns green when the board reports the same build.
 

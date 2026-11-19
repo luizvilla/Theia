@@ -23,7 +23,13 @@ const kpInFile = () => /static const float kp = ([^F;]+)F;/.exec(fs.readFileSync
 const app = await connect(port);
 const exceptions = [];
 await app.send('Runtime.enable');
-app.on('Runtime.exceptionThrown', e => exceptions.push(e.exceptionDetails?.exception?.description ?? e.exceptionDetails?.text));
+app.on('Runtime.exceptionThrown', e => {
+    const d = e.exceptionDetails ?? {};
+    // A rejected promise of a plain object says only "Object": keep its preview and where it came from.
+    const preview = d.exception?.preview?.properties?.map(p => `${p.name}=${p.value}`).join(', ');
+    const where = d.stackTrace?.callFrames?.slice(0, 3).map(f => `${f.functionName || '?'} ${f.url.split('/').pop()}:${f.lineNumber}`).join(' < ');
+    exceptions.push([d.exception?.description ?? d.text, preview && `{${preview}}`, where].filter(Boolean).join(' '));
+});
 await waitForWindow(app);
 await sleep(3000);
 const failures = [];
