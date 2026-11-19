@@ -12,11 +12,12 @@ import importlib.metadata
 import json
 import pathlib
 import sys
+from time import monotonic
 import traceback
 
 import numpy as np
 
-from .simulation import DEFAULT_REFERENCE_V, Harness, load_project, sync_plant_values
+from .simulation import DEFAULT_REFERENCE_V, Harness, SimulationCancelled, load_project, sync_plant_values
 
 
 def _backend_types():
@@ -64,9 +65,28 @@ def backend(mission: pathlib.Path):
                 harness = Harness(root, project=project, store_every=store_every)
                 harness.update("Converter", {"wVoltageRef_V": DEFAULT_REFERENCE_V, "Mode": 1})
 
-                callbacks.progress(10, "Running the OwnStudio setup simulator...")
-                harness.advance(project.simulation_settings.tstop)
-                if callbacks.check_cancelled():
+                total = project.simulation_settings.tstop
+                started = monotonic()
+                last = [0.0]
+
+                def progress(t):
+                    # F4 (Q175): the bar follows simulated time; Pause and Cancel act here.
+                    callbacks.wait_if_paused()
+                    now = monotonic()
+                    if now - last[0] < 0.25:
+                        return
+                    last[0] = now
+                    done = min(t / total, 1.0) if total > 0 else 0.0
+                    left = (now - started) / done * (1 - done) if done >= 0.02 else None
+                    callbacks.progress(10 + int(89 * done), f"Simulated {t * 1e3:.1f} of {total * 1e3:.1f} ms"
+                                       + (f", about {left:.0f} s left" if left is not None else ""))
+
+                harness.on_progress = progress
+                harness.is_cancelled = callbacks.check_cancelled
+                callbacks.progress(10, f"Simulating {total * 1e3:.1f} ms with OwnStudio's runner...")
+                try:
+                    harness.advance(total)
+                except SimulationCancelled:
                     return BackendRunResult(error_message="Simulation cancelled")
                 wave = harness.capture()
                 time = np.asarray(wave["t"], dtype=float) + float(settings.t_start)

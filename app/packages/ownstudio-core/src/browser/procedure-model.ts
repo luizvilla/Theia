@@ -5,9 +5,7 @@ import { Emitter } from '@theia/core/lib/common';
 import { PreferenceService } from '@theia/core/lib/common/preferences';
 import { ConfirmDialog } from '@theia/core/lib/browser';
 import { BoardService } from '../common/board-protocol.js';
-import {
-    ProcedureClient, ProcedureEvent, ProcedureInfo, ProcedureService
-} from '../common/procedure-protocol.js';
+import { ProcedureClient, ProcedureEvent, ProcedureInfo, ProcedureProgress, ProcedureService } from '../common/procedure-protocol.js';
 import { MissionService } from './mission-service.js';
 import { BoardModel } from './board-model.js';
 import { LabChecklistModel } from './lab-checklist-model.js';
@@ -34,6 +32,8 @@ export interface ProcedureRun {
     ask?: { id: number; kind: 'number' | 'confirm'; question: string };
     records: { path: string; verdict: string }[];
     done?: { status: number; error?: string };
+    /** F4: the latest progress of a simulator run. */
+    progress?: ProcedureProgress;
     /** A record filed earlier, shown again (from the control center): no process runs. */
     past?: boolean;
     /** Board record being replayed on the simulator after its result-level action. */
@@ -252,6 +252,7 @@ export class ProcedureModel {
             case 'log': run.log.push(event.text); break;
             case 'ask': run.ask = { id: event.id, kind: event.kind, question: event.question }; break;
             case 'record': run.records.push({ path: event.path, verdict: event.verdict }); break;
+            case 'progress': { const { event: _kind, ...progress } = event; run.progress = progress; break; }
             case 'done': this.finish(event); return;
         }
         this.onDidChangeEmitter.fire();

@@ -50,17 +50,53 @@ const before = new Set(fs.existsSync(records) ? fs.readdirSync(records) : []);
 const started = Date.now();
 await press('button[data-run-target="simulator"]');
 let shown = false;
+const seen = [];          // F4: what the progress bar said while it ran
 while (Date.now() - started < 600_000) {
     shown = await app.evaluate(`!!document.querySelector('.ownstudio-capture-result')`);
     if (shown) { break; }
+    const p = await app.evaluate(`(() => { const e = document.querySelector('[data-progress]'); return e && { f: e.dataset.progress, text: e.textContent }; })()`);
+    if (p) { seen.push(p); }
     await sleep(1000);
 }
 const seconds = ((Date.now() - started) / 1000).toFixed(0);
 check(shown, `Simulate runs the capture and opens its result (${seconds} s)`);
+const fractions = seen.map(p => Number(p.f)).filter(f => f > 0);
+check(fractions.length >= 5 && fractions.every((f, i) => i === 0 || f >= fractions[i - 1]) && fractions.at(-1) > 0.8,
+    `the bar rises with simulated time (${fractions.length} readings, last ${(fractions.at(-1) ?? 0).toFixed(2)})`);
+check(seen.some(p => /Building the control code/.test(p.text)), 'it says when it is building the control code');
+check(seen.some(p => /about \d+ (s|min) left/.test(p.text)), `and how long is left ("${seen.find(p => /left/.test(p.text))?.text ?? seen.at(-1)?.text}")`);
 const added = (fs.existsSync(records) ? fs.readdirSync(records) : []).filter(d => !before.has(d));
 const record = added.map(d => path.join(records, d, 'capture-simulator', 'record.json')).find(f => fs.existsSync(f));
 const text = record ? fs.readFileSync(record, 'utf8') : '';
 check(/"v_in_V": "?30(\.0)?"?[,}\s]/.test(text), `at the canvas's 30 V (${record ? path.relative(setup, record) : 'no record'})`);
+
+// Cancel: a second run, cancelled once the bar moves, ends within a few seconds and files nothing.
+const labShown = () => app.evaluate(`!!document.querySelector('button[data-run-target="simulator"]')?.getClientRects().length`);
+if (!await labShown()) {          // the result is in front: back to the Lab's own tab
+    const tab = await app.evaluate(`(() => { const e = [...document.querySelectorAll('#theia-main-content-panel .lm-TabBar-tab')]
+        .find(e => e.textContent.trim() === 'Lab'); if (!e) return null; const r = e.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`);
+    if (tab) { await app.click(tab.x, tab.y); }
+    await sleep(1000);
+}
+const filed = fs.readdirSync(records).length;
+await press('button[data-run-target="simulator"]');
+const second = Date.now();
+let moving = 0;
+while (Date.now() - second < 120_000 && !(moving > 0.05)) {
+    moving = Number(await app.evaluate(`document.querySelector('[data-progress]')?.dataset.progress || 0`));
+    await sleep(500);
+}
+check(moving > 0.05, `a second run is under way before Cancel (bar at ${moving.toFixed(2)})`);
+check(await app.clickOn('button[data-stop-run]'), 'Cancel is there while it runs');
+const cancelled = Date.now();
+let ended = false;
+while (Date.now() - cancelled < 15_000) {
+    ended = await app.evaluate(`!document.querySelector('button[data-stop-run]')`);
+    if (ended) { break; }
+    await sleep(250);
+}
+check(ended, `Cancel ends the run (${((Date.now() - cancelled) / 1000).toFixed(1)} s)`);
+check(fs.readdirSync(records).length === filed, 'and files no record');
 
 app.close();
 process.exit(failures ? 1 : 0);

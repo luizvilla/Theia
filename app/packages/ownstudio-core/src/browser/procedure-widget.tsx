@@ -11,7 +11,7 @@ import { FileService } from '@theia/filesystem/lib/browser/file-service';
 import { CommandService } from '@theia/core/lib/common';
 import { ProcedureModel } from './procedure-model.js';
 import { MissionService } from './mission-service.js';
-import { statusText } from '../common/procedure-protocol.js';
+import { ProcedureProgress, statusText } from '../common/procedure-protocol.js';
 import { eventWindow, Waveform, parseWaveform } from '../common/waveform.js';
 import { Band, TestRecord, bands, clip, compareCases, formatConditions, twinPath } from '../common/overlay.js';
 import { OPEN_PULSIMGUI_COMMAND } from './pulsimgui-contribution.js';
@@ -236,8 +236,9 @@ export class ProcedureWidget extends ReactWidget {
                     {first?.twin ? 'A board run and its simulation at the same conditions.' : `Run on the ${first?.target ?? run.target}.`}</p>
                 : <p className='ownstudio-workbench-purpose'>{where} · started {run.started.toLocaleTimeString()} ·{' '}
                     <b className={run.done ? (run.done.status === 0 ? 'os-test-pass' : 'os-test-fail') : ''}>{state}</b>{' '}
-                    {!run.done && <button className='theia-button secondary' onClick={() => this.model.stop()}>
-                        <span className={codicon('debug-stop')} /> Stop</button>}</p>}
+                    {!run.done && <button className='theia-button secondary' data-stop-run onClick={() => this.model.stop()}>
+                        <span className={codicon('debug-stop')} /> {run.target === 'simulator' ? 'Cancel' : 'Stop'}</button>}</p>}
+            {!run.done && !run.past && run.target === 'simulator' && this.renderProgress(run.progress)}
             {run.ask && this.renderAsk(run.ask)}
             {run.done?.error && <pre className='ownstudio-problem ownstudio-procedure-log'>{run.done.error}</pre>}
             {run.records.filter(r => !this.isShownAsTwin(r.path)).map(r => this.renderRecord(r.path, r.verdict))}
@@ -328,6 +329,19 @@ export class ProcedureWidget extends ReactWidget {
         </table>;
     }
 
+    /** F4 (Q175): simulated time over the total, and roughly how long is left. */
+    protected renderProgress(progress: ProcedureProgress | undefined): React.ReactNode {
+        const fraction = progress?.fraction ?? undefined;
+        const text = progress?.stage ?? (fraction !== undefined && progress?.total_s
+            ? `Simulated ${((progress.simulated_s ?? 0) * 1e3).toFixed(1)} of ${(progress.total_s * 1e3).toFixed(0)} ms`
+              + (progress.left_s ? ` · about ${formatLeft(progress.left_s)} left` : '')
+            : 'Starting the simulator…');
+        return <div className='ownstudio-sim-progress' data-progress={fraction ?? ''}>
+            <div className='ownstudio-sim-progress-bar'><div style={{ width: `${Math.round((fraction ?? 0) * 100)}%` }} /></div>
+            <span>{text}</span>
+        </div>;
+    }
+
     protected renderAsk(ask: { kind: 'number' | 'confirm'; question: string }): React.ReactNode {
         return <div className='ownstudio-card ownstudio-procedure-ask' role='alertdialog' aria-label='The procedure asks'>
             <div className='ownstudio-card-title'>{ask.question}</div>
@@ -392,4 +406,8 @@ export class ProcedureWidget extends ReactWidget {
             <text x={left + 4} y={14} className='os-axis os-plot-title'>{label}</text>
         </svg>;
     }
+}
+
+function formatLeft(seconds: number): string {
+    return seconds < 90 ? `${Math.max(1, Math.round(seconds))} s` : `${Math.round(seconds / 60)} min`;
 }

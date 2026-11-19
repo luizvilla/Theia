@@ -24,10 +24,21 @@ export interface ProcedureInfo {
     };
 }
 
+/** F4 (Q175): a simulator run's progress: a stage, or simulated time over the total expected. */
+export interface ProcedureProgress {
+    stage?: string;
+    fraction?: number | null;
+    simulated_s?: number;
+    total_s?: number;
+    elapsed_s?: number;
+    left_s?: number | null;
+}
+
 export type ProcedureEvent =
     | { event: 'log'; text: string }
     | { event: 'ask'; id: number; kind: 'number' | 'confirm'; question: string }
     | { event: 'record'; path: string; verdict: 'PASS' | 'FAIL' | 'BLOCKED' }
+    | ({ event: 'progress' } & ProcedureProgress)
     | { event: 'done'; status: number; error?: string };
 
 export interface ProcedureStart {

@@ -29,6 +29,13 @@ DEFAULT_REFERENCE_V = 12.0
 PULSIM_RELEASE = "2.0.0"
 
 
+PROGRESS_EVERY_S = 2e-3     # F4: simulated time between two progress reports
+
+
+class SimulationCancelled(RuntimeError):
+    """The user cancelled a simulation between two chunks."""
+
+
 class SimulationError(RuntimeError):
     pass
 
@@ -297,6 +304,9 @@ class Harness:
                  step_load_ohm: float | None = None, build_dir: str | None = None, store_every: int = 4,
                  project=None):
         self.mission = pathlib.Path(mission).resolve()
+        self.on_progress = None     # F4: fn(simulated time) after each chunk
+        self.is_cancelled = None    # F4: fn() -> True to stop the run
+        self._next_progress = 0.0
         p, Project, ComponentType, build_node_map, build_node_alias_map = _runtime()
         self.p = p
         if project is None:
@@ -419,6 +429,15 @@ class Harness:
         return self.t
 
     def _switch_fn(self, t):
+        # F4 (Q175): Pulsim calls this at every step, so progress and cancellation ride on it
+        # every PROGRESS_EVERY_S of simulated time. Splitting a run into several simulate()
+        # calls instead changed the answer (the control block restarts its sampling).
+        if t >= self._next_progress:
+            self._next_progress = t + PROGRESS_EVERY_S
+            if self.is_cancelled is not None and self.is_cancelled():
+                raise SimulationCancelled("Simulation cancelled")
+            if self.on_progress is not None:
+                self.on_progress(t)
         k = int(math.floor(t / self.period + 1e-6))
         if k != self.pwm_k:
             self.pwm_k, self.applied = k, self.command

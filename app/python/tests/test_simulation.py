@@ -121,13 +121,41 @@ class NativePlant(unittest.TestCase):
         self.assertEqual(nodes["board"]["values"]["inductance_H"], 55e-6)
         self.assertEqual(nodes["board"]["values"]["capacitance_F"], 22e-6)
 
+    def test_a_simulated_run_reports_its_progress_and_can_be_cancelled(self):
+        # F4 (Q175): simulated time over the total the procedure expects, with the time left.
+        from ownstudio_lab import procedure
+        from ownstudio_lab.simulation import SimulationCancelled
+        from ownstudio_lab.target import SimTarget
+
+        class IO:
+            events = []
+            log = staticmethod(lambda _text: None)
+            progress = staticmethod(lambda message: IO.events.append(message))
+
+        target = SimTarget(Harness(self.setup, store_every=40))
+        ctx = procedure.Context(self.setup, target, io=IO())
+        target.update("Converter", {"wVoltageRef_V": 12.0, "Mode": 1})
+        with mock.patch.object(procedure, "PROGRESS_INTERVAL_S", 0.0):
+            ctx.expect(0.006)
+            target.wait(0.006)
+        fractions = [e["fraction"] for e in IO.events]
+        self.assertGreaterEqual(len(fractions), 3)
+        self.assertEqual(fractions, sorted(fractions))
+        self.assertGreater(fractions[-1], 0.6)
+        self.assertTrue(all(e["total_s"] == 0.006 for e in IO.events))
+        self.assertIsNotNone(IO.events[-1]["left_s"])
+        target.harness.is_cancelled = lambda: True
+        with self.assertRaises(SimulationCancelled):
+            target.wait(0.004)
+        target.close()
+
     def test_pulsimgui_backend_uses_the_same_native_harness(self):
         from pulsimgui.services.simulation_service import SimulationService, SimulationSettings
 
         project, _, _, _ = load_project(self.setup)
         service = SimulationService()
         data = service.convert_gui_circuit(project)
-        settings = SimulationSettings(t_stop=0.0005, t_step=project.simulation_settings.dt, output_points=500)
+        settings = SimulationSettings(t_stop=0.008, t_step=project.simulation_settings.dt, output_points=500)
         progress = []
 
         class Callbacks:
@@ -145,6 +173,8 @@ class NativePlant(unittest.TestCase):
         self.assertIn("rV1Low_V", result.signals)
         self.assertEqual(len(result.time), len(result.signals["rV1Low_V"]))
         self.assertEqual(progress[-1], 100)
+        # F4: the bar moves while it simulates, not only at the start and the end.
+        self.assertTrue(any(10 < value < 100 for value in progress), progress)
 
     def test_headless_pulsimgui_run_action_uses_ownstudio_backend(self):
         env = dict(os.environ, QT_QPA_PLATFORM="offscreen")

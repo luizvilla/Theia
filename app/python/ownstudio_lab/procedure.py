@@ -42,6 +42,7 @@ import importlib.util
 import json
 import pathlib
 import sys
+import time
 import traceback
 
 from . import testing
@@ -50,6 +51,9 @@ from .target import TargetError, open_target
 
 class ProcedureError(Exception):
     pass
+
+
+PROGRESS_INTERVAL_S = 0.5   # F4: at most two progress events a second
 
 
 class Context:
@@ -68,6 +72,28 @@ class Context:
 
     def log(self, text):
         self.io.log(text)
+
+    def expect(self, simulated_s):
+        """F4 (Q175): this run will simulate ``simulated_s`` from now; on the simulator the app
+        then shows a bar (simulated time over total) and the time left. On a board it does nothing."""
+        harness = getattr(self.target, "harness", None)
+        if harness is None or not hasattr(harness, "on_progress"):
+            return
+        start_sim, start_wall, total = harness.now(), time.monotonic(), float(simulated_s)
+        last = [0.0]
+
+        def report(t):
+            now = time.monotonic()
+            if now - last[0] < PROGRESS_INTERVAL_S:
+                return
+            last[0] = now
+            done = min(max((t - start_sim) / total, 0.0), 1.0) if total > 0 else None
+            elapsed = now - start_wall
+            left = elapsed / done * (1 - done) if done and done >= 0.02 else None
+            self.io.progress({"fraction": done, "simulated_s": t - start_sim, "total_s": total,
+                              "elapsed_s": elapsed, "left_s": left})
+
+        harness.on_progress = report
 
     def ask_number(self, question) -> float:
         return float(self.io.ask("number", question))
@@ -100,6 +126,13 @@ class ConsoleIO:
     def log(self, text):
         print(text, flush=True)
 
+    def progress(self, message):
+        if message.get("stage"):
+            print(message["stage"], flush=True)
+        elif message.get("fraction") is not None:
+            left = message.get("left_s")
+            print(f"simulated {message['fraction']:.0%}" + (f", about {left:.0f} s left" if left else ""), flush=True)
+
     def ask(self, kind, question):
         while True:
             answer = input(question + (" [y/N] " if kind == "confirm" else " ")).strip()
@@ -128,6 +161,9 @@ class JsonIO:
 
     def log(self, text):
         self.emit({"event": "log", "text": str(text)})
+
+    def progress(self, message):
+        self.emit({"event": "progress", **message})
 
     def ask(self, kind, question):
         ask_id = self.next_id
@@ -211,6 +247,8 @@ def simulate_record(mission, path, board_path, io, sim_target=None) -> int:
     shown = ", ".join(f"{k} = {v:g}" if isinstance(v, (int, float)) else f"{k} = {v}"
                       for k, v in options.items())
     io.log(f"Simulation of this run, at the board's conditions ({shown or 'the simulator defaults'})…")
+    if sim_target is None and hasattr(io, "progress"):
+        io.progress({"stage": "Building the control code for the simulator…"})
     target = sim_target or open_target("simulator", mission, **options)
     ctx = Context(mission, target, board_path.parent, io, options)
     try:
@@ -235,6 +273,8 @@ def run_procedure(mission, path, target_kind, io, board=None, allow_power=False,
     if target_kind == "board" and power_on and not allow_power:
         raise ProcedureError(f"{path.name} switches the converter on: it needs a one-time power token from OwnStudio")
     if target is None:
+        if target_kind == "simulator" and hasattr(io, "progress"):
+            io.progress({"stage": "Building the control code for the simulator…"})
         target = open_target(target_kind, mission, board, guard=power_guard(power_on, allow_power), **(options or {}))
     ctx = Context(mission, target, campaign, io, options)
     try:
@@ -263,6 +303,8 @@ def run_twin(mission, module, board_ctx, io, sim_target=None):
     shown = ", ".join(f"{k} = {v:g}" if isinstance(v, (int, float)) else f"{k} = {v}" for k, v in options.items())
     io.log(f"Simulation of this run, at the board's conditions ({shown or 'the simulator defaults'})…")
     try:
+        if sim_target is None and hasattr(io, "progress"):
+            io.progress({"stage": "Building the control code for the simulator…"})
         target = sim_target or open_target("simulator", mission, **options)
         ctx = Context(mission, target, board_ctx.campaign, io, dict(board_ctx.options, **options))
         try:

@@ -435,3 +435,9 @@ body.theia-dark .ownstudio-start-body h1 { color: var(--ownstudio-yellow); }
 .ownstudio-diff .os-diff-del { color: #ef6b5b; }
 .ownstudio-diff .os-diff-hunk { color: #6bb3e3; }
 .ownstudio-diff .os-diff-meta { opacity: 0.6; }
+
+/* F4 (Q175): a simulator run's progress, simulated time over the total. */
+.ownstudio-sim-progress { display: flex; align-items: center; gap: 10px; margin: 8px 0 12px; max-width: 640px; }
+.ownstudio-sim-progress-bar { flex: 1; height: 6px; border-radius: 3px; background: rgba(128, 128, 128, 0.3); position: relative; overflow: hidden; }
+.ownstudio-sim-progress-bar > div { position: absolute; inset: 0 auto 0 0; background: var(--ownstudio-persimmon, #e8763a); transition: width 0.4s linear; }
+.ownstudio-sim-progress > span { font-variant-numeric: tabular-nums; white-space: nowrap; }
