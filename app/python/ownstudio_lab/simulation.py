@@ -111,17 +111,21 @@ def apply_setup_values(project, setup: dict) -> dict[str, float]:
     return values
 
 
-def load_project(mission: pathlib.Path):
-    """Load the setup's saved project and apply canvas values by component name."""
+def load_project(mission: pathlib.Path, *, to_simulate: bool = True):
+    """Load the setup's saved project and apply canvas values by component name.
+
+    ``to_simulate=False`` opens it for editing (PulsimGui, Q174): a canvas without its
+    source or load is allowed then, and the plant keeps its own Vin and Rload.
+    """
     _, Project, _, _, _ = _runtime()
     setup = _setup(mission)
     config, path = _plant_config(mission, setup)
     missing = missing_for_simulation(setup)
-    if missing:
+    if missing and to_simulate:
         raise SimulationError(missing)
     write_plant(mission)            # the file on disk says what is simulated (F2)
     project = Project.load(path)
-    values = apply_setup_values(project, setup)
+    values = apply_setup_values(project, setup) if not missing else {**project_values(project), **canvas_values(setup)}
     return project, config, path, values
 
 

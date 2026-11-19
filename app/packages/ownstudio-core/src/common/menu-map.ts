@@ -23,6 +23,8 @@ export interface Menu { label: string; items: MenuEntry[] }
 
 /** F1: the command that adds a part at its default spot (Setup › Add part, a click in Parts). */
 export const addPartCommand = (part: string): string => `ownstudio.setup.addPart.${part}`;
+/** F3: the bench's source and load, wired (the Lab's shortcut when the canvas cannot be simulated). */
+export const ADD_BENCH_COMMAND = 'ownstudio.setup.addBench';
 
 const later = (label: string, slice: number, step?: string): MenuItem => ({ label, comes: { slice, step } });
 

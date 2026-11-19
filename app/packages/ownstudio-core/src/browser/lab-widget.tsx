@@ -13,7 +13,12 @@ import { boardName } from '../common/board-protocol.js';
 import { countStates, stateInfo } from '../common/test-states.js';
 import { OPEN_CONTROL_CENTER_COMMAND } from './control-center-widget.js';
 import { ProcedureModel, RUN_PROCEDURE_COMMAND } from './procedure-model.js';
+import { ProcedureInfo } from '../common/procedure-protocol.js';
 import { LabChecklistModel } from './lab-checklist-model.js';
+import { CanvasState } from './canvas-state.js';
+import { simulationMissing } from '../common/canvas-model.js';
+import { ADD_BENCH_COMMAND } from '../common/menu-map.js';
+import { OPEN_PULSIMGUI_COMMAND } from './pulsimgui-contribution.js';
 
 export const OPEN_PANEL_COMMAND = { id: 'ownstudio.panel.open', category: 'OwnStudio', label: 'Open a Panel…' };
 export const OPEN_DATA_OBJECTS_COMMAND = { id: 'ownstudio.dataObjects.open', category: 'OwnStudio', label: 'Open the Data Object Table' };
@@ -28,6 +33,7 @@ export class LabWidget extends ReactWidget {
     @inject(CommandService) protected readonly commands: CommandService;
     @inject(ProcedureModel) protected readonly procedures: ProcedureModel;
     @inject(LabChecklistModel) protected readonly checklist: LabChecklistModel;
+    @inject(CanvasState) protected readonly canvas: CanvasState;
 
     protected panels: string[] = [];
 
@@ -46,6 +52,7 @@ export class LabWidget extends ReactWidget {
         this.board.onDidChange(() => this.update());
         this.procedures.onDidChange(() => this.update());
         this.checklist.onDidChange(() => this.update());
+        this.canvas.onDidChange(() => this.update());
         this.findPanels();
     }
 
@@ -63,6 +70,25 @@ export class LabWidget extends ReactWidget {
             this.panels = [];
         }
         this.update();
+    }
+
+    /**
+     * F3 (Q173b, Q174): the same capture on the simulator, built from the canvas, with no board
+     * needed. Greyed out with its sentence while the canvas lacks the source or the load.
+     */
+    protected simulateButton(p: ProcedureInfo): React.ReactNode {
+        const missing = simulationMissing(this.canvas.model);
+        return <button className='theia-button' data-run-target='simulator' data-ready={!missing}
+            disabled={this.procedures.running || !!missing} title={missing ?? 'Run this capture on the simulator, at the canvas\'s values'}
+            onClick={() => this.commands.executeCommand(RUN_PROCEDURE_COMMAND.id, p, 'simulator')}>
+            <span className={codicon('play')} /> Simulate</button>;
+    }
+
+    protected simulateMissing(): React.ReactNode {
+        const missing = simulationMissing(this.canvas.model);
+        return missing && <p className='ownstudio-simulate-missing' data-simulate-missing>{missing}{' '}
+            <button className='theia-button secondary' data-add-bench onClick={() => this.commands.executeCommand(ADD_BENCH_COMMAND)}>
+                <span className={codicon('add')} /> Add the bench source and load</button></p>;
     }
 
     protected render(): React.ReactNode {
@@ -110,7 +136,11 @@ export class LabWidget extends ReactWidget {
                         onClick={() => this.commands.executeCommand(RUN_PROCEDURE_COMMAND.id, p, t)}>
                         <span className={codicon(t === 'board' ? 'circuit-board' : 'play')} /> {p.capture ? 'Capture from' : 'Run on'} the {t}
                         {t === 'board' && blocker ? ` · ${blocker.sentence}` : ''}</button>)}
+                    {p.capture && p.targets.includes('simulator') && this.simulateButton(p)}
+                    <button className='theia-button secondary' data-open-pulsimgui onClick={() => this.commands.executeCommand(OPEN_PULSIMGUI_COMMAND.id)}>
+                        <span className={codicon('circuit-board')} /> Open in PulsimGui</button>
                 </div>
+                {p.capture && p.targets.includes('simulator') && this.simulateMissing()}
             </div>;
             })}
             <h2 className='ownstudio-emphasis'>Tests</h2>

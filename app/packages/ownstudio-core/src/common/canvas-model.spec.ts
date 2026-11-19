@@ -2,7 +2,7 @@
 // Plan U8: the first topology rules of the setup canvas (SPEC §6, Q82).
 import { test } from 'node:test';
 import * as assert from 'node:assert/strict';
-import { Canvas, addPart, canAdd, canConnect, normaliseCanvas } from './canvas-model.js';
+import { Canvas, addPart, canAdd, canConnect, normaliseCanvas, simulationMissing, withBenchSourceAndLoad } from './canvas-model.js';
 
 const setup = (): Canvas => ({
     nodes: [
@@ -63,4 +63,31 @@ test('one board; adding a part gives it an id, a place and its default values', 
 test('capture and monitor probes survive canvas normalisation', () => {
     const probes = [{ kind: 'capture' as const, label: 'V_LOW1', object: 'rV1Low_V', unit: 'V' }];
     assert.deepEqual(normaliseCanvas({ nodes: [], wires: [], probes }).probes, probes);
+});
+
+test('F3: simulation needs a source wired to HIGH and a load wired to LOW1, and says which is missing', () => {
+    const twist: Canvas = { nodes: [{ id: 'board', part: 'twist' }], wires: [] };
+    assert.equal(simulationMissing(twist), 'Add a source on HIGH and a load on LOW1 to simulate.');
+    const placed: Canvas = { ...twist, nodes: [...twist.nodes, { id: 'dc-source', part: 'dc-source' }, { id: 'resistor', part: 'resistor' }] };
+    assert.equal(simulationMissing(placed), 'Add a source on HIGH and a load on LOW1 to simulate.', 'placed but not wired');
+    const source: Canvas = { ...placed, wires: [{ from: { node: 'dc-source', port: 'out' }, to: { node: 'board', port: 'HIGH' } }] };
+    assert.equal(simulationMissing(source), 'Add a load on LOW1 to simulate.');
+    const both: Canvas = { ...source, wires: [...source.wires, { from: { node: 'board', port: 'LOW1' }, to: { node: 'resistor', port: 'in' } }] };
+    assert.equal(simulationMissing(both), undefined);
+});
+
+test('F3: the bench shortcut adds 30 V on HIGH and 33 Ω on LOW1, wiring parts already placed', () => {
+    const spot = () => ({ x: 0, y: 0 });
+    const fresh = withBenchSourceAndLoad({ nodes: [{ id: 'board', part: 'twist' }], wires: [] }, spot);
+    assert.equal(simulationMissing(fresh), undefined);
+    assert.deepEqual(fresh.nodes.map(n => [n.part, n.values]), [
+        ['twist', undefined], ['dc-source', { voltage: 30, limit: 1 }], ['resistor', { ohm: 33 }]]);
+
+    // A source the user placed and set to 24 V is wired, not replaced; a second run changes nothing.
+    const placed: Canvas = { nodes: [{ id: 'board', part: 'twist' }, { id: 'dc-source', part: 'dc-source', values: { voltage: 24 } }], wires: [] };
+    const wired = withBenchSourceAndLoad(placed, spot);
+    assert.equal(wired.nodes.filter(n => n.part === 'dc-source').length, 1);
+    assert.equal(wired.nodes.find(n => n.part === 'dc-source')!.values!.voltage, 24);
+    assert.equal(simulationMissing(wired), undefined);
+    assert.deepEqual(withBenchSourceAndLoad(wired, spot), wired);
 });

@@ -84,6 +84,21 @@ class NativePlant(unittest.TestCase):
         (self.setup / "ownstudio" / "setup.yaml").write_text(yaml.safe_dump(setup, sort_keys=False))
         with self.assertRaisesRegex(SimulationError, "Add a source on HIGH and a load on LOW1 to simulate."):
             load_project(self.setup)
+        # PulsimGui still opens it to edit (Q174); its Run refuses with the same sentence.
+        project, _, _, values = load_project(self.setup, to_simulate=False)
+        self.assertEqual(values["L"], 44e-6)
+        from pulsimgui.services.simulation_service import SimulationService, SimulationSettings
+
+        class Callbacks:
+            check_cancelled = staticmethod(lambda: False)
+            wait_if_paused = staticmethod(lambda: None)
+            data_point = staticmethod(lambda _time, _values: None)
+            progress = staticmethod(lambda _value, _message: None)
+
+        _, implementation = backend(self.setup)
+        result = implementation().run_transient(SimulationService().convert_gui_circuit(project),
+                                                SimulationSettings(t_stop=0.0005, t_step=1e-7, output_points=10), Callbacks())
+        self.assertEqual(result.error_message, "Add a source on HIGH and a load on LOW1 to simulate.")
 
     def test_saved_named_values_sync_back_to_the_canvas(self):
         from pulsimgui.models.project import Project

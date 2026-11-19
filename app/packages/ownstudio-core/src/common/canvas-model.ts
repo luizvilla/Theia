@@ -154,3 +154,65 @@ export function normaliseCanvas(raw: unknown): Canvas {
     return { nodes: Array.isArray(c.nodes) ? c.nodes : [], wires: Array.isArray(c.wires) ? c.wires : [],
         ...(Array.isArray(c.probes) ? { probes: c.probes } : {}) };
 }
+
+/** The part wired to one of the board's ports, if any (the simulator follows the wires). */
+export function wiredTo(canvas: Canvas, port: 'HIGH' | 'LOW1' | 'LOW2'): CanvasNode | undefined {
+    for (const wire of canvas.wires) {
+        for (const [board, other] of [[wire.from, wire.to], [wire.to, wire.from]]) {
+            if (kindOf(canvas, board.node) === 'board' && board.port === port) {
+                return canvas.nodes.find(n => n.id === other.node);
+            }
+        }
+    }
+    return undefined;
+}
+
+/**
+ * F3 (Q173b): one sentence saying what the canvas lacks before it can be simulated, or undefined.
+ * The same words as ownstudio_lab.plant_values.missing_for_simulation, which the runner enforces.
+ */
+export function simulationMissing(canvas: Canvas): string | undefined {
+    const source = !!wiredTo(canvas, 'HIGH'), load = !!wiredTo(canvas, 'LOW1');
+    if (source && load) {
+        return undefined;
+    }
+    if (!source && !load) {
+        return 'Add a source on HIGH and a load on LOW1 to simulate.';
+    }
+    return source ? 'Add a load on LOW1 to simulate.' : 'Add a source on HIGH to simulate.';
+}
+
+/**
+ * F3 (Q173b): the bench's source and load, wired: the 30 V source on HIGH and a 33 Ω resistor on
+ * LOW1 (their part defaults). Parts already there are wired rather than duplicated; what is
+ * already wired is left alone. `spot` places a new part.
+ */
+export function withBenchSourceAndLoad(canvas: Canvas, spot: (part: string, canvas: Canvas) => { x: number; y: number }): Canvas {
+    const board = canvas.nodes.find(n => partDef(n.part)?.kind === 'board');
+    if (!board) {
+        return canvas;
+    }
+    let next = canvas;
+    for (const [port, part, partPort] of [['HIGH', 'dc-source', 'out'], ['LOW1', 'resistor', 'in']] as const) {
+        if (wiredTo(next, port)) {
+            continue;
+        }
+        const kind = partDef(part)!.kind;
+        let node = next.nodes.find(n => partDef(n.part)?.kind === kind
+            && !next.wires.some(w => w.from.node === n.id || w.to.node === n.id));
+        if (!node) {
+            const at = spot(part, next);
+            const added = addPart(next, part, at.x, at.y);
+            if ('reason' in added) {
+                continue;       // a source wired elsewhere cannot happen: sources only take HIGH
+            }
+            next = added.canvas;
+            node = next.nodes[next.nodes.length - 1];
+        }
+        const from = { node: node.id, port: partPort }, to = { node: board.id, port };
+        if (canConnect(next, from, to).ok) {
+            next = { ...next, wires: [...next.wires, { from, to }] };
+        }
+    }
+    return next;
+}

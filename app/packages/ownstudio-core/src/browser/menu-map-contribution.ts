@@ -6,7 +6,7 @@ import {
 import { ApplicationShell, WidgetManager } from '@theia/core/lib/browser';
 import { WindowService } from '@theia/core/lib/browser/window/window-service';
 import {
-    DOCUMENTATION_URL, MENU_MAP, MenuEntry, MenuItem, REPORT_PROBLEM_URL, addPartCommand, comingMessage, placeholderCommand, shownLabel
+    DOCUMENTATION_URL, MENU_MAP, MenuEntry, MenuItem, REPORT_PROBLEM_URL, ADD_BENCH_COMMAND, addPartCommand, comingMessage, placeholderCommand, shownLabel
 } from '../common/menu-map.js';
 import { BOTTOM_SLOTS, RIGHT_SLOTS } from '../common/window-layout.js';
 import { TimelineWidget } from './timeline-widget.js';
@@ -111,6 +111,12 @@ export class MenuMapContribution implements CommandContribution {
                 },
             });
         }
+        registry.registerCommand({ id: ADD_BENCH_COMMAND, label: 'Add the bench source and load', category: 'Setup' }, {
+            execute: async () => {
+                const canvas = await this.widgets.getOrCreateWidget<CanvasWidget>(BOTTOM_SLOTS[0].widgetId);
+                canvas.addBenchSourceAndLoad();
+            },
+        });
         registry.registerCommand({ id: 'ownstudio.view.timeline', label: 'Timeline', category: 'View' }, {
             execute: () => this.timeline.setHidden(!this.timeline.isHidden),
             isToggled: () => !this.timeline.isHidden,

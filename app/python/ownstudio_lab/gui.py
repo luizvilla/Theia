@@ -121,7 +121,7 @@ def open_gui(mission: pathlib.Path, *, check: bool = False, check_run: bool = Fa
     app.setStyle("Fusion")
     window = MainWindow()
     window.resize(1700, 1000)
-    project, _, path, values = load_project(pathlib.Path(mission))
+    project, _, path, values = load_project(pathlib.Path(mission), to_simulate=False)
     if check_run:
         project.simulation_settings.tstop = 0.001
         project.simulation_settings.output_points = 1000
@@ -194,7 +194,7 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps(sync_plant_values(args.setup)))
             return 0
         if args.command == "check":
-            _, _, path, values = load_project(args.setup)
+            _, _, path, values = load_project(args.setup, to_simulate=False)
             info, _ = backend(args.setup)
             import PySide6  # noqa: F401 - the launcher requires Qt, not just the project model
             print(json.dumps({"plant": str(path), "values": values, "backend": info.identifier,

@@ -19,7 +19,7 @@ import {
     ReactFlowProvider, applyNodeChanges
 } from '@xyflow/react';
 import { BOTTOM_SLOTS, CANVAS_TINT, WORKBENCH_SLOTS, WorkbenchId } from '../common/window-layout.js';
-import { Canvas, PartDef, addPart, canConnect, normaliseCanvas, partDef } from '../common/canvas-model.js';
+import { Canvas, PartDef, addPart, canConnect, normaliseCanvas, partDef, withBenchSourceAndLoad } from '../common/canvas-model.js';
 import { InsideBlockId, InsideModel, insideModel } from '../common/inside-model.js';
 import { BoardDefinition, SetupService } from '../common/setup-protocol.js';
 import { WORKBENCHES, commandId, iconClass } from './workbenches.js';
@@ -295,11 +295,20 @@ export class CanvasWidget extends ReactWidget {
         return undefined;
     }
 
-    protected defaultSpot(part: string): { x: number; y: number } {
+    /** F3 (Q173b): the bench's 30 V source on HIGH and 33 Ω on LOW1, wired, as one canvas dot. */
+    addBenchSourceAndLoad(): void {
+        const next = withBenchSourceAndLoad(this.canvas, (part, canvas) => this.defaultSpot(part, canvas));
+        if (next !== this.canvas) {
+            this.changed(next, 'bench source and load');
+            setTimeout(() => this.flow?.fitView({ padding: 0.25, maxZoom: 1.2, duration: 200 }), 50);
+        }
+    }
+
+    protected defaultSpot(part: string, canvas: Canvas = this.canvas): { x: number; y: number } {
         const kind = partDef(part)?.kind;
-        const board = this.canvas.nodes.find(n => partDef(n.part)?.kind === 'board');
+        const board = canvas.nodes.find(n => partDef(n.part)?.kind === 'board');
         const bx = board?.x ?? 300, by = board?.y ?? 40;
-        const same = this.canvas.nodes.filter(n => partDef(n.part)?.kind === kind).length;
+        const same = canvas.nodes.filter(n => partDef(n.part)?.kind === kind).length;
         if (kind === 'source') {
             return { x: bx - 260, y: by + 30 * same };
         }
