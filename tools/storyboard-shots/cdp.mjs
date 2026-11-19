@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: LGPL-2.1-only
 // A small Chrome DevTools Protocol client for driving OwnStudio's window (no dependencies).
-export async function connect(port) {
+/** Attaches to the app's page, or to another target (a webview's frame) by its id. */
+export async function connect(port, targetId) {
     const targets = await (await fetch(`http://127.0.0.1:${port}/json`)).json();
-    const page = targets.find(t => t.type === 'page');
+    const page = targetId ? targets.find(t => t.id === targetId) : targets.find(t => t.type === 'page');
     const ws = new WebSocket(page.webSocketDebuggerUrl);
     let id = 0;
     const pending = new Map();

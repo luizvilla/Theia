@@ -77,6 +77,7 @@
     "vscode.git-base": "https://open-vsx.org/api/vscode/git-base/1.95.3/file/vscode.git-base-1.95.3.vsix",
     "llvm-vs-code-extensions.vscode-clangd": "https://open-vsx.org/api/llvm-vs-code-extensions/vscode-clangd/0.6.0/file/llvm-vs-code-extensions.vscode-clangd-0.6.0.vsix",
     "detachhead.basedpyright": "https://open-vsx.org/api/detachhead/basedpyright/1.40.2/file/detachhead.basedpyright-1.40.2.vsix",
-    "vscode.ini": "https://open-vsx.org/api/vscode/ini/1.95.3/file/vscode.ini-1.95.3.vsix"
+    "vscode.ini": "https://open-vsx.org/api/vscode/ini/1.95.3/file/vscode.ini-1.95.3.vsix",
+    "mhutchie.git-graph": "https://open-vsx.org/api/mhutchie/git-graph/1.30.0/file/mhutchie.git-graph-1.30.0.vsix"
   }
 }

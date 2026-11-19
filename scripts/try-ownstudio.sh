@@ -60,7 +60,7 @@ echo "OwnStudio trial in $run"
 echo "  setups:     $run/home/setups"
 echo "  your notes: $run/notes.md"
 cd "$here/app/applications/electron"
-[ -d plugins ] || npm run download:plugins >/dev/null
+npm run download:plugins >/dev/null           # skips the ones already there; fetches new ones (F12: Git Graph)
 "$here/scripts/download-clangd.sh"          # F5: clangd ships with OwnStudio
 exec env -u ELECTRON_RUN_AS_NODE "$here/app/node_modules/electron/dist/electron" . --no-sandbox --plugins=local-dir:plugins \
     --user-data-dir="$run/userdata"
