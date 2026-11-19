@@ -129,6 +129,7 @@ export class LabPanelWidget extends WindowPanel {
 
     @inject(LabChecklistModel) protected readonly checklist: LabChecklistModel;
     @inject(ProcedureModel) protected readonly procedures: ProcedureModel;
+    @inject(CommandRegistry) protected readonly commands: CommandRegistry;
 
     @postConstruct()
     protected override init(): void {
@@ -145,7 +146,10 @@ export class LabPanelWidget extends WindowPanel {
             <div className='ownstudio-lab-checks' data-ready={checks.every(check => check.ok)}>
                 {checks.map(check => <div key={check.id} className={`ownstudio-lab-check ownstudio-lab-check-${check.ok ? 'ok' : 'bad'}`}
                     data-check={check.id} data-ok={check.ok}>
-                    <span className='ownstudio-dot' /><span><b>{check.label}</b> · {check.sentence}</span>
+                    <span className='ownstudio-dot' /><span><b>{check.label}</b> · {check.sentence}
+                        {check.action && <>{' '}<button className='theia-button' data-check-action={check.action}
+                            onClick={() => this.commands.executeCommand(check.action === 'upload' ? 'ownstudio.setup.upload' : 'ownstudio.setup.buildUpload')}>
+                            {check.action === 'upload' ? 'Upload' : 'Build and upload'}</button></>}</span>
                 </div>)}
             </div>
             <div className='ownstudio-panel-head'>Procedures</div>

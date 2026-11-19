@@ -94,14 +94,16 @@ export class LabWidget extends ReactWidget {
     protected render(): React.ReactNode {
         const lab = WORKBENCHES.find(w => w.id === 'lab')!;
         const { link } = this.board;
+        const firmware = this.checklist.checks().find(check => check.id === 'firmware')!;
         return <div className='ownstudio-workbench-body'>
             <h1 className='ownstudio-title'>{lab.label}</h1>
             <p className='ownstudio-workbench-purpose'>{lab.purpose}</p>
             <h2 className='ownstudio-emphasis'>Board</h2>
-            <p>{link ? <>{boardName(link.product)} on {link.port}: firmware {this.board.firmware === 'matches' ? 'matches the setup' : 'differs from the setup'}.</>
+            <p>{link ? <>{boardName(link.product)} on {link.port}. {firmware.sentence}</>
                 : 'No board linked. Panels and the data object table go live when one is.'}
-                {' '}{this.board.identity?.prebuilt && this.board.firmware !== 'matches' &&
-                    <button className='theia-button secondary' onClick={() => this.commands.executeCommand('ownstudio.board.flash')}>Flash the pre-built firmware</button>}</p>
+                {link && firmware.action && <>{' '}<button className='theia-button secondary' data-firmware-action={firmware.action}
+                    onClick={() => this.commands.executeCommand(firmware.action === 'upload' ? 'ownstudio.setup.upload' : 'ownstudio.setup.buildUpload')}>
+                    {firmware.action === 'upload' ? 'Upload' : 'Build and upload'}</button></>}</p>
             <h2 className='ownstudio-emphasis'>Panels</h2>
             {!this.panels.length && <p className='ownstudio-muted'>This setup has no panels (panels/*.panel.json).</p>}
             <div className='ownstudio-button-row'>

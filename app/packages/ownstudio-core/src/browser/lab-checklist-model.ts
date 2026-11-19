@@ -70,6 +70,8 @@ export class LabChecklistModel {
             boardProduct: this.board.link?.product,
             firmware: this.board.firmware,
             firmwareHash: this.board.link?.build?.rSourceHash,
+            latestBuildHash: this.board.identity?.prebuilt?.build.source_hash,
+            sourcesHash: this.board.identity?.sources?.source_hash,
             highVoltage: liveNumber(this.live.values, 'Measurements/rVHigh_V'),
             outputs: { LOW1: port('LOW1'), LOW2: port('LOW2') },
             procedure: procedure ? {

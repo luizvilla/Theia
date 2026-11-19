@@ -51,3 +51,29 @@ test('an output cannot be called inside limits without all live measurements', (
     assert.equal(check.ok, false);
     assert.match(check.sentence, /LOW1 has no live current reading/);
 });
+
+test('F6: the firmware line names both builds and offers the one action that fixes it', async () => {
+    const { firmwareCheck } = await import('./lab-checklist.js');
+    const base = { canvas: { nodes: [], wires: [] }, outputs: {}, boardProduct: 'TWIST_V1_4_2' };
+    const unplugged = firmwareCheck({ canvas: { nodes: [], wires: [] }, outputs: {}, firmware: 'unknown', latestBuildHash: '8a0a099bc5c20324' });
+    assert.equal(unplugged.sentence, 'Connect the board to read its firmware.');
+    assert.equal(unplugged.action, undefined);
+    // Luiz's trial: the board ran d4c7, the code was built as 8a0a and not uploaded.
+    const trial = firmwareCheck({ ...base, firmware: 'differs', firmwareHash: 'd4c7e553b9c495a1',
+        latestBuildHash: '8a0a099bc5c20324', sourcesHash: '8a0a099bc5c20324' });
+    assert.equal(trial.sentence, 'The board runs build d4c7e553; your code is build 8a0a099b, built and not uploaded.');
+    assert.equal(trial.action, 'upload');
+    const edited = firmwareCheck({ ...base, firmware: 'differs', firmwareHash: 'd4c7e553b9c495a1',
+        latestBuildHash: '8a0a099bc5c20324', sourcesHash: 'ffff0000ffff0000' });
+    assert.equal(edited.sentence, 'The board runs build d4c7e553; your code changed since build 8a0a099b.');
+    assert.equal(edited.action, 'build-upload');
+    const stale = firmwareCheck({ ...base, firmware: 'prebuilt', firmwareHash: '8a0a099bc5c20324',
+        latestBuildHash: '8a0a099bc5c20324', sourcesHash: 'ffff0000ffff0000' });
+    assert.equal(stale.sentence, 'The board runs build 8a0a099b, your latest build; your code changed since.');
+    assert.equal(stale.action, 'build-upload');
+    const never = firmwareCheck({ ...base, firmware: 'differs', firmwareHash: 'd4c7e553b9c495a1', sourcesHash: 'ffff0000ffff0000' });
+    assert.equal(never.sentence, 'The board runs build d4c7e553; this setup has not been built yet.');
+    const ok = firmwareCheck({ ...base, firmware: 'matches', firmwareHash: '8a0a099bc5c20324' });
+    assert.equal(ok.ok, true);
+    assert.equal(ok.action, undefined);
+});

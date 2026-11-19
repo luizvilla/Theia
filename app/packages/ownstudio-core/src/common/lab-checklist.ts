@@ -13,6 +13,8 @@ export interface LabCheck {
     ok: boolean;
     /** One sentence shown beside a red Run button or a checklist line. */
     sentence: string;
+    /** F6 (Q178): the one action that fixes a failing check, shown beside it. */
+    action?: 'upload' | 'build-upload';
 }
 
 export interface LivePort {
@@ -26,7 +28,11 @@ export interface LabChecklistInput {
     canvas: Canvas;
     boardProduct?: string;
     firmware: FirmwareState;
+    /** The build the board reports. */
     firmwareHash?: string;
+    /** F6: the setup's latest build, and the build its code would make now. */
+    latestBuildHash?: string;
+    sourcesHash?: string;
     highVoltage?: number;
     outputs: Partial<Record<'LOW1' | 'LOW2', LivePort>>;
     procedure?: { title: string; valid: boolean };
@@ -40,6 +46,37 @@ const wireAt = (canvas: Canvas, node: string, port: string) => canvas.wires.find
     (w.from.node === node && w.from.port === port) || (w.to.node === node && w.to.port === port));
 
 const otherEnd = (wire: Canvas['wires'][number], node: string) => wire.from.node === node ? wire.to : wire.from;
+
+const short = (hash: string | undefined) => hash?.slice(0, 8);
+
+/**
+ * F6 (Q178): the firmware line names the board's build and the setup's, and offers the one
+ * action that fixes it: Upload when the code is built and not uploaded, else Build and upload.
+ */
+export function firmwareCheck(input: LabChecklistInput): LabCheck {
+    const board = short(input.firmwareHash), latest = short(input.latestBuildHash), now = short(input.sourcesHash);
+    const builtNow = !!latest && latest === now;
+    if (input.firmware === 'matches') {
+        return pass('firmware', 'Firmware', `Runs this setup${board ? ` (build ${board})` : ''}.`);
+    }
+    if (!input.boardProduct) {
+        return fail('firmware', 'Firmware', 'Connect the board to read its firmware.');
+    }
+    if (!board || input.firmware === 'unknown') {
+        return { ...fail('firmware', 'Firmware', builtNow
+            ? `The board does not report an OwnStudio build; your code is build ${latest}, built and not uploaded.`
+            : 'The board does not report an OwnStudio build; build and upload this setup.'), action: builtNow ? 'upload' : 'build-upload' };
+    }
+    if (input.firmware === 'prebuilt' || board === latest) {
+        return { ...fail('firmware', 'Firmware', `The board runs build ${board}, your latest build; your code changed since.`), action: 'build-upload' };
+    }
+    if (builtNow) {
+        return { ...fail('firmware', 'Firmware', `The board runs build ${board}; your code is build ${latest}, built and not uploaded.`), action: 'upload' };
+    }
+    return { ...fail('firmware', 'Firmware', latest
+        ? `The board runs build ${board}; your code changed since build ${latest}.`
+        : `The board runs build ${board}; this setup has not been built yet.`), action: 'build-upload' };
+}
 
 /** Build the checklist in the exact order fixed by SPEC §9. */
 export function labChecklist(input: LabChecklistInput): LabCheck[] {
@@ -58,14 +95,7 @@ export function labChecklist(input: LabChecklistInput): LabCheck[] {
         board = pass('board', 'Board', `${expectedBoard}, as on the canvas.`);
     }
 
-    const hash = input.firmwareHash?.slice(0, 8);
-    const firmware = input.firmware === 'matches'
-        ? pass('firmware', 'Firmware', `Runs this setup${hash ? ` (${hash})` : ''}.`)
-        : fail('firmware', 'Firmware', input.firmware === 'prebuilt'
-            ? 'The setup changed after this firmware was built; build and upload it again.'
-            : input.firmware === 'differs'
-                ? 'The board runs different firmware; upload this setup.'
-                : 'The board does not report this setup’s build identity.');
+    const firmware = firmwareCheck(input);
 
     let high: LabCheck;
     const highWire = boardNode && wireAt(input.canvas, boardNode.id, 'HIGH');
