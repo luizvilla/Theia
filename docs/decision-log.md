@@ -368,3 +368,41 @@ Facts found:
 Luiz confirmed the shared understanding on 2026-11-13.
 
 Amendment (2026-11-13): Luiz moved the timing work after slice 4, as slice 5 (it was slice 3 in Q153 and Q168). The ST-Link developer slice (ADR 0035) moves after slice 5. Plan, SPEC §8 and §19, ADRs 0034 and 0035 updated.
+
+## Rounds 23–25 (2026-11-19): Luiz's slice 1 trial
+
+Luiz ran the nine steps on 2026-11-19 (trial `/data/ownstudio/try/2026-11-19_114359`, notes in `notes2.md`, kept local). His verdict was **not good enough**: parts could not be placed on the canvas, so the Lab never reached 6/6 and steps 5 and 7 could not run.
+
+Facts found:
+- The setup's canvas held only the Twist, with no wires.
+- The plant file `ownstudio/plant/twist_buck.pulsim` was never rewritten after its template copy: 40 V, 33 µH, 14.1 µF. Design's seven L changes and five C changes reached `setup.yaml` only.
+- The simulation he ran used 40 V: with no source on the canvas, it fell back to the template.
+- The PulsimGui progress bar stuck at 10 %. The cause is OwnStudio's runner adapter (`ownstudio_lab/gui.py`), not PulsimGui.
+- Parts could not be placed from the menu either, so the cause is where the canvas accepts a part, not the drag gesture.
+- The Lab showed Firmware red because the board ran build `d4c7e553` while the latest build was `8a0a099b`. Luiz had rebuilt after a Kp change and not uploaded.
+- Claude Code failed because the agent SDK was not installed.
+
+| # | Question | Recommendation | Answer | Recorded in |
+|---|---|---|---|---|
+| Q171 | Slice 1 stays open for fixes only until the nine steps pass end to end; features go to slice 2 unless pulled in? | Yes. | Yes: slice 1 is well consolidated and deserves to be finished. | plan |
+| Q172 | The canvas is the only place parameters live; the plant file is regenerated from it, and a PulsimGui save writes back to the canvas? | Yes. | Yes. | plan F2 |
+| Q173 | Simulation refuses without a source and load, rather than falling back? | Yes. | How does it go with Q174: should a blank setup simulate, and should Simulate build from the canvas? | Q173b |
+| Q173b | Simulate always builds from the canvas; on a blank setup it is greyed out with one sentence and an **Add the bench source and load** shortcut (30 V on HIGH, 33 Ω on LOW1)? | Yes. | Yes. | plan F3 |
+| Q174 | **Simulate** in the Lab beside the board capture, with no board needed, and **Open in PulsimGui** always available? | Yes. | Yes. | plan F3 |
+| Q175 | A progress bar on every simulation, from simulated time over total, with time left and Cancel? | Yes. | Yes; the bar inside PulsimGui stuck at 10 % throughout. | plan F4 |
+| Q176 | A click on a part also adds it at a default spot? | Yes. | Yes; adding from the menu was refused too. | plan F1 |
+| Q177 | clangd shipped with OwnStudio, and `compile_commands.json` from PlatformIO at creation and after each build; `.conf` and `.ini` coloured? | Yes. | Yes. | plan F5 |
+| Q178 | The Firmware line names both builds and offers **Upload**? | Yes. | Yes. | plan F6 |
+| Q179 | Several Spins connected: pick one by serial number, remembered by the setup; setups using several boards later? | Yes. | Yes. | plan F8 |
+| Q180 | The Claude agent SDK ships as a dependency of OwnStudio? | Yes. | Yes. | plan F7 |
+| Q181 | The file tree in three groups (user code, app, hidden), with **Show all files**, as a slice 1 fix? | Yes. | Yes. | plan F9 |
+| Q182 | Build output in green and red, the examples list without paths, the inside view on a fixed grid? | Yes. | Yes. | plan F10 |
+| Q183 | Applied Kp and Ti link to their line in `control.cpp`; the automatic comment on Apply goes to slice 2? | Yes. | Yes. | plan F11, slice 2 |
+| Q184 | Git Graph installed by default now; the source control and Extensions views in slice 2? | Yes. | Yes. | plan F12, slice 2 |
+| Q185 | The output filter in the power block comes from `board.yaml`, not the devicetree, in slice 2? | Yes. | Yes for now; the devicetree may be needed in the future. | slice 2 |
+| Q186 | New setup shows its stages, with a target under 3 s from the local Core copy; report first if it is over? | Yes. | Yes. | plan F13 |
+| Q187 | Before Luiz tests again, Claude runs the nine steps through the app's driver (simulator, flash with the supply off, step 5 left to Luiz), with a regression test per blocker? | Yes. | Yes. | plan F14 |
+
+Also fixed without a question, as bugs: the L curve does not follow the drag, the timeline preview tab goes blank with no title or close button, and the AI prompt does not show spaces.
+
+Luiz confirmed the shared understanding on 2026-11-19.

@@ -478,6 +478,34 @@ What each step built and measured: tests, gates, frames, and every difference fr
 | E21 | examples `4a180f7` (branch `ownstudio/buck-extras`) and Theia `284fcdb` | The buck example carries the firmware the Lab needs, so a setup loaded from it works on a real Twist without copying files by hand (the test setups of U13–U18 copied `control.cpp` from the mission): `main.cpp` with the PI moved to a hardware-free `control_step()` (`control.cpp`), ThingSet data objects on the second USB port (`app.conf`, `app.overlay`), the firmware scope, and the build identity. **Found and fixed on the way**: U10's forced header (`-include`) defined only the image's identity string, so a setup build reported source hash "unknown" over ThingSet and the Lab checklist's Firmware line could never turn green on a real board (U11's tests used a fake board). The header now also defines `BUILD_COMMIT`, `BUILD_DIRTY` and `BUILD_SOURCE_HASH`, and the example's `build_identity.cpp` uses them when defined. Check: a fresh setup loads the example (its 11 files in `src/`), and OwnStudio's own BuildService with real PlatformIO builds it in 61 s: 227,328-byte signed image, 91 ThingSet symbols, `scope_init`, `control_step`, and the setup's source hash `d4c7e553b9c495a1` in `build_source_hash`; the setup is clean after the build. 91 TypeScript tests (the header test is new). Differences from the Order row: no `ownstudio/` requirements or procedures yet, because nothing in a setup reads them in slice 1 (the Lab's capture comes from the board description); they come with the test sequences. The README says what changed from the original example |
 | U19 | this commit | [Slice report](step-5-slice-1-report.md): what works per step of SPEC §2, what this session found beyond the plan, what waits for Luiz, and every storyboard frame beside its screenshot with the recorded differences. All app screenshots retaken on the final build in three runs on fresh setups (frame 11 is U14's own capture); the storyboard frames are rendered from `docs/design/storyboards.html` by the new `tools/storyboard-frames/`. [try-it.md](try-it.md) rewritten for the nine steps, with the known limits first; `scripts/try-ownstudio.sh` now starts on the Start page with a fresh home, profile and `notes.md` per trial, one Python for bridge, simulator and PulsimGui, the local Core mirror, the control library, PlatformIO and mcumgr, and refuses to start unless the examples are on `ownstudio/buck-extras`. Correction found while writing it: parts' values cannot be typed on the canvas in slice 1 (the editable inspector is slice 2); try-it says so. Stale differences in `shots.mjs` ("comes in U18") updated. Luiz's test session is the remaining check |
 
+### Fixes after Luiz's trial (2026-11-19)
+
+Luiz's trial ended with "not good enough" (decision log, rounds 23–25). Slice 1 stays open for these fixes only (Q171). Each blocker gets a test that fails before its fix. Results go in the work log below, as for U1–U19.
+
+| Plan | What | Test | Decision |
+|---|---|---|---|
+| **Blockers** | | | |
+| F1 | Placing a part works by drag, by click (default spot) and from the menu, from every workbench; the shared cause found first | Drag, click and menu each add a source and a resistor, then wire them, in Design, Code and Lab | Q176 |
+| F2 | The canvas holds every parameter; the plant file is written from it before every simulation and every PulsimGui open; a PulsimGui save writes back to the canvas as one event | After each Design change, the plant file equals the canvas; a PulsimGui save shows on the canvas | Q172 |
+| F3 | **Simulate** in the Lab beside the board capture, building from the canvas; greyed out with one sentence and **Add the bench source and load** on a blank setup; **Open in PulsimGui** always available | A blank setup refuses with its sentence; the shortcut then lets it run at 30 V and 33 Ω | Q173b, Q174 |
+| F4 | Progress on every simulation, from simulated time over total, with time left and Cancel, including OwnStudio's runner behind PulsimGui's Run | The bar moves during a run and Cancel stops it | Q175 |
+| **Bugs** | | | |
+| F5 | clangd shipped with OwnStudio; `compile_commands.json` from PlatformIO at creation and after each build; `.conf` and `.ini` coloured | Ctrl+click on a Core function in `control.cpp` opens its definition; no download prompt | Q177 |
+| F6 | The Firmware line names the board's build and the latest build, with **Upload** | Build after a change, without uploading: the sentence names both builds | Q178 |
+| F7 | The Claude agent SDK ships as a dependency of OwnStudio | Claude Code starts on a machine without a global install | Q180 |
+| F15 | The L curve follows the drag; the timeline preview tab never goes blank and can always be closed; the AI prompt shows spaces | One check each | trial |
+| **Polish** | | | |
+| F8 | Several Spins connected: pick one by serial number, remembered by the setup | Two fake Spins: the picker lists both, the choice sticks | Q179 |
+| F9 | The file tree in three groups (user code, app, hidden), with **Show all files**; files stay where they are on disk | The default tree shows only the user code and app groups | Q181 |
+| F10 | Build output in green and red; the examples list without paths; the inside view on a fixed grid | Screenshots against frames 4, 5 and 7 | Q182 |
+| F11 | Applied Kp and Ti link to their line in `control.cpp` | The link opens the line | Q183 |
+| F12 | Git Graph installed by default from Open VSX | Extension list check | Q184 |
+| F13 | New setup shows its stages; under 3 s from the local Core copy, or a report of why not | Timed creation | Q186 |
+| **Gate** | | | |
+| F14 | Claude runs the nine steps through the app's driver: steps 1–4 and 6–9 on the simulator, flashing on the Twist with the supply off, step 5 left to Luiz; one report with a screenshot per step | The run passes end to end before Luiz's next session | Q187 |
+
+Moved to slice 2: the automatic comment on Apply (Q183), the source control and Extensions views (Q184), the output filter in the power block from `board.yaml` (Q185), setups using several boards (Q179).
+
 ### Still deferred
 
 Slice 2–4 content; the Windows installer (#5); sensor calibration (#14); the Pulsim upstream issue, waiting for Luiz.
