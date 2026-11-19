@@ -21,6 +21,9 @@ export type MenuEntry = MenuItem | '-';
 
 export interface Menu { label: string; items: MenuEntry[] }
 
+/** F1: the command that adds a part at its default spot (Setup › Add part, a click in Parts). */
+export const addPartCommand = (part: string): string => `ownstudio.setup.addPart.${part}`;
+
 const later = (label: string, slice: number, step?: string): MenuItem => ({ label, comes: { slice, step } });
 
 export const MENU_MAP: Menu[] = [
@@ -54,7 +57,11 @@ export const MENU_MAP: Menu[] = [
     },
     {
         label: 'Setup', items: [
-            { label: 'Add part', items: [later('DC source', 1, 'U8'), later('Twist', 1, 'U8'), later('Resistor', 1, 'U8')] },
+            { label: 'Add part', items: [
+                { label: 'DC source', command: addPartCommand('dc-source') },
+                { label: 'Twist', command: addPartCommand('twist') },
+                { label: 'Resistor', command: addPartCommand('resistor') },
+            ] },
             later('Libraries…', 3),
             later('Check setup', 1, 'U8'),
             '-',

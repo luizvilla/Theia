@@ -12,6 +12,8 @@ import { iconClass } from './workbenches.js';
 import { LabChecklistModel } from './lab-checklist-model.js';
 import { ProcedureModel } from './procedure-model.js';
 import { DesignModel } from './design-model.js';
+import { CommandRegistry } from '@theia/core/lib/common/command';
+import { addPartCommand } from '../common/menu-map.js';
 
 abstract class WindowPanel extends ReactWidget {
     protected abstract readonly slot: WindowSlot<string>;
@@ -48,15 +50,17 @@ const PARTS: Part[] = [
 @injectable()
 export class PartsWidget extends WindowPanel {
     protected readonly slot = RIGHT_SLOTS[0];
+    @inject(CommandRegistry) protected readonly commands: CommandRegistry;
 
     protected render(): React.ReactNode {
         return <div className='ownstudio-panel-body'>
             {PARTS.map(p => <div key={p.name} className={'ownstudio-part' + (p.part ? '' : ' ownstudio-later')}
-                data-part={p.part ?? ''} draggable={!!p.part}
+                data-part={p.part ?? ''} draggable={!!p.part} title={p.part ? 'Click to add, or drag onto the canvas' : undefined}
+                onClick={() => { if (p.part) { this.commands.executeCommand(addPartCommand(p.part)); } }}
                 onDragStart={e => { if (p.part) { e.dataTransfer.setData(PART_MIME, p.part); e.dataTransfer.effectAllowed = 'copy'; } }}>
                 <span className='ownstudio-dot' style={{ background: p.colour }} />{p.name}<small>{p.note}</small>
             </div>)}
-            <p className='ownstudio-muted'>Drag a part onto the setup canvas: one source on HIGH, one Twist, loads on LOW1 or LOW2.
+            <p className='ownstudio-muted'>Click a part to add it beside the Twist, or drag it onto the setup canvas: one source on HIGH, one Twist, loads on LOW1 or LOW2.
                 Wires that break the rules do not snap.</p>
         </div>;
     }

@@ -502,9 +502,16 @@ Luiz's trial ended with "not good enough" (decision log, rounds 23–25). Slice 
 | F12 | Git Graph installed by default from Open VSX | Extension list check | Q184 |
 | F13 | New setup shows its stages; under 3 s from the local Core copy, or a report of why not | Timed creation | Q186 |
 | **Gate** | | | |
+| F16 | Found while fixing F1: eleven menu items still said "(slice 1)" without a command (New setup…, Export › Report, Add part, Check setup, Select board…, Boards manager…, Board info, Run procedure, Stop, Reports, Board datasheet); each gets its command, or moves to the slice that brings it with Luiz's OK | The menus test fails on any "(slice 1)" label | Q171 |
 | F14 | Claude runs the nine steps through the app's driver: steps 1–4 and 6–9 on the simulator, flashing on the Twist with the supply off, step 5 left to Luiz; one report with a screenshot per step | The run passes end to end before Luiz's next session | Q187 |
 
 Moved to slice 2: the automatic comment on Apply (Q183), the source control and Extensions views (Q184), the output filter in the power block from `board.yaml` (Q185), setups using several boards (Q179).
+
+### Work log (fixes after the trial)
+
+| Plan | Commit | Result |
+|---|---|---|
+| F1 | this commit | **Cause:** Theia's frontend (`@theia/core` `frontend-application.js`) listens to `dragenter` and `dragover` on the whole document and sets `dropEffect = 'none'`, to keep files dropped on the window from opening. Those listeners run after the canvas's React handler, overwrite its `copy`, and Chromium then never fires `drop`. The storyboard helper `dropPart` built its DragEvents by hand, which carry no real drop effect, so every gate passed while a real drag failed. **Fix:** the canvas accepts `dragenter` too and stops a part's drag events from reaching the document. **Menu:** Setup › Add part was still the U8 placeholder; it now runs one command per part (`ownstudio.setup.addPart.<part>`), which a click in Parts runs too. The part lands at its default spot (source left of the Twist, loads right, one under the other) and the view fits the setup; a refusal shows on the canvas and as a message. **Test:** `tools/storyboard-shots/real-drag-test.mjs` drags through Chromium's own pipeline (CDP `Input.setInterceptDrags`, `Input.dispatchDragEvent`), clicks, and uses the menu with mouse movement; on a copy of Luiz's trial setup it failed before the fix (nodes 1 → 1) and passes after (drag, drag, click, and a second source refused with "A setup has one source, on HIGH."). Unit tests 91/91, menus test clean |
 
 ### Still deferred
 

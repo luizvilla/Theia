@@ -269,18 +269,52 @@ export class CanvasWidget extends ReactWidget {
             return;
         }
         event.preventDefault();
+        event.stopPropagation();
         const at = this.flow?.screenToFlowPosition({ x: event.clientX, y: event.clientY }) ?? { x: 40, y: 40 };
-        const result = addPart(this.canvas, part, at.x, at.y);
-        if ('reason' in result) {
-            this.refuse(result.reason);
-            return;
-        }
-        this.changed(result.canvas, `${partDef(part)!.label} added`);
+        this.addPartAt(part, at);
     };
 
+    /**
+     * F1 (Q176): adds a part, at a point or at its default spot beside the board: a source
+     * to its left (HIGH), loads to its right (LOW1), one under the other. Returns the
+     * refusal sentence, shown on the canvas too, or undefined when the part was added.
+     */
+    addPartAt(part: string, at?: { x: number; y: number }): string | undefined {
+        const result = addPart(this.canvas, part, (at ?? this.defaultSpot(part)).x, (at ?? this.defaultSpot(part)).y);
+        if ('reason' in result) {
+            this.refuse(result.reason);
+            return result.reason;
+        }
+        this.changed(result.canvas, `${partDef(part)!.label} added`);
+        if (!at) {      // placed out of sight, perhaps: bring the whole setup into view
+            setTimeout(() => this.flow?.fitView({ padding: 0.25, maxZoom: 1.2, duration: 200 }), 50);
+        }
+        return undefined;
+    }
+
+    protected defaultSpot(part: string): { x: number; y: number } {
+        const kind = partDef(part)?.kind;
+        const board = this.canvas.nodes.find(n => partDef(n.part)?.kind === 'board');
+        const bx = board?.x ?? 300, by = board?.y ?? 40;
+        const same = this.canvas.nodes.filter(n => partDef(n.part)?.kind === kind).length;
+        if (kind === 'source') {
+            return { x: bx - 260, y: by + 30 * same };
+        }
+        if (kind === 'load') {
+            return { x: bx + 340, y: by + 120 * same };
+        }
+        return { x: bx, y: by + 220 };
+    }
+
+    /**
+     * Accepts a part on dragenter and dragover. Theia's frontend sets `dropEffect = 'none'` on the
+     * whole document (frontend-application.js) after this handler, which makes Chromium cancel
+     * the drop; stopping the event here keeps the 'copy'. Hand-built DragEvents never showed it.
+     */
     protected onDragOver = (event: React.DragEvent) => {
         if (event.dataTransfer.types.includes(PART_MIME)) {
             event.preventDefault();
+            event.stopPropagation();
             event.dataTransfer.dropEffect = 'copy';
         }
     };
@@ -450,7 +484,7 @@ export class CanvasWidget extends ReactWidget {
         const edges: Edge[] = this.canvas.wires.map((w, i) => ({
             id: `w${i}`, source: w.from.node, sourceHandle: w.from.port, target: w.to.node, targetHandle: w.to.port, className: 'ownstudio-wire',
         }));
-        return <div className='ownstudio-canvas' onDrop={this.onDrop} onDragOver={this.onDragOver} data-node-count={this.canvas.nodes.length}
+        return <div className='ownstudio-canvas' onDrop={this.onDrop} onDragEnter={this.onDragOver} onDragOver={this.onDragOver} data-node-count={this.canvas.nodes.length}
             data-canvas-level='setup' data-selected-block={this.selected ?? ''}>
             <ReactFlowProvider>
                 <ReactFlow<Node<PartData>, Edge> nodes={this.rfNodes} edges={edges} nodeTypes={NODE_TYPES}

@@ -6,10 +6,12 @@ import {
 import { ApplicationShell, WidgetManager } from '@theia/core/lib/browser';
 import { WindowService } from '@theia/core/lib/browser/window/window-service';
 import {
-    DOCUMENTATION_URL, MENU_MAP, MenuEntry, MenuItem, REPORT_PROBLEM_URL, comingMessage, placeholderCommand, shownLabel
+    DOCUMENTATION_URL, MENU_MAP, MenuEntry, MenuItem, REPORT_PROBLEM_URL, addPartCommand, comingMessage, placeholderCommand, shownLabel
 } from '../common/menu-map.js';
 import { BOTTOM_SLOTS, RIGHT_SLOTS } from '../common/window-layout.js';
 import { TimelineWidget } from './timeline-widget.js';
+import { CanvasWidget } from './canvas-widget.js';
+import { PARTS } from '../common/canvas-model.js';
 
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-$/, '');
 
@@ -97,6 +99,18 @@ export class MenuMapContribution implements CommandContribution {
         registry.registerCommand({ id: 'ownstudio.view.inspector', label: 'Inspector', category: 'View' }, { execute: show(inspector) });
         registry.registerCommand({ id: 'ownstudio.view.ai', label: 'AI', category: 'View' }, { execute: show(ai) });
         registry.registerCommand({ id: 'ownstudio.view.canvas', label: 'Canvas', category: 'View' }, { execute: show(BOTTOM_SLOTS[0].widgetId) });
+        for (const def of PARTS) {
+            registry.registerCommand({ id: addPartCommand(def.part), label: `Add ${def.label}`, category: 'Setup' }, {
+                execute: async () => {
+                    const canvas = await this.widgets.getOrCreateWidget<CanvasWidget>(BOTTOM_SLOTS[0].widgetId);
+                    await this.shell.activateWidget(canvas.id);
+                    const refused = canvas.addPartAt(def.part);
+                    if (refused) {
+                        this.messages.info(refused);
+                    }
+                },
+            });
+        }
         registry.registerCommand({ id: 'ownstudio.view.timeline', label: 'Timeline', category: 'View' }, {
             execute: () => this.timeline.setHidden(!this.timeline.isHidden),
             isToggled: () => !this.timeline.isHidden,

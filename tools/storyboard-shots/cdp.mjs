@@ -102,7 +102,7 @@ export const STATE = `(() => {
     };
 })()`;
 
-/** Drops a part from the Parts panel onto the canvas at a fraction of its size (HTML drag and drop, as a user's drag). The node shows on React's next render. */
+/** Drops a part from the Parts panel onto the canvas at a fraction of its size with hand-built DragEvents. Fast for frames, but it skips Chromium's drop effect: it passed while a real drag failed (F1). real-drag-test.mjs drags as a user does. */
 export async function dropPart(app, part, fx = 0.5, fy = 0.5) {
     return app.evaluate(`(() => {
         const src = document.querySelector('#ownstudio\\\\.parts [data-part="${part}"]');
