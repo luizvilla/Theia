@@ -10,6 +10,10 @@ import { SETUP_SERVICE_PATH } from '../common/setup-protocol.js';
 import { SetupServiceImpl } from './setup-service.js';
 import { BUILD_SERVICE_PATH, BuildClient } from '../common/build-protocol.js';
 import { BuildServiceImpl } from './build-service.js';
+import { addBundledToolsToPath } from './bundled-tools.js';
+
+// F5: before any extension host starts, so the clangd extension finds the shipped clangd.
+addBundledToolsToPath();
 
 export default new ContainerModule(bind => {
     // One bridge per frontend connection (one per window).

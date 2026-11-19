@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-2.1-only
 // One owner for the U10 build actions used by the Code toolbar, status bar and
 // Board menu. Process output goes to Theia's existing Build output tab.
+import { FrontendApplicationContribution } from '@theia/core/lib/browser/frontend-application-contribution';
 import { inject, injectable, postConstruct } from '@theia/core/shared/inversify';
 import { CommandContribution, CommandRegistry, Emitter, MessageService } from '@theia/core/lib/common';
 import { codicon, Widget, WidgetManager } from '@theia/core/lib/browser';
@@ -28,7 +29,7 @@ export class BuildClientImpl implements BuildClient {
 }
 
 @injectable()
-export class BuildContribution implements CommandContribution, TabBarToolbarContribution {
+export class BuildContribution implements CommandContribution, TabBarToolbarContribution, FrontendApplicationContribution {
     @inject(BuildService) protected readonly builds: BuildService;
     @inject(BuildClientImpl) protected readonly client: BuildClientImpl;
     @inject(SetupService) protected readonly setups: SetupService;
@@ -45,6 +46,14 @@ export class BuildContribution implements CommandContribution, TabBarToolbarCont
 
     @postConstruct()
     protected init(): void { this.client.onEvent(event => this.receive(event)); }
+
+    /** F5 (Q177): a setup that opens without its compile database gets one, in the background. */
+    async onDidInitializeLayout(): Promise<void> {
+        const folder = (await this.workspace.roots)[0]?.resource.path.fsPath();
+        if (folder && await this.setups.isSetup(folder).catch(() => false)) {
+            void this.builds.refreshCodeTools(folder).catch(() => undefined);
+        }
+    }
 
     registerCommands(registry: CommandRegistry): void {
         registry.registerCommand(BUILD_COMMAND, {
@@ -93,6 +102,9 @@ export class BuildContribution implements CommandContribution, TabBarToolbarCont
 
     protected receive(event: BuildEvent): void {
         this.output.appendLine(event.text);
+        if (event.phase === 'index') {
+            return;     // F5: the background index writes to Build output, never into another action's progress
+        }
         const progress = event.current !== undefined && event.total
             ? `${event.current.toLocaleString()} / ${event.total.toLocaleString()} bytes`
             : event.text;

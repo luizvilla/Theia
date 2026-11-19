@@ -61,5 +61,6 @@ echo "  setups:     $run/home/setups"
 echo "  your notes: $run/notes.md"
 cd "$here/app/applications/electron"
 [ -d plugins ] || npm run download:plugins >/dev/null
+"$here/scripts/download-clangd.sh"          # F5: clangd ships with OwnStudio
 exec env -u ELECTRON_RUN_AS_NODE "$here/app/node_modules/electron/dist/electron" . --no-sandbox --plugins=local-dir:plugins \
     --user-data-dir="$run/userdata"

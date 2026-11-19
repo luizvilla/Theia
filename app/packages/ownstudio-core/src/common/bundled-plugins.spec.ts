@@ -13,7 +13,7 @@ const APP = path.resolve(__dirname, '../../../../applications/electron');
 const manifest = JSON.parse(fs.readFileSync(path.join(APP, 'package.json'), 'utf8'));
 
 // SPEC 2.0 §8: C++ and Python language support, YAML and JSON, and git, from VS Code extensions.
-const REQUIRED = ['vscode.cpp', 'vscode.python', 'vscode.yaml', 'vscode.json', 'vscode.git', 'vscode.git-base',
+const REQUIRED = ['vscode.cpp', 'vscode.ini', 'vscode.python', 'vscode.yaml', 'vscode.json', 'vscode.git', 'vscode.git-base',
     'llvm-vs-code-extensions.vscode-clangd', 'detachhead.basedpyright'];
 
 test('the plugin system is part of the application', () => {

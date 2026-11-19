@@ -72,6 +72,7 @@ export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
     bind(BuildContribution).toSelf().inSingletonScope();
     bind(CommandContribution).toService(BuildContribution);
     bind(TabBarToolbarContribution).toService(BuildContribution);
+    bind(FrontendApplicationContribution).toService(BuildContribution);
     bind(ExampleContribution).toSelf().inSingletonScope();
     bind(CommandContribution).toService(ExampleContribution);
     bind(StartWidget).toSelf();

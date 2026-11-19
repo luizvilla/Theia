@@ -17,7 +17,18 @@
         "preferences": {
           "toolbar.showToolbar": false,
           "security.workspace.trust.enabled": false,
-          "window.titleBarStyle": "custom"
+          "window.titleBarStyle": "custom",
+          "clangd.arguments": [
+            "--query-driver=**/arm-none-eabi-*",
+            "--header-insertion=never",
+            "--background-index",
+            "--completion-style=detailed"
+          ],
+          "clangd.checkUpdates": false,
+          "clangd.detectExtensionConflicts": false,
+          "files.associations": {
+            "*.conf": "ini"
+          }
         }
       }
     }
@@ -64,6 +75,7 @@
     "vscode.git": "https://open-vsx.org/api/vscode/git/1.95.3/file/vscode.git-1.95.3.vsix",
     "vscode.git-base": "https://open-vsx.org/api/vscode/git-base/1.95.3/file/vscode.git-base-1.95.3.vsix",
     "llvm-vs-code-extensions.vscode-clangd": "https://open-vsx.org/api/llvm-vs-code-extensions/vscode-clangd/0.6.0/file/llvm-vs-code-extensions.vscode-clangd-0.6.0.vsix",
-    "detachhead.basedpyright": "https://open-vsx.org/api/detachhead/basedpyright/1.40.2/file/detachhead.basedpyright-1.40.2.vsix"
+    "detachhead.basedpyright": "https://open-vsx.org/api/detachhead/basedpyright/1.40.2/file/detachhead.basedpyright-1.40.2.vsix",
+    "vscode.ini": "https://open-vsx.org/api/vscode/ini/1.95.3/file/vscode.ini-1.95.3.vsix"
   }
 }

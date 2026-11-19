@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-2.1-only
-import { spawn, execFile } from 'child_process';
+import { ChildProcess, spawn, execFile } from 'child_process';
 import { createHash } from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -10,6 +10,43 @@ import {
 } from '../common/build-protocol.js';
 
 const exec = promisify(execFile);
+/** F5: the inputs that change compile flags; editing code does not. */
+const FLAG_INPUTS = ['platformio.ini', 'west.yml', 'src/app.conf', 'src/app.overlay', 'src/app.ini'];
+
+/**
+ * F5: keeps a generated file out of the setup's timeline (event commits stage everything) without
+ * touching a tracked file: the clone's own .git/info/exclude.
+ */
+export async function excludeFromTimeline(folder: string, name: string): Promise<void> {
+    const exclude = path.join(folder, '.git', 'info', 'exclude');
+    const text = await fs.promises.readFile(exclude, 'utf8').catch(() => '');
+    if (!text.split('\n').some(line => line.trim() === `/${name}`)) {
+        await fs.promises.mkdir(path.dirname(exclude), { recursive: true });
+        await fs.promises.writeFile(exclude, `${text}${text && !text.endsWith('\n') ? '\n' : ''}/${name}\n`);
+    }
+}
+
+/** F5: the setup's clangd settings: Doxygen comments rendered in the hover. Never overwrites a user's own. */
+export async function writeClangdConfig(folder: string): Promise<void> {
+    const file = path.join(folder, '.clangd');
+    if (!fs.existsSync(file)) {
+        await fs.promises.writeFile(file, '# Written by OwnStudio for its C++ code tools (clangd).\nDocumentation:\n  CommentFormat: Doxygen\n');
+    }
+    await excludeFromTimeline(folder, '.clangd');
+}
+
+/** F5: compile_commands.json is missing or older than an input that changes the flags. */
+export function codeToolsStale(folder: string): boolean {
+    const database = path.join(folder, 'compile_commands.json');
+    if (!fs.existsSync(database)) {
+        return true;
+    }
+    const built = fs.statSync(database).mtimeMs;
+    return FLAG_INPUTS.some(name => {
+        const file = path.join(folder, name);
+        return fs.existsSync(file) && fs.statSync(file).mtimeMs > built;
+    });
+}
 const SOURCE_PATHS = ['src', 'platformio.ini', 'zephyr', 'owntech', 'libs'];
 
 interface BuildManifest {
@@ -81,6 +118,7 @@ export class BuildServiceImpl implements BuildService {
 
     async build(folder: string): Promise<BuildResult> {
         this.validate(folder);
+        await this.stopCodeTools();     // one PlatformIO at a time in .pio: the build wins, the index runs again after
         const started = Date.now();
         const identity = await setupBuildIdentity(folder);
         const ownBuild = path.join(folder, '.pio', 'ownstudio');
@@ -90,10 +128,7 @@ export class BuildServiceImpl implements BuildService {
         this.emit('build', `> ${this.pio} run`);
         const generated = await this.snapshotGeneratedCoreFiles(folder);
         try {
-            await this.run('build', this.pio, ['run'], folder, {
-                PLATFORMIO_BUILD_FLAGS: [process.env.PLATFORMIO_BUILD_FLAGS, `-include\"${header}\"`,
-                    '-Wl,--undefined=ownstudio_build_identity'].filter(Boolean).join(' '),
-            });
+            await this.run('build', this.pio, ['run'], folder, this.buildEnv(header));
         } finally {
             await this.restoreGeneratedCoreFiles(generated);
         }
@@ -109,7 +144,64 @@ export class BuildServiceImpl implements BuildService {
         await fs.promises.writeFile(manifestPath, JSON.stringify(manifest, undefined, 2) + '\n');
         const duration = Date.now() - started;
         this.emit('build', `Build ${identity.source_hash} ✓ ${Math.round(duration / 1000)} s`);
+        void this.refreshCodeTools(folder).catch(() => undefined);
         return { identity, image, manifest: manifestPath, bytes: data.length, duration_ms: duration };
+    }
+
+    protected buildEnv(header: string): Record<string, string> {
+        return {
+            PLATFORMIO_BUILD_FLAGS: [process.env.PLATFORMIO_BUILD_FLAGS, `-include\"${header}\"`,
+                '-Wl,--undefined=ownstudio_build_identity'].filter(Boolean).join(' '),
+        };
+    }
+
+    protected codeTools: { folder: string; child: ChildProcess; closed: Promise<void> } | undefined;
+
+    async refreshCodeTools(folder: string): Promise<'fresh' | 'started' | 'running'> {
+        this.validate(folder);
+        await excludeFromTimeline(folder, 'compile_commands.json');
+        await writeClangdConfig(folder);
+        if (this.codeTools?.folder === folder) {
+            return 'running';
+        }
+        if (!codeToolsStale(folder)) {
+            return 'fresh';
+        }
+        const header = path.join(folder, '.pio', 'ownstudio', 'build_identity.h');
+        await fs.promises.mkdir(path.dirname(header), { recursive: true });
+        if (!fs.existsSync(header)) {
+            await fs.promises.writeFile(header, this.header(await setupBuildIdentity(folder)));
+        }
+        const generated = await this.snapshotGeneratedCoreFiles(folder);
+        const started = Date.now();
+        this.emit('index', 'Code tools: indexing the build for Ctrl+click, completion and hover (about 2 min, in the background)…');
+        const child = spawn(this.pio, ['run', '--target', 'compiledb'], {
+            cwd: folder, env: { ...process.env, ...this.buildEnv(header) }, stdio: 'ignore',
+        });
+        let closed!: () => void;
+        this.codeTools = { folder, child, closed: new Promise<void>(resolve => { closed = resolve; }) };
+        child.on('error', () => undefined);
+        child.on('close', async code => {
+            if (this.codeTools?.child === child) {
+                this.codeTools = undefined;
+            }
+            await this.restoreGeneratedCoreFiles(generated);
+            this.emit('index', code === 0
+                ? `Code tools ✓ ${Math.round((Date.now() - started) / 1000)} s: Ctrl+click, completion and hover follow the build.`
+                : child.killed ? 'Code tools: indexing stopped for the build; it runs again after it.'
+                    : `Code tools: indexing failed (exit code ${code}); Build once, then it runs again.`);
+            closed();
+        });
+        return 'started';
+    }
+
+    /** Stops a running index and waits until it has put Core's generated files back. */
+    protected async stopCodeTools(): Promise<void> {
+        const running = this.codeTools;
+        if (running) {
+            running.child.kill();
+            await running.closed;
+        }
     }
 
     async clean(folder: string): Promise<void> {

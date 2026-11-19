@@ -5,7 +5,7 @@
 export const BUILD_SERVICE_PATH = '/services/ownstudio-build';
 export const BuildService = Symbol('BuildService');
 
-export type BuildPhase = 'build' | 'clean' | 'flash';
+export type BuildPhase = 'build' | 'clean' | 'flash' | 'index';
 
 export interface BuildEvent {
     phase: BuildPhase;
@@ -43,4 +43,9 @@ export interface BuildService {
     clean(folder: string): Promise<void>;
     upload(folder: string): Promise<BuildResult>;
     serialCommand(): Promise<SerialCommand>;
+    /**
+     * F5 (Q177): makes sure `compile_commands.json` describes the setup's build, for clangd
+     * (Ctrl+click, completion, hover). Started in the background; a no-op while it is fresh.
+     */
+    refreshCodeTools(folder: string): Promise<'fresh' | 'started' | 'running'>;
 }
