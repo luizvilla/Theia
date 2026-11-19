@@ -90,3 +90,15 @@ test('placeholder commands are unique', () => {
     for (const m of MENU_MAP) { walk(m.items, m.label); }
     assert.equal(new Set(ids).size, ids.length);
 });
+
+test('F16: no menu item waits for slice 1 any more: slice 1 is the one being finished', () => {
+    const left: string[] = [];
+    const walk = (items: (MenuItem | '-')[], path: string): void => {
+        for (const i of items) {
+            if (i === '-') { continue; }
+            if (i.items) { walk(i.items, `${path} › ${i.label}`); } else if (i.comes?.slice === 1) { left.push(`${path} › ${i.label}`); }
+        }
+    };
+    for (const m of MENU_MAP) { walk(m.items, m.label); }
+    assert.deepEqual(left, []);
+});

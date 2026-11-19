@@ -17,8 +17,9 @@ The script gives you a fresh OwnStudio home and profile under `/data/ownstudio/t
 The Twist on USB, the supply **off** until step 5 (30 V, 1 A limit, 33 Ω on LOW1, as at the bench session). Switching on happens only in step 5, only with you there.
 
 Known limits, so you don't lose time on them:
-- **The AI.** Claude Code needs its agent SDK on the machine: `npm install -g @anthropic-ai/claude-agent-sdk`. Codex as Theia ships it (0.49) refuses your `~/.codex/config.toml` because of `model_reasoning_effort = "xhigh"`; set `high` while you try it, or skip the AI. See the U17 row of the plan.
+- **The AI.** Claude Code's agent SDK comes with OwnStudio (F7): no global install. Codex as Theia ships it (0.49) refuses your `~/.codex/config.toml` because of `model_reasoning_effort = "xhigh"`; set `high` while you try it, or skip the AI. See the U17 row of the plan.
 - **The simulator** compiles `control.cpp` against OwnTech's control library. The script points it at a cached copy; a setup does not yet find the copy PlatformIO downloads.
+- **Several Spins plugged in.** The status bar says "2 boards · choose one": **Board › Select board…** lists them by serial number, and the setup remembers your choice (F8).
 - **Slice 2 and later** items say so in the menus ("(slice 2)"); clicking one tells you which step brings it.
 
 ## The nine steps
@@ -29,7 +30,7 @@ Known limits, so you don't lose time on them:
 
 **3. Load an example.** **File › Examples › Examples of the board…**, then **buck voltage mode**. It lands on its own branch (`buck-voltage-mode`, status bar and timeline); the previous `src/` stays on the setup's first branch.
 
-**4. Build and flash.** In **Code**, open `src/main.cpp` or `src/control.cpp`: the toolbar above the editor has **Build**, **Upload**, **Build and upload**. Build takes about a minute (progress in **Build output**); then Upload. The Twist on the canvas shows the firmware's identity, and the Lab checklist's **Firmware** line turns green when the board reports the same build.
+**4. Build and flash.** In **Code**, **Setup files** lists **Your code** (`main.cpp`, `control.cpp`) and the **App** files; **Show all files** brings back the whole tree (F9). Open `src/main.cpp` or `src/control.cpp`: the toolbar above the editor has **Build**, **Upload**, **Build and upload**. Build takes about a minute (progress in **Build output**); then Upload. The Twist on the canvas shows the firmware's identity, and the Lab checklist's **Firmware** line turns green when the board reports the same build.
 
 **5. Switch on and capture.** Supply on. In **Lab**, the checklist (left) must reach 6/6: board, firmware, HIGH measured within 10 % of the canvas, outputs, load, procedure. Then **Capture from the board**, read the dialog, confirm. The reference steps from 10 to 12 V; the result opens on the step (drag to zoom, Shift+wheel to pan, **Whole run**).
 

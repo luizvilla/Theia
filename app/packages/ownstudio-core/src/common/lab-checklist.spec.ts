@@ -77,3 +77,12 @@ test('F6: the firmware line names both builds and offers the one action that fix
     assert.equal(ok.ok, true);
     assert.equal(ok.action, undefined);
 });
+
+test('F8: with several boards and none chosen, the board line asks for one and offers the picker', () => {
+    const base = labChecklist(ready({ boardProduct: undefined })).find(c => c.id === 'board')!;
+    assert.match(base.sentence, /^Connect Twist 1\.4\.2/);
+    const several = labChecklist(ready({ boardProduct: undefined, boardsToChoose: 2 })).find(c => c.id === 'board')!;
+    assert.equal(several.ok, false);
+    assert.equal(several.sentence, '2 boards are connected: choose the one this setup works with.');
+    assert.equal(several.action, 'select-board');
+});

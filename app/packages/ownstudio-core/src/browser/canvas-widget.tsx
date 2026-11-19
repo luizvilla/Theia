@@ -20,7 +20,7 @@ import {
 } from '@xyflow/react';
 import { BOTTOM_SLOTS, CANVAS_TINT, WORKBENCH_SLOTS, WorkbenchId } from '../common/window-layout.js';
 import { Canvas, PartDef, addPart, canConnect, normaliseCanvas, partDef, withBenchSourceAndLoad } from '../common/canvas-model.js';
-import { InsideBlockId, InsideModel, insideModel } from '../common/inside-model.js';
+import { INSIDE_VIEW, InsideBlockId, InsideModel, insideLayout, insideModel } from '../common/inside-model.js';
 import { BoardDefinition, SetupService } from '../common/setup-protocol.js';
 import { WORKBENCHES, commandId, iconClass } from './workbenches.js';
 import { InspectorAction, InspectorWidget } from './window-widgets.js';
@@ -454,44 +454,51 @@ export class CanvasWidget extends ReactWidget {
 
     protected renderInside(label: string | undefined): React.ReactNode {
         const model = this.inside!;
-        const signal = (from: InsideBlockId, to: InsideBlockId) => model.signals.find(item => item[0] === from && item[1] === to)?.[2] ?? '';
+        // F10: one coordinate system for blocks, arrows and sides, scaled uniformly (see insideLayout).
+        const layout = insideLayout(model);
+        const path = (points: [number, number][]) => 'M' + points.map(([x, y]) => `${x} ${y}`).join(' L');
+        const { power, control } = layout.sides;
         return <div className='ownstudio-canvas ownstudio-canvas-inside' data-canvas-level='inside'
             data-selected-block={this.insideSelection ?? ''}>
             <div className='ownstudio-inside-breadcrumb'><button onClick={this.closeInside}>Setup</button><span>›</span>
                 <b>{model.boardLabel}</b><span>› inside</span></div>
-            <div className='ownstudio-inside-side ownstudio-inside-power'><span>POWER SIDE · power ground</span></div>
-            <div className='ownstudio-inside-side ownstudio-inside-control'><span>CONTROL SIDE · digital ground</span></div>
-            <svg className='ownstudio-inside-signals' viewBox='0 0 1000 300' preserveAspectRatio='none' aria-hidden='true'>
+            <svg className='ownstudio-inside-view' viewBox={`0 0 ${INSIDE_VIEW.width} ${INSIDE_VIEW.height}`}
+                preserveAspectRatio='xMidYMid meet'>
                 <defs>
-                    <marker id='ownstudio-signal-arrow' markerWidth='9' markerHeight='9' refX='7' refY='4.5' orient='auto'>
-                        <path d='M0 0 L9 4.5 L0 9z' fill='#6bb3e3' />
+                    <marker id='ownstudio-signal-arrow' markerWidth='8' markerHeight='8' refX='8' refY='4' orient='auto' markerUnits='userSpaceOnUse'>
+                        <path d='M0 0 L8 4 L0 8z' fill='#6bb3e3' />
                     </marker>
-                    <marker id='ownstudio-energy-arrow' markerWidth='9' markerHeight='9' refX='7' refY='4.5' orient='auto'>
-                        <path d='M0 0 L9 4.5 L0 9z' fill='#f08a4b' />
+                    <marker id='ownstudio-energy-arrow' markerWidth='8' markerHeight='8' refX='8' refY='4' orient='auto' markerUnits='userSpaceOnUse'>
+                        <path d='M0 0 L8 4 L0 8z' fill='#f08a4b' />
                     </marker>
                 </defs>
-                {model.isolation && <><path className='ownstudio-isolation' d='M330 300 L650 0' />
-                    <text x='660' y='18' className='ownstudio-inside-svg-label'>isolation barrier</text></>}
-                <path className='ownstudio-signal' d='M320 68 H680' />
-                <text x='420' y='55' className='ownstudio-inside-svg-label'>{signal('power', 'measurement')}</text>
-                <path className='ownstudio-signal' d='M790 96 V214' />
-                <text x='802' y='155' className='ownstudio-inside-svg-label'>{signal('measurement', 'controller')}</text>
-                <path className='ownstudio-signal' d='M680 240 H320' />
-                <text x='475' y='264' className='ownstudio-inside-svg-label'>{signal('controller', 'driver')}</text>
-                <path className='ownstudio-signal' d='M210 214 V96' />
-                <text x='222' y='155' className='ownstudio-inside-svg-label'>{signal('driver', 'power')}</text>
-                <path className='ownstudio-energy' d='M455 135 L325 88' />
-                <path className='ownstudio-energy' d='M545 135 L675 88' />
-                <path className='ownstudio-energy' d='M455 166 L325 220' />
-                <path className='ownstudio-energy' d='M545 166 L675 220' />
+                <rect className='ownstudio-inside-side ownstudio-inside-power' x={power.x} y={power.y} width={power.width} height={power.height} rx='8' />
+                <text className='ownstudio-inside-side-label ownstudio-inside-power' x={power.x + 10} y={power.y + 14}>POWER SIDE · power ground</text>
+                <rect className='ownstudio-inside-side ownstudio-inside-control' x={control.x} y={control.y} width={control.width} height={control.height} rx='8' />
+                <text className='ownstudio-inside-side-label ownstudio-inside-control' x={control.x + control.width - 10} y={control.y + 14}
+                    textAnchor='end'>CONTROL SIDE · digital ground</text>
+                {layout.barrier && <g data-barrier>
+                    <line className='ownstudio-isolation' x1={layout.barrier[0]} y1={layout.barrier[1]} x2={layout.barrier[2]} y2={layout.barrier[3]} />
+                    <text className='ownstudio-inside-svg-label' x={layout.barrier[0]} y={layout.barrier[1] - 8} textAnchor='middle'>isolation barrier</text>
+                </g>}
+                {layout.energy.map(arrow => <path key={`e-${arrow.to}`} className='ownstudio-energy' data-energy={arrow.to} d={path(arrow.points)} />)}
+                {layout.signals.map(arrow => <g key={`s-${arrow.from}-${arrow.to}`}>
+                    <path className='ownstudio-signal' data-signal={`${arrow.from}-${arrow.to}`} d={path(arrow.points)} />
+                    {arrow.label && arrow.labelAt && <text className='ownstudio-inside-svg-label' x={arrow.labelAt[0]} y={arrow.labelAt[1]}
+                        textAnchor='start'>{arrow.label}</text>}
+                </g>)}
+                {layout.blocks.map(rect => {
+                    const block = model.blocks.find(b => b.id === rect.id)!;
+                    return <g key={rect.id} data-block={rect.id} role='button'
+                        className={'ownstudio-inside-block' + (this.insideSelection === rect.id ? ' selected' : '')}
+                        onClick={() => this.selectInside(rect.id)}>
+                        <rect x={rect.x} y={rect.y} width={rect.width} height={rect.height} rx='8' />
+                        <text className='ownstudio-inside-block-label' x={rect.x + 14} y={rect.y + rect.height / 2 + 5}>{block.label}</text>
+                        {block.id === 'power' && <text className='ownstudio-inside-block-ports' x={rect.x + rect.width - 12}
+                            y={rect.y + rect.height / 2 + 4} textAnchor='end'>{model.ports.join(' · ')}</text>}
+                    </g>;
+                })}
             </svg>
-            {model.blocks.map(block => <button key={block.id} data-block={block.id}
-                className={'ownstudio-inside-block' + (this.insideSelection === block.id ? ' selected' : '')}
-                style={{ left: `${8 + block.at[0] * 58}%`, top: `${18 + block.at[1] * 50}%` }}
-                onClick={() => this.selectInside(block.id)}>
-                {block.label}
-                {block.id === 'power' && <small>{model.ports.join(' · ')}</small>}
-            </button>)}
             <span className='ownstudio-canvas-label'>{label}</span>
         </div>;
     }

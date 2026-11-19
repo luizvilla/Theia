@@ -31,14 +31,14 @@ const later = (label: string, slice: number, step?: string): MenuItem => ({ labe
 export const MENU_MAP: Menu[] = [
     {
         label: 'File', items: [
-            later('New setup…', 1, 'U6'),
+            { label: 'New setup…', command: 'ownstudio.setup.new' },
             { label: 'Open setup…', command: 'workspace:openFolder' },
             { label: 'Open recent', command: 'workspace:openRecent' },
             { label: 'Examples', items: [{ label: 'Examples of the board…', command: 'ownstudio.setup.loadExample' }] },
             '-',
             { label: 'Save', command: 'core.save' },
             { label: 'Save all', command: 'core.saveAll' },
-            { label: 'Export', items: [later('Report', 1, 'U12'), later('Wiring diagram', 2)] },
+            { label: 'Export', items: [{ label: 'Report', command: 'ownstudio.record.exportReport' }, later('Wiring diagram', 2)] },
             '-',
             { label: 'Preferences', command: 'preferences:open' },
             { label: 'Quit', command: 'close.window' },
@@ -65,7 +65,7 @@ export const MENU_MAP: Menu[] = [
                 { label: 'Resistor', command: addPartCommand('resistor') },
             ] },
             later('Libraries…', 3),
-            later('Check setup', 1, 'U8'),
+            { label: 'Check setup', command: 'ownstudio.setup.check' },
             '-',
             later('Wiring diagram', 2),
             later('Simulation sheet', 2),
@@ -74,26 +74,26 @@ export const MENU_MAP: Menu[] = [
     },
     {
         label: 'Board', items: [
-            later('Select board…', 1, 'U6'),
-            later('Boards manager…', 1, 'U6'),
+            { label: 'Select board…', command: 'ownstudio.board.select' },
+            { label: 'Boards manager…', command: 'ownstudio.board.manager' },
             '-',
             { label: 'Build', command: 'ownstudio.setup.build' },
             { label: 'Flash', command: 'ownstudio.setup.upload' },
             { label: 'Build and flash', command: 'ownstudio.setup.buildUpload' },
             '-',
-            later('Board info', 1, 'U4'),
+            { label: 'Board info', command: 'ownstudio.board.info' },
         ],
     },
     {
         label: 'Lab', items: [
-            later('Run procedure', 1, 'U12'),
-            later('Stop', 1, 'U12'),
+            { label: 'Run procedure', command: 'ownstudio.procedure.run' },
+            { label: 'Stop', command: 'ownstudio.procedure.stop' },
             { label: 'Run on the simulator', command: 'ownstudio.procedure.runSimulator' },
             '-',
             later('New procedure', 3),
             { ...later('AI takeover', 4), when: 'ownstudio.aiTakeoverEnabled' },
             '-',
-            later('Reports', 1, 'U12'),
+            { label: 'Reports', command: 'ownstudio.record.reports' },
         ],
     },
     {
@@ -134,7 +134,7 @@ export const MENU_MAP: Menu[] = [
         label: 'Help', items: [
             later('Tutorials', 2),
             { label: 'Documentation', command: 'ownstudio.help.documentation' },
-            later('Board datasheet', 1, 'U4'),
+            { label: 'Board datasheet', command: 'ownstudio.board.datasheet' },
             '-',
             { label: 'Report a problem', command: 'ownstudio.help.reportProblem' },
             { label: 'About', command: 'core.about' },

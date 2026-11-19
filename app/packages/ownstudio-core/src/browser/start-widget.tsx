@@ -58,21 +58,12 @@ export class StartWidget extends ReactWidget {
         this.node.focus();
     }
 
+    /** One flow for the Start page and File › New setup… (menu-commands-contribution.ts). */
     protected async newSetup(board: StartBoard): Promise<void> {
-        const name = await this.input.input({ prompt: `Name of the new setup on the ${board.label}`, value: `${board.board}-setup` });
-        if (!name) {
-            return;
-        }
         this.busy = true;
         this.update();
-        const progress = await this.messages.showProgress({ text: `Creating "${name}" from OwnTech Core…` });
         try {
-            const folder = await this.setups.createSetup(board.board, name);
-            progress.cancel();
-            await this.workspace.open(new URI(`file://${folder}`), { preserveWindow: true });
-        } catch (e) {
-            progress.cancel();
-            this.messages.error(`The setup could not be created: ${(e as Error).message ?? e}`);
+            await this.commands.executeCommand('ownstudio.setup.new', board.board);
         } finally {
             this.busy = false;
             this.update();
@@ -122,7 +113,7 @@ export class StartWidget extends ReactWidget {
                     <div className='ownstudio-panel-head'>{chosen?.label ?? ''} examples ({examples.length} in OwnTech examples)</div>
                     {!info?.examplesFound && <p className='ownstudio-muted'>OwnTech's examples are not on this computer yet ({info?.home}/.cache/examples).</p>}
                     <div className='ownstudio-start-examples'>
-                        {examples.map(e => <div key={e.path} className='ownstudio-part' data-example={e.path} title={e.path}
+                        {examples.map(e => <div key={e.path} className='ownstudio-part' data-example={e.path}
                             onClick={() => this.commands.executeCommand(LOAD_EXAMPLE.id, e.path)}>
                             {e.title}<small>{e.group}{e.extras ? ' · extras' : ''}</small>
                         </div>)}

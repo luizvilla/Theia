@@ -27,6 +27,8 @@ export interface StartInfo {
 
 export interface SetupService {
     startInfo(): Promise<StartInfo>;
+    /** F13: fetches OwnTech Core into the local mirror; offline, the mirror as it is serves (updated false). */
+    updateCore(): Promise<{ updated: boolean }>;
     /** Creates a setup from Core plus the board's plant, under <home>/setups; returns its folder. */
     createSetup(board: string, name: string): Promise<string>;
     /** True when `folder` holds ownstudio/setup.yaml. */
@@ -43,6 +45,13 @@ export interface SetupService {
     commitEvent(folder: string, event: string, summary: string, exclude?: string[]): Promise<void>;
     /** F2: the plant file is as OwnStudio last wrote it from the canvas (not a PulsimGui save). */
     isOwnPlantWrite(folder: string): Promise<boolean>;
+    /**
+     * F8 (Q179): the serial number of the Spin this setup works with, when several are plugged in.
+     * Kept in the setup's .git folder: it belongs to the bench, not to the design, so it is not a
+     * timeline dot and going back to an old dot keeps it.
+     */
+    boardChoice(folder: string): Promise<string | undefined>;
+    setBoardChoice(folder: string, serial: string | undefined): Promise<void>;
     /** Board description plus the setup Core clone's devicetree values (plan U9). */
     boardDefinition(folder: string): Promise<BoardDefinition>;
     /** Opens the setup-owned plant in the pip-installed PulsimGui (plan U14). */

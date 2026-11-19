@@ -6,7 +6,7 @@ import * as path from 'path';
 import { promisify } from 'util';
 import { injectable } from '@theia/core/shared/inversify';
 import {
-    BuildClient, BuildIdentity, BuildPhase, BuildResult, BuildService, SerialCommand
+    ansi, BuildClient, BuildIdentity, BuildPhase, BuildResult, BuildService, SerialCommand, onlyColours, stripAnsi
 } from '../common/build-protocol.js';
 
 const exec = promisify(execFile);
@@ -143,15 +143,16 @@ export class BuildServiceImpl implements BuildService {
         const manifestPath = path.join(ownBuild, 'manifest.json');
         await fs.promises.writeFile(manifestPath, JSON.stringify(manifest, undefined, 2) + '\n');
         const duration = Date.now() - started;
-        this.emit('build', `Build ${identity.source_hash} ✓ ${Math.round(duration / 1000)} s`);
+        this.emit('build', ansi.green(`Build ${identity.source_hash} ✓ ${Math.round(duration / 1000)} s`));
         void this.refreshCodeTools(folder).catch(() => undefined);
         return { identity, image, manifest: manifestPath, bytes: data.length, duration_ms: duration };
     }
 
     protected buildEnv(header: string): Record<string, string> {
         return {
+            // F10: the compiler's errors and warnings in colour, although it writes into a pipe.
             PLATFORMIO_BUILD_FLAGS: [process.env.PLATFORMIO_BUILD_FLAGS, `-include\"${header}\"`,
-                '-Wl,--undefined=ownstudio_build_identity'].filter(Boolean).join(' '),
+                '-Wl,--undefined=ownstudio_build_identity', '-fdiagnostics-color=always'].filter(Boolean).join(' '),
         };
     }
 
@@ -217,7 +218,7 @@ export class BuildServiceImpl implements BuildService {
         this.emit('clean', 'Clean ✓');
     }
 
-    async upload(folder: string): Promise<BuildResult> {
+    async upload(folder: string, serial?: string): Promise<BuildResult> {
         this.validate(folder);
         const built = await this.lastBuild(folder);
         if (!built) {
@@ -231,7 +232,10 @@ export class BuildServiceImpl implements BuildService {
         if (process.env.OWNSTUDIO_MCUMGR) {
             args.push('--mcumgr', process.env.OWNSTUDIO_MCUMGR);
         }
-        this.emit('flash', `> ${this.python} -m ownstudio_lab.flash ${manifestPath}`);
+        if (serial) {
+            args.push('--board', serial);
+        }
+        this.emit('flash', `> ${this.python} -m ownstudio_lab.flash ${manifestPath}${serial ? ` --board ${serial}` : ''}`);
         await this.run('flash', this.python, args, folder, { PYTHONUNBUFFERED: '1' });
         const duration = Date.now() - started;
         this.emit('flash', `Flash ${manifest.build.source_hash} ✓ ${Math.round(duration / 1000)} s`, manifest.bytes, manifest.bytes);
@@ -259,15 +263,18 @@ export class BuildServiceImpl implements BuildService {
     protected run(phase: BuildPhase, command: string, args: string[], cwd: string,
         extraEnv: Record<string, string | undefined> = {}): Promise<void> {
         return new Promise((resolve, reject) => {
-            const child = spawn(command, args, { cwd, env: { ...process.env, ...extraEnv }, stdio: ['ignore', 'pipe', 'pipe'] });
+            // F10: PlatformIO colours its lines ([SUCCESS] green, [FAILED] red) only for a terminal, unless forced.
+            const colour = command === this.pio ? { PLATFORMIO_FORCE_ANSI: 'true' } : {};
+            const child = spawn(command, args, { cwd, env: { ...process.env, ...colour, ...extraEnv }, stdio: ['ignore', 'pipe', 'pipe'] });
             let tail = '';
             const read = (chunk: Buffer): void => {
                 tail += chunk.toString();
                 const lines = tail.split(/[\r\n]+/);
                 tail = lines.pop() ?? '';
-                for (const line of lines) {
+                for (const raw of lines) {
+                    const line = onlyColours(raw);
                     if (!line) { continue; }
-                    const progress = phase === 'flash' ? byteProgress(line) : undefined;
+                    const progress = phase === 'flash' ? byteProgress(stripAnsi(line)) : undefined;
                     const shown = progress ? `Uploading ${progress.current} / ${progress.total} bytes` : line;
                     this.emit(phase, shown, progress?.current, progress?.total);
                 }
@@ -277,8 +284,8 @@ export class BuildServiceImpl implements BuildService {
             child.on('error', error => reject(new Error(`Cannot start ${command}: ${error.message}`)));
             child.on('close', code => {
                 if (tail.trim()) {
-                    const line = tail.trim();
-                    const progress = phase === 'flash' ? byteProgress(line) : undefined;
+                    const line = onlyColours(tail.trim());
+                    const progress = phase === 'flash' ? byteProgress(stripAnsi(line)) : undefined;
                     const shown = progress ? `Uploading ${progress.current} / ${progress.total} bytes` : line;
                     this.emit(phase, shown, progress?.current, progress?.total);
                 }

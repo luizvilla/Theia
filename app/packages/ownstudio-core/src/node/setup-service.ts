@@ -54,10 +54,20 @@ export class SetupServiceImpl implements SetupService {
         return { ...info, home: this.home };
     }
 
-    async createSetup(board: string, name: string): Promise<string> {
+    protected coreUpdatedAt = 0;
+
+    async updateCore(): Promise<{ updated: boolean }> {
         // Offline, an existing mirror serves (S4): a failed update is not an error then.
-        await this.run('ownstudio_lab.setups', ['mirror', process.env.OWNSTUDIO_CORE_UPSTREAM || CORE_UPSTREAM, this.mirror])
-            .catch(e => { if (!fs.existsSync(path.join(this.mirror, 'refs'))) { throw e; } });
+        const updated = await this.run('ownstudio_lab.setups', ['mirror', process.env.OWNSTUDIO_CORE_UPSTREAM || CORE_UPSTREAM, this.mirror])
+            .then(() => true, e => { if (!fs.existsSync(path.join(this.mirror, 'refs'))) { throw e; } return false; });
+        this.coreUpdatedAt = Date.now();
+        return { updated };
+    }
+
+    async createSetup(board: string, name: string): Promise<string> {
+        if (Date.now() - this.coreUpdatedAt > 60_000) {     // F13: New setup updates Core as a stage of its own, just before
+            await this.updateCore();
+        }
         const base = path.join(this.home, 'setups', setupSlug(name));
         let dest = base;
         for (let n = 2; fs.existsSync(dest); n++) {
@@ -117,6 +127,26 @@ export class SetupServiceImpl implements SetupService {
     async isOwnPlantWrite(folder: string): Promise<boolean> {
         const own = this.ownPlantWrite.get(folder);
         return !!own && own === this.digest(this.plantFile(folder));
+    }
+
+    protected boardChoiceFile(folder: string): string {
+        return path.join(folder, '.git', 'ownstudio-board');
+    }
+
+    async boardChoice(folder: string): Promise<string | undefined> {
+        const text = await fs.promises.readFile(this.boardChoiceFile(folder), 'utf8').catch(() => '');
+        return text.trim() || undefined;
+    }
+
+    async setBoardChoice(folder: string, serial: string | undefined): Promise<void> {
+        if (!fs.existsSync(path.join(folder, '.git'))) {
+            throw new Error('This folder is not a setup (it has no history).');
+        }
+        if (serial) {
+            await fs.promises.writeFile(this.boardChoiceFile(folder), serial + '\n');
+        } else {
+            await fs.promises.rm(this.boardChoiceFile(folder), { force: true });
+        }
     }
 
     protected plantFile(folder: string): string {

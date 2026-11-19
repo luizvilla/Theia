@@ -10,6 +10,7 @@ import { Message } from '@theia/core/shared/@lumino/messaging';
 import { RIGHT_SLOTS, WORKBENCH_SLOTS, WindowSlot } from '../common/window-layout.js';
 import { iconClass } from './workbenches.js';
 import { LabChecklistModel } from './lab-checklist-model.js';
+import { CHECK_ACTIONS } from '../common/lab-checklist.js';
 import { ProcedureModel } from './procedure-model.js';
 import { DesignModel } from './design-model.js';
 import { CommandRegistry } from '@theia/core/lib/common/command';
@@ -148,8 +149,8 @@ export class LabPanelWidget extends WindowPanel {
                     data-check={check.id} data-ok={check.ok}>
                     <span className='ownstudio-dot' /><span><b>{check.label}</b> · {check.sentence}
                         {check.action && <>{' '}<button className='theia-button' data-check-action={check.action}
-                            onClick={() => this.commands.executeCommand(check.action === 'upload' ? 'ownstudio.setup.upload' : 'ownstudio.setup.buildUpload')}>
-                            {check.action === 'upload' ? 'Upload' : 'Build and upload'}</button></>}</span>
+                            onClick={() => this.commands.executeCommand(CHECK_ACTIONS[check.action!].command)}>
+                            {CHECK_ACTIONS[check.action].label}</button></>}</span>
                 </div>)}
             </div>
             <div className='ownstudio-panel-head'>Procedures</div>

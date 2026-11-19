@@ -68,6 +68,7 @@ export class LabChecklistModel {
         return {
             canvas: this.canvas.model,
             boardProduct: this.board.link?.product,
+            boardsToChoose: this.board.needsChoice ? this.board.boards.length : undefined,
             firmware: this.board.firmware,
             firmwareHash: this.board.link?.build?.rSourceHash,
             latestBuildHash: this.board.identity?.prebuilt?.build.source_hash,

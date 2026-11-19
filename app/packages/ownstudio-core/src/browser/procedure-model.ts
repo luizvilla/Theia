@@ -119,10 +119,11 @@ export class ProcedureModel {
                 this.onDidChangeEmitter.fire();
                 return false;
             }
-            const running = this.board.boards.filter(b => !b.in_bootloader);
-            board = this.board.link?.serial_number ?? (running.length === 1 ? running[0].serial_number : undefined);
+            board = this.board.link?.serial_number ?? this.board.target;
             if (!board) {
-                this.problem = 'Connect exactly one board to run a procedure on it.';
+                this.problem = this.board.needsChoice
+                    ? 'Several boards are connected: choose one with Board › Select board….'
+                    : 'Connect a board to run a procedure on it.';
                 this.onDidChangeEmitter.fire();
                 return false;
             }

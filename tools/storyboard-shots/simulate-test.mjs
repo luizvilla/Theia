@@ -3,7 +3,7 @@
 // with the Twist alone it is greyed out with its sentence; "Add the bench source and load"
 // wires 30 V and 33 Ω; Simulate then runs the capture on the simulator at those values,
 // with no board. Run it on a setup whose canvas holds the Twist alone:
-//   tools/storyboard-shots/run.sh <port> <setup> tools/storyboard-shots/simulate-test.mjs <port> <setup>
+//   tools/storyboard-shots/run.sh <port> <setup> tools/storyboard-shots/simulate-test.mjs <setup>
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { connect, sleep, waitForWindow } from './cdp.mjs';

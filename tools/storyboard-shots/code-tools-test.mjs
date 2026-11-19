@@ -2,7 +2,7 @@
 // F5 gate (Q177): in the running app, C++ code tools work on a setup's control.cpp with the
 // shipped clangd: no download prompt, F12 / Ctrl+click goes to OwnTech's control library, and
 // the hover shows its documentation comment. Run it on a built setup (compile_commands.json):
-//   tools/storyboard-shots/run.sh <port> <setup> tools/storyboard-shots/code-tools-test.mjs <port>
+//   tools/storyboard-shots/run.sh <port> <setup> tools/storyboard-shots/code-tools-test.mjs
 import { connect, sleep, waitForWindow } from './cdp.mjs';
 
 const app = await connect(process.argv[2]);
@@ -21,11 +21,11 @@ const activeTitle = () => app.evaluate(`document.querySelector('#theia-main-cont
 const goTo = async where => { await key('g', CTRL); await sleep(800); await app.send('Input.insertText', { text: where }); await sleep(500); await key('Enter'); await sleep(800); };
 const notifications = () => app.evaluate(`[...document.querySelectorAll('.theia-notification-message, .theia-notification-list-item')].map(e => e.textContent).join(' | ')`);
 
-// Open src/control.cpp from the Explorer, as a user does.
-const node = name => app.evaluate(`(() => { const e = [...document.querySelectorAll('.theia-TreeNode')]
-    .find(n => n.textContent.trim() === ${JSON.stringify(name)});
+// Open src/control.cpp from the Code workbench's Setup files (F9), as a user does.
+const node = name => app.evaluate(`(() => { const e = [...document.querySelectorAll('[data-file]')]
+    .find(n => n.dataset.file === 'src/' + ${JSON.stringify(name)});
     if (!e) return null; const r = e.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`);
-for (const name of ['src', 'control.cpp']) {
+for (const name of ['control.cpp']) {
     const at = await node(name);
     if (at) {
         await app.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: at.x, y: at.y });

@@ -137,3 +137,30 @@ export async function wire(app, [nodeA, portA], [nodeB, portB]) {
     await sleep(400);
     return app.evaluate(`document.querySelectorAll('#ownstudio\\\\.canvas .react-flow__edge').length`);
 }
+
+/**
+ * Chooses a menu item as a hand does: opens the top menu, then moves onto each label and clicks it
+ * (Lumino picks the active item on mouse movement). True when every label was found.
+ */
+export async function chooseMenu(app, top, ...labels) {
+    await app.send('Page.bringToFront');
+    const index = await app.evaluate(`[...document.querySelectorAll('#theia-top-panel .lm-MenuBar-item')].findIndex(e => e.textContent.trim() === ${JSON.stringify(top)}) + 1`);
+    if (!index) { return false; }
+    await app.clickOn(`#theia-top-panel .lm-MenuBar-item:nth-child(${index})`);
+    await sleep(400);
+    for (const label of labels) {
+        const at = await app.evaluate(`(() => { const e = [...document.querySelectorAll('.lm-Menu .lm-Menu-item')].reverse()
+            .find(e => e.querySelector('.lm-Menu-itemLabel')?.textContent === ${JSON.stringify(label)} && !e.classList.contains('lm-mod-disabled'));
+            if (!e) return null; const r = e.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`);
+        if (!at) {
+            await app.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
+            await app.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
+            return false;
+        }
+        await app.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: at.x, y: at.y });
+        await sleep(300);
+        await app.click(at.x, at.y);
+        await sleep(500);
+    }
+    return true;
+}

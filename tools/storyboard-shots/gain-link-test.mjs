@@ -33,6 +33,9 @@ check(await toDesign(), 'Design › Control loop shows the gains in control.cpp 
 for (const [gain, name] of [['kp', 'kp'], ['ti', 'Ti']]) {
     const text = await app.evaluate(`document.querySelector('[data-gain-link="${gain}"]')?.textContent ?? ''`);
     check(text.includes(`(line ${lineOf(name)})`), `${name}'s link names its line ("${text}", control.cpp line ${lineOf(name)})`);
+    // The Design page scrolls: bring the link into sight first, as a user does.
+    await app.evaluate(`document.querySelector('[data-gain-link="${gain}"]')?.scrollIntoView({ block: 'center' })`);
+    await sleep(300);
     await app.clickOn(`[data-gain-link="${gain}"]`);
     await waitFor(`/control\\.cpp/.test(document.querySelector('#theia-main-content-panel .lm-TabBar-tab.lm-mod-current .lm-TabBar-tabLabel')?.textContent ?? '')`, 8000);
     const want = String(lineOf(name));

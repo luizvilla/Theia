@@ -2,11 +2,13 @@
 import { inject, injectable } from '@theia/core/shared/inversify';
 import { CommandContribution, CommandRegistry, MessageService } from '@theia/core/lib/common';
 import { PreferenceContribution, PreferenceSchema } from '@theia/core/lib/common/preferences';
-import { ConfirmDialog, FrontendApplicationContribution, StatusBar, StatusBarAlignment } from '@theia/core/lib/browser';
+import { ConfirmDialog, FrontendApplicationContribution, QuickInputService, QuickPickItem, StatusBar, StatusBarAlignment } from '@theia/core/lib/browser';
 import { boardName } from '../common/board-protocol.js';
 import { BoardClientImpl, BoardModel } from './board-model.js';
 import { MissionService } from './mission-service.js';
 
+/** F8 (Q179): Board › Select board…, the Spin this setup works with when several are plugged in. */
+export const SELECT_BOARD_COMMAND = { id: 'ownstudio.board.select', category: 'OwnStudio', label: 'Select board…' };
 export const FLASH_COMMAND = { id: 'ownstudio.board.flash', category: 'OwnStudio', label: "Flash the Mission's Pre-built Firmware" };
 
 export const boardPreferenceSchema: PreferenceSchema = {
@@ -36,6 +38,7 @@ export class BoardContribution implements CommandContribution, FrontendApplicati
     @inject(MissionService) protected readonly missions: MissionService;
     @inject(StatusBar) protected readonly statusBar: StatusBar;
     @inject(MessageService) protected readonly messages: MessageService;
+    @inject(QuickInputService) protected readonly input: QuickInputService;
 
     onStart(): void {
         this.board.onDidChange(() => this.render());
@@ -48,10 +51,35 @@ export class BoardContribution implements CommandContribution, FrontendApplicati
     }
 
     registerCommands(registry: CommandRegistry): void {
+        registry.registerCommand(SELECT_BOARD_COMMAND, { execute: () => this.select() });
         registry.registerCommand(FLASH_COMMAND, {
             execute: () => this.flash(),
             isEnabled: () => !this.board.busy && !!this.board.identity?.prebuilt,
         });
+    }
+
+    /** Lists the plugged-in boards by serial number; the choice is remembered by the setup. */
+    async select(): Promise<string | undefined> {
+        const boards = this.board.boards;
+        if (!boards.length) {
+            this.messages.warn('No board is connected. Plug a Spin into USB.');
+            return undefined;
+        }
+        const items: (QuickPickItem & { serial: string })[] = boards.map(b => ({
+            serial: b.serial_number,
+            label: `${boardName(b.product)} · ${b.serial_number}`,
+            description: b.serial_number === this.board.target ? (this.board.link?.serial_number === b.serial_number ? 'linked' : 'chosen') : undefined,
+            detail: b.in_bootloader ? 'waiting in its bootloader' : Object.values(b.ports)[0],
+        }));
+        const chosen = await this.input.showQuickPick(items, {
+            placeholder: `Which board does this setup work with? (${boards.length} connected; the setup remembers it)`,
+        });
+        if (!chosen) {
+            return undefined;
+        }
+        await this.board.choose(chosen.serial);
+        this.messages.info(`This setup now works with ${chosen.label}.`);
+        return chosen.serial;
     }
 
     protected async flash(): Promise<void> {
@@ -61,11 +89,15 @@ export class BoardContribution implements CommandContribution, FrontendApplicati
             this.messages.warn('This mission has no pre-built firmware (bin/manifest.json).');
             return;
         }
-        if (boards.length !== 1) {
-            this.messages.warn(boards.length ? 'Several boards are connected: unplug all but one.' : 'No board is connected.');
+        if (!boards.length) {
+            this.messages.warn('No board is connected.');
             return;
         }
-        const target = boards[0];
+        const serial = this.board.target ?? await this.select();
+        const target = boards.find(b => b.serial_number === serial);
+        if (!target) {
+            return;
+        }
         const title = this.missions.mission?.title ?? 'this mission';
         const ok = await new ConfirmDialog({
             title: 'Flash the board',
@@ -106,7 +138,8 @@ export class BoardContribution implements CommandContribution, FrontendApplicati
             text = '$(debug-disconnect) No board';
             tooltip = 'Plug a Twist into USB. It is detected automatically.';
         } else if (link) {
-            const name = boardName(link.product);
+            // F8: with several boards, the status bar says which one this setup is linked to.
+            const name = boardName(link.product) + (boards.length > 1 ? ` ${link.serial_number}` : '');
             const state = this.board.firmware;
             const build = link.build;
             const running = build ? `Runs sources ${build.rSourceHash} (commit ${build.rCommit.slice(0, 7)}${build.rDirty ? ', dirty' : ''}).` : 'Reports no build identity.';
@@ -125,9 +158,17 @@ export class BoardContribution implements CommandContribution, FrontendApplicati
                 command = FLASH_COMMAND.id;
                 className += ' ownstudio-board-warning';
             }
+        } else if (this.board.needsChoice) {
+            text = `$(plug) ${boards.length} boards · choose one`;
+            tooltip = `Several boards are connected (${boards.map(b => b.serial_number).join(', ')}). Click to choose the one this setup works with.`;
+            command = SELECT_BOARD_COMMAND.id;
+            className += ' ownstudio-board-warning';
         } else if (boards.length > 1) {
-            text = `$(plug) ${boards.length} boards`;
-            tooltip = 'Several boards are connected. Keep one plugged in to link to it.';
+            const chosen = boards.find(b => b.serial_number === this.board.target)!;
+            text = `$(plug) ${boardName(chosen.product)} ${chosen.serial_number} · no mission firmware`;
+            tooltip = 'The chosen board does not answer ThingSet yet. Click to choose another board.';
+            command = SELECT_BOARD_COMMAND.id;
+            className += ' ownstudio-board-warning';
         } else {
             const name = boardName(boards[0].product);
             text = `$(plug) ${name} · no mission firmware`;

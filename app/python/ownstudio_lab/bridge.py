@@ -226,10 +226,10 @@ def main():
 
 class _StoryboardLink:
     """Deterministic ThingSet values for UI captures; enabled only by the shot harness."""
-    def __init__(self, source_hash, high):
+    def __init__(self, source_hash, high, serial="STORYBOARD"):
         self.groups = {
             "Build": {"rCommit": "storyboard", "rDirty": False, "rSourceHash": source_hash},
-            "Device": {"rName": "Storyboard Twist"},
+            "Device": {"rName": "Storyboard Twist", "rSerial": serial},
             "Measurements": {"rVHigh_V": high, "rV1Low_V": 0.0, "rV2Low_V": 0.0,
                              "rI1Low_A": 0.0, "rI2Low_A": 0.0},
         }
@@ -277,8 +277,12 @@ def _storyboard_bridge(emit):
                 source_hash = digest.hexdigest()[:16]
     high = float(os.environ.get("OWNSTUDIO_STORYBOARD_HIGH", "0.2"))
     product = os.environ.get("OWNSTUDIO_STORYBOARD_PRODUCT", "TWIST_V1_4_2")
-    board = Board("STORYBOARD", product, {"1.2": "storyboard"})
-    return Bridge(find=lambda: [board], open_link=lambda _board: ("storyboard", _StoryboardLink(source_hash, high)), emit=emit)
+    # F8: OWNSTUDIO_STORYBOARD_BOARDS=SPIN-A,SPIN-B stands in for several Spins plugged in at once.
+    serials = [s for s in os.environ.get("OWNSTUDIO_STORYBOARD_BOARDS", "STORYBOARD").split(",") if s]
+    boards = [Board(serial, product, {"1.2": f"storyboard-{serial}"}) for serial in serials]
+    return Bridge(find=lambda: list(boards),
+                  open_link=lambda board: (f"storyboard-{board.serial_number}", _StoryboardLink(source_hash, high, board.serial_number)),
+                  emit=emit)
 
 
 if __name__ == "__main__":

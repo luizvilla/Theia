@@ -15,6 +15,7 @@ import { OPEN_CONTROL_CENTER_COMMAND } from './control-center-widget.js';
 import { ProcedureModel, RUN_PROCEDURE_COMMAND } from './procedure-model.js';
 import { ProcedureInfo } from '../common/procedure-protocol.js';
 import { LabChecklistModel } from './lab-checklist-model.js';
+import { CHECK_ACTIONS } from '../common/lab-checklist.js';
 import { CanvasState } from './canvas-state.js';
 import { simulationMissing } from '../common/canvas-model.js';
 import { ADD_BENCH_COMMAND } from '../common/menu-map.js';
@@ -102,8 +103,8 @@ export class LabWidget extends ReactWidget {
             <p>{link ? <>{boardName(link.product)} on {link.port}. {firmware.sentence}</>
                 : 'No board linked. Panels and the data object table go live when one is.'}
                 {link && firmware.action && <>{' '}<button className='theia-button secondary' data-firmware-action={firmware.action}
-                    onClick={() => this.commands.executeCommand(firmware.action === 'upload' ? 'ownstudio.setup.upload' : 'ownstudio.setup.buildUpload')}>
-                    {firmware.action === 'upload' ? 'Upload' : 'Build and upload'}</button></>}</p>
+                    onClick={() => this.commands.executeCommand(CHECK_ACTIONS[firmware.action!].command)}>
+                    {CHECK_ACTIONS[firmware.action].label}</button></>}</p>
             <h2 className='ownstudio-emphasis'>Panels</h2>
             {!this.panels.length && <p className='ownstudio-muted'>This setup has no panels (panels/*.panel.json).</p>}
             <div className='ownstudio-button-row'>

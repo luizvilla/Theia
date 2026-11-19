@@ -13,6 +13,7 @@ import { TabBar } from '@theia/core/shared/@lumino/widgets';
 import { WorkspaceService } from '@theia/workspace/lib/browser';
 import { SetupService } from '../common/setup-protocol.js';
 import { START_WIDGET_ID } from './start-widget.js';
+import { SetupFilesContribution } from './setup-files-widget.js';
 import { TimelineWidget } from './timeline-widget.js';
 
 const THEIA_NEW_TERMINAL = 'terminal:new';
@@ -42,6 +43,7 @@ export class WorkbenchContribution implements CommandContribution, KeybindingCon
     @inject(WorkspaceService) protected readonly workspace: WorkspaceService;
     @inject(SetupService) protected readonly setups: SetupService;
     @inject(TimelineWidget) protected readonly timeline: TimelineWidget;
+    @inject(SetupFilesContribution) protected readonly setupFiles: SetupFilesContribution;
 
     /** No setup open: the Start page fills the window (frame 1) until a workbench is chosen. */
     protected startMode = false;
@@ -134,6 +136,7 @@ export class WorkbenchContribution implements CommandContribution, KeybindingCon
                 await this.shell.addWidget(widget, { area: 'left', rank: 100 + i });
             }
         }
+        await this.setupFiles.show();     // F9: grouped files, whatever a restored layout kept
         for (const [i, slot] of RIGHT_SLOTS.entries()) {
             const widget = await this.widgets.getOrCreateWidget(slot.widgetId).catch(() => undefined);
             if (!widget) {

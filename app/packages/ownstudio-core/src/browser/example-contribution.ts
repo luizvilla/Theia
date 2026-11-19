@@ -69,7 +69,8 @@ export class ExampleContribution implements CommandContribution {
                 group = e.group;
                 items.push({ type: 'separator', label: e.group.replace(/_/g, '-') });
             }
-            items.push({ label: e.title, description: e.extras ? '+ OwnStudio extras' : undefined, detail: e.path, example: e });
+            // F10 (Q182): the title alone; the example's folder says nothing a user needs.
+            items.push({ label: e.title, description: e.extras ? '+ OwnStudio extras' : undefined, example: e });
         }
         const chosen = await this.input.showQuickPick(items, { placeholder: `Examples of the ${boardLabel} (${examples.length} in OwnTech examples)` });
         return (chosen as { example?: ExampleEntry } | undefined)?.example;

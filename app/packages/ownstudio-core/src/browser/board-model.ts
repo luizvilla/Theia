@@ -6,6 +6,7 @@ import {
     BoardClient, BoardInfo, BoardService, FirmwareState, LinkInfo, MissionIdentity, firmwareState
 } from '../common/board-protocol.js';
 import { MissionService } from './mission-service.js';
+import { SetupService } from '../common/setup-protocol.js';
 import { BuildService } from '../common/build-protocol.js';
 
 export const POLL_MS = 2000;
@@ -31,10 +32,13 @@ export class BoardModel {
 
     @inject(BoardService) protected readonly service: BoardService;
     @inject(MissionService) protected readonly missions: MissionService;
+    @inject(SetupService) protected readonly setups: SetupService;
     @inject(PreferenceService) protected readonly preferences: PreferenceService;
     @inject(BuildService) protected readonly builds: BuildService;
 
     boards: BoardInfo[] = [];
+    /** F8: the serial number this setup works with (Board › Select board…), when several are plugged in. */
+    chosen: string | undefined;
     link: LinkInfo | undefined;
     identity: MissionIdentity | undefined;
     problem: string | undefined;
@@ -53,7 +57,7 @@ export class BoardModel {
 
     @postConstruct()
     protected init(): void {
-        this.missions.onDidChange(() => this.refreshIdentity());
+        this.missions.onDidChange(() => { void this.refreshIdentity(); void this.loadChoice(); });
         this.missions.onDidChangeFiles(uris => {
             if (uris.some(uri => /\/(firmware|bin)\/|data_objects\.yaml$/.test(uri.path.toString()))) {
                 clearTimeout(this.identityTimer);
@@ -71,8 +75,45 @@ export class BoardModel {
         await this.preferences.ready;
         await this.configure();
         await this.refreshIdentity();
+        await this.loadChoice();
         await this.poll();
         this.timer = setInterval(() => this.poll(), POLL_MS);
+    }
+
+    /** The board OwnStudio works with: the chosen one when plugged in, else the only one running a firmware. */
+    get target(): string | undefined {
+        const running = this.boards.filter(b => !b.in_bootloader);
+        if (this.chosen && this.boards.some(b => b.serial_number === this.chosen)) {
+            return this.chosen;
+        }
+        return running.length === 1 ? running[0].serial_number : this.boards.length === 1 ? this.boards[0].serial_number : undefined;
+    }
+
+    /** Several boards and none chosen (or the chosen one is not plugged in): the user picks one. */
+    get needsChoice(): boolean {
+        return this.boards.length > 1 && !this.target;
+    }
+
+    protected async loadChoice(): Promise<void> {
+        const folder = this.missions.root?.path.fsPath();
+        this.chosen = folder ? await this.setups.boardChoice(folder).catch(() => undefined) : undefined;
+        this.onDidChangeEmitter.fire();
+    }
+
+    /** F8: remembers the choice in the setup and links to that board. */
+    async choose(serial: string): Promise<void> {
+        const folder = this.missions.root?.path.fsPath();
+        if (folder) {
+            await this.setups.setBoardChoice(folder, serial);
+        }
+        this.chosen = serial;
+        this.failed.clear();
+        if (this.link && this.link.serial_number !== serial) {
+            await this.service.disconnect();
+            this.link = undefined;
+        }
+        this.onDidChangeEmitter.fire();
+        await this.poll();
     }
 
     async refreshIdentity(): Promise<void> {
@@ -159,6 +200,11 @@ export class BoardModel {
             this.boards = status.boards;
             this.link = status.link ?? undefined;
             this.problem = undefined;
+            const target = this.target;
+            if (this.link && target && this.link.serial_number !== target) {
+                await this.service.disconnect();        // linked to another board than the setup's: switch
+                this.link = undefined;
+            }
             if (!this.link) {
                 await this.autoConnect();
             }
@@ -179,10 +225,10 @@ export class BoardModel {
                 this.failed.delete(serial);
             }
         }
-        if (running.length !== 1) {
-            return;
+        const board = running.find(b => b.serial_number === this.target);
+        if (!board) {
+            return;     // none running, or several and none chosen yet
         }
-        const board = running[0];
         const lastFailure = this.failed.get(board.serial_number);
         if (lastFailure !== undefined && Date.now() - lastFailure < RETRY_MS) {
             return;

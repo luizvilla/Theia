@@ -7,9 +7,9 @@ import { CommandContribution, CommandRegistry, Emitter, MessageService } from '@
 import { codicon, Widget, WidgetManager } from '@theia/core/lib/browser';
 import { TabBarToolbarContribution, TabBarToolbarRegistry } from '@theia/core/lib/browser/shell/tab-bar-toolbar';
 import { WorkspaceService } from '@theia/workspace/lib/browser';
-import { OutputChannel, OutputChannelManager } from '@theia/output/lib/browser/output-channel';
+import { OutputChannel, OutputChannelManager, OutputChannelSeverity } from '@theia/output/lib/browser/output-channel';
 import { TerminalService } from '@theia/terminal/lib/browser/base/terminal-service';
-import { BuildClient, BuildEvent, BuildResult, BuildService } from '../common/build-protocol.js';
+import { BuildClient, BuildEvent, BuildResult, BuildService, stripAnsi } from '../common/build-protocol.js';
 import { SetupService } from '../common/setup-protocol.js';
 import { BOTTOM_SLOTS } from '../common/window-layout.js';
 import { CanvasWidget } from './canvas-widget.js';
@@ -107,7 +107,7 @@ export class BuildContribution implements CommandContribution, TabBarToolbarCont
         }
         const progress = event.current !== undefined && event.total
             ? `${event.current.toLocaleString()} / ${event.total.toLocaleString()} bytes`
-            : event.text;
+            : stripAnsi(event.text);
         this.progress?.report({ message: progress,
             work: event.current !== undefined && event.total ? { done: event.current, total: event.total } : undefined });
     }
@@ -125,7 +125,7 @@ export class BuildContribution implements CommandContribution, TabBarToolbarCont
             await action(folder);
         } catch (error) {
             const message = error instanceof Error ? error.message : String(error);
-            this.output.appendLine(`Error: ${message}`);
+            this.output.appendLine(`Error: ${message}`, OutputChannelSeverity.Error);     // F10: red
             this.messages.error(`${label} failed: ${message}`);
         } finally {
             this.progress?.cancel();
@@ -148,7 +148,7 @@ export class BuildContribution implements CommandContribution, TabBarToolbarCont
         const canvas = this.canvas();
         canvas?.setFirmware('flashing…');
         try {
-            const result = await this.builds.upload(folder);
+            const result = await this.builds.upload(folder, this.board.target);
             canvas?.setFirmware(`${result.identity.source_hash} ✓`);
             await this.setups.commitEvent(folder, 'flash', `Flash ${result.identity.source_hash} ✓`);
             this.messages.info(`Uploaded ${result.bytes.toLocaleString()} bytes to the board.`);

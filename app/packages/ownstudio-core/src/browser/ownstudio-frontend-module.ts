@@ -53,6 +53,9 @@ import { LabChecklistModel } from './lab-checklist-model.js';
 import { LabChecklistContribution } from './lab-checklist-contribution.js';
 import { CanvasState } from './canvas-state.js';
 import { PulsimGuiContribution } from './pulsimgui-contribution.js';
+import { MenuCommandsContribution } from './menu-commands-contribution.js';
+import { NavigatorWidgetFactory } from '@theia/navigator/lib/browser/navigator-widget-factory';
+import { OwnStudioNavigatorWidgetFactory, SETUP_FILES_ID, SetupFilesContribution, SetupFilesWidget } from './setup-files-widget.js';
 
 export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
     bind(MissionService).toSelf().inSingletonScope();
@@ -155,6 +158,16 @@ export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
         bind(WidgetFactory).toDynamicValue(ctx => ({ id, createWidget: () => ctx.container.get(widget) })).inSingletonScope();
     }
     bind(CanvasState).toService(CanvasWidget);
+    // F9: the Code workbench's files in groups, Theia's file tree behind "Show all files".
+    bind(SetupFilesWidget).toSelf().inSingletonScope();
+    bind(WidgetFactory).toDynamicValue(ctx => ({ id: SETUP_FILES_ID, createWidget: () => ctx.container.get(SetupFilesWidget) })).inSingletonScope();
+    bind(OwnStudioNavigatorWidgetFactory).toSelf().inSingletonScope();
+    rebind(NavigatorWidgetFactory).toService(OwnStudioNavigatorWidgetFactory);
+    bind(SetupFilesContribution).toSelf().inSingletonScope();
+    bind(CommandContribution).toService(SetupFilesContribution);
+    bind(TabBarToolbarContribution).toService(SetupFilesContribution);
+    bind(MenuCommandsContribution).toSelf().inSingletonScope();     // F16
+    bind(CommandContribution).toService(MenuCommandsContribution);
     bind(PulsimGuiContribution).toSelf().inSingletonScope();
     bind(CommandContribution).toService(PulsimGuiContribution);
     bind(FrontendApplicationContribution).toService(PulsimGuiContribution);

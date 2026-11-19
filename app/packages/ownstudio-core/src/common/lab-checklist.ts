@@ -14,7 +14,7 @@ export interface LabCheck {
     /** One sentence shown beside a red Run button or a checklist line. */
     sentence: string;
     /** F6 (Q178): the one action that fixes a failing check, shown beside it. */
-    action?: 'upload' | 'build-upload';
+    action?: LabCheckAction;
 }
 
 export interface LivePort {
@@ -24,9 +24,19 @@ export interface LivePort {
     currentMax?: number;
 }
 
+/** What a failed check offers to do about it, as a button beside its sentence. */
+export type LabCheckAction = 'upload' | 'build-upload' | 'select-board';
+export const CHECK_ACTIONS: Record<LabCheckAction, { command: string; label: string }> = {
+    'upload': { command: 'ownstudio.setup.upload', label: 'Upload' },
+    'build-upload': { command: 'ownstudio.setup.buildUpload', label: 'Build and upload' },
+    'select-board': { command: 'ownstudio.board.select', label: 'Select board…' },
+};
+
 export interface LabChecklistInput {
     canvas: Canvas;
     boardProduct?: string;
+    /** F8: several boards are plugged in and this setup has not chosen one. */
+    boardsToChoose?: number;
     firmware: FirmwareState;
     /** The build the board reports. */
     firmwareHash?: string;
@@ -85,6 +95,8 @@ export function labChecklist(input: LabChecklistInput): LabCheck[] {
     let board: LabCheck;
     if (!boardNode) {
         board = fail('board', 'Board', 'Place a board on the canvas.');
+    } else if (!input.boardProduct && input.boardsToChoose) {
+        board = { ...fail('board', 'Board', `${input.boardsToChoose} boards are connected: choose the one this setup works with.`), action: 'select-board' };
     } else if (!input.boardProduct) {
         board = fail('board', 'Board', `Connect ${expectedBoard}, as shown on the canvas.`);
     } else if (boardNode.part === 'twist' && input.boardProduct !== 'TWIST_V1_4_2') {

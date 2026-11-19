@@ -2,7 +2,7 @@
 // F2 gate (Q172): in the running app, the plant file follows the canvas, OwnStudio's own
 // write adds no "PulsimGui saved" dot, and a PulsimGui save of a value comes back to the
 // canvas as one dot. Run it on a setup whose canvas holds the Twist alone:
-//   tools/storyboard-shots/run.sh <port> <setup> tools/storyboard-shots/plant-follows-canvas-test.mjs <port> <setup>
+//   tools/storyboard-shots/run.sh <port> <setup> tools/storyboard-shots/plant-follows-canvas-test.mjs <setup>
 import { execFileSync } from 'node:child_process';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
