@@ -28,7 +28,7 @@ Claude ran the nine steps of [try-it.md](try-it.md) through the app's driver bef
 ## Open
 
 1. **Upload on the Twist, not done.** At 20:36 the Twist's Spin (`…0041`) re-enumerated and now runs another firmware. That firmware reports no OwnStudio build and has no `Measurements` group, so the supply cannot be confirmed off. Another Spin (`…0031`, product `SPIN`) is plugged in too; earlier in the evening a `pio run -e SAFETY_TIME -t upload` came from another project. The driver did not overwrite a board someone may be using. With Luiz's OK it is one more run: Board › Select board… `…0041`, Upload, then the Lab's Firmware line.
-2. **Restore speed on a real setup** (step 9). Git takes 0.2 s for a restore or a return. The rest, up to 5 s, happens in the app: file events, the canvas and the open editor reloading, and clangd and the code-tools index reacting to the changed files. The U18 gate passed on a lighter setup with no build and no index. Two of the 200 moves did not land, and one move left an uncaught cancellation. A fix of its own is proposed.
+2. **Restore speed on a real setup** (step 9). Fixed in `bf9e79b` (F17): a move now starts Python once instead of five times, and the canvas draws before the devicetree details. All 200 moves land now (2 missed before). The timings, median 1.43 s and p95 3.3 s, were taken while other work held the machine at load 13–19, so they need a quiet machine before they can be compared with the 2 s target.
 3. **The window title keeps the last centre view's name.** In Code it still said "Lab – f14-bench".
 4. **The editor area is empty when a setup opens in Code.** This is the logo idea, already in slice 2.
 
@@ -50,4 +50,4 @@ Run times are for the simulation alone, one at a time, on a machine with a load 
 
 **Reading.** All five steps stay within the step-4 tolerances. At **100 ns**, every metric is within 0.004 V and 0.3 mV of 25 ns, for about **3.4× less time**. That brings the 100 ms capture from about 2.5 min to under 1 min. At 200 ns the ripple jumps to 69 mV (+19 %), because the ripple is what a coarse step resolves worst. 400 ns lands back on 57.7 mV, but by chance: its voltages are already drifting.
 
-**Proposal:** 100 ns in the Twist's plant (`boards/twist/plant/twist_buck.pulsim`, `dt` and `max_step`), with the step-4 comparison test as its gate. Luiz's call, because it changes the default for every new setup; existing setups keep their own plant.
+**Done** (`6eb6514`, Luiz's OK): 100 ns in the Twist's plant (`boards/twist/plant/twist_buck.pulsim`, `dt` and `max_step`), with the step-4 comparison test as its gate. New setups get it; existing setups keep their own plant.
