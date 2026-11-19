@@ -138,7 +138,8 @@ export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
     bind(TimelineModel).toSelf().inSingletonScope();
     bind(TimelineContribution).toSelf().inSingletonScope();
     bind(CommandContribution).toService(TimelineContribution);
-    bind(TimelinePreviewWidget).toSelf().inSingletonScope();
+    // F15: a new widget each time: closing the tab disposes it, and a disposed singleton came back blank.
+    bind(TimelinePreviewWidget).toSelf();
     bind(WidgetFactory).toDynamicValue(ctx => ({
         id: TIMELINE_PREVIEW_ID,
         createWidget: () => ctx.container.get(TimelinePreviewWidget),

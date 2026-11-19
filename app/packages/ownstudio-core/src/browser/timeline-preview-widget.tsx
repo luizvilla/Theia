@@ -29,11 +29,21 @@ export class TimelinePreviewWidget extends ReactWidget {
         this.title.closable = true;
         this.addClass('ownstudio-workbench');
         this.addClass('ownstudio-timeline-preview');
-        this.model.onDidChange(() => { this.update(); this.showInInspector(); });
+        this.toDispose.push(this.model.onDidChange(() => { this.update(); this.showInInspector(); }));
     }
 
     protected override onAfterShow(msg: Message): void {
         super.onAfterShow(msg);
+        this.update();
+        this.showInInspector();
+    }
+
+    /**
+     * F15: in an empty main area the new widget is attached already visible, so it never gets
+     * after-show, and the dot's preview was loaded before it existed: draw it on attach too.
+     */
+    protected override onAfterAttach(msg: Message): void {
+        super.onAfterAttach(msg);
         this.update();
         this.showInInspector();
     }

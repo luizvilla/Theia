@@ -81,6 +81,14 @@ export class CanvasWidget extends ReactWidget {
     /** Keep writes and their event commits in order when the user moves quickly between workbenches. */
     protected persistence: Promise<void> = Promise.resolve();
     protected flow: ReactFlowInstance<Node<PartData>, Edge> | undefined;
+    protected keysActive = false;
+
+    protected setKeysActive(active: boolean): void {
+        if (this.keysActive !== active) {
+            this.keysActive = active;
+            this.update();
+        }
+    }
     protected readonly onDidChangeEmitter = new Emitter<void>();
     readonly onDidChange = this.onDidChangeEmitter.event;
 
@@ -93,6 +101,15 @@ export class CanvasWidget extends ReactWidget {
         this.title.closable = false;
         this.addClass('ownstudio-panel');
         this.node.tabIndex = 0;
+        // F15: React Flow listens for its keys on the whole document and takes Monaco's new input
+        // element (Electron 44's EditContext) for something other than a text field, so it ate
+        // every Space typed in the AI prompt. Its keys act only while the canvas has the focus.
+        this.node.addEventListener('focusin', () => this.setKeysActive(true));
+        this.node.addEventListener('focusout', event => {
+            if (!this.node.contains(event.relatedTarget as globalThis.Node | null)) {
+                this.setKeysActive(false);
+            }
+        });
         this.load();
         this.update();
         // U18: a restore or a branch moves the setup under the canvas.
@@ -504,7 +521,9 @@ export class CanvasWidget extends ReactWidget {
                     onConnect={this.onConnect} onConnectStart={() => { this.refusal = ''; }} onConnectEnd={this.onConnectEnd} onNodesChange={this.onNodesChange}
                     onNodeDragStop={this.onNodeDragStop} onNodeDoubleClick={this.openInside} onInit={flow => { this.flow = flow; }}
                     fitView fitViewOptions={{ padding: 0.25, maxZoom: 1.2 }} minZoom={0.3} maxZoom={2}
-                    proOptions={{ hideAttribution: true }} deleteKeyCode={null}>
+                    proOptions={{ hideAttribution: true }} deleteKeyCode={null}
+                    panActivationKeyCode={this.keysActive ? 'Space' : null} selectionKeyCode={this.keysActive ? 'Shift' : null}
+                    multiSelectionKeyCode={this.keysActive ? 'Control' : null} zoomActivationKeyCode={this.keysActive ? 'Control' : null}>
                     <Background gap={18} size={1} color='rgba(255,255,255,0.12)' />
                 </ReactFlow>
             </ReactFlowProvider>
