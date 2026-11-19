@@ -51,6 +51,8 @@ export interface SetupService {
      * timeline dot and going back to an old dot keeps it.
      */
     boardChoice(folder: string): Promise<string | undefined>;
+    /** F16: a board's description (boards/<board>/board.yaml), for Boards manager and Board datasheet. */
+    boardDescription(board: string): Promise<{ path: string; text: string } | undefined>;
     setBoardChoice(folder: string, serial: string | undefined): Promise<void>;
     /** Board description plus the setup Core clone's devicetree values (plan U9). */
     boardDefinition(folder: string): Promise<BoardDefinition>;

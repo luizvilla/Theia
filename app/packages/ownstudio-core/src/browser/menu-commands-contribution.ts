@@ -8,7 +8,7 @@ import { FileService } from '@theia/filesystem/lib/browser/file-service';
 import { FileDialogService } from '@theia/filesystem/lib/browser';
 import { WorkspaceService } from '@theia/workspace/lib/browser';
 import { ConfirmDialog } from '@theia/core/lib/browser/dialogs';
-import { BoardService, boardName } from '../common/board-protocol.js';
+import { boardName } from '../common/board-protocol.js';
 import { SetupService, StartBoard } from '../common/setup-protocol.js';
 import { BoardModel } from './board-model.js';
 import { LabChecklistModel } from './lab-checklist-model.js';
@@ -33,7 +33,6 @@ export const MENU_COMMANDS = {
 @injectable()
 export class MenuCommandsContribution implements CommandContribution {
     @inject(SetupService) protected readonly setups: SetupService;
-    @inject(BoardService) protected readonly boardService: BoardService;
     @inject(BoardModel) protected readonly board: BoardModel;
     @inject(LabChecklistModel) protected readonly checklist: LabChecklistModel;
     @inject(ProcedureModel) protected readonly procedures: ProcedureModel;
@@ -171,7 +170,7 @@ export class MenuCommandsContribution implements CommandContribution {
         if (!chosen) {
             return;
         }
-        const pack = await this.boardService.boardPack(chosen.board.board);
+        const pack = await this.setups.boardDescription(chosen.board.board);
         if (!pack) {
             this.messages.info(`${chosen.label} has no board description (board.yaml) on this computer yet.`);
             return;
@@ -204,7 +203,7 @@ export class MenuCommandsContribution implements CommandContribution {
         const folder = roots[0]?.resource.path.fsPath();
         const setup = folder ? await this.setups.describeSetup(folder).catch(() => undefined) : undefined;
         const name = setup?.board || this.board.link?.product?.split('_')[0]?.toLowerCase() || 'twist';
-        const pack = await this.boardService.boardPack(name);
+        const pack = await this.setups.boardDescription(name);
         const url = pack?.text.match(/^datasheet:\s*(\S+)/m)?.[1];
         if (!url) {
             this.messages.info(`The ${name} board description gives no datasheet link yet.`);

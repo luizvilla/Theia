@@ -5,7 +5,7 @@
 # (user data, Theia config and OwnStudio home under /data/ownstudio/build),
 # runs the script against it, then stops exactly the processes of that run
 # (binary + port). "-" opens no folder (the Start page).
-# OWNSTUDIO_PYTHON, OWNSTUDIO_EXAMPLES, OWNSTUDIO_CORE_UPSTREAM pass through;
+# OWNSTUDIO_PYTHON, OWNSTUDIO_EXAMPLES, OWNSTUDIO_CORE_UPSTREAM, OWNSTUDIO_OPEN_LOG pass through;
 # OWNSTUDIO_HOME defaults to the throwaway home.
 set -u
 port="$1"; folder="$2"; script="$3"; shift 3
@@ -22,6 +22,11 @@ export OWNSTUDIO_BOARDS="${OWNSTUDIO_BOARDS:-$root/boards}"
 # Frame 7 needs deterministic progress without requiring a board. Callers can
 # override either tool when testing a real build or a real Twist.
 export OWNSTUDIO_PIO="${OWNSTUDIO_PIO:-$root/tools/storyboard-shots/fake-pio.mjs}"
+# A test may ask for links meant for the system browser to be recorded instead (fake-xdg-open).
+if [ -n "${OWNSTUDIO_OPEN_LOG:-}" ]; then
+    mkdir -p "$scratch/bin" && cp "$root/tools/storyboard-shots/fake-xdg-open" "$scratch/bin/xdg-open"
+    export PATH="$scratch/bin:$PATH"
+fi
 export OWNSTUDIO_BUILD_PYTHON="${OWNSTUDIO_BUILD_PYTHON:-$root/tools/storyboard-shots/fake-flash.mjs}"
 (cd "$app" && THEIA_CONFIG_DIR="$scratch/config" env -u ELECTRON_RUN_AS_NODE "$bin" . --remote-debugging-port="$port" \
     --no-sandbox --disable-backgrounding-occluded-windows --disable-renderer-backgrounding --disable-background-timer-throttling \

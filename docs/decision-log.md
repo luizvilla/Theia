@@ -406,3 +406,15 @@ Facts found:
 Also fixed without a question, as bugs: the L curve does not follow the drag, the timeline preview tab goes blank with no title or close button, and the AI prompt does not show spaces.
 
 Luiz confirmed the shared understanding on 2026-11-19.
+
+## After the fixes F8–F16 (2026-11-19)
+
+Luiz's answers to the open points of the F8–F16 report.
+
+| # | Question | Recommended | Answer | Where |
+|---|---|---|---|---|
+| Q188 | New setup takes 7.2 s to the canvas (about 2 s OwnStudio, about 5 s Theia's window reload): accept for slice 1? | Accept, or a fix of its own | Try 7 s. | plan F13 |
+| Q189 | Which page does Help › Board datasheet open for the Twist? | — | https://docs.owntech.org/latest/twist/1.4.1/getting_started/ | board.yaml |
+| Q190 | Git Graph ships unmodified in the installer (its licence forbids distributing modified copies)? | Yes, checked with the agent SDK question | OK. | #5 |
+| Q191 | A larger simulation time step to win back the speed lost with exact edges? | Try steps and compare | Try some new steps. | plan F14 |
+| Q192 | Run F14, the nine steps through the app, before Luiz's retest? | Yes | Run F14. | plan F14 |

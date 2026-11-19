@@ -1,0 +1,5 @@
+#!/bin/sh
+# SPDX-License-Identifier: LGPL-2.1-only
+# Stands in for xdg-open in test runs (run.sh, OWNSTUDIO_OPEN_LOG): records what the app asked to
+# open in the system browser instead of opening it on the desktop.
+echo "$@" >> "$OWNSTUDIO_OPEN_LOG"

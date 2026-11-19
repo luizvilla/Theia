@@ -133,6 +133,15 @@ export class SetupServiceImpl implements SetupService {
         return path.join(folder, '.git', 'ownstudio-board');
     }
 
+    async boardDescription(board: string): Promise<{ path: string; text: string } | undefined> {
+        if (!/^[a-z0-9_-]+$/.test(board)) {
+            return undefined;
+        }
+        const file = path.join(this.boards, board, 'board.yaml');
+        const text = await fs.promises.readFile(file, 'utf8').catch(() => undefined);
+        return text === undefined ? undefined : { path: file, text };
+    }
+
     async boardChoice(folder: string): Promise<string | undefined> {
         const text = await fs.promises.readFile(this.boardChoiceFile(folder), 'utf8').catch(() => '');
         return text.trim() || undefined;

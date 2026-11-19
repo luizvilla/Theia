@@ -2,7 +2,9 @@
 // F16 gate: the menu items that said "(slice 1)" each do something. Run on a setup with a report,
 // one storyboard board (OWNSTUDIO_STORYBOARD_BOARD=1):
 //   tools/storyboard-shots/run.sh <port> <setup> tools/storyboard-shots/menu-commands-test.mjs
+// OWNSTUDIO_OPEN_LOG=<file> records the datasheet link instead of opening a browser.
 // New setup… and Select board… have their own tests (new-setup-test, board-picker-test).
+import * as fs from 'node:fs';
 import { chooseMenu, connect, sleep, waitForWindow } from './cdp.mjs';
 
 const app = await connect(process.argv[2]);
@@ -81,9 +83,11 @@ const stopDisabled = await (async () => {
 })();
 check(stopDisabled === true, 'Lab › Stop is greyed out while nothing runs');
 
+// The link goes to the system browser; with OWNSTUDIO_OPEN_LOG, run.sh records it instead.
+const log = process.env.OWNSTUDIO_OPEN_LOG;
 check(await menu('Help', 'Board datasheet'), 'Help › Board datasheet');
-n = await until(notes, t => /datasheet/.test(t));
-check(/datasheet/.test(n), `answers ("${n.slice(0, 120)}")`);
+const opened = await until(() => (log && fs.existsSync(log) ? fs.readFileSync(log, 'utf8') : ''), t => /owntech/.test(t));
+check(/^https:\/\/docs\.owntech\.org\/latest\/twist\/1\.4\.1\/getting_started\/$/m.test(opened), `opens the Twist's page in the browser ("${opened.trim()}")`);
 
 console.log(`menus: ${shownLabels.join(', ')}`);
 app.close();

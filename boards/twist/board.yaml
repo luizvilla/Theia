@@ -4,6 +4,8 @@
 # and thresholds are read from the overlay in the setup's Core clone.
 board: twist
 label: Twist 1.4.2
+# Help › Board datasheet (F16). The 1.4.1 getting-started page: Luiz's choice, 2026-11-19.
+datasheet: https://docs.owntech.org/latest/twist/1.4.1/getting_started/
 controller: spin
 devicetree:
   overlay: zephyr/boards/shields/twist/twist_v1_4_2.overlay
