@@ -10,7 +10,7 @@ import { WORKBENCHES, widgetId } from './workbenches.js';
 import { SetupService } from '../common/setup-protocol.js';
 import {
     BodeCurve, ControlLoopSheet, FilterTrial, OutputFilterSheet, SheetResult,
-    filterArgs, fromSlider, gainsDiffer, loopArgs, toSlider
+    filterArgs, fromSlider, gainsDiffer, loopArgs, rippleOnCurve, toSlider
 } from '../common/design-sheet.js';
 import { eng, parseEng } from '../common/units.js';
 import { DesignModel } from './design-model.js';
@@ -307,7 +307,10 @@ export class DesignWidget extends ReactWidget {
         const x = (h: number) => left + Math.log(Math.min(Math.max(h, xs[0]), xs[xs.length - 1]) / xs[0])
             / Math.log(xs[xs.length - 1] / xs[0]) * (W - left - right);
         const y = (v: number) => top + (1 - Math.min(v, yMax) / yMax) * (H - top - bottom);
-        const now = f.results.find(r => r.id === 'ripple_v')!.value;
+        // F15: the dot sits on the curve at the L being tried; the exact value once the sheet has caught up.
+        const computed = f.results.find(r => r.id === 'ripple_v')!.value;
+        const now = Math.abs(f.values.inductance_H - L) <= L * 1e-9 ? computed : rippleOnCurve(f.curve, L);
+        const Lshown = Math.min(Math.max(L, xs[0]), xs[xs.length - 1]);
         const ticks = [10e-6, 20e-6, 50e-6, 100e-6];
         return <svg viewBox={`0 0 ${W} ${H}`} className='ownstudio-bode ownstudio-ripple-curve' role='img' aria-label='Ripple vs L'>
             <text x={10} y={14} className='os-axis os-plot-title'>Output ripple vs L</text>
@@ -320,8 +323,8 @@ export class DesignWidget extends ReactWidget {
             <text x={x(f.board.inductance_H) + 4} y={H - bottom - 4} className='os-axis'>Twist {eng(f.board.inductance_H, 'H')}</text>
             <polyline fill='none' stroke='#f0dc55' strokeWidth={2}
                 points={xs.map((h, i) => `${x(h).toFixed(1)},${y(ys[i]).toFixed(1)}`).join(' ')} />
-            <circle cx={x(L)} cy={y(now)} r={5} fill='#f0dc55' />
-            <text x={x(L) + 8} y={y(now) - 6} className='os-axis os-point-label'>{eng(L, 'H')} · {eng(now, 'V')}</text>
+            <circle cx={x(Lshown)} cy={y(now)} r={5} fill='#f0dc55' data-ripple-dot={now} />
+            <text x={x(Lshown) + 8} y={y(now) - 6} className='os-axis os-point-label'>{eng(L, 'H')} · {eng(now, 'V')}</text>
         </svg>;
     }
 

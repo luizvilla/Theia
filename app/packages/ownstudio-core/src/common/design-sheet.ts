@@ -74,3 +74,25 @@ export function toSlider(value: number, lo: number, hi: number): number {
 export function fromSlider(position: number, lo: number, hi: number): number {
     return Number((lo * (hi / lo) ** (position / 1000)).toPrecision(3));
 }
+
+/**
+ * F15: the ripple read off the sheet's curve at L, interpolated on its log-L axis, clamped to the
+ * sweep. The dot on "Output ripple vs L" uses it, so it stays on the curve while L is dragged and
+ * the next calculation is still on its way (the dot used to slide sideways at the old height).
+ */
+export function rippleOnCurve(curve: { inductance_H: number[]; ripple_V: number[] }, L: number): number {
+    const xs = curve.inductance_H, ys = curve.ripple_V;
+    if (!xs.length) {
+        return NaN;
+    }
+    if (L <= xs[0]) {
+        return ys[0];
+    }
+    for (let i = 1; i < xs.length; i++) {
+        if (L <= xs[i]) {
+            const k = Math.log(L / xs[i - 1]) / Math.log(xs[i] / xs[i - 1]);
+            return ys[i - 1] + k * (ys[i] - ys[i - 1]);
+        }
+    }
+    return ys[ys.length - 1];
+}
