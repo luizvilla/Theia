@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-2.1-only
 import { test } from 'node:test';
 import * as assert from 'node:assert/strict';
-import { filterArgs, fromSlider, gainsDiffer, loopArgs, rippleOnCurve, toSlider } from './design-sheet.js';
+import { filterArgs, fromSlider, gainLines, gainsDiffer, loopArgs, rippleOnCurve, toSlider } from './design-sheet.js';
 import { eng, parseEng } from './units.js';
 
 test('the filter sheet sends the canvas values unless the user is trying others', () => {
@@ -45,4 +45,11 @@ test('F15: the dot is read off the ripple curve at L, so it stays on it while L 
     assert.ok(Math.abs(rippleOnCurve(curve, Math.sqrt(10e-6 * 20e-6)) - 0.3) < 1e-12, 'halfway on the log axis');
     assert.equal(rippleOnCurve(curve, 5e-6), 0.4, 'below the sweep: its first point');
     assert.equal(rippleOnCurve(curve, 80e-6), 0.1, 'above the sweep: its last point');
+});
+
+test('F11: the links to Kp and Ti find their lines in control.cpp', () => {
+    const text = ['#include "pid.h"', '', 'static const float kp = 0.00201F;', 'static const float Ti = 1.2e-3F;',
+        '    PidParams params(period_s, kp, Ti, Td, N, lower_bound, upper_bound);'].join('\n');
+    assert.deepEqual(gainLines(text), { kp: 3, ti: 4 });
+    assert.deepEqual(gainLines('int main() {}'), {});
 });

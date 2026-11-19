@@ -4,13 +4,14 @@ import { inject, injectable, postConstruct } from '@theia/core/shared/inversify'
 import { Message } from '@theia/core/shared/@lumino/messaging';
 import { ReactWidget } from '@theia/core/lib/browser/widgets/react-widget';
 import { OpenerService, codicon, open } from '@theia/core/lib/browser';
-import { MessageService } from '@theia/core/lib/common';
+import { CommandRegistry, MessageService } from '@theia/core/lib/common';
+import { FileService } from '@theia/filesystem/lib/browser/file-service';
 import URI from '@theia/core/lib/common/uri';
-import { WORKBENCHES, widgetId } from './workbenches.js';
+import { WORKBENCHES, commandId, widgetId } from './workbenches.js';
 import { SetupService } from '../common/setup-protocol.js';
 import {
     BodeCurve, ControlLoopSheet, FilterTrial, OutputFilterSheet, SheetResult,
-    filterArgs, fromSlider, gainsDiffer, loopArgs, rippleOnCurve, toSlider
+    filterArgs, fromSlider, gainLines, gainsDiffer, loopArgs, rippleOnCurve, toSlider
 } from '../common/design-sheet.js';
 import { eng, parseEng } from '../common/units.js';
 import { DesignModel } from './design-model.js';
@@ -45,6 +46,8 @@ export class DesignWidget extends ReactWidget {
     @inject(CanvasWidget) protected readonly canvas: CanvasWidget;
     @inject(OpenerService) protected readonly opener: OpenerService;
     @inject(MessageService) protected readonly messages: MessageService;
+    @inject(FileService) protected readonly files: FileService;
+    @inject(CommandRegistry) protected readonly commands: CommandRegistry;
 
     protected filter: OutputFilterSheet | undefined;
     protected trial: FilterTrial = { vOut: 12, stepA: 0.5, rippleMax: 0.1 };
@@ -113,6 +116,7 @@ export class DesignWidget extends ReactWidget {
                     this.loop = result;
                     this.kp ??= result.gains_in_control_cpp.kp;
                     this.ti ??= result.gains_in_control_cpp.ti;
+                    void this.readGainLines();
                 }
             }
             if (request === this.request) {
@@ -168,11 +172,39 @@ export class DesignWidget extends ReactWidget {
         try {
             this.loop = await this.setups.runDesignSheet(folder, 'control_loop', loopArgs(this.kp, this.ti, true)) as ControlLoopSheet;
             await this.setups.commitEvent(folder, 'design', `design: Kp ${this.kp}, Ti ${this.ti} s in control.cpp`);
-            this.messages.info(`src/control.cpp now has Kp = ${this.kp} and Ti = ${this.ti} s. Build and run to see what it does.`);
+            await this.readGainLines();
+            const show = 'Show in the code';
+            void this.messages.info(`src/control.cpp now has Kp = ${this.kp} and Ti = ${this.ti} s. Build and run to see what it does.`, show)
+                .then(chosen => { if (chosen === show) { void this.showGain('kp'); } });
         } catch (error) {
             this.messages.error(`The gains were not written: ${error instanceof Error ? error.message : error}`);
         }
         this.update();
+    }
+
+    /** F11: where Kp and Ti are in src/control.cpp, read again after each sheet run that reads the file. */
+    protected gainLine: { kp?: number; ti?: number } = {};
+
+    protected async readGainLines(): Promise<void> {
+        const folder = this.model.folder;
+        if (!folder) { return; }
+        try {
+            const text = (await this.files.read(new URI(`file://${folder}/src/control.cpp`))).value;
+            this.gainLine = gainLines(text);
+        } catch {
+            this.gainLine = {};
+        }
+        this.update();
+    }
+
+    /** F11 (Q183): opens control.cpp in Code with the cursor on Kp's or Ti's line. */
+    protected async showGain(gain: 'kp' | 'ti'): Promise<void> {
+        const folder = this.model.folder;
+        const line = this.gainLine[gain];
+        if (!folder || !line) { return; }
+        await this.commands.executeCommand(commandId(WORKBENCHES.find(w => w.id === 'code')!));
+        await open(this.opener, new URI(`file://${folder}/src/control.cpp`),
+            { selection: { start: { line: line - 1, character: 0 }, end: { line: line - 1, character: 0 } }, mode: 'activate' });
     }
 
     // --- rendering -----------------------------------------------------------
@@ -350,7 +382,8 @@ export class DesignWidget extends ReactWidget {
                     <button className='theia-button' disabled={!changed} onClick={() => this.applyGains()} data-action='apply'
                         title='Write Kp and Ti into src/control.cpp (only those two numbers)'>
                         <span className={codicon('save')} /> Apply to the code</button>
-                    <p className='ownstudio-muted'>control.cpp has Kp = {l.gains_in_control_cpp.kp}, Ti = {l.gains_in_control_cpp.ti} s.</p>
+                    <p className='ownstudio-muted' data-gains-in-code>control.cpp has {this.gainLink('kp', `Kp = ${l.gains_in_control_cpp.kp}`)},
+                        {' '}{this.gainLink('ti', `Ti = ${l.gains_in_control_cpp.ti} s`)}.</p>
                 </div>
                 <div className='ownstudio-cc-summary ownstudio-sheet-margins'>
                     <span className='ownstudio-cc-chip' data-result='crossover'>Crossover {m.crossover_Hz === null ? 'none' : eng(m.crossover_Hz, 'Hz')}</span>
@@ -363,6 +396,14 @@ export class DesignWidget extends ReactWidget {
             </div>
             {this.renderBode(l)}
         </>;
+    }
+
+    protected gainLink(gain: 'kp' | 'ti', text: string): React.ReactNode {
+        const line = this.gainLine[gain];
+        return line
+            ? <a href='#' data-gain-link={gain} title={`Open src/control.cpp at line ${line}`}
+                onClick={e => { e.preventDefault(); void this.showGain(gain); }}>{text} (line {line})</a>
+            : text;
     }
 
     protected renderBode(l: ControlLoopSheet): React.ReactNode {

@@ -96,3 +96,16 @@ export function rippleOnCurve(curve: { inductance_H: number[]; ripple_V: number[
     }
     return ys[ys.length - 1];
 }
+
+/**
+ * F11 (Q183): the 1-based lines of `static const float kp = …F;` and `static const float Ti = …F;`
+ * in control.cpp (the lines the control_loop sheet reads and Apply writes), for links to them.
+ */
+export function gainLines(text: string): { kp?: number; ti?: number } {
+    const lines: { kp?: number; ti?: number } = {};
+    text.split('\n').forEach((line, i) => {
+        const m = /static const float (kp|Ti)\s*=\s*[-+0-9.eE]+F?;/.exec(line);
+        if (m) { lines[m[1] === 'kp' ? 'kp' : 'ti'] = i + 1; }
+    });
+    return lines;
+}
