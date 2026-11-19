@@ -147,9 +147,12 @@ export class CanvasWidget extends ReactWidget {
         this.onDidChangeEmitter.fire();
     }
 
-    /** U18: commit pending canvas edits now and wait for every write (before a restore). */
-    async flushPending(): Promise<void> {
-        this.commitNow();
+    /**
+     * U18: commit pending canvas edits now and wait for every write (before a restore).
+     * F2: `exclude` leaves paths for the event that owns them (a PulsimGui save of the plant).
+     */
+    async flushPending(exclude: string[] = []): Promise<void> {
+        this.commitNow(exclude);
         await this.persistence;
     }
 
@@ -245,7 +248,7 @@ export class CanvasWidget extends ReactWidget {
         this.persistence = this.persistence.then(operation).catch(e => console.error(failure, e));
     }
 
-    protected commitNow(): void {
+    protected commitNow(exclude: string[] = []): void {
         clearTimeout(this.commitTimer);
         if (!this.pendingSummary || !this.folder) {
             return;
@@ -253,7 +256,7 @@ export class CanvasWidget extends ReactWidget {
         const folder = this.folder;
         const summary = `canvas: ${this.pendingSummary}`;
         this.pendingSummary = undefined;
-        this.enqueuePersistence(() => this.setups.commitEvent(folder, 'canvas', summary), 'canvas not committed');
+        this.enqueuePersistence(() => this.setups.commitEvent(folder, 'canvas', summary, exclude), 'canvas not committed');
     }
 
     protected refuse(reason: string): void {

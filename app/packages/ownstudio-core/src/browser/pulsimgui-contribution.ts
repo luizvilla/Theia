@@ -75,10 +75,16 @@ export class PulsimGuiContribution implements CommandContribution, FrontendAppli
 
     protected async sync(root: URI): Promise<void> {
         try {
+            if (await this.setups.isOwnPlantWrite(root.path.fsPath())) {
+                return;         // OwnStudio wrote it from the canvas; it goes with the canvas's dot
+            }
+            // Canvas edits still waiting for their dot get it first, without the PulsimGui save,
+            // so the save's dot holds only what PulsimGui changed.
+            await this.canvas.flushPending(['ownstudio/plant']);
             const result = await this.setups.syncPlantValues(root.path.fsPath());
-            this.canvas.replaceFromPlant(result.canvas);
             const changed = Object.keys(result.changed);
             if (changed.length) {
+                this.canvas.replaceFromPlant(result.canvas);
                 this.messages.info(`PulsimGui saved ${changed.join(', ')}; the setup canvas is in sync.`);
             }
         } catch (error) {

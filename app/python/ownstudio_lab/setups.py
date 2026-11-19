@@ -260,8 +260,11 @@ def is_dirty(repo):
     return bool(git(repo, "status", "--porcelain").strip())
 
 
-def commit_event(repo, event, summary, extra_trailers=None):
+def commit_event(repo, event, summary, extra_trailers=None, exclude=()):
     """Commits the setup's state as one timeline dot. Events without file changes (a build, a run) are empty commits.
+
+    ``exclude`` leaves paths out of this dot, for the event that owns them next (F2: canvas
+    edits are committed before a PulsimGui save is synced, without that save).
 
     After a restore (detached HEAD), the first edit creates a branch from the restored dot (S7).
     """
@@ -270,7 +273,7 @@ def commit_event(repo, event, summary, extra_trailers=None):
     branch_made = None
     if current_branch(repo) is None:
         branch_made = _branch_from_restore(repo)
-    git(repo, "add", "--all")
+    git(repo, "add", "--all", "--", ".", *(f":(exclude){p}" for p in exclude))
     trailers = [f"{EVENT_TRAILER}: {event}"] + [f"{k}: {v}" for k, v in (extra_trailers or {}).items()]
     message = summary + "\n\n" + "\n".join(trailers) + "\n"
     git(repo, "commit", "--quiet", "--allow-empty", "--no-verify", "-m", message, env=_identity_env(repo))
@@ -521,7 +524,7 @@ def main(argv):
                                           name=args[3] if len(args) > 3 else None,
                                           board_root=args[4] if len(args) > 4 else None)}
         elif cmd == "event":
-            out = asdict(commit_event(args[0], args[1], args[2]))
+            out = asdict(commit_event(args[0], args[1], args[2], exclude=args[3:]))
         elif cmd == "timeline":
             out = [asdict(d) for d in timeline(*args)]
         elif cmd == "restore":

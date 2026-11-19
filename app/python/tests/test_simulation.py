@@ -14,7 +14,7 @@ from unittest import mock
 import yaml
 
 from ownstudio_lab.gui import backend
-from ownstudio_lab.simulation import Harness, load_project, sync_plant_values
+from ownstudio_lab.simulation import Harness, SimulationError, load_project, project_values, sync_plant_values
 from ownstudio_lab.target import load_harness
 
 
@@ -73,6 +73,17 @@ class NativePlant(unittest.TestCase):
         self.assertEqual(values, {"Vin": 36.0, "Rload": 12.0, "L": 44e-6, "C": 14.1e-6})
         self.assertEqual(parts["Vin"].parameters["waveform"]["value"], 36.0)
         self.assertEqual(parts["Rload"].parameters["resistance"], 12.0)
+        # F2: the file on disk says what was simulated.
+        from pulsimgui.models.project import Project
+        self.assertEqual(project_values(Project.load(self.setup / "ownstudio/plant/twist_buck.pulsim")), values)
+
+    def test_a_canvas_without_source_and_load_is_not_simulated(self):
+        # F3 (Q173b): no silent fallback to the plant's 40 V and 6 ohm.
+        setup = yaml.safe_load((self.setup / "ownstudio" / "setup.yaml").read_text())
+        setup["canvas"]["wires"] = []
+        (self.setup / "ownstudio" / "setup.yaml").write_text(yaml.safe_dump(setup, sort_keys=False))
+        with self.assertRaisesRegex(SimulationError, "Add a source on HIGH and a load on LOW1 to simulate."):
+            load_project(self.setup)
 
     def test_saved_named_values_sync_back_to_the_canvas(self):
         from pulsimgui.models.project import Project

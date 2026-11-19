@@ -112,6 +112,17 @@ class Setups(unittest.TestCase):
         with self.assertRaises(su.SetupError):
             su.commit_event(self.setup, "lunch", "not an event")
 
+    def test_an_event_can_leave_a_path_for_the_next_event(self):
+        # F2: canvas edits get their dot before a PulsimGui save is synced, without that save.
+        self.edit_canvas(33)
+        plant = os.path.join(self.setup, "ownstudio", "plant.pulsim")
+        with open(plant, "w") as f:
+            f.write("{}\n")
+        su.commit_event(self.setup, "canvas", "load added", exclude=["ownstudio/plant.pulsim"])
+        self.assertEqual(su.git(self.setup, "status", "--porcelain").strip(), "?? ownstudio/plant.pulsim")
+        su.commit_event(self.setup, "simulate", "PulsimGui saved")
+        self.assertEqual(su.git(self.setup, "show", "--name-only", "--format=", "HEAD").split(), ["ownstudio/plant.pulsim"])
+
     def test_restore_shows_an_old_dot_without_a_branch_and_back(self):
         self.edit_canvas(33)
         first = su.commit_event(self.setup, "canvas", "33 ohm")

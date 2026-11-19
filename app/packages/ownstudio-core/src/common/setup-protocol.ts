@@ -40,7 +40,9 @@ export interface SetupService {
     /** Writes the canvas section, leaving the rest of setup.yaml as it is. */
     writeCanvas(folder: string, canvas: unknown): Promise<void>;
     /** Commits the setup as one timeline dot (U5's events). */
-    commitEvent(folder: string, event: string, summary: string): Promise<void>;
+    commitEvent(folder: string, event: string, summary: string, exclude?: string[]): Promise<void>;
+    /** F2: the plant file is as OwnStudio last wrote it from the canvas (not a PulsimGui save). */
+    isOwnPlantWrite(folder: string): Promise<boolean>;
     /** Board description plus the setup Core clone's devicetree values (plan U9). */
     boardDefinition(folder: string): Promise<BoardDefinition>;
     /** Opens the setup-owned plant in the pip-installed PulsimGui (plan U14). */

@@ -22,6 +22,8 @@ import tempfile
 import numpy as np
 import yaml
 
+from .plant_values import canvas_values, connected_node, missing_for_simulation, write_plant
+
 CONTROL_PERIOD_S = 100e-6
 DEFAULT_REFERENCE_V = 12.0
 PULSIM_RELEASE = "2.0.0"
@@ -69,21 +71,6 @@ def _components(project) -> dict:
     return {part.name: part for part in project.get_active_circuit().components.values()}
 
 
-def _connected_node(setup: dict, board_port: str) -> dict | None:
-    canvas = setup.get("canvas") or {}
-    nodes = {node.get("id"): node for node in canvas.get("nodes", []) if isinstance(node, dict)}
-    board_ids = {node_id for node_id, node in nodes.items() if node.get("part") == setup.get("board")}
-    for wire in canvas.get("wires", []):
-        if not isinstance(wire, dict):
-            continue
-        left, right = wire.get("from") or {}, wire.get("to") or {}
-        if left.get("node") in board_ids and left.get("port") == board_port:
-            return nodes.get(right.get("node"))
-        if right.get("node") in board_ids and right.get("port") == board_port:
-            return nodes.get(left.get("node"))
-    return None
-
-
 def project_values(project) -> dict[str, float]:
     """Read the four canvas-facing values from their named plant components."""
     parts = _components(project)
@@ -104,31 +91,19 @@ def project_values(project) -> dict[str, float]:
 
 
 def apply_setup_values(project, setup: dict) -> dict[str, float]:
-    """Apply the setup's named Vin/Rload/L/C values to a loaded project."""
+    """Apply the canvas's Vin/Rload/L/C to a loaded project (F2: the canvas is their one home).
+
+    The simulator refuses a canvas without a source on HIGH and a load on LOW1 (F3,
+    Q173b) instead of falling back to the plant's own values: that fallback once ran
+    a 30 V bench at 40 V without anyone noticing. L and C come from the board node;
+    a board that has not been through Design yet keeps the board plant's values,
+    which are the board's defaults.
+    """
+    missing = missing_for_simulation(setup)
+    if missing:
+        raise SimulationError(missing)
     parts = _components(project)
-    defaults = project_values(project)
-
-    source, load = _connected_node(setup, "HIGH"), _connected_node(setup, "LOW1")
-    source_values = (source or {}).get("values") or {}
-    load_values = (load or {}).get("values") or {}
-    board = next((node for node in (setup.get("canvas") or {}).get("nodes", [])
-                  if isinstance(node, dict) and node.get("part") == setup.get("board")), {})
-    board_values = board.get("values") or {}
-    overrides = setup.get("simulation") or {}
-
-    values = {
-        "Vin": float(source_values.get("voltage", defaults["Vin"])),
-        "Rload": float(load_values.get("ohm", defaults["Rload"])),
-        "L": float(board_values.get("inductance_H", board_values.get("inductance",
-                   defaults["L"]))),
-        "C": float(board_values.get("capacitance_F", board_values.get("capacitance",
-                   defaults["C"]))),
-    }
-    for name in tuple(values):
-        if name in overrides:
-            values[name] = float(overrides[name])
-        if not math.isfinite(values[name]) or values[name] <= 0:
-            raise SimulationError(f"the setup's {name} value must be positive")
+    values = {**project_values(project), **canvas_values(setup)}
     parts["Vin"].parameters["waveform"]["value"] = values["Vin"]
     parts["Rload"].parameters["resistance"] = values["Rload"]
     parts["L"].parameters["inductance"] = values["L"]
@@ -141,6 +116,10 @@ def load_project(mission: pathlib.Path):
     _, Project, _, _, _ = _runtime()
     setup = _setup(mission)
     config, path = _plant_config(mission, setup)
+    missing = missing_for_simulation(setup)
+    if missing:
+        raise SimulationError(missing)
+    write_plant(mission)            # the file on disk says what is simulated (F2)
     project = Project.load(path)
     values = apply_setup_values(project, setup)
     return project, config, path, values
@@ -165,12 +144,13 @@ def sync_plant_values(mission: pathlib.Path) -> dict:
     nodes = canvas.get("nodes")
     if not isinstance(nodes, list):
         raise SimulationError("the setup canvas has no nodes")
-    source = _connected_node(setup, "HIGH")
-    load = _connected_node(setup, "LOW1")
+    source = connected_node(setup, "HIGH")
+    load = connected_node(setup, "LOW1")
     board = next((node for node in nodes if isinstance(node, dict)
                   and node.get("part") == setup.get("board")), None)
     if source is None or load is None or board is None:
-        raise SimulationError("connect a source to HIGH and a resistor to LOW1 before syncing the plant")
+        raise SimulationError(f"PulsimGui's Vin ({values['Vin']:g} V) and Rload ({values['Rload']:g} Ω) have no place "
+                              "on the canvas yet: add a source on HIGH and a load on LOW1, then save again")
 
     changed: dict[str, float] = {}
 

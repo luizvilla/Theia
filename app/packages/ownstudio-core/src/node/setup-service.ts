@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-only
 import { execFile, spawn } from 'child_process';
+import { createHash } from 'crypto';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
@@ -93,10 +94,43 @@ export class SetupServiceImpl implements SetupService {
         const setup = (load(fs.readFileSync(file, 'utf8')) ?? {}) as Record<string, unknown>;
         setup.canvas = canvas;
         fs.writeFileSync(file, dump(setup, { sortKeys: false, lineWidth: 120 }));
+        await this.writePlant(folder);
     }
 
-    async commitEvent(folder: string, event: string, summary: string): Promise<void> {
-        await this.run('ownstudio_lab.setups', ['event', folder, event, summary]);
+    /**
+     * F2 (Q172): the canvas is the one home of Vin, Rload, L and C; the plant file follows it on
+     * every canvas save. The content written is remembered, so the PulsimGui watcher can tell
+     * OwnStudio's own write from a save in PulsimGui. A plant that cannot be written (a setup
+     * without one) never stops the canvas from saving.
+     */
+    protected async writePlant(folder: string): Promise<void> {
+        try {
+            const result = await this.run('ownstudio_lab.plant_values', ['write', folder]) as { plant: string };
+            this.ownPlantWrite.set(folder, this.digest(path.join(folder, result.plant)));
+        } catch (error) {
+            console.warn(`OwnStudio: the plant of ${folder} does not follow the canvas: ${error instanceof Error ? error.message : error}`);
+        }
+    }
+
+    protected readonly ownPlantWrite = new Map<string, string>();
+
+    async isOwnPlantWrite(folder: string): Promise<boolean> {
+        const own = this.ownPlantWrite.get(folder);
+        return !!own && own === this.digest(this.plantFile(folder));
+    }
+
+    protected plantFile(folder: string): string {
+        const setup = (load(fs.readFileSync(this.setupFile(folder), 'utf8')) ?? {}) as { plant?: string | { file?: string } };
+        const file = typeof setup.plant === 'string' ? setup.plant : setup.plant?.file;
+        return path.join(folder, file ?? 'ownstudio/plant/missing.pulsim');
+    }
+
+    protected digest(file: string): string {
+        return fs.existsSync(file) ? createHash('sha256').update(fs.readFileSync(file)).digest('hex') : '';
+    }
+
+    async commitEvent(folder: string, event: string, summary: string, exclude: string[] = []): Promise<void> {
+        await this.run('ownstudio_lab.setups', ['event', folder, event, summary, ...exclude]);
     }
 
     async boardDefinition(folder: string): Promise<BoardDefinition> {
@@ -133,6 +167,10 @@ export class SetupServiceImpl implements SetupService {
     async syncPlantValues(folder: string): Promise<PlantSync> {
         const result = await this.run('ownstudio_lab.gui', ['sync', folder]) as PlantSync;
         const names = Object.keys(result.changed);
+        if (names.length) {
+            // Python wrote setup.yaml in its own style; one writer's style keeps the dot's diff to the values.
+            await this.writeCanvas(folder, result.canvas);
+        }
         const dirty = await new Promise<boolean>((resolve, reject) => {
             execFile('git', ['-C', folder, 'status', '--porcelain', '--', result.plant, 'ownstudio/setup.yaml'],
                 (error, stdout, stderr) => error ? reject(new Error(stderr.trim() || String(error))) : resolve(!!stdout.trim()));
