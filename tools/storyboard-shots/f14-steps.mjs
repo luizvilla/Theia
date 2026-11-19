@@ -222,6 +222,34 @@ if (step === '7') {
     await shot('step-7b-result');
 }
 
+if (step === '8') {
+    // 8. Screenshots of the Design sheets after design-test (which checks them): L on its curve, Kp applied.
+    await workbench('design');
+    await moveClick('.ownstudio-sheet-item[data-sheet="output_filter"]');
+    await until(() => app.evaluate(`!!document.querySelector('.ownstudio-ripple-curve circle')`), v => v);
+    await shot('step-8a-output-filter');
+    await moveClick('.ownstudio-sheet-item[data-sheet="control_loop"]');
+    const links = await until(() => text('[data-gains-in-code]'), t => /line/.test(t));
+    check(/Kp = 0\.0005 \(line 15\)/.test(links), `the applied Kp links to its line ("${links.replace(/\s+/g, ' ')}")`);
+    await shot('step-8b-control-loop');
+}
+
+if (step === '9') {
+    // 9. A screenshot of the timeline preview after timeline-test (which checks restore and branches).
+    await app.clickOn('.ownstudio-timeline-toggle, [id="ownstudio.view.timeline"]');
+    const dots = await app.evaluate(`[...document.querySelectorAll('.ownstudio-timeline-dot[data-commit]')].map(d => d.dataset.commit)`);
+    check(dots.length >= 5, `every change, build and simulation is a dot (${dots.length})`);
+    const at = await app.evaluate(`(() => { const strip = document.querySelector('.ownstudio-timeline-body')?.getBoundingClientRect();
+        const d = [...document.querySelectorAll('.ownstudio-timeline-dot[data-commit]')].filter(d => { const r = d.getBoundingClientRect();
+            return strip && r.width && r.left >= strip.left && r.right <= strip.right; }).at(-2);
+        const r = d?.getBoundingClientRect(); return r && { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`);
+    if (at) { await app.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: at.x, y: at.y }); await app.click(at.x, at.y); }
+    const preview = await until(() => app.evaluate(`!!document.querySelector('[data-preview]')`), v => v);
+    check(preview, 'a dot opens the preview of what differs from now');
+    await sleep(800);
+    await shot('step-9-preview');
+}
+
 if (step === 'w') {
     // W. The window: the three workbenches, the eight menus, the green title bar.
     const left = await app.evaluate(`[...document.querySelectorAll('.lm-TabBar.theia-app-left .lm-TabBar-tab')].map(t => t.title || t.getAttribute('aria-label') || t.textContent.trim())`);
