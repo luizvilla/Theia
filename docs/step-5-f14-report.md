@@ -74,4 +74,13 @@ Run through the app's driver (`f14-steps.mjs` steps `4u`, `1`, `57`) on a copy o
 7. With a 1 A limit the supply tripped at switch-on with this firmware; the checklist cannot see a supply's limit.
 8. **I_LOW1 did not match the load.** The load is **10 Ω**, not 33 Ω (Luiz): the board's 1.04 A and 1.21 A are right. The simulation's current was wrong: it kept one sample every 100 µs, exactly 20 periods of the 200 kHz switching, so it always read the ripple's valley (0.67 A at 10 V into 10 Ω). Fixed in F20: each simulated scope sample is the mean over its period, as the board's ADC averages; now 1.00 A and 1.20 A.
 
-**Fixed after the run (F20, no power):** items 1–4. Recomputed on this run's board waveform, the new metrics give LOW1 10.06 V before the step, rise **24.2 ms** (the 18.6 ms was the noise crossing 90 % early), overshoot **0 %, noise ±10 %**. A new simulation at 29.9 V and 10 Ω starts settled at 9.97 V: rise **25.7 ms**, overshoot 0 %, final 12.00 V, I_LOW1 1.00 → 1.20 A. Simulating the capture takes 61 s instead of 37 s (the 80 ms of settling). The work copy's canvas says 2 A (dot `3e101a7`) and 10 Ω (dot `2eaa827`). Still to check on the bench, with Luiz: a new capture, its simulation, and both dots.
+**Fixed after the run (F20, no power):** items 1–4. Recomputed on this run's board waveform, the new metrics give LOW1 10.06 V before the step, rise **24.2 ms** (the 18.6 ms was the noise crossing 90 % early), overshoot **0 %, noise ±10 %**. A new simulation at 29.9 V and 10 Ω starts settled at 9.97 V: rise **25.7 ms**, overshoot 0 %, final 12.00 V, I_LOW1 1.00 → 1.20 A. Simulating the capture takes 61 s instead of 37 s (the 80 ms of settling). The work copy's canvas says 2 A (dot `3e101a7`) and 10 Ω (dot `2eaa827`). Checked on the bench at 15:14 with Luiz (driver step `57`, log `step-57d.log`; the Spin …0031 and Ownverter …0041 were busy with another program, untouched; the app links only the chosen board): checklist 6/6 (29.9 V, 10 Ω on LOW1), dialog named …002E, capture in 5 s, simulation in 67 s.
+
+| Case | Simulation | Board | Board − simulation |
+|---|---|---|---|
+| Level before the step | 9.974 V | 9.987 V | +0.013 V |
+| Final voltage | 12.00 V | 11.99 V | −0.008 V |
+| 10–90 % rise time | 25.6 ms | 25.3 ms | −0.3 ms |
+| Overshoot (noise ±5.8 %) | 0 % | 0 % | 0 |
+
+Dots `14b1159` (run, board) and `97eba2c` (simulate), each naming its record; nothing left uncommitted. Converter `Mode` 0 afterwards, HIGH 30.04 V, LOW1 0.64 V. New: the app warned "Unable to watch for file changes in this large workspace" (the setup holds `.pio` and Core; the file watcher's limit), not looked into.
