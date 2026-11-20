@@ -26,11 +26,23 @@ export async function excludeFromTimeline(folder: string, name: string): Promise
     }
 }
 
-/** F5: the setup's clangd settings: Doxygen comments rendered in the hover. Never overwrites a user's own. */
+const CLANGD_HEADER = '# Written by OwnStudio for its C++ code tools (clangd).\n';
+
+/**
+ * F5: the setup's clangd settings: Doxygen comments rendered in the hover. Never overwrites a user's own.
+ * F19: until compile_commands.json exists clangd has no include paths and marks every line
+ * red, so its diagnostics wait for the first index (about 2 min after a setup opens).
+ */
 export async function writeClangdConfig(folder: string): Promise<void> {
     const file = path.join(folder, '.clangd');
-    if (!fs.existsSync(file)) {
-        await fs.promises.writeFile(file, '# Written by OwnStudio for its C++ code tools (clangd).\nDocumentation:\n  CommentFormat: Doxygen\n');
+    const current = await fs.promises.readFile(file, 'utf8').catch(() => undefined);
+    if (current === undefined || current.startsWith(CLANGD_HEADER)) {
+        const waiting = !fs.existsSync(path.join(folder, 'compile_commands.json'));
+        const wanted = CLANGD_HEADER + 'Documentation:\n  CommentFormat: Doxygen\n'
+            + (waiting ? "# No compile database yet: diagnostics wait for the code index.\nDiagnostics:\n  Suppress: '*'\n" : '');
+        if (wanted !== current) {
+            await fs.promises.writeFile(file, wanted);
+        }
     }
     await excludeFromTimeline(folder, '.clangd');
 }
@@ -73,11 +85,24 @@ export async function setupBuildIdentity(folder: string): Promise<BuildIdentity>
         }
         hash.update(relative.replaceAll(path.sep, '/'));
         hash.update('\0');
-        hash.update(await fs.promises.readFile(file));
+        const content = await fs.promises.readFile(file);
+        const generated = GENERATED_CORE_LINES[relative.replaceAll(path.sep, '/')];
+        hash.update(generated ? generated(content.toString('utf8')) : content);
         hash.update('\0');
     }
     return { commit, dirty, source_hash: hash.digest('hex').slice(0, 16) };
 }
+
+/**
+ * F19: the lines PlatformIO writes into Core's own files during a build or the code
+ * index, from platformio.ini (already hashed). Core's files are put back afterwards, but
+ * not when the app quits in between, so the same sources had two hashes and a board running
+ * them read as "firmware differs". The identity reads these files without those lines.
+ */
+const GENERATED_CORE_LINES: Record<string, (text: string) => string> = {
+    'zephyr/CMakeLists.txt': text => text.split('\n').filter(line => !/^\s*set\((BOARD|SHIELD) /.test(line)).join('\n'),
+    'zephyr/boards/owntech/spin/spin.dts': text => text.replace('zephyr,console = &cdc_acm_uart0;', 'zephyr,console = &lpuart1;'),
+};
 
 /** Turns the progress formats emitted by mcumgr into exact byte counts. */
 export function byteProgress(text: string): { current: number; total: number } | undefined {
@@ -187,6 +212,7 @@ export class BuildServiceImpl implements BuildService {
                 this.codeTools = undefined;
             }
             await this.restoreGeneratedCoreFiles(generated);
+            await writeClangdConfig(folder).catch(() => undefined);     // F19: the database is there, diagnostics on
             this.emit('index', code === 0
                 ? `Code tools ✓ ${Math.round((Date.now() - started) / 1000)} s: Ctrl+click, completion and hover follow the build.`
                 : child.killed ? 'Code tools: indexing stopped for the build; it runs again after it.'

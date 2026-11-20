@@ -5,7 +5,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import { addBundledToolsToPath } from './bundled-tools.js';
-import { codeToolsStale } from './build-service.js';
+import { codeToolsStale, writeClangdConfig } from './build-service.js';
 
 test('F5: shipped tools and the ARM toolchain go on PATH, once, before what was there', () => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), 'ownstudio-tools-'));
@@ -40,6 +40,27 @@ test('F5: the compile database is stale when missing or older than a flag input,
         assert.equal(codeToolsStale(setup), false, 'a code edit does not change the flags');
         fs.writeFileSync(path.join(setup, 'src', 'app.conf'), 'CONFIG_X=y\n');
         assert.equal(codeToolsStale(setup), true, 'app.conf changed after the database');
+    } finally {
+        fs.rmSync(setup, { recursive: true, force: true });
+    }
+});
+
+test('F19: no red marks before the compile database exists; a user\'s own .clangd is left alone', async () => {
+    const setup = fs.mkdtempSync(path.join(os.tmpdir(), 'ownstudio-clangd-'));
+    try {
+        fs.mkdirSync(path.join(setup, '.git', 'info'), { recursive: true });
+        const config = path.join(setup, '.clangd');
+        await writeClangdConfig(setup);
+        assert.match(fs.readFileSync(config, 'utf8'), /Suppress: '\*'/, 'no database: diagnostics wait');
+        fs.writeFileSync(path.join(setup, 'compile_commands.json'), '[]');
+        await writeClangdConfig(setup);
+        const ready = fs.readFileSync(config, 'utf8');
+        assert.doesNotMatch(ready, /Suppress/, 'database ready: diagnostics shown');
+        assert.match(ready, /CommentFormat: Doxygen/);
+        fs.writeFileSync(config, 'Diagnostics:\n  UnusedIncludes: None\n');
+        fs.rmSync(path.join(setup, 'compile_commands.json'));
+        await writeClangdConfig(setup);
+        assert.equal(fs.readFileSync(config, 'utf8'), 'Diagnostics:\n  UnusedIncludes: None\n');
     } finally {
         fs.rmSync(setup, { recursive: true, force: true });
     }

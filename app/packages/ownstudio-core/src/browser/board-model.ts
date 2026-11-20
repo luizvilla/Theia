@@ -43,6 +43,8 @@ export class BoardModel {
     identity: MissionIdentity | undefined;
     problem: string | undefined;
     busy = false;     // a flash is running: no polling, no auto-connect
+    /** F19: the open folder is a setup (built and uploaded by Board › Build/Upload), not a 1.0 mission. */
+    setup = false;
 
     protected readonly onDidChangeEmitter = new Emitter<void>();
     readonly onDidChange = this.onDidChangeEmitter.event;
@@ -96,15 +98,28 @@ export class BoardModel {
 
     protected async loadChoice(): Promise<void> {
         const folder = this.missions.root?.path.fsPath();
-        this.chosen = folder ? await this.setups.boardChoice(folder).catch(() => undefined) : undefined;
+        const setup = folder ? await this.setups.isSetup(folder).catch(() => false) : false;
+        this.chosen = folder && setup ? await this.setups.boardChoice(folder).catch(() => undefined) : undefined;
+        const pending = pendingChoice();
+        if (folder && setup && !this.chosen && pending) {
+            // F19: a board chosen on the Start page goes to the setup opened next
+            // (opening a setup reloads the window, which used to drop the choice).
+            await this.setups.setBoardChoice(folder, pending).catch(() => undefined);
+            this.chosen = pending;
+        }
+        if (folder && setup) {
+            pendingChoice(null);
+        }
         this.onDidChangeEmitter.fire();
     }
 
-    /** F8: remembers the choice in the setup and links to that board. */
+    /** F8: remembers the choice in the setup and links to that board; with no setup open, until one opens (F19). */
     async choose(serial: string): Promise<void> {
         const folder = this.missions.root?.path.fsPath();
-        if (folder) {
+        if (folder && await this.setups.isSetup(folder).catch(() => false)) {
             await this.setups.setBoardChoice(folder, serial);
+        } else {
+            pendingChoice(serial);
         }
         this.chosen = serial;
         this.failed.clear();
@@ -121,8 +136,10 @@ export class BoardModel {
         try {
             if (!root) {
                 this.identity = undefined;
+                this.setup = false;
             } else {
                 const folder = root.path.fsPath();
+                this.setup = await this.setups.isSetup(folder).catch(() => false);
                 try {
                     const [sources, built] = await Promise.all([this.builds.identity(folder), this.builds.lastBuild(folder)]);
                     this.identity = {
@@ -244,4 +261,20 @@ export class BoardModel {
 
 function message(error: unknown): string {
     return error instanceof Error ? error.message : String(error);
+}
+
+const PENDING_CHOICE = 'ownstudio.board.pendingChoice';
+
+/** F19: reads, sets (serial) or clears (null) the board chosen while no setup was open. */
+function pendingChoice(value?: string | null): string | undefined {
+    try {
+        if (value === null) {
+            window.localStorage.removeItem(PENDING_CHOICE);
+        } else if (value !== undefined) {
+            window.localStorage.setItem(PENDING_CHOICE, value);
+        }
+        return window.localStorage.getItem(PENDING_CHOICE) ?? undefined;
+    } catch {
+        return undefined;
+    }
 }

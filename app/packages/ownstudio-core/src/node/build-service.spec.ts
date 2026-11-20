@@ -96,3 +96,21 @@ test('the forced header gives the firmware its identity macros for ThingSet (E21
     assert.match(header, /#define BUILD_SOURCE_HASH "c2f17421be7dfa4a"/);
     assert.match(header, /ownstudio_build_identity\[\] = "\{\\"commit\\":/);
 });
+
+test('F19: Core files rewritten by PlatformIO do not change the source identity', async () => {
+    const { folder } = fixture();
+    const cmake = path.join(folder, 'zephyr', 'CMakeLists.txt');
+    const before = await setupBuildIdentity(folder);
+    // what a build or the code index leaves behind when it is stopped before Core's files are put back
+    fs.writeFileSync(cmake, fs.readFileSync(cmake, 'utf8').replace('twist_v1_4_1', 'twist_v1_4_2'));
+    assert.equal((await setupBuildIdentity(folder)).source_hash, before.source_hash);
+    fs.mkdirSync(path.join(folder, 'zephyr', 'boards', 'owntech', 'spin'), { recursive: true });
+    const dts = path.join(folder, 'zephyr', 'boards', 'owntech', 'spin', 'spin.dts');
+    fs.writeFileSync(dts, 'chosen { zephyr,console = &lpuart1; };\n');
+    const withDts = await setupBuildIdentity(folder);
+    fs.writeFileSync(dts, 'chosen { zephyr,console = &cdc_acm_uart0; };\n');
+    assert.equal((await setupBuildIdentity(folder)).source_hash, withDts.source_hash);
+    // a real edit of the same file still counts
+    fs.appendFileSync(cmake, 'add_compile_definitions(EXTRA)\n');
+    assert.notEqual((await setupBuildIdentity(folder)).source_hash, before.source_hash);
+});

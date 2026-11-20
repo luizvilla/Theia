@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-only
 import { inject, injectable } from '@theia/core/shared/inversify';
-import { CommandContribution, CommandRegistry, MessageService } from '@theia/core/lib/common';
+import { CommandContribution, CommandRegistry, CommandService, MessageService } from '@theia/core/lib/common';
 import { PreferenceContribution, PreferenceSchema } from '@theia/core/lib/common/preferences';
 import { ConfirmDialog, FrontendApplicationContribution, QuickInputService, QuickPickItem, StatusBar, StatusBarAlignment } from '@theia/core/lib/browser';
 import { boardName } from '../common/board-protocol.js';
@@ -39,6 +39,7 @@ export class BoardContribution implements CommandContribution, FrontendApplicati
     @inject(StatusBar) protected readonly statusBar: StatusBar;
     @inject(MessageService) protected readonly messages: MessageService;
     @inject(QuickInputService) protected readonly input: QuickInputService;
+    @inject(CommandService) protected readonly commands: CommandService;
 
     onStart(): void {
         this.board.onDidChange(() => this.render());
@@ -83,6 +84,10 @@ export class BoardContribution implements CommandContribution, FrontendApplicati
     }
 
     protected async flash(): Promise<void> {
+        if (this.board.setup) {
+            await this.uploadSetup();
+            return;
+        }
         const prebuilt = this.board.identity?.prebuilt;
         const boards = this.board.boards;
         if (!prebuilt) {
@@ -121,12 +126,33 @@ export class BoardContribution implements CommandContribution, FrontendApplicati
         }
     }
 
+    /** F19: in a setup, the status bar's flash is the setup's own Upload (or Build and upload when the build is older than the sources). */
+    protected async uploadSetup(): Promise<void> {
+        const identity = this.board.identity;
+        const sources = identity?.sources?.source_hash;
+        const built = !!sources && identity?.prebuilt?.build.source_hash === sources;
+        const target = this.board.boards.find(b => b.serial_number === this.board.chosen) ?? this.board.boards.find(b => b.serial_number === this.board.target);
+        const where = target ? `${boardName(target.product)} (${target.serial_number})` : 'the board';
+        const ok = await new ConfirmDialog({
+            title: built ? 'Upload to the board' : 'Build and upload',
+            msg: built
+                ? `Upload this setup's build (sources ${sources}) to ${where}? The converter stays idle after uploading.`
+                : `The setup's sources (${sources ?? 'unknown'}) have no build yet. Build them and upload to ${where}? The converter stays idle after uploading.`,
+            ok: built ? 'Upload' : 'Build and upload',
+        }).open();
+        if (ok) {
+            await this.commands.executeCommand(built ? 'ownstudio.setup.upload' : 'ownstudio.setup.buildUpload');
+        }
+    }
+
     protected render(): void {
         const { boards, link, problem } = this.board;
         let text: string;
         let tooltip: string;
         let command: string | undefined;
         let className = 'ownstudio-board';
+        const kind = this.board.setup ? 'setup' : 'mission';
+        const flashHint = this.board.setup ? "Click to upload the setup's build." : "Click to flash the mission's pre-built firmware.";
         if (this.board.busy) {
             text = '$(sync~spin) Flashing…';
             tooltip = 'The board is being flashed.';
@@ -146,15 +172,15 @@ export class BoardContribution implements CommandContribution, FrontendApplicati
             const sources = this.board.identity?.sources?.source_hash;
             if (state === 'matches') {
                 text = `$(plug) ${name} · $(check) firmware matches`;
-                tooltip = `${name} on ${link.port}. ${running}\nThe mission's sources are the same.`;
+                tooltip = `${name} on ${link.port}. ${running}\nThe ${kind}'s sources are the same.`;
             } else {
                 const why = {
-                    prebuilt: "It runs the mission's pre-built firmware, but the sources have changed since.",
-                    differs: `The mission's sources are ${sources}: the board runs other code.`,
-                    unknown: 'The firmware or the mission has no build identity to compare.',
+                    prebuilt: this.board.setup ? "It runs the setup's last build, but the sources have changed since." : "It runs the mission's pre-built firmware, but the sources have changed since.",
+                    differs: `The ${kind}'s sources are ${sources}: the board runs other code.`,
+                    unknown: `The firmware or the ${kind} has no build identity to compare.`,
                 }[state];
                 text = `$(plug) ${name} · $(warning) firmware differs`;
-                tooltip = `${name} on ${link.port}. ${running}\n${why}\nClick to flash the mission's pre-built firmware.`;
+                tooltip = `${name} on ${link.port}. ${running}\n${why}\n${flashHint}`;
                 command = FLASH_COMMAND.id;
                 className += ' ownstudio-board-warning';
             }
@@ -165,16 +191,16 @@ export class BoardContribution implements CommandContribution, FrontendApplicati
             className += ' ownstudio-board-warning';
         } else if (boards.length > 1) {
             const chosen = boards.find(b => b.serial_number === this.board.target)!;
-            text = `$(plug) ${boardName(chosen.product)} ${chosen.serial_number} · no mission firmware`;
+            text = `$(plug) ${boardName(chosen.product)} ${chosen.serial_number} · no ${kind} firmware`;
             tooltip = 'The chosen board does not answer ThingSet yet. Click to choose another board.';
             command = SELECT_BOARD_COMMAND.id;
             className += ' ownstudio-board-warning';
         } else {
             const name = boardName(boards[0].product);
-            text = `$(plug) ${name} · no mission firmware`;
+            text = `$(plug) ${name} · no ${kind} firmware`;
             tooltip = boards[0].in_bootloader
-                ? 'The board waits in its bootloader. Click to flash the mission firmware.'
-                : 'The board does not answer ThingSet. Click to flash the mission firmware.';
+                ? `The board waits in its bootloader. ${flashHint}`
+                : `The board does not answer ThingSet. ${flashHint}`;
             command = FLASH_COMMAND.id;
             className += ' ownstudio-board-warning';
         }
