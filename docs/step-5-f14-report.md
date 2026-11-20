@@ -51,3 +51,24 @@ Run times are for the simulation alone, one at a time, on a machine with a load 
 **Reading.** All five steps stay within the step-4 tolerances. At **100 ns**, every metric is within 0.004 V and 0.3 mV of 25 ns, for about **3.4× less time**. That brings the 100 ms capture from about 2.5 min to under 1 min. At 200 ns the ripple jumps to 69 mV (+19 %), because the ripple is what a coarse step resolves worst. 400 ns lands back on 57.7 mV, but by chance: its voltages are already drifting.
 
 **Done** (`6eb6514`, Luiz's OK): 100 ns in the Twist's plant (`boards/twist/plant/twist_buck.pulsim`, `dt` and `max_step`), with the step-4 comparison test as its gate. New setups get it; existing setups keep their own plant.
+
+## Bench run of steps 4, 5 and 7 (2026-11-20, Luiz at the bench)
+
+Run through the app's driver (`f14-steps.mjs` steps `4u`, `1`, `57`) on a copy of Luiz's 10:52 setup (`/data/ownstudio/build/f20/`), Twist `…002E`, supply 30 V, 33 Ω on LOW1. Logs and screenshots in `/data/ownstudio/build/f20/`.
+
+| Step | Result |
+|---|---|
+| 4 | Build and flash from the Board menu: no board question (the setup's choice), **Flash 9599a5b2 ✓**, 117 s; status bar "firmware matches"; Lab Firmware line green. The copy already had its compile database, so the quiet-clangd part of F19 was not exercised |
+| 1 | Luiz's setup had no source or load on the canvas (checklist 4/6, nothing switched on); step 1 wired 30 V / 1 A and 33 Ω |
+| 5, first try | Checklist 6/6, dialog named `…002E`, confirmed. The supply's limit was too low: HIGH collapsed, the duty saturated at 1.0, a scope read got `m` instead of data, and the error path switched off (`Mode` 0, checked). No record. The scope read path was checked afterwards without power (chunks 0, 63, 64, 79 read) |
+| 5 | Luiz raised the limit. Checklist 6/6 (29.9 V), dialog read and confirmed; capture in 5 s; LOW1 10.06 V before the step (sd 0.14), 11.98 V after; rise 18.6 ms; overshoot 15.95 % |
+| 7 | Simulate at these conditions: 59 s, drawn dashed over the measurement, metrics side by side. Converter `Mode` 0 afterwards, HIGH 30.07 V |
+
+**Found:**
+1. **The simulation does not start where the board does.** The board sits at 10 V before the step; the simulation's trace starts near 0 V at −20 ms and is still rising at the step, so its rise time (26 ms) and overshoot (0 %) compare a start-up with a step. Final voltage agrees (11.99 V vs 11.98 V).
+2. **Overshoot is the single highest sample of a noisy trace.** 12.32 V peak against 11.98 V ± 0.13 V of noise gives "16 %" from noise alone.
+3. **Captures and their simulations are not timeline dots.** `ownstudio/records/` is git-ignored and the procedure commits no `run` event; try-it step 9 says every run is a dot.
+4. **The canvas says 1 A** while the bench supply's limit is now higher, and the record files `source_limit_A 1`.
+5. **The example's branch is `buck-voltage-mode-2`** because the setup was also named `buck-voltage-mode`.
+6. **A click on Capture from the board did nothing once** (second try, no message); the third run's first click worked. The driver now clicks up to three times and reads the dialog before confirming.
+7. With a 1 A limit the supply tripped at switch-on with this firmware; the checklist cannot see a supply's limit.

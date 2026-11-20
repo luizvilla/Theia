@@ -259,5 +259,82 @@ if (step === 'w') {
     await shot('step-w-window');
 }
 
+if (step === '4u') {
+    // 4 with the upload (F20, Luiz present): no red marks before the index, Build and flash from the
+    // Board menu goes to the setup's chosen board without asking, then the board reports this build.
+    await workbench('code');
+    await moveClick('[data-file="src/main.cpp"]');
+    await sleep(4000);
+    const red = () => app.evaluate(`document.querySelectorAll('#theia-main-content-panel .monaco-editor .squiggly-error').length`);
+    console.log(`     main.cpp red marks after opening: ${await red()}`);
+    check(await chooseMenu(app, 'Board', 'Build and flash'), 'Board › Build and flash');
+    const started = Date.now();
+    let asked = false;
+    const line = await until(async () => {
+        asked ||= await app.evaluate(`!!document.querySelector('.quick-input-widget:not([style*="display: none"]) .quick-input-list .monaco-list-row')`);
+        return app.evaluate(`[...document.querySelectorAll('.theia-output .view-line')].map(e => e.textContent).find(t => /Flash\\s[0-9a-f]+\\s✓|^Error:/.test(t)) ?? ''`);
+    }, v => !!v, 900_000);
+    check(!asked, 'no board question: the setup\'s choice is used');
+    check(/Flash\s[0-9a-f]+\s✓/.test(line), `build and flash pass ("${line}", ${Math.round((Date.now() - started) / 1000)} s)`);
+    console.log(`     flash log: ${JSON.stringify(await app.evaluate(`[...document.querySelectorAll('.theia-output .view-line')].map(e => e.textContent).filter(t => /Board |Restarting|Uploading…|Done:/.test(t))`))}`);
+    await shot('step-4u-flash');
+    const bar = await until(() => status(), v => /firmware matches/.test(v), 60_000);
+    check(/firmware matches/.test(bar), `status bar: "${bar.match(/[^·]*·[^·]*firmware[^·]*/)?.[0] ?? bar}"`);
+    await workbench('lab');
+    const fw = (await text('[data-check="firmware"]')).replace(/\s+/g, ' ');
+    check(await app.evaluate(`document.querySelector('[data-check="firmware"]')?.dataset.ok === 'true'`), `Lab firmware line: "${fw}"`);
+    await shot('step-4u-lab');
+    const marks = await until(red, v => v === 0, 240_000);
+    console.log(`     main.cpp red marks once the index is done: ${marks}`);
+}
+
+if (step === '57') {
+    // 5 and 7 (F20): with Luiz at the bench and the supply on. The checklist must be complete
+    // before anything switches on; the dialog is read and printed before it is confirmed.
+    await workbench('lab');
+    const checks = await until(() => app.evaluate(`[...document.querySelectorAll('[data-check]')].map(e => ({ id: e.dataset.check, ok: e.dataset.ok === 'true', text: e.textContent.replace(/\\s+/g, ' ').trim() }))`),
+        v => v.length >= 6 && v.every(c => c.ok), 60_000);
+    for (const c of checks) { console.log(`     ${c.ok ? '✓' : '✗'} ${c.text}`); }
+    const ready = checks.length >= 6 && checks.every(c => c.ok);
+    check(ready, `Lab checklist ${checks.filter(c => c.ok).length}/${checks.length}`);
+    await shot('step-5a-checklist');
+    if (!ready) { app.close(); process.exit(1); }
+    await app.evaluate(`document.querySelector('[data-run-target="board"]')?.scrollIntoView({ block: 'center' })`);
+    await sleep(300);
+    let dialog = '';
+    for (let attempt = 1; attempt <= 3 && !dialog; attempt++) {
+        // The checklist re-renders as measurements arrive; a click during that may land on nothing.
+        await moveClick('[data-run-target="board"]');
+        dialog = await until(() => app.evaluate(`document.querySelector('.dialogOverlay .dialogContent')?.textContent?.trim() ?? ''`), v => !!v, 4000);
+        if (!dialog) { console.log(`     click ${attempt}: no dialog; Lab says "${(await text('.ownstudio-problem')).trim()}"`); }
+    }
+    check(!!dialog, 'Capture from the board opens the power dialog');
+    console.log(`     dialog: "${dialog}"`);
+    await shot('step-5b-dialog');
+    const confirmed = /switches the converter of board 584350030047002E on/.test(dialog)
+        && await app.evaluate(`(() => { const b = [...document.querySelectorAll('.dialogOverlay button')].find(e => e.textContent.trim() === 'Switch on and run'); b?.click(); return !!b; })()`);
+    check(confirmed, 'the dialog names the Twist …002E; confirmed');
+    if (!confirmed) { app.close(); process.exit(1); }
+    const started = Date.now();
+    const plotted = await until(() => app.evaluate(`!!document.querySelector('.ownstudio-uplot canvas') || !!document.querySelector('.ownstudio-problem')`), v => v, 300_000);
+    const problem = await text('.ownstudio-problem');
+    check(plotted && !problem, `the capture opens (${Math.round((Date.now() - started) / 1000)} s)${problem ? `: ${problem}` : ''}`);
+    const metrics = () => app.evaluate(`[...document.querySelectorAll('.ownstudio-overlay-table tbody tr')].map(e => [...e.children].map(c => c.textContent.trim()).join(' | '))`);
+    console.log(`     measured: ${JSON.stringify(await metrics(), null, 1)}`);
+    await sleep(1500);
+    await shot('step-5c-capture');
+    if (problem) { app.close(); process.exit(1); }
+    // 7. Simulate at these conditions: dashed simulation over the solid measurement.
+    check(await moveClick('[data-simulate-record]'), 'Simulate at these conditions');
+    const simStarted = Date.now();
+    const both = await until(() => app.evaluate(`[...document.querySelectorAll('.ownstudio-overlay-table thead th')].map(e => e.textContent.trim()).join(',')`),
+        v => /Simulat/i.test(v), 900_000);
+    check(/Simulat/i.test(both), `simulation drawn over the measurement (${Math.round((Date.now() - simStarted) / 1000)} s; columns ${both})`);
+    console.log(`     side by side: ${JSON.stringify(await metrics(), null, 1)}`);
+    await sleep(1500);
+    await shot('step-7c-overlay');
+    console.log(`     records: ${git('status', '--porcelain', '--', 'ownstudio/records').split('\n').length} new files; last commits: ${JSON.stringify(git('log', '--format=%s', '-4').split('\n'))}`);
+}
+
 app.close();
 process.exit(failures ? 1 : 0);
