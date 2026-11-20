@@ -95,3 +95,29 @@ export function boardName(product: string): string {
     }
     return product === 'MCUBOOT' ? 'Spin board (bootloader)' : 'Spin board';
 }
+
+/**
+ * F18: the board an upload goes to. Stricter than the link's choice: a setup
+ * that chose a board never uploads to another one, even when that board is
+ * the only one plugged in, since a build for one shield can drive another
+ * shield's power stage wrongly.
+ */
+export type UploadTarget =
+    | { kind: 'board'; serial: string }
+    | { kind: 'choose' }
+    | { kind: 'missing'; message: string };
+
+export function uploadTarget(boards: BoardInfo[], chosen: string | undefined): UploadTarget {
+    if (chosen) {
+        return boards.some(b => b.serial_number === chosen)
+            ? { kind: 'board', serial: chosen }
+            : { kind: 'missing', message: `This setup's board (${chosen}) is not plugged in. Plug it in, or pick another with Board › Select board….` };
+    }
+    if (boards.length === 0) {
+        return { kind: 'missing', message: 'No board is plugged in.' };
+    }
+    if (boards.length === 1) {
+        return { kind: 'board', serial: boards[0].serial_number };
+    }
+    return { kind: 'choose' };
+}

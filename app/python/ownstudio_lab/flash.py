@@ -132,7 +132,13 @@ def flash(manifest_path, serial_number=None, mcumgr=None, log=print,
     if not board.in_bootloader:
         log("Restarting the board in its bootloader…")
         touch(board.console)
-        board = wait_for(board.serial_number, True, find, sleep, timeout=10)
+        try:
+            board = wait_for(board.serial_number, True, find, sleep, timeout=10)
+        except FlashError as err:
+            # F18: the restart request only reaches the board when this was the
+            # port's last open handle; a serial monitor or the app's link keeps it open.
+            raise FlashError(f"{err}. Is another program using its port {board.console} "
+                             "(a serial monitor, another OwnStudio)? Close it and upload again.") from err
         sleep(1.0)  # let MCUboot finish starting its serial recovery
 
     connection = ["--conntype", "serial", "--connstring",

@@ -3,17 +3,19 @@
 // Board menu. Process output goes to Theia's existing Build output tab.
 import { FrontendApplicationContribution } from '@theia/core/lib/browser/frontend-application-contribution';
 import { inject, injectable, postConstruct } from '@theia/core/shared/inversify';
-import { CommandContribution, CommandRegistry, Emitter, MessageService } from '@theia/core/lib/common';
+import { CommandContribution, CommandRegistry, CommandService, Emitter, MessageService } from '@theia/core/lib/common';
 import { codicon, Widget, WidgetManager } from '@theia/core/lib/browser';
 import { TabBarToolbarContribution, TabBarToolbarRegistry } from '@theia/core/lib/browser/shell/tab-bar-toolbar';
 import { WorkspaceService } from '@theia/workspace/lib/browser';
 import { OutputChannel, OutputChannelManager, OutputChannelSeverity } from '@theia/output/lib/browser/output-channel';
 import { TerminalService } from '@theia/terminal/lib/browser/base/terminal-service';
 import { BuildClient, BuildEvent, BuildResult, BuildService, stripAnsi } from '../common/build-protocol.js';
+import { uploadTarget } from '../common/board-protocol.js';
 import { SetupService } from '../common/setup-protocol.js';
 import { BOTTOM_SLOTS } from '../common/window-layout.js';
 import { CanvasWidget } from './canvas-widget.js';
 import { BoardModel } from './board-model.js';
+import { SELECT_BOARD_COMMAND } from './board-contribution.js';
 
 export const BUILD_COMMAND = { id: 'ownstudio.setup.build', category: 'OwnStudio', label: 'Build' };
 export const UPLOAD_COMMAND = { id: 'ownstudio.setup.upload', category: 'OwnStudio', label: 'Upload' };
@@ -39,6 +41,7 @@ export class BuildContribution implements CommandContribution, TabBarToolbarCont
     @inject(MessageService) protected readonly messages: MessageService;
     @inject(WidgetManager) protected readonly widgets: WidgetManager;
     @inject(BoardModel) protected readonly board: BoardModel;
+    @inject(CommandService) protected readonly commands: CommandService;
 
     protected busy = false;
     protected progress: { report(update: { message?: string; work?: { done: number; total: number } }): void; cancel(): void } | undefined;
@@ -145,17 +148,30 @@ export class BuildContribution implements CommandContribution, TabBarToolbarCont
     }
 
     protected async upload(folder: string): Promise<BuildResult> {
+        let target = uploadTarget(this.board.boards, this.board.chosen);
+        if (target.kind === 'choose') {
+            await this.commands.executeCommand(SELECT_BOARD_COMMAND.id);
+            target = uploadTarget(this.board.boards, this.board.chosen);
+        }
+        if (target.kind !== 'board') {
+            throw new Error(target.kind === 'missing' ? target.message : 'Choose the board to upload to with Board › Select board….');
+        }
         const canvas = this.canvas();
         canvas?.setFirmware('flashing…');
+        // F18: the board link holds the board's port; with it open, the 1200-baud restart
+        // request never reaches the board and the upload waits for a bootloader in vain.
+        const resume = await this.board.release();
         try {
-            const result = await this.builds.upload(folder, this.board.target);
+            const result = await this.builds.upload(folder, target.serial);
             canvas?.setFirmware(`${result.identity.source_hash} ✓`);
             await this.setups.commitEvent(folder, 'flash', `Flash ${result.identity.source_hash} ✓`);
-            this.messages.info(`Uploaded ${result.bytes.toLocaleString()} bytes to the board.`);
+            this.messages.info(`Uploaded ${result.bytes.toLocaleString()} bytes to the board ${target.serial}.`);
             return result;
         } catch (error) {
             canvas?.setFirmware('upload failed');
             throw error;
+        } finally {
+            await resume();
         }
     }
 

@@ -114,6 +114,7 @@ class Flashing(unittest.TestCase):
         with self.assertRaises(fl.FlashError) as ctx:
             self.flash()
         self.assertIn("bootloader", str(ctx.exception))
+        self.assertIn("another program using its port", str(ctx.exception))
 
 
 if __name__ == "__main__":
