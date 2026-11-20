@@ -222,6 +222,30 @@ def link_twins(board_records, sim_records, campaign):
             (path / "record.json").write_text(json.dumps(rec, indent=2) + "\n")
 
 
+def timeline_dot(mission, title, records, io):
+    """F20: every run is a dot on a setup's timeline (try-it step 9). Records stay git-ignored, so the dot
+    is the setup's state at the run, and its OwnStudio-Record trailers name the record folders.
+    A board run is a "run" dot; a simulator run is a "simulate" dot. Not in a setup (a 1.0 mission): no dot."""
+    mission = pathlib.Path(mission)
+    if not records or not (mission / "ownstudio" / "setup.yaml").is_file() or not (mission / ".git").exists():
+        return None
+    from . import setups
+    paths = [pathlib.Path(path) for path, _ in records]
+    kind = json.loads((paths[0] / "record.json").read_text()).get("target", "")
+    board = json.loads((paths[0] / "record.json").read_text()).get("board") or {}
+    verdicts = ", ".join(sorted({verdict for _, verdict in records}))
+    if kind == "board":
+        event, summary = "run", f"{title} on the board {board.get('serial_number', '')}".rstrip() + f" ({verdicts})"
+    else:
+        event, summary = "simulate", f"{title} on the simulator ({verdicts})"
+    trailers = {"OwnStudio-Record": ", ".join(str(path.relative_to(mission)) for path in paths)}
+    try:
+        return setups.commit_event(mission, event, summary, trailers)
+    except Exception as err:  # noqa: BLE001 - the record is filed; a missing dot is reported, not fatal
+        io.log(f"The run is filed but not on the timeline: {err}")
+        return None
+
+
 def simulate_record(mission, path, board_path, io, sim_target=None) -> int:
     """Rerun ``path`` on the simulator at one filed board record's conditions."""
     mission = pathlib.Path(mission).resolve()
@@ -258,6 +282,7 @@ def simulate_record(mission, path, board_path, io, sim_target=None) -> int:
     if not ctx.records:
         raise ProcedureError(f"{path.name} produced no simulator record")
     link_twins([(board_path, board_record.get("verdict", ""))], ctx.records, board_path.parent)
+    timeline_dot(mission, _title(module, mission), ctx.records, io)
     return 1 if any(verdict == "FAIL" for _, verdict in ctx.records) else 0
 
 
@@ -287,6 +312,7 @@ def run_procedure(mission, path, target_kind, io, board=None, allow_power=False,
                 pass
         target.close()
     status = 1 if any(v == "FAIL" for _, v in ctx.records) else 0
+    timeline_dot(mission, _title(module, mission), ctx.records, io)
     if twin and target_kind == "board" and ctx.records:
         run_twin(mission, module, ctx, io, twin_target)
     return status
@@ -315,6 +341,18 @@ def run_twin(mission, module, board_ctx, io, sim_target=None):
         io.log(f"The simulation could not run: {type(err).__name__}: {err}")
         return
     link_twins(board_ctx.records, ctx.records, board_ctx.campaign)
+    timeline_dot(mission, _title(module, mission), ctx.records, io)
+
+
+def _title(module, mission):
+    """The procedure's title; the default capture takes the board description's."""
+    info = getattr(module, "procedure_info", None)
+    if info is not None:
+        try:
+            return (info(pathlib.Path(mission)) or {}).get("title") or module.PROCEDURE["title"]
+        except Exception:  # noqa: BLE001 - a title is cosmetic
+            pass
+    return module.PROCEDURE.get("title", "Procedure")
 
 
 DEFAULT_CAPTURE = "default-capture"   # the board's default capture, by name (for AGENTS.md and the terminal)

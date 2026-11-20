@@ -9,6 +9,8 @@ import textwrap
 import unittest
 from unittest import mock
 
+import numpy as np
+
 from ownstudio_lab import procedure as proc
 from ownstudio_lab import capture
 from ownstudio_lab.fakes import fake_board_target
@@ -246,9 +248,68 @@ class DefaultCapture(Fixture):
         self.assertIn("Captured waveform", report.read_text())
         status_lines = subprocess.run(["git", "-C", str(self.m), "status", "--porcelain"],
                                       capture_output=True, text=True, check=True).stdout
-        self.assertNotIn("ownstudio/records", status_lines)
-        self.assertIn("ownstudio/reports", status_lines)
+        self.assertEqual(status_lines, "")          # F20: the run is a dot, with its report; the record stays ignored
+        dot = subprocess.run(["git", "-C", str(self.m), "log", "-1", "--format=%s%n%b"],
+                             capture_output=True, text=True, check=True).stdout
+        self.assertIn("Capture: reference step on the board FAKE (PASS)", dot)
+        self.assertIn("OwnStudio-Event: run", dot)
+        self.assertIn(f"OwnStudio-Record: {record_folder.relative_to(self.m)}", dot)
         self.assertEqual(target.link.writes[-1], ("Converter", {"Mode": 0}))
+
+    def test_a_run_outside_a_setup_makes_no_dot(self):
+        fake = FakeIO([True])
+        proc.run_procedure(self.m, self.m / "step.py", "simulator", fake)
+        log = subprocess.run(["git", "-C", str(self.m), "log", "--oneline"], capture_output=True, text=True).stdout
+        self.assertEqual(log, "")
+
+
+class CaptureMetrics(unittest.TestCase):
+    """F20: the default capture's metrics on synthetic 10 → 12 V steps sampled at 100 µs."""
+    T = np.arange(-0.02, 0.08, 1e-4)
+
+    def step(self, start=10.0, tau=0.01, noise=0.0, overshoot=0.0, seed=1):
+        t = self.T
+        v = np.where(t < 0, start, 12.0 - (12.0 - start) * np.exp(-np.clip(t, 0, None) / tau))
+        if overshoot:                       # underdamped: about 37 % above 12 V at t = 0.94 tau
+            v = np.where(t < 0, start, 12.0 - (12.0 - start) * np.exp(-np.clip(t, 0, None) / tau)
+                         * np.cos(3 * np.clip(t, 0, None) / tau))
+        return {"t": t, "v": v + np.random.default_rng(seed).normal(0.0, noise, len(t))}
+
+    def cases(self, wave):
+        return {c["id"]: c for c in capture._metrics(wave, "v", 10.0, 12.0)}
+
+    def test_rise_time_of_a_first_order_step(self):
+        cases = self.cases(self.step())
+        self.assertAlmostEqual(cases["CAPTURE.start"]["measured"], 10.0)
+        self.assertAlmostEqual(cases["CAPTURE.rise"]["measured"], 22.0, delta=0.5)   # 2.2 tau
+        self.assertEqual(cases["CAPTURE.overshoot"]["measured"], 0.0)
+
+    def test_one_noisy_sample_is_not_an_overshoot(self):
+        for seed in range(20):
+            self.assertEqual(self.cases(self.step(noise=0.13, seed=seed))["CAPTURE.overshoot"]["measured"], 0.0, seed)
+        cases = self.cases(self.step(noise=0.13))
+        self.assertEqual(cases["CAPTURE.overshoot"]["measured"], 0.0)
+        self.assertIn("noise ±", cases["CAPTURE.overshoot"]["criterion"])
+        self.assertAlmostEqual(cases["CAPTURE.rise"]["measured"], 22.0, delta=2.0)
+
+    def test_a_real_overshoot_is_measured_through_the_noise(self):
+        cases = self.cases(self.step(noise=0.13, overshoot=True))
+        self.assertAlmostEqual(cases["CAPTURE.overshoot"]["measured"], 37.0, delta=3.0)
+
+    def test_a_start_up_is_not_compared_with_a_step(self):
+        t = self.T
+        wave = {"t": t, "v": 12.0 - 12.0 * np.exp(-(t + 0.02) / 0.012)}      # rising from 0 V through the window
+        cases = self.cases(wave)
+        self.assertEqual(cases["CAPTURE.rise"]["reason"], "not settled before the step")
+        self.assertEqual(cases["CAPTURE.overshoot"]["reason"], "not settled before the step")
+        self.assertIn("measured", cases["CAPTURE.final"])
+
+    def test_the_simulators_trace_is_cut_to_the_scope_window(self):
+        t = np.arange(-0.1, 0.08, 1e-4)
+        wave = capture._window({"t": t, "v": t * 2, "duty": np.zeros((3, 2)), "t_trigger": 0.0}, 0.02)
+        self.assertAlmostEqual(wave["t"][0], -0.02)
+        self.assertEqual(len(wave["t"]), len(wave["v"]))
+        self.assertEqual(wave["duty"].shape, (3, 2))
 
 
 TWIN_PROCEDURE = '''

@@ -72,3 +72,6 @@ Run through the app's driver (`f14-steps.mjs` steps `4u`, `1`, `57`) on a copy o
 5. **The example's branch is `buck-voltage-mode-2`** because the setup was also named `buck-voltage-mode`.
 6. **A click on Capture from the board did nothing once** (second try, no message); the third run's first click worked. The driver now clicks up to three times and reads the dialog before confirming.
 7. With a 1 A limit the supply tripped at switch-on with this firmware; the checklist cannot see a supply's limit.
+8. **I_LOW1 does not match the load.** The board reads 1.04 A before the step and 1.21 A after, where 10 V and 12 V into 33 Ω are 0.30 A and 0.36 A; the simulation's current is −0.14 A. Either the load is not 33 Ω, or the board's current calibration and the plant's current sign are off. Not looked into yet.
+
+**Fixed after the run (F20, no power):** items 1–4. Recomputed on this run's board waveform, the new metrics give LOW1 10.06 V before the step, rise **24.2 ms** (the 18.6 ms was the noise crossing 90 % early), overshoot **0 %, noise ±10 %**. A new simulation at 29.9 V and 33 Ω starts settled at 9.96 V: rise **25.7 ms**, overshoot 0 %, final 11.98 V. Simulating the capture takes 61 s instead of 37 s (the 80 ms of settling). The canvas limit is 2 A (dot `3e101a7`). Still to check on the bench, with Luiz: a new capture, its simulation, and both dots.

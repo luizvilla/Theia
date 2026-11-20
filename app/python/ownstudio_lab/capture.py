@@ -138,27 +138,96 @@ def _aligned_waveform(wave: dict, sample_period_s: float) -> dict:
     return out
 
 
+SMOOTH_S = 2e-3          # the metrics read a 2 ms moving mean: one noisy sample is not a peak (short against a 20 ms rise)
+SETTLED_FRACTION = 0.05  # before the step, the output may drift by at most 5 % of the step
+NOISE_SIGMAS = 5.0       # an overshoot under 5 sigma of the settled noise is not resolved (4 sigma: 0.6 % false peaks)
+
+
+def _smoothed(time: np.ndarray, values: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Centred moving mean over SMOOTH_S; the time axis shrinks to the full windows."""
+    period = float(np.median(np.diff(time))) if len(time) > 1 else 0.0
+    width = max(1, int(round(SMOOTH_S / period))) if period > 0 else 1
+    if width <= 1 or len(values) < width:
+        return time, values
+    kernel = np.ones(width) / width
+    half = (width - 1) // 2
+    return time[half:half + len(values) - width + 1], np.convolve(values, kernel, mode="valid")
+
+
+def _window(wave: dict, pretrigger_s: float) -> dict:
+    """The simulator's trace from pretrigger_s before the step: it keeps everything since power-on,
+    settling included, where a board's scope keeps only its own window."""
+    time = np.asarray(wave["t"], dtype=float)
+    keep = time >= -pretrigger_s - 1e-9
+    if keep.all():
+        return wave
+    out = dict(wave)
+    for name, values in wave.items():
+        try:
+            array = np.asarray(values)
+        except (TypeError, ValueError):
+            continue
+        if array.ndim == 1 and len(array) == len(time):
+            out[name] = array[keep]
+    return out
+
+
 def _metrics(wave: dict, channel: str, before: float, after: float) -> list[dict]:
+    """F20: the level before the step, then rise and overshoot from the measured levels on a smoothed trace.
+
+    Rise and overshoot are only filed when the output had settled before the step (a simulation that
+    is still starting up would compare a start-up with a step). The overshoot is the smoothed peak
+    above the final level, and reads 0 when it is within the noise of the settled output."""
     values = np.asarray(wave[channel], dtype=float)
     time = np.asarray(wave["t"], dtype=float)
-    final = float(values[-max(1, len(values) // 20):].mean())
+    tail = max(1, len(values) // 20)
+    final = float(values[-tail:].mean())
+    pre = values[time < 0.0]
+    start = float(pre.mean()) if len(pre) else None
     span = after - before
-    lo, hi = before + 0.1 * span, before + 0.9 * span
-    crossed_lo = np.flatnonzero(time >= 0.0)
-    crossed_lo = crossed_lo[values[crossed_lo] >= lo] if span >= 0 else crossed_lo[values[crossed_lo] <= lo]
-    crossed_hi = np.flatnonzero(time >= 0.0)
-    crossed_hi = crossed_hi[values[crossed_hi] >= hi] if span >= 0 else crossed_hi[values[crossed_hi] <= hi]
-    rise_ms = float((time[crossed_hi[0]] - time[crossed_lo[0]]) * 1e3) if len(crossed_lo) and len(crossed_hi) else None
-    overshoot = max(0.0, float((values.max() - after) / abs(span) * 100)) if span else 0.0
-    return [
+    st, sv = _smoothed(time, values)
+    # Settled: the two halves of the pre-step window agree (no drift), whatever the level it settled at.
+    halves = np.array_split(pre, 2) if len(pre) > 3 else []
+    settled = span != 0 and len(halves) == 2 and \
+        abs(float(halves[1].mean() - halves[0].mean())) <= SETTLED_FRACTION * abs(span)
+    cases = [
+        {"id": "CAPTURE.start", "title": "Level before the step", "criterion": "information only",
+         **({"measured": start, "expected": before, "unit": "V"} if start is not None else {"reason": "no samples before the step"}),
+         "verdict": "INFO"},
         {"id": "CAPTURE.final", "title": "Final voltage", "criterion": "information only",
          "measured": final, "expected": after, "unit": "V", "verdict": "INFO"},
+    ]
+    if not settled:
+        reason = "not settled before the step" if start is not None else "no samples before the step"
+        cases += [{"id": "CAPTURE.rise", "title": "10–90 % rise time", "criterion": "information only",
+                   "reason": reason, "verdict": "INFO"},
+                  {"id": "CAPTURE.overshoot", "title": "Overshoot", "criterion": "information only",
+                   "reason": reason, "verdict": "INFO"}]
+        return cases
+    moved = final - start
+    after_step = st >= 0.0
+    lo, hi = start + 0.1 * moved, start + 0.9 * moved
+    up = moved >= 0
+    crossed_lo = np.flatnonzero(after_step & ((sv >= lo) if up else (sv <= lo)))
+    crossed_hi = np.flatnonzero(after_step & ((sv >= hi) if up else (sv <= hi)))
+    rise_ms = float((st[crossed_hi[0]] - st[crossed_lo[0]]) * 1e3) if len(crossed_lo) and len(crossed_hi) else None
+    # The noise of the smoothed trace, from both settled stretches: before the step and the last fifth.
+    before_step, tail = sv[st < 0.0], sv[-max(2, len(sv) // 5):]
+    residuals = np.concatenate([before_step - before_step.mean() if len(before_step) else [], tail - tail.mean()])
+    noise = float(residuals.std()) * NOISE_SIGMAS
+    level = float(tail.mean())                  # the settled level, over the last fifth: steadier than "final"
+    peak = float(sv[after_step].max() - level) if up else float(level - sv[after_step].min())
+    resolution = noise / abs(moved) * 100 if moved else 0.0
+    overshoot = max(0.0, peak / abs(moved) * 100) if moved and peak > noise else 0.0
+    criterion = "information only" + (f"; noise ±{resolution:.1f} %" if resolution >= 0.05 else "")
+    cases += [
         {"id": "CAPTURE.rise", "title": "10–90 % rise time", "criterion": "information only",
          **({"measured": rise_ms, "unit": "ms"} if rise_ms is not None else {"reason": "thresholds not crossed"}),
          "verdict": "INFO"},
-        {"id": "CAPTURE.overshoot", "title": "Overshoot", "criterion": "information only",
+        {"id": "CAPTURE.overshoot", "title": "Overshoot", "criterion": criterion,
          "measured": overshoot, "unit": "%", "verdict": "INFO"},
     ]
+    return cases
 
 
 def run(target, ctx):
@@ -169,13 +238,17 @@ def run(target, ctx):
     ctx.log(f"Preparing {before:g} → {after:g} {reference.get('unit', '')} reference step…")
     target.update(reference["group"], {reference["name"]: before})
     target.update(power["group"], {power["name"]: power["value"]})
-    settle = max(float(config["pretrigger_s"]), 0.02)
+    # F20: run at the start level long enough to settle (settle_s), on the board and the simulator alike;
+    # the simulator otherwise starts from 0 V and is still rising when the reference steps.
+    settle = max(float(config.get("settle_s", 0.0)), float(config["pretrigger_s"]), 0.02)
     ctx.expect(settle + max(0.0, float(config["duration_s"]) - float(config["pretrigger_s"])))
     target.wait(settle)
     target.arm()
     target.update(reference["group"], {reference["name"]: after})
     target.wait(max(0.0, float(config["duration_s"]) - float(config["pretrigger_s"])))
     wave = _aligned_waveform(target.capture(), float(config["sample_period_s"]))
+    if target.kind == "simulator":
+        wave = _window(wave, float(config["pretrigger_s"]))
     available = next((c["object"] for c in config["channels"] if c.get("object") in wave), None)
     if available is None:
         raise CaptureError("the firmware scope returned none of the configured probe channels")

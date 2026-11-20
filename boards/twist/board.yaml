@@ -85,4 +85,7 @@ default_capture:
   power_on: {group: Converter, name: Mode, value: 1}
   duration_s: 0.100
   pretrigger_s: 0.020
+  # Time at the "from" level before the scope arms, so the step starts from a settled
+  # output on the board and in the simulation (which starts from 0 V; F20).
+  settle_s: 0.080
   sample_period_s: 0.0001
