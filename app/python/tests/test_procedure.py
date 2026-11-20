@@ -304,6 +304,13 @@ class CaptureMetrics(unittest.TestCase):
         self.assertEqual(cases["CAPTURE.overshoot"]["reason"], "not settled before the step")
         self.assertIn("measured", cases["CAPTURE.final"])
 
+    def test_a_switching_ripple_is_averaged_not_aliased(self):
+        t = np.arange(0.0, 0.01, 1e-7)                              # 100 ns steps, 200 kHz ripple around 1 A
+        ripple = 1.0 + 0.5 * ((t * 200e3) % 1.0 - 0.5)
+        wave = capture._aligned_waveform({"t": t, "i": ripple, "t_trigger": 0.0}, 1e-4)
+        self.assertAlmostEqual(float(np.mean(wave["i"][1:-1])), 1.0, delta=0.01)
+        self.assertLess(float(np.ptp(wave["i"][1:-1])), 0.01)
+
     def test_the_simulators_trace_is_cut_to_the_scope_window(self):
         t = np.arange(-0.1, 0.08, 1e-4)
         wave = capture._window({"t": t, "v": t * 2, "duty": np.zeros((3, 2)), "t_trigger": 0.0}, 0.02)

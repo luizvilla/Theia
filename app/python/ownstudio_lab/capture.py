@@ -121,9 +121,15 @@ def _aligned_waveform(wave: dict, sample_period_s: float) -> dict:
     trigger = float(wave.get("t_trigger") or 0.0)
     time = time - trigger
     indices = np.arange(len(time))
+    lo = hi = None
     if len(time) > 1 and sample_period_s > 0 and np.median(np.diff(time)) < sample_period_s * 0.75:
         wanted = np.arange(time[0], time[-1] + sample_period_s * 0.25, sample_period_s)
         indices = np.unique(np.searchsorted(time, wanted).clip(max=len(time) - 1))
+        # F20: each scope sample is the mean over its own period, as the board's ADC averages. One
+        # picked sample every 100 µs is always at the same point of the 200 kHz switching period
+        # (20 periods apart), so the inductor current read its ripple's valley: a third low.
+        lo = np.searchsorted(time, time[indices] - sample_period_s / 2)
+        hi = np.maximum(np.searchsorted(time, time[indices] + sample_period_s / 2), lo + 1).clip(max=len(time))
     out["t"] = time[indices]
     for name, values in wave.items():
         if name in ("t", "t_trigger"):
@@ -133,7 +139,11 @@ def _aligned_waveform(wave: dict, sample_period_s: float) -> dict:
         except (TypeError, ValueError):
             continue
         if array.ndim == 1 and len(array) == len(time):
-            out[name] = array[indices]
+            if lo is None or not np.issubdtype(array.dtype, np.number):
+                out[name] = array[indices]
+            else:
+                total = np.concatenate([[0.0], np.cumsum(array, dtype=float)])
+                out[name] = (total[hi] - total[lo]) / (hi - lo)
     out["t_trigger"] = 0.0
     return out
 
