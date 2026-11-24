@@ -33,18 +33,18 @@ flowchart LR
   end
 
   subgraph Skills["Dev skills"]
-    N22["🔎 #22 Which ways of working<br/>become dev skills?"]:::wip
-    N27["👤 #27 Choose which<br/>dev skills to write"]:::blocked
+    N22["✓ #22 Dev skills<br/>inventory"]:::done
+    N27["👤 #27 Choose which<br/>dev skills to write"]:::open
     FS["dev skill builds"]:::fog
   end
 
   subgraph S1["Milestone A · slice 1 accepted"]
     N19["🔨👤 #19 F20 checked<br/>on the bench"]:::open
     N20["🔨 #20 F14 leftovers"]:::open
-    N21["🔎 #21 Redistribute the<br/>Claude agent SDK?"]:::wip
+    N21["✓ #21 Agent SDK<br/>licence"]:::done
     N23["👤 #23 Power and<br/>agent shells"]:::open
     N24["👤 #24 Pulsim<br/>exact-edges fix"]:::open
-    N25["👤 #25 Slice 1 rulings"]:::blocked
+    N25["👤 #25 Slice 1 rulings"]:::open
     N26["👤 #26 Slice 1 retest:<br/>nine steps"]:::blocked
   end
 
