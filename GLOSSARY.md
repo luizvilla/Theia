@@ -277,3 +277,17 @@ _Avoid_: accuracy (that is a measured error), level of detail
 **Simulation backend**:
 The part of the OwnTech API that, when the target is the simulator, takes measurements from and gives PWM commands to the plant model instead of the hardware, so the rest of the API runs unchanged.
 _Avoid_: virtual board, mock API, emulator
+
+## Working on OwnStudio
+
+**Dev map**:
+The tracker issue that shows the way from today to the current destination of OwnStudio's development: what is decided, built, takeable, blocked or still unclear.
+_Avoid_: roadmap (that is a set of dates), backlog, plan (plan.md keeps the reasons)
+
+**Dev skill**:
+A skill for the agents that build OwnStudio, describing one recurring way of working on it.
+_Avoid_: skill alone, when a setup skill could be meant
+
+**Setup skill**:
+A skill shipped inside a user's setup, for the agents that work on that setup.
+_Avoid_: skill alone, when a dev skill could be meant

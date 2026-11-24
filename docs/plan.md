@@ -369,9 +369,11 @@ The step 3 rules still apply, and one is stricter: **nothing switches the conver
 
 # Plan to "good enough" (step 5)
 
+> **Status now lives on the [dev map](https://github.com/luizvilla/Theia/issues/17)** (round 26). This file keeps the rules, choices and reasons; its Order tables and work logs become history once [#44](https://github.com/luizvilla/Theia/issues/44) is done.
+
 Decided in rounds 11–20 ([decision log](decision-log.md)), specified in [SPEC 2.0](../SPEC.md), drawn in the [storyboards](design/storyboards.html). The 1.0 interface gets no more fixes.
 
-**Exit criterion.** Luiz does the nine steps of SPEC §2 on a Twist in one or two hours of testing, and finds OwnStudio good enough: functional, not perfect, with no problem he could have caught himself. Then the PhD trial, and the tutorial rewritten on top.
+**Exit criterion.** Luiz does the nine steps of SPEC §2 on a Twist in one or two hours of testing, and finds OwnStudio good enough: functional, not perfect, with no problem he could have caught himself. The PhD trial follows slice 5's acceptance, not slice 1's (Q205), with the tutorial rewritten on top.
 
 | Slice | Content | Done when |
 |---|---|---|

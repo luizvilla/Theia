@@ -418,3 +418,29 @@ Luiz's answers to the open points of the F8–F16 report.
 | Q190 | Git Graph ships unmodified in the installer (its licence forbids distributing modified copies)? | Yes, checked with the agent SDK question | OK. | #5 |
 | Q191 | A larger simulation time step to win back the speed lost with exact edges? | Try steps and compare | Try some new steps. | plan F14 |
 | Q192 | Run F14, the nine steps through the app, before Luiz's retest? | Yes | Run F14. | plan F14 |
+
+## Round 26 (2026-11-24): the dev map
+
+Luiz asked for a map of OwnStudio's work with a visual follow-up, as in his life-organization repository, replacing status kept only in writing in plan.md. The map is [issue #17](https://github.com/luizvilla/Theia/issues/17) on this repository, with a [GitHub Project](https://github.com/users/luizvilla/projects/2) beside it.
+
+| # | Question | Recommended | Answer | Where |
+|---|---|---|---|---|
+| Q193 | Where does the map end? | Slices 2–5 ready to build | Slices 2–5 ready to build; redrawn by Q205 | map |
+| Q194 | Decisions only, one build ticket per slice, or one ticket per unit? | One per slice | One ticket per unit: the point is to move from a written plan.md to a map that shows progress | map Notes |
+| Q195 | Map and tickets as issues on luizvilla/Theia (public), with native sub-issues and blocking? | Yes | Yes. | map |
+| Q196 | Old open issues on the route become children of the map; the rest stay plain issues or out of scope? | Yes | Yes; #1–#3 (plant values) go under bench accuracy with #4, #14, #15. | map |
+| Q197 | A colour-coded Mermaid diagram in the map, as in life-organization, plus purple for work in progress, mirrored in docs/overview.md? | Yes | Yes. | map, overview |
+| Q198 | Destination redrawn: OwnStudio 2.0 built through slice 5 and accepted on the bench, with the PhD trial run on it? | Yes | Yes. | map |
+| Q199 | plan.md stops tracking status: tables frozen as history, rationale only from now on? | Yes | Yes. | [#44](https://github.com/luizvilla/Theia/issues/44) |
+| Q200 | No back-fill of done units as closed issues? | No back-fill | Back-fill: useful for debugging and for people joining; a task now, done after slice 5 or earlier if someone joins. | [#45](https://github.com/luizvilla/Theia/issues/45) |
+| Q201 | A script generates the diagram from the tracker? Does GitHub offer such a view? | Script | GitHub Projects gives board, table, roadmap and sub-issue progress but draws no dependencies: both, the Project for day-to-day, the script for the route. | [#18](https://github.com/luizvilla/Theia/issues/18) |
+| Q202 | A `wayfinder:luiz` label for tickets that can't move without Luiz? | Yes | Yes. | map Notes |
+| Q203 | Claim by assigning and commenting, since every session uses Luiz's account? | Yes | Yes, and stale tickets must show (3 days without activity), with a "Resume here" block for restarting after a stop. | map Notes, [#18](https://github.com/luizvilla/Theia/issues/18) |
+| Q204 | Tickets in English? | Yes | Yes. | map Notes |
+| Q205 | The PhD trial right after slice 1 acceptance, as plan.md said? | Yes | No: after slice 5. Students would quickly hit slice 1's limits. | plan, map |
+| Q206 | Separate dev skills (for the agents building OwnStudio) from setup skills (slice 4)? | Yes | Yes. | glossary |
+| Q207 | Dev-skill candidates mined from memory notes, docs, tools and past transcripts? | Yes | Yes, and cross-checked against Matt Pocock's skills and the other installed skills, since some may already exist. | [#22](https://github.com/luizvilla/Theia/issues/22) |
+| Q208 | Push slice 1's 26 commits before tickets link to them? | Yes | Yes. | done |
+| Q209 | The first 28 tickets as proposed? | Yes | Yes. | map |
+
+Luiz also asked that anything recurrent in our exchanges, in the way we have worked, or in the documentation that could become a skill should become one ([#22](https://github.com/luizvilla/Theia/issues/22), [#27](https://github.com/luizvilla/Theia/issues/27)).

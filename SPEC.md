@@ -38,7 +38,7 @@ The first users are colleagues and PhD students at LAAS, then students. The obje
 >
 > all in the same tool.
 
-**Good enough** is the bar: Luiz uses OwnStudio end to end, in one or two hours of testing, without hitting problems he could have caught himself. Only then do PhD students try it (Q114).
+**Good enough** is the bar: Luiz uses OwnStudio end to end, in one or two hours of testing, without hitting problems he could have caught himself. PhD students try it only after that, and after slice 5 (Q114, Q205).
 
 ## 3. The core idea: a board, a setup, three workbenches
 
