@@ -444,3 +444,11 @@ Luiz asked for a map of OwnStudio's work with a visual follow-up, as in his life
 | Q209 | The first 28 tickets as proposed? | Yes | Yes. | map |
 
 Luiz also asked that anything recurrent in our exchanges, in the way we have worked, or in the documentation that could become a skill should become one ([#22](https://github.com/luizvilla/Theia/issues/22), [#27](https://github.com/luizvilla/Theia/issues/27)).
+
+## Round 27 (2026-11-24): slice 1 rulings
+
+The three open points of the slice 1 report, worked as [Slice 1 rulings](https://github.com/luizvilla/Theia/issues/25), with the licence and agent-extensions research as input.
+
+| # | Question | Recommended | Answer | Where |
+|---|---|---|---|---|
+| Q210 | Keep the navigation rule "95 % of switches within 200 ms, none above 300 ms" (changed by Codex in U2)? | Yes | Yes. | plan U2 |
