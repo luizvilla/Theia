@@ -44,7 +44,8 @@ flowchart LR
     N21["✓ #21 Agent SDK<br/>licence"]:::done
     N23["👤 #23 Power and<br/>agent shells"]:::open
     N24["👤 #24 Pulsim<br/>exact-edges fix"]:::open
-    N25["👤 #25 Slice 1 rulings"]:::open
+    N46["🔎 #46 Agent extensions<br/>installed by users?"]:::wip
+    N25["👤 #25 Slice 1 rulings"]:::blocked
     N26["👤 #26 Slice 1 retest:<br/>nine steps"]:::blocked
   end
 
@@ -76,6 +77,8 @@ flowchart LR
   N18 --> N44
   N22 --> N27 -.-> FS
   N21 --> N25
+  N46 --> N25
+  N46 -.-> N23 & N28
   N19 & N20 & N23 & N24 & N25 --> N26
   N26 --> N28 --> N29 --> N30
   N23 --> N30
