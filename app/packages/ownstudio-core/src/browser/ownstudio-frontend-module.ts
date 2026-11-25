@@ -37,6 +37,7 @@ import { DesignWidget } from './design-widget.js';
 import { DesignModel } from './design-model.js';
 import { ClaudeCodeChatAgent } from '@theia/ai-claude-code/lib/browser/claude-code-chat-agent';
 import { CodexChatAgent } from '@theia/ai-codex/lib/browser/codex-chat-agent';
+import { dropCancelledInlayHints } from './inlay-hints-cancellation.js';
 import { WindowTitleUpdater } from '@theia/core/lib/browser/window/window-title-updater';
 import { OwnStudioWindowTitleUpdater } from './window-title.js';
 import { AgentInstallClientImpl, AgentInstallOffer, OwnStudioClaudeCodeChatAgent, OwnStudioCodexChatAgent } from './ai/agents.js';
@@ -59,6 +60,9 @@ import { PulsimGuiContribution } from './pulsimgui-contribution.js';
 import { MenuCommandsContribution } from './menu-commands-contribution.js';
 import { NavigatorWidgetFactory } from '@theia/navigator/lib/browser/navigator-widget-factory';
 import { OwnStudioNavigatorWidgetFactory, SETUP_FILES_ID, SetupFilesContribution, SetupFilesWidget } from './setup-files-widget.js';
+
+// #50: cancelled inlay-hint requests are not errors.
+dropCancelledInlayHints();
 
 export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
     bind(MissionService).toSelf().inSingletonScope();
