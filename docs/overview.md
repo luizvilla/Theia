@@ -41,7 +41,7 @@ flowchart LR
   subgraph S1["Milestone A · slice 1 accepted"]
     N19["🔨👤 #19 F20 checked<br/>on the bench"]:::open
     N20["✓ #20 F14 leftovers"]:::done
-    N50["🔨 #50 Cancelled token<br/>thrown on restore"]:::open
+    N50["✓ #50 Cancelled token<br/>thrown on restore"]:::done
     N21["✓ #21 Agent SDK<br/>licence"]:::done
     N23["👤 #23 Power and<br/>agent shells"]:::open
     N24["👤 #24 Pulsim<br/>exact-edges fix"]:::open
