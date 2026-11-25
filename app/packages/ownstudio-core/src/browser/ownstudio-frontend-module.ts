@@ -37,7 +37,8 @@ import { DesignWidget } from './design-widget.js';
 import { DesignModel } from './design-model.js';
 import { ClaudeCodeChatAgent } from '@theia/ai-claude-code/lib/browser/claude-code-chat-agent';
 import { CodexChatAgent } from '@theia/ai-codex/lib/browser/codex-chat-agent';
-import { OwnStudioClaudeCodeChatAgent, OwnStudioCodexChatAgent } from './ai/agents.js';
+import { AgentInstallClientImpl, AgentInstallOffer, OwnStudioClaudeCodeChatAgent, OwnStudioCodexChatAgent } from './ai/agents.js';
+import { AGENT_INSTALL_SERVICE_PATH, AgentInstallService } from '../common/agent-install-protocol.js';
 import { TimelineWidget } from './timeline-widget.js';
 import { TimelineModel } from './timeline-model.js';
 import { TimelineContribution } from './timeline-contribution.js';
@@ -90,6 +91,12 @@ export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
     bind(FrontendApplicationContribution).toService(LabChecklistContribution);
 
     // The user's own agents (SPEC §12, plan U17), without the modes that skip approval or the sandbox.
+    // #47: installed on first use, from the AI tab.
+    bind(AgentInstallClientImpl).toSelf().inSingletonScope();
+    bind(AgentInstallService).toDynamicValue(ctx =>
+        ServiceConnectionProvider.createProxy<AgentInstallService>(ctx.container, AGENT_INSTALL_SERVICE_PATH, ctx.container.get(AgentInstallClientImpl))
+    ).inSingletonScope();
+    bind(AgentInstallOffer).toSelf().inSingletonScope();
     rebind(ClaudeCodeChatAgent).to(OwnStudioClaudeCodeChatAgent).inSingletonScope();
     rebind(CodexChatAgent).to(OwnStudioCodexChatAgent).inSingletonScope();
     bind(ProcedureWidget).toSelf();

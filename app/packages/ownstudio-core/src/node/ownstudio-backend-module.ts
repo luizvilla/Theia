@@ -11,12 +11,14 @@ import { SetupServiceImpl } from './setup-service.js';
 import { BUILD_SERVICE_PATH, BuildClient } from '../common/build-protocol.js';
 import { BuildServiceImpl } from './build-service.js';
 import { addBundledToolsToPath } from './bundled-tools.js';
-import { preferBundledClaudeSdk } from './claude-sdk.js';
+import { useInstalledAgents } from './agent-lookup.js';
+import { AGENT_INSTALL_SERVICE_PATH, AgentInstallClient } from '../common/agent-install-protocol.js';
+import { AgentInstallServiceImpl } from './agent-install-service.js';
 
 // F5: before any extension host starts, so the clangd extension finds the shipped clangd.
 addBundledToolsToPath();
-// F7: Claude Code uses the agent SDK that comes with OwnStudio.
-preferBundledClaudeSdk();
+// #47: Claude Code and Codex are the ones the student installed from the AI tab.
+useInstalledAgents();
 
 export default new ContainerModule(bind => {
     // One bridge per frontend connection (one per window).
@@ -46,6 +48,15 @@ export default new ContainerModule(bind => {
     bind(ConnectionHandler).toDynamicValue(ctx =>
         new RpcConnectionHandler<BuildClient>(BUILD_SERVICE_PATH, client => {
             const service = ctx.container.get(BuildServiceImpl);
+            service.setClient(client);
+            client.onDidCloseConnection(() => service.setClient(undefined));
+            return service;
+        })
+    ).inSingletonScope();
+    bind(AgentInstallServiceImpl).toSelf();
+    bind(ConnectionHandler).toDynamicValue(ctx =>
+        new RpcConnectionHandler<AgentInstallClient>(AGENT_INSTALL_SERVICE_PATH, client => {
+            const service = ctx.container.get(AgentInstallServiceImpl);
             service.setClient(client);
             client.onDidCloseConnection(() => service.setClient(undefined));
             return service;

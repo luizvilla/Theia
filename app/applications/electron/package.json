@@ -34,7 +34,6 @@
     }
   },
   "dependencies": {
-    "@anthropic-ai/claude-agent-sdk": "0.3.328",
     "@ownstudio/core": "0.1.0",
     "@theia/ai-chat": "1.77.0",
     "@theia/ai-chat-ui": "1.77.0",

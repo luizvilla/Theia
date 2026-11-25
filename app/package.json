@@ -12,6 +12,7 @@
   ],
   "scripts": {
     "build": "npm run build --workspace=@ownstudio/core && npm run build --workspace=ownstudio-electron",
-    "start": "npm run start --workspace=ownstudio-electron"
+    "start": "npm run start --workspace=ownstudio-electron",
+    "postinstall": "node scripts/drop-agent-binaries.mjs"
   }
 }
