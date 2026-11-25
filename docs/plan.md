@@ -1,5 +1,7 @@
 # Plan to the first student study
 
+> **Since 2026-11-24 the status lives on the [dev map](https://github.com/luizvilla/Theia/issues/17)** (round 26, drawn by [tools/devmap](../tools/devmap/README.md)). The Order tables, Work logs and "Commits as made" below are history up to then and are no longer updated. This file keeps the rules, choices and rationale of each slice; each map ticket links back to its section.
+
 Four steps, done in order. Dates are a target, not a deadline: if a step takes longer, it takes longer (round 7). Luiz builds; PhD students, colleagues and Jean test.
 
 ```mermaid
@@ -424,6 +426,8 @@ As in steps 1–4: every commit builds and passes its tests; work on `/data/owns
 
 ### Order
 
+_History up to 2026-11-24, no longer updated: status is on the [dev map](https://github.com/luizvilla/Theia/issues/17)._
+
 | Plan | Repo | Commit message | What | Test | Storyboard |
 |---|---|---|---|---|---|
 | **A. The shell** | | | | | |
@@ -457,6 +461,8 @@ As in steps 1–4: every commit builds and passes its tests; work on `/data/owns
 
 ### Work log (slice 1)
 
+_History up to 2026-11-24, no longer updated: status is on the [dev map](https://github.com/luizvilla/Theia/issues/17)._
+
 What each step built and measured: tests, gates, frames, and every difference from the Order table above. The Order table stays the plan; results go here.
 
 | Plan | Commit | Result |
@@ -484,6 +490,8 @@ What each step built and measured: tests, gates, frames, and every difference fr
 | U19 | this commit | [Slice report](step-5-slice-1-report.md): what works per step of SPEC §2, what this session found beyond the plan, what waits for Luiz, and every storyboard frame beside its screenshot with the recorded differences. All app screenshots retaken on the final build in three runs on fresh setups (frame 11 is U14's own capture); the storyboard frames are rendered from `docs/design/storyboards.html` by the new `tools/storyboard-frames/`. [try-it.md](try-it.md) rewritten for the nine steps, with the known limits first; `scripts/try-ownstudio.sh` now starts on the Start page with a fresh home, profile and `notes.md` per trial, one Python for bridge, simulator and PulsimGui, the local Core mirror, the control library, PlatformIO and mcumgr, and refuses to start unless the examples are on `ownstudio/buck-extras`. Correction found while writing it: parts' values cannot be typed on the canvas in slice 1 (the editable inspector is slice 2); try-it says so. Stale differences in `shots.mjs` ("comes in U18") updated. Luiz's test session is the remaining check |
 
 ### Fixes after Luiz's trial (2026-11-19)
+
+_History up to 2026-11-24, no longer updated: status is on the [dev map](https://github.com/luizvilla/Theia/issues/17)._
 
 Luiz's trial ended with "not good enough" (decision log, rounds 23–25). Slice 1 stays open for these fixes only (Q171). Each blocker gets a test that fails before its fix. Results go in the work log below, as for U1–U19.
 
@@ -516,6 +524,8 @@ Noted for slice 2 (Luiz, 2026-11-19, during the fixes): an empty editor area sho
 
 ### Work log (fixes after the trial)
 
+_History up to 2026-11-24, no longer updated: status is on the [dev map](https://github.com/luizvilla/Theia/issues/17)._
+
 | Plan | Commit | Result |
 |---|---|---|
 | F1 | this commit | **Cause:** Theia's frontend (`@theia/core` `frontend-application.js`) listens to `dragenter` and `dragover` on the whole document and sets `dropEffect = 'none'`, to keep files dropped on the window from opening. Those listeners run after the canvas's React handler, overwrite its `copy`, and Chromium then never fires `drop`. The storyboard helper `dropPart` built its DragEvents by hand, which carry no real drop effect, so every gate passed while a real drag failed. **Fix:** the canvas accepts `dragenter` too and stops a part's drag events from reaching the document. **Menu:** Setup › Add part was still the U8 placeholder; it now runs one command per part (`ownstudio.setup.addPart.<part>`), which a click in Parts runs too. The part lands at its default spot (source left of the Twist, loads right, one under the other) and the view fits the setup; a refusal shows on the canvas and as a message. **Test:** `tools/storyboard-shots/real-drag-test.mjs` drags through Chromium's own pipeline (CDP `Input.setInterceptDrags`, `Input.dispatchDragEvent`), clicks, and uses the menu with mouse movement; on a copy of Luiz's trial setup it failed before the fix (nodes 1 → 1) and passes after (drag, drag, click, and a second source refused with "A setup has one source, on HIGH."). Unit tests 91/91, menus test clean |
@@ -546,6 +556,8 @@ Slice 2–4 content; the Windows installer (#5); sensor calibration (#14); the P
 
 ### Commits as made (slice 1)
 
+_History up to 2026-11-24, no longer updated: status is on the [dev map](https://github.com/luizvilla/Theia/issues/17)._
+
 | Plan | Repo | Commit | Message | Note |
 |---|---|---|---|---|
 | U1 | Theia | `7ebdca0` | app: the plugin system, with C++, Python and git extensions | The GitHub pull-request extension is left out until slice 3: it fails to start without GitHub sign-in. clangd itself is offered for download on first use; the installer (#5) will bundle it. Also fixed: the OwnStudio themes had no token colours, and Theia's theme cache replayed an old copy over them; they are now registered again after the cache is restored |
@@ -572,6 +584,8 @@ Slice 2–4 content; the Windows installer (#5); sensor calibration (#14); the P
 | U19 | Theia | this commit | docs: slice 1 report and how to try it | Report with frames side by side, try-it for the nine steps, a fresh-trial script |
 
 ## Slice 5: timing on the Spin (planned)
+
+_Units T1–T8 and the examples are tickets on the [dev map](https://github.com/luizvilla/Theia/issues/17) (#31–#40); their status lives there._
 
 Decided in [round 22](decision-log.md#round-22-2026-11-13-timing-on-the-spin), specified in [ADR 0034](adr/0034-timing-check-and-load-gauge.md), drawn in storyboard frames T-1…T-9 (`docs/design/timing-storyboard.html`, kept local). Moved after slice 4 at Luiz's request (2026-11-13; it was first planned in slice 3). It needs slice 3's Monitor mode, because the gauge reads through Monitor's ThingSet polling. As in slice 1, every window commit is checked against its storyboard frames with `tools/storyboard-shots`, and the navigation test is rerun.
 
