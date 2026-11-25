@@ -1,0 +1,959 @@
+{
+ "now": "2026-11-25T22:50:19Z",
+ "mapBody": "## Destination\n\nOwnStudio 2.0 built through slice 5 and accepted on the bench, with the PhD trial run on it. Milestone A on the way: slice 1 accepted after Luiz's nine-step retest.\n\n## Resume here\n\n<!-- devmap:resume:start -->\n_Nothing in progress._ Takeable now: see the blue nodes.\n<!-- devmap:resume:end -->\n\n## Visual map\n\n<!-- devmap:diagram:start -->\n```mermaid\nflowchart LR\n  classDef done fill:#d3f9d8,stroke:#2b8a3e,color:#1b4332\n  classDef open fill:#d0ebff,stroke:#1c7ed6,color:#0b3d6e\n  classDef blocked fill:#ffe8cc,stroke:#e8590c,color:#5c2b00\n  classDef wip fill:#f3d9fa,stroke:#ae3ec9,color:#4a1259\n  classDef stale fill:#ffe3e3,stroke:#e03131,color:#5c0a0a,stroke-width:3px\n  classDef fog fill:#f1f3f5,stroke:#868e96,color:#495057,stroke-dasharray:5 5\n  classDef dest fill:#343a40,stroke:#000,color:#fff,font-weight:bold\n\n  DEST([\"🎯 OwnStudio 2.0 built through slice 5,<br/>accepted on the bench, PhD trial run\"]):::dest\n\n  subgraph Before[\"Done before the map\"]\n    D1[\"✓ Steps 1–4<br/>OwnStudio 1.0\"]:::done\n    D2[\"✓ Slice 0 · paper<br/>SPEC 2.0, ADRs, storyboards\"]:::done\n    D3[\"✓ Slice 1 · U1–U19\"]:::done\n    D4[\"✓ Fixes F1–F20<br/>after the 11-19 trial\"]:::done\n  end\n\n  subgraph Upkeep[\"Map upkeep\"]\n    N18[\"🔨 #18 Dev map tooling\"]:::open\n    N44[\"#44 Move plan.md status<br/>onto the map\"]:::blocked\n    N45[\"#45 Back-fill done units<br/>(after slice 5)\"]:::open\n  end\n\n  subgraph Skills[\"Dev skills\"]\n    N22[\"✓ #22 Dev skills<br/>inventory\"]:::done\n    N27[\"👤 #27 Choose which<br/>dev skills to write\"]:::open\n    FS[\"dev skill builds\"]:::fog\n  end\n\n  subgraph S1[\"Milestone A · slice 1 accepted\"]\n    N19[\"🔨👤 #19 F20 checked<br/>on the bench\"]:::open\n    N20[\"✓ #20 F14 leftovers\"]:::done\n    N50[\"🔨 #50 Cancelled token<br/>thrown on restore\"]:::open\n    N21[\"✓ #21 Agent SDK<br/>licence\"]:::done\n    N23[\"👤 #23 Power and<br/>agent shells\"]:::open\n    N24[\"👤 #24 Pulsim<br/>exact-edges fix\"]:::open\n    N46[\"✓ #46 Agent extensions<br/>installed by users\"]:::done\n    N25[\"✓ #25 Slice 1 rulings\"]:::done\n    N47[\"✓ #47 Agents installed<br/>on first use\"]:::done\n    N49[\"👤 #49 Signing in<br/>without a terminal\"]:::open\n    N26[\"👤 #26 Slice 1 retest:<br/>nine steps\"]:::blocked\n  end\n\n  subgraph Spec[\"Slices 2–4\"]\n    N28[\"👤 #28 Specify slice 2\"]:::blocked\n    N48[\"🔨 #48 Extensions view<br/>on Open VSX\"]:::blocked\n    N29[\"👤 #29 Specify slice 3\"]:::blocked\n    N30[\"👤 #30 Specify slice 4\"]:::blocked\n    F2[\"slice 2 build units\"]:::fog\n    F3[\"slice 3 build units\"]:::fog\n    F4[\"slice 4 build units\"]:::fog\n  end\n\n  subgraph S5[\"Slice 5 · timing on the Spin\"]\n    N31[\"🔨 #31 T1 Spin API probes\"]:::blocked\n    N32[\"🔨 #32 T2 Timing check\"]:::blocked\n    N33_38[\"🔨 #33–#38 T3–T8<br/>gauge, tab, CodeLens,<br/>dots, restore, agent recipe\"]:::blocked\n    N39[\"🔨 #39 Examples<br/>on ThingSet\"]:::blocked\n    N40[\"👤 #40 Slice 5 accepted<br/>on the bench\"]:::blocked\n  end\n\n  subgraph Trial[\"PhD trial\"]\n    N41[\"👤 #41 Bench accuracy<br/>before students\"]:::blocked\n    N42[\"👤 #42 Trial protocol\"]:::blocked\n    N43[\"👤 #43 Tutorial on 2.0\"]:::blocked\n    FT[\"trial build work\"]:::fog\n  end\n\n  D4 --> N19 & N20\n  N18 --> N44\n  N22 --> N27 -.-> FS\n  N21 --> N25\n  N46 --> N25\n  N46 -.-> N23 & N28\n  N19 & N20 & N23 & N24 & N25 & N47 --> N26\n  N25 --> N47 & N48\n  N47 --> N49\n  N28 --> N48\n  N26 --> N28 --> N29 --> N30\n  N23 --> N30\n  N28 -.-> F2\n  N29 -.-> F3\n  N30 -.-> F4\n  N30 --> N31 & N39\n  F3 -.-> N31\n  N31 --> N32 --> N33_38\n  N33_38 & N39 --> N40\n  N40 --> N41 & N42 & N43\n  N41 & N42 & N43 -.-> FT\n  N40 --> DEST\n  FT -.-> DEST\n```\n\n<sub>Green done · blue takeable · purple in progress · orange blocked · red ⏳ stale (3 days without activity) · grey dashed fog · 🔨 build · 🔎 research · 👤 can't move without Luiz.</sub>\n<!-- devmap:diagram:end -->\n\nDay-to-day board: [GitHub Project \"OwnStudio dev map\"](https://github.com/users/luizvilla/projects/2) (Status / Slice / Kind, sorted by Updated to spot stale work).\n\n## Notes\n\n- **Domain:** OwnStudio, a Theia/Electron workbench for OwnTech power-electronics boards (Twist, Spin). Vocabulary in [GLOSSARY.md](https://github.com/luizvilla/Theia/blob/step-5/slice-1-thread/GLOSSARY.md); keep to it. Spec in [SPEC 2.0](https://github.com/luizvilla/Theia/blob/step-5/slice-1-thread/SPEC.md), reasons in [ADRs](https://github.com/luizvilla/Theia/blob/step-5/slice-1-thread/docs/adr/), every question asked in the [decision log](https://github.com/luizvilla/Theia/blob/step-5/slice-1-thread/docs/decision-log.md).\n- **Skills to consult:** `grilling` and `domain-modeling` for HITL tickets; `tdd` for build tickets; `research` for research tickets. Dev skills written from [Choose which dev skills to write](https://github.com/luizvilla/Theia/issues/27) join this list.\n- **This map carries execution (override of wayfinder's planning default).** `wayfinder:build` tickets are build units: their body is Unit / Done when / Test, not a question. Commits say `Refs #n`; the last one says `Closes #n`. A build ticket closes when its \"done when\" holds.\n- **plan.md** keeps rules, choices and rationale per slice; status lives on this map (from [Move plan.md's status onto the dev map](https://github.com/luizvilla/Theia/issues/44) on).\n- **`wayfinder:luiz`** (👤) marks a ticket that can't move without Luiz: a decision, the bench with power on, or a retest.\n- **Claiming:** assign the ticket (always to luizvilla, since every session uses that account) **and** comment \"claimed by <Claude|Codex|Luiz>, <date>\"; set the Project's Status to In Progress. Post \"stopped at / next step\" on the ticket at every commit, so a crash leaves a trail. A claimed ticket with no comment, commit or update for **3 days is stale** (⏳ red).\n- **Visual map:** redraw the diagram (colours and arrows) whenever a ticket opens, closes, is claimed or goes stale, and copy it into [docs/overview.md](https://github.com/luizvilla/Theia/blob/step-5/slice-1-thread/docs/overview.md). [Dev map tooling](https://github.com/luizvilla/Theia/issues/18) will generate both.\n- **Working style:** be critical; log each answered grilling round in the decision log, glossary, ADRs, benchmark and overview, and commit before the next round.\n- **Bench:** switching power on only with Luiz present, one run at a time, read the converter Mode back after every power run. Automated tests never set power on.\n- **Dev skill** (for the agents building OwnStudio) ≠ **setup skill** (slice 4, shipped in a user's setup).\n- Tickets in English. The repository is public: nothing sensitive in tickets (consent and DPO details stay out).\n\n## Decisions so far\n\n<!-- one line per closed ticket -->\n\n- [Which recurring ways of working should become dev skills?](https://github.com/luizvilla/Theia/issues/22): no root AGENTS.md exists, so it comes first; new dev skills: run-app, drive-app, bench (split with AGENTS.md), trial-intake, nine-steps, report; grilling rounds and dev map upkeep extend existing skills; resume, commit plan and retro are already covered.\n- [May OwnStudio redistribute the Claude agent SDK?](https://github.com/luizvilla/Theia/issues/21): yes, under Anthropic's Commercial Terms: unmodified binary, the user's own account billed directly, no Claude branding; subscription login is unclear (only Anthropic can say), an API key is always fine; Codex is Apache-2.0 (ship LICENSE + NOTICE).\n- [Slice 1 rulings: navigation timing rule, Codex version, shipping the agent SDK](https://github.com/luizvilla/Theia/issues/25): keep \"95 % within 200 ms, none above 300 ms\"; OwnStudio ships no agent, the AI tab installs Claude Code and Codex on first use with one click (pinned, probed); any Open VSX extension allowed, no shortlist; safety moves wholly to Power and agent shells.\n- [Can users install the Claude Code and Codex extensions themselves, and what does open extension install risk?](https://github.com/luizvilla/Theia/issues/46): yes, from Open VSX (Microsoft's marketplace is closed to Theia); no redistribution, and subscription login is allowed; but user-installed agents run outside ADR 0031 (Claude Code starts in auto mode), one plugin host crash stops every extension, and a `.vsix` dropped into `~/.theia/extensions/` already loads today.\n- [Agents installed on first use from the AI tab](https://github.com/luizvilla/Theia/issues/47): built; one click installs Claude agent SDK 0.3.332 or Codex 0.172.0 (sha512-pinned) into OwnStudio's folder; the app ships neither; checked by Luiz; a student's sign-in is still open.\n- [F14 leftovers: stale window title, restore speed on a quiet machine](https://github.com/luizvilla/Theia/issues/20): the title follows the workbench (Code with no editor says \"Code\"); 200 restores on a quiet start: median 733 ms, p95 1.38 s, slowest 1.75 s, so S7 holds; a cancelled-token error during restores moved to its own ticket.\n\n## Not yet specified\n\n- The build units of slices 2, 3 and 4: they become build tickets when each slice is specified.\n- The dev skills themselves: build tickets once chosen.\n- The PhD trial's own build work (recording, consent flow, tutorial content), once the protocol and the tutorial are decided.\n- Whatever Luiz's slice 1 retest finds.\n- A lab's own model as a bare OpenAI-compatible endpoint (e.g. a university's ZRR-safe service) driving an agent in the AI tab: whose agent, which tools, takeover or not; for the slice 2 spec.\n- Where the Pulsim fix ends up (fork or upstream) and how OwnStudio pins it, once decided.\n\n## Out of scope\n\n- Averaged simulator target ([ADR 0033](https://github.com/luizvilla/Theia/blob/step-5/slice-1-thread/docs/adr/0033-averaged-simulator-for-fast-evaluation.md)) and the ST-Link developer slice ([ADR 0035](https://github.com/luizvilla/Theia/blob/step-5/slice-1-thread/docs/adr/0035-st-link-probe-support.md)): after slice 5.\n- [Windows installer](https://github.com/luizvilla/Theia/issues/5); so is the serial-port service of ADR 0031's option 3, which belongs with it.\n- Upstream pull requests: [Core bootloader script](https://github.com/luizvilla/Theia/issues/8), [Pulsim's GCC-only flags](https://github.com/luizvilla/Theia/issues/9).\n- [Light theme never checked](https://github.com/luizvilla/Theia/issues/7), [PulsimGUI view of the mission plant](https://github.com/luizvilla/Theia/issues/10), [adding a data object from the table](https://github.com/luizvilla/Theia/issues/6).\n\n\n\n",
+ "tickets": [
+  {
+   "number": 18,
+   "title": "Dev map tooling: generated diagram, Resume here, stale tickets, Project sync",
+   "state": "OPEN",
+   "updatedAt": "2026-11-25T22:47:46Z",
+   "labels": [
+    "wayfinder:build"
+   ],
+   "assignees": [
+    "luizvilla"
+   ],
+   "blockedBy": [],
+   "lastComment": {
+    "body": "claimed by Claude, 2026-11-25",
+    "createdAt": "2026-11-25T22:47:42Z"
+   },
+   "lastCommit": null
+  },
+  {
+   "number": 19,
+   "title": "F20 checked on the bench: one board capture with Luiz",
+   "state": "OPEN",
+   "updatedAt": "2026-11-24T12:04:47Z",
+   "labels": [
+    "wayfinder:build",
+    "wayfinder:luiz"
+   ],
+   "assignees": [],
+   "blockedBy": [],
+   "lastComment": null,
+   "lastCommit": null
+  },
+  {
+   "number": 20,
+   "title": "F14 leftovers: stale window title, restore speed on a quiet machine",
+   "state": "CLOSED",
+   "updatedAt": "2026-11-25T22:47:18Z",
+   "labels": [
+    "wayfinder:build"
+   ],
+   "assignees": [
+    "luizvilla"
+   ],
+   "blockedBy": [],
+   "lastComment": {
+    "body": "**Resolution:** done (16195b7, 9164d04).\n1. **Window title:** the workbench switch detached the old centre view without changing Theia's current tab, so the title kept \"Lab\". The switch now tells the title updater what the centre shows, and Code with no editor is named \"Code\". `title-test.mjs` checks 12 states (4 failed before). Navigation gate: 657 clicks, 0 wrong, p95 127 ms.\n2. **Restore timing, quiet start (load 1.4):** 200 moves on a copy of `f14-bench-step9`, all land: median 733 ms, p95 1.38 s, slowest 1.75 s. **S7 holds.** Before F17: 1.30 s / 4.2 s.\n\nAlso hardened `navigation-test.mjs`: right after start-up, Quick Open could list the file and drop the Enter.\n\nLeft over: timeline-test still ends on an uncaught cancelled-token object that Monaco rethrows during restores (F17 saw it). Moved to its own ticket.\n",
+    "createdAt": "2026-11-25T22:47:04Z"
+   },
+   "lastCommit": {
+    "sha": "9ccd9002f59930140b3087384c71d6253fdcced1",
+    "date": "2026-11-25T23:47:29+01:00",
+    "subject": "docs: dev map, #20 done; restore cancelled token is #50"
+   }
+  },
+  {
+   "number": 21,
+   "title": "May OwnStudio redistribute the Claude agent SDK?",
+   "state": "CLOSED",
+   "updatedAt": "2026-11-24T12:13:36Z",
+   "labels": [
+    "wayfinder:research"
+   ],
+   "assignees": [
+    "luizvilla"
+   ],
+   "blockedBy": [],
+   "lastComment": {
+    "body": "**Resolution** (what the texts say, not legal advice; [notes](https://github.com/luizvilla/Theia/blob/research/claude-agent-sdk-licence/research/claude-agent-sdk-licence.md)):\n- The SDK is proprietary, under Anthropic's Commercial Terms.\n- Shipping Claude Code inside a product is allowed if someone accepts the Commercial Terms, the binary ships unmodified, each user signs in with their own account and is billed directly, and no Claude or Anthropic name or logo appears in OwnStudio's branding.\n- Signing in with a Claude subscription (rather than an API key) through the SDK is ambiguous across Anthropic's pages; only Anthropic can settle it. An API key is always fine.\n- Codex 0.49 is Apache-2.0 and can be redistributed with its LICENSE, plus the upstream NOTICE, which the npm tarball leaves out.\n- The cleanest alternative is the user's own install, which Theia already supports for Claude Code.\n\nNext: [Slice 1 rulings](https://github.com/luizvilla/Theia/issues/25).",
+    "createdAt": "2026-11-24T12:13:36Z"
+   },
+   "lastCommit": {
+    "sha": "2d2645f5bf867cd3accc17779b78176d6fe8773d",
+    "date": "2026-11-24T13:12:28+01:00",
+    "subject": "research: may OwnStudio redistribute the Claude agent SDK and Codex? (#21)"
+   }
+  },
+  {
+   "number": 22,
+   "title": "Which recurring ways of working should become dev skills?",
+   "state": "CLOSED",
+   "updatedAt": "2026-11-24T12:13:08Z",
+   "labels": [
+    "wayfinder:research"
+   ],
+   "assignees": [
+    "luizvilla"
+   ],
+   "blockedBy": [],
+   "lastComment": {
+    "body": "**Resolution:** the [inventory](https://github.com/luizvilla/Theia/blob/research/dev-skills-inventory/research/dev-skills-inventory.md) ranks nine candidates. New dev skills: run-app, drive-app, bench (split, with its hard rules going into AGENTS.md), trial-intake, nine-steps, report. Grilling rounds and dev map upkeep extend existing skills. Session resume, commit plan and retro are already covered by Matt Pocock's skills. First finding: the repo has no root AGENTS.md or CLAUDE.md, so Codex sees none of the working rules. Next: [Choose which dev skills to write](https://github.com/luizvilla/Theia/issues/27).",
+    "createdAt": "2026-11-24T12:13:07Z"
+   },
+   "lastCommit": {
+    "sha": "fd43590bac0629445c086a2ebd7489e8551bcbbb",
+    "date": "2026-11-24T13:12:14+01:00",
+    "subject": "research: dev skills inventory (#22)"
+   }
+  },
+  {
+   "number": 23,
+   "title": "Power and agent shells: what stops an agent switching power on?",
+   "state": "OPEN",
+   "updatedAt": "2026-11-25T12:24:44Z",
+   "labels": [
+    "wayfinder:grilling",
+    "wayfinder:luiz"
+   ],
+   "assignees": [],
+   "blockedBy": [],
+   "lastComment": {
+    "body": "Input from [Slice 1 rulings](https://github.com/luizvilla/Theia/issues/25) (Q211–Q219, ADR 0031 amendment):\n- Students install their own agents (one click in the AI tab, or any Open VSX extension, or a lab's harness in the terminal). Safety no longer chooses the agent route: it is decided here.\n- Start from \"the token stops mistakes, not agents\": as in VS Code, any agent the student installs can launch the prepared scripts or open the port. OwnStudio's limits (Codex sandbox, no `bypassPermissions`) hold in the AI tab only.\n- The open choice is where the real guard lives: the bench (supply limits set by a person, someone present) and/or the port service with the installer (ADR 0031 option 3); and whether AI takeover is offered only in the AI tab.",
+    "createdAt": "2026-11-25T12:24:44Z"
+   },
+   "lastCommit": null
+  },
+  {
+   "number": 24,
+   "title": "Pulsim exact-edges fix: fork, upstream, and the C-Block path",
+   "state": "OPEN",
+   "updatedAt": "2026-11-24T12:05:21Z",
+   "labels": [
+    "wayfinder:grilling",
+    "wayfinder:luiz"
+   ],
+   "assignees": [],
+   "blockedBy": [],
+   "lastComment": null,
+   "lastCommit": null
+  },
+  {
+   "number": 25,
+   "title": "Slice 1 rulings: navigation timing rule, Codex version, shipping the agent SDK",
+   "state": "CLOSED",
+   "updatedAt": "2026-11-25T12:24:45Z",
+   "labels": [
+    "wayfinder:grilling",
+    "wayfinder:luiz"
+   ],
+   "assignees": [
+    "luizvilla"
+   ],
+   "blockedBy": [
+    {
+     "number": 46,
+     "state": "CLOSED"
+    },
+    {
+     "number": 21,
+     "state": "CLOSED"
+    }
+   ],
+   "lastComment": {
+    "body": "**Resolution** (round 27, Q210–Q219 in the [decision log](https://github.com/luizvilla/Theia/blob/step-5/slice-1-thread/docs/decision-log.md); [ADR 0031 amendment](https://github.com/luizvilla/Theia/blob/step-5/slice-1-thread/docs/adr/0031-ai-agents-and-takeover.md)):\n1. **Navigation rule:** keep \"95 % of switches within 200 ms, none above 300 ms\".\n2. **Codex version** and 3. **the Claude SDK:** OwnStudio ships neither agent. The AI tab installs Claude Code and Codex on first use with one click (pinned, probed versions, from npm into OwnStudio's folder, no terminal), so the version is current and nothing is redistributed. This replaces Q180 (F7). → [Agents installed on first use from the AI tab](https://github.com/luizvilla/Theia/issues/47), before the retest.\n- Any Open VSX extension may be installed, no shortlist, so students can bring their lab's AI. → [Extensions view on Open VSX](https://github.com/luizvilla/Theia/issues/48), slice 2.\n- A bare OpenAI-compatible lab endpoint driving an agent in the AI tab: fog for the slice 2 spec.\n- Safety no longer chooses the agent route; it moves wholly to [Power and agent shells](https://github.com/luizvilla/Theia/issues/23).",
+    "createdAt": "2026-11-25T12:24:45Z"
+   },
+   "lastCommit": {
+    "sha": "a09e789a5fdd780658a43527c97f22541aad400a",
+    "date": "2026-11-25T13:25:10+01:00",
+    "subject": "docs: round 27 closes the slice 1 rulings (#25)"
+   }
+  },
+  {
+   "number": 26,
+   "title": "Slice 1 retest: Luiz's nine steps on the Twist, good enough or not",
+   "state": "OPEN",
+   "updatedAt": "2026-11-24T12:01:39Z",
+   "labels": [
+    "wayfinder:task",
+    "wayfinder:luiz"
+   ],
+   "assignees": [],
+   "blockedBy": [
+    {
+     "number": 47,
+     "state": "CLOSED"
+    },
+    {
+     "number": 25,
+     "state": "CLOSED"
+    },
+    {
+     "number": 24,
+     "state": "OPEN"
+    },
+    {
+     "number": 23,
+     "state": "OPEN"
+    },
+    {
+     "number": 20,
+     "state": "CLOSED"
+    },
+    {
+     "number": 19,
+     "state": "OPEN"
+    }
+   ],
+   "lastComment": null,
+   "lastCommit": null
+  },
+  {
+   "number": 27,
+   "title": "Choose which dev skills to write",
+   "state": "OPEN",
+   "updatedAt": "2026-11-24T12:13:15Z",
+   "labels": [
+    "wayfinder:grilling",
+    "wayfinder:luiz"
+   ],
+   "assignees": [],
+   "blockedBy": [
+    {
+     "number": 22,
+     "state": "CLOSED"
+    }
+   ],
+   "lastComment": {
+    "body": "Input from [the inventory](https://github.com/luizvilla/Theia/issues/22): suggested first batch is a root **AGENTS.md** (12 rules drafted in the file), then run-app, drive-app and bench. Open points to settle here: how Codex loads skills (not checked yet); whether the driving gotchas belong in `tools/storyboard-shots/README.md` instead; slimming the memory notes once skills exist; committing scratchpad scripts under `tools/` (the gate runner was lost with one session).",
+    "createdAt": "2026-11-24T12:13:09Z"
+   },
+   "lastCommit": null
+  },
+  {
+   "number": 28,
+   "title": "Specify slice 2: units, tests and storyboard frames",
+   "state": "OPEN",
+   "updatedAt": "2026-11-24T12:01:42Z",
+   "labels": [
+    "wayfinder:grilling",
+    "wayfinder:luiz"
+   ],
+   "assignees": [],
+   "blockedBy": [
+    {
+     "number": 26,
+     "state": "OPEN"
+    }
+   ],
+   "lastComment": null,
+   "lastCommit": null
+  },
+  {
+   "number": 29,
+   "title": "Specify slice 3: units, tests and storyboard frames",
+   "state": "OPEN",
+   "updatedAt": "2026-11-24T12:01:44Z",
+   "labels": [
+    "wayfinder:grilling",
+    "wayfinder:luiz"
+   ],
+   "assignees": [],
+   "blockedBy": [
+    {
+     "number": 28,
+     "state": "OPEN"
+    }
+   ],
+   "lastComment": null,
+   "lastCommit": null
+  },
+  {
+   "number": 30,
+   "title": "Specify slice 4: setup skills and AI takeover",
+   "state": "OPEN",
+   "updatedAt": "2026-11-24T12:01:46Z",
+   "labels": [
+    "wayfinder:grilling",
+    "wayfinder:luiz"
+   ],
+   "assignees": [],
+   "blockedBy": [
+    {
+     "number": 23,
+     "state": "OPEN"
+    },
+    {
+     "number": 29,
+     "state": "OPEN"
+    }
+   ],
+   "lastComment": null,
+   "lastCommit": null
+  },
+  {
+   "number": 31,
+   "title": "Slice 5 T1: Spin API fork: load objects, OWN_TIMING probes, TIMING image",
+   "state": "OPEN",
+   "updatedAt": "2026-11-24T12:01:48Z",
+   "labels": [
+    "wayfinder:build"
+   ],
+   "assignees": [],
+   "blockedBy": [
+    {
+     "number": 30,
+     "state": "OPEN"
+    }
+   ],
+   "lastComment": null,
+   "lastCommit": null
+  },
+  {
+   "number": 32,
+   "title": "Slice 5 T2: ownstudio_lab.timing: run, record and restore a Timing check",
+   "state": "OPEN",
+   "updatedAt": "2026-11-24T12:01:50Z",
+   "labels": [
+    "wayfinder:build"
+   ],
+   "assignees": [],
+   "blockedBy": [
+    {
+     "number": 31,
+     "state": "OPEN"
+    }
+   ],
+   "lastComment": null,
+   "lastCommit": null
+  },
+  {
+   "number": 33,
+   "title": "Slice 5 T3: Load gauge in the status bar and on the Controller",
+   "state": "OPEN",
+   "updatedAt": "2026-11-24T12:01:52Z",
+   "labels": [
+    "wayfinder:build"
+   ],
+   "assignees": [],
+   "blockedBy": [
+    {
+     "number": 32,
+     "state": "OPEN"
+    }
+   ],
+   "lastComment": null,
+   "lastCommit": null
+  },
+  {
+   "number": 34,
+   "title": "Slice 5 T4: Timing bottom tab: overview, detailed view, table",
+   "state": "OPEN",
+   "updatedAt": "2026-11-24T12:01:54Z",
+   "labels": [
+    "wayfinder:build"
+   ],
+   "assignees": [],
+   "blockedBy": [
+    {
+     "number": 32,
+     "state": "OPEN"
+    }
+   ],
+   "lastComment": null,
+   "lastCommit": null
+  },
+  {
+   "number": 35,
+   "title": "Slice 5 T5: CodeLens above OWN_TIMING lines",
+   "state": "OPEN",
+   "updatedAt": "2026-11-24T12:01:56Z",
+   "labels": [
+    "wayfinder:build"
+   ],
+   "assignees": [],
+   "blockedBy": [
+    {
+     "number": 32,
+     "state": "OPEN"
+    }
+   ],
+   "lastComment": null,
+   "lastCommit": null
+  },
+  {
+   "number": 36,
+   "title": "Slice 5 T6: Timing dots on the timeline, Compare with…",
+   "state": "OPEN",
+   "updatedAt": "2026-11-24T12:01:57Z",
+   "labels": [
+    "wayfinder:build"
+   ],
+   "assignees": [],
+   "blockedBy": [
+    {
+     "number": 32,
+     "state": "OPEN"
+    }
+   ],
+   "lastComment": null,
+   "lastCommit": null
+  },
+  {
+   "number": 37,
+   "title": "Slice 5 T7: Firmware match TIMING image and Put my firmware back",
+   "state": "OPEN",
+   "updatedAt": "2026-11-24T12:01:59Z",
+   "labels": [
+    "wayfinder:build"
+   ],
+   "assignees": [],
+   "blockedBy": [
+    {
+     "number": 32,
+     "state": "OPEN"
+    }
+   ],
+   "lastComment": null,
+   "lastCommit": null
+  },
+  {
+   "number": 38,
+   "title": "Slice 5 T8: Timing check recipe for agents in AGENTS.md / CLAUDE.md",
+   "state": "OPEN",
+   "updatedAt": "2026-11-24T12:02:01Z",
+   "labels": [
+    "wayfinder:build"
+   ],
+   "assignees": [],
+   "blockedBy": [
+    {
+     "number": 32,
+     "state": "OPEN"
+    }
+   ],
+   "lastComment": null,
+   "lastCommit": null
+  },
+  {
+   "number": 39,
+   "title": "Slice 5: the Twist examples used by tutorials move to ThingSet",
+   "state": "OPEN",
+   "updatedAt": "2026-11-24T12:02:03Z",
+   "labels": [
+    "wayfinder:build"
+   ],
+   "assignees": [],
+   "blockedBy": [
+    {
+     "number": 30,
+     "state": "OPEN"
+    }
+   ],
+   "lastComment": null,
+   "lastCommit": null
+  },
+  {
+   "number": 40,
+   "title": "Slice 5 accepted on the bench",
+   "state": "OPEN",
+   "updatedAt": "2026-11-24T12:02:05Z",
+   "labels": [
+    "wayfinder:task",
+    "wayfinder:luiz"
+   ],
+   "assignees": [],
+   "blockedBy": [
+    {
+     "number": 39,
+     "state": "OPEN"
+    },
+    {
+     "number": 38,
+     "state": "OPEN"
+    },
+    {
+     "number": 37,
+     "state": "OPEN"
+    },
+    {
+     "number": 36,
+     "state": "OPEN"
+    },
+    {
+     "number": 35,
+     "state": "OPEN"
+    },
+    {
+     "number": 34,
+     "state": "OPEN"
+    },
+    {
+     "number": 33,
+     "state": "OPEN"
+    },
+    {
+     "number": 32,
+     "state": "OPEN"
+    },
+    {
+     "number": 31,
+     "state": "OPEN"
+    }
+   ],
+   "lastComment": null,
+   "lastCommit": null
+  },
+  {
+   "number": 41,
+   "title": "Bench accuracy before students: calibration, supply current, Safety API, plant values",
+   "state": "OPEN",
+   "updatedAt": "2026-11-24T12:02:08Z",
+   "labels": [
+    "wayfinder:grilling",
+    "wayfinder:luiz"
+   ],
+   "assignees": [],
+   "blockedBy": [
+    {
+     "number": 40,
+     "state": "OPEN"
+    }
+   ],
+   "lastComment": null,
+   "lastCommit": null
+  },
+  {
+   "number": 42,
+   "title": "PhD trial protocol: who, what is measured, consent, dry run",
+   "state": "OPEN",
+   "updatedAt": "2026-11-24T12:02:09Z",
+   "labels": [
+    "wayfinder:grilling",
+    "wayfinder:luiz"
+   ],
+   "assignees": [],
+   "blockedBy": [
+    {
+     "number": 40,
+     "state": "OPEN"
+    }
+   ],
+   "lastComment": null,
+   "lastCommit": null
+  },
+  {
+   "number": 43,
+   "title": "Tutorial on OwnStudio 2.0, and the buck mission's challenge",
+   "state": "OPEN",
+   "updatedAt": "2026-11-24T12:02:11Z",
+   "labels": [
+    "wayfinder:grilling",
+    "wayfinder:luiz"
+   ],
+   "assignees": [],
+   "blockedBy": [
+    {
+     "number": 40,
+     "state": "OPEN"
+    }
+   ],
+   "lastComment": null,
+   "lastCommit": null
+  },
+  {
+   "number": 44,
+   "title": "Move plan.md's status onto the dev map",
+   "state": "OPEN",
+   "updatedAt": "2026-11-24T12:02:13Z",
+   "labels": [
+    "wayfinder:task"
+   ],
+   "assignees": [],
+   "blockedBy": [
+    {
+     "number": 18,
+     "state": "OPEN"
+    }
+   ],
+   "lastComment": null,
+   "lastCommit": null
+  },
+  {
+   "number": 45,
+   "title": "Back-fill done units as closed issues",
+   "state": "OPEN",
+   "updatedAt": "2026-11-24T12:07:38Z",
+   "labels": [
+    "wayfinder:task"
+   ],
+   "assignees": [],
+   "blockedBy": [],
+   "lastComment": null,
+   "lastCommit": null
+  },
+  {
+   "number": 46,
+   "title": "Can users install the Claude Code and Codex extensions themselves, and what does open extension install risk?",
+   "state": "CLOSED",
+   "updatedAt": "2026-11-24T13:03:32Z",
+   "labels": [
+    "wayfinder:research"
+   ],
+   "assignees": [
+    "luizvilla"
+   ],
+   "blockedBy": [],
+   "lastComment": {
+    "body": "**Resolution** ([notes](https://github.com/luizvilla/Theia/blob/research/agent-extensions/research/agent-extensions.md)):\n- Microsoft's marketplace is closed to Theia-based products.\n- Both vendors publish verified extensions on Open VSX that fit Theia 1.77's API (1.144). Codex may lose minor features that rely on proposed APIs (not tested).\n- When users install an extension themselves, OwnStudio redistributes nothing, and a subscription login is allowed.\n- All extensions share one plugin host process: if it crashes, every extension stops (clangd, Pyright, Git), but OwnStudio's own panels keep running.\n- Safety: user-installed agents run outside ADR 0031. Claude Code starts in auto mode and ignores the setup's settings for its starting mode; the Codex extension can be switched to Full Access, and that setting is shared with OwnStudio's own Codex.\n- A `.vsix` dropped into `~/.theia/extensions/` loads today, even without an Extensions view.\n\nOptions for ruling 3: A bundle only · B allow-listed user installs · C both · D the CLI in a terminal · E open installs (not recommended). Next: [Slice 1 rulings](https://github.com/luizvilla/Theia/issues/25).",
+    "createdAt": "2026-11-24T13:03:31Z"
+   },
+   "lastCommit": {
+    "sha": "e72473af7ef1205c3cfea64157610d2affe593ee",
+    "date": "2026-11-24T14:03:45+01:00",
+    "subject": "docs: dev map after the agent-extensions research (#46)"
+   }
+  },
+  {
+   "number": 47,
+   "title": "Agents installed on first use from the AI tab",
+   "state": "CLOSED",
+   "updatedAt": "2026-11-25T22:11:13Z",
+   "labels": [
+    "wayfinder:build",
+    "wayfinder:luiz"
+   ],
+   "assignees": [
+    "luizvilla"
+   ],
+   "blockedBy": [
+    {
+     "number": 25,
+     "state": "CLOSED"
+    }
+   ],
+   "lastComment": {
+    "body": "**Resolution:** done. Luiz's check on 2026-11-25: on a fresh OwnStudio home, both agents installed with one click and answered. The installer carries neither agent; the sandbox probe passes on the pinned Codex 0.172.0 (ca4a71a, ea4439f).\n\nFound during the check: neither agent asked for an account, because each reused a login already on the machine (Claude Code: Luiz's Team subscription in `~/.claude`; Codex: ChatGPT tokens in `~/.codex`). A student's fresh machine has no login, so that step is now its own decision: [Signing in to an installed agent without a terminal](https://github.com/luizvilla/Theia/issues/49). The lab's own AI is not part of this unit: it comes with [Extensions view on Open VSX](https://github.com/luizvilla/Theia/issues/48) and the slice 2 spec.\n",
+    "createdAt": "2026-11-25T22:11:13Z"
+   },
+   "lastCommit": {
+    "sha": "315a040a718eb0d8c85c97b11be8c4d453d30d10",
+    "date": "2026-11-25T23:11:20+01:00",
+    "subject": "docs: dev map, #47 done; signing in without a terminal is #49"
+   }
+  },
+  {
+   "number": 48,
+   "title": "Extensions view on Open VSX",
+   "state": "OPEN",
+   "updatedAt": "2026-11-25T12:24:03Z",
+   "labels": [
+    "wayfinder:build"
+   ],
+   "assignees": [],
+   "blockedBy": [
+    {
+     "number": 25,
+     "state": "CLOSED"
+    },
+    {
+     "number": 28,
+     "state": "OPEN"
+    }
+   ],
+   "lastComment": null,
+   "lastCommit": null
+  },
+  {
+   "number": 49,
+   "title": "Signing in to an installed agent without a terminal",
+   "state": "OPEN",
+   "updatedAt": "2026-11-25T22:11:08Z",
+   "labels": [
+    "wayfinder:grilling",
+    "wayfinder:luiz"
+   ],
+   "assignees": [],
+   "blockedBy": [
+    {
+     "number": 47,
+     "state": "CLOSED"
+    }
+   ],
+   "lastComment": null,
+   "lastCommit": {
+    "sha": "315a040a718eb0d8c85c97b11be8c4d453d30d10",
+    "date": "2026-11-25T23:11:20+01:00",
+    "subject": "docs: dev map, #47 done; signing in without a terminal is #49"
+   }
+  },
+  {
+   "number": 50,
+   "title": "Restores throw an uncaught cancelled token in the window",
+   "state": "OPEN",
+   "updatedAt": "2026-11-25T22:47:12Z",
+   "labels": [
+    "wayfinder:build"
+   ],
+   "assignees": [],
+   "blockedBy": [],
+   "lastComment": null,
+   "lastCommit": {
+    "sha": "9ccd9002f59930140b3087384c71d6253fdcced1",
+    "date": "2026-11-25T23:47:29+01:00",
+    "subject": "docs: dev map, #20 done; restore cancelled token is #50"
+   }
+  }
+ ],
+ "project": {
+  "id": "PVT_kwHOAYJwo84BtAwy",
+  "fields": {
+   "Status": {
+    "id": "PVTSSF_lAHOAYJwo84BtAwyzhrML5U",
+    "options": {
+     "Todo": "b95faf27",
+     "In Progress": "cc1eabc4",
+     "Blocked": "6a9f2104",
+     "Done": "624025c2"
+    }
+   },
+   "Slice": {
+    "id": "PVTSSF_lAHOAYJwo84BtAwyzhrML9k",
+    "options": {
+     "Map upkeep": "538e4e9b",
+     "Dev skills": "903a966e",
+     "Slice 1": "bb70ea0e",
+     "Slices 2–4 spec": "332e167b",
+     "Slice 5": "d8e4355b",
+     "PhD trial": "f4c95deb"
+    }
+   },
+   "Kind": {
+    "id": "PVTSSF_lAHOAYJwo84BtAwyzhrML_Y",
+    "options": {
+     "Decision": "05f09709",
+     "Build": "e23aa104",
+     "Task": "137593fd"
+    }
+   }
+  },
+  "items": {
+   "18": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhLcLzs",
+    "Status": "In Progress",
+    "Slice": "Map upkeep",
+    "Kind": "Build"
+   },
+   "19": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhLcL54",
+    "Status": "Todo",
+    "Slice": "Slice 1",
+    "Kind": "Build"
+   },
+   "20": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhLcMBc",
+    "Status": "Done",
+    "Slice": "Slice 1",
+    "Kind": "Build"
+   },
+   "21": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhLcMHw",
+    "Status": "Done",
+    "Slice": "Slice 1",
+    "Kind": "Decision"
+   },
+   "22": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhLcMOs",
+    "Status": "Done",
+    "Slice": "Dev skills",
+    "Kind": "Decision"
+   },
+   "23": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhLcMV8",
+    "Status": "Todo",
+    "Slice": "Slice 1",
+    "Kind": "Decision"
+   },
+   "24": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhLcMcw",
+    "Status": "Todo",
+    "Slice": "Slice 1",
+    "Kind": "Decision"
+   },
+   "12": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhLcMeE"
+   },
+   "25": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhLcMis",
+    "Status": "Done",
+    "Slice": "Slice 1",
+    "Kind": "Decision"
+   },
+   "26": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhLcMps",
+    "Status": "Blocked",
+    "Slice": "Slice 1",
+    "Kind": "Task"
+   },
+   "27": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhLcMvY",
+    "Status": "Todo",
+    "Slice": "Dev skills",
+    "Kind": "Decision"
+   },
+   "28": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhLcM2E",
+    "Status": "Blocked",
+    "Slice": "Slices 2–4 spec",
+    "Kind": "Decision"
+   },
+   "29": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhLcM9w",
+    "Status": "Blocked",
+    "Slice": "Slices 2–4 spec",
+    "Kind": "Decision"
+   },
+   "30": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhLcND8",
+    "Status": "Blocked",
+    "Slice": "Slices 2–4 spec",
+    "Kind": "Decision"
+   },
+   "31": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhLcNKo",
+    "Status": "Blocked",
+    "Slice": "Slice 5",
+    "Kind": "Build"
+   },
+   "32": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhLcNP8",
+    "Status": "Blocked",
+    "Slice": "Slice 5",
+    "Kind": "Build"
+   },
+   "33": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhLcNXY",
+    "Status": "Blocked",
+    "Slice": "Slice 5",
+    "Kind": "Build"
+   },
+   "34": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhLcNe8",
+    "Status": "Blocked",
+    "Slice": "Slice 5",
+    "Kind": "Build"
+   },
+   "35": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhLcNm8",
+    "Status": "Blocked",
+    "Slice": "Slice 5",
+    "Kind": "Build"
+   },
+   "36": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhLcNtc",
+    "Status": "Blocked",
+    "Slice": "Slice 5",
+    "Kind": "Build"
+   },
+   "37": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhLcNzc",
+    "Status": "Blocked",
+    "Slice": "Slice 5",
+    "Kind": "Build"
+   },
+   "38": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhLcN4k",
+    "Status": "Blocked",
+    "Slice": "Slice 5",
+    "Kind": "Build"
+   },
+   "39": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhLcN_A",
+    "Status": "Blocked",
+    "Slice": "Slice 5",
+    "Kind": "Build"
+   },
+   "40": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhLcOE8",
+    "Status": "Blocked",
+    "Slice": "Slice 5",
+    "Kind": "Task"
+   },
+   "41": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhLcOK4",
+    "Status": "Blocked",
+    "Slice": "PhD trial",
+    "Kind": "Decision"
+   },
+   "1": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhLcOMs"
+   },
+   "2": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhLcOM8"
+   },
+   "3": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhLcONg"
+   },
+   "4": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhLcONw"
+   },
+   "14": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhLcOOA"
+   },
+   "15": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhLcOOU"
+   },
+   "42": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhLcOQk",
+    "Status": "Blocked",
+    "Slice": "PhD trial",
+    "Kind": "Decision"
+   },
+   "43": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhLcOW4",
+    "Status": "Blocked",
+    "Slice": "PhD trial",
+    "Kind": "Decision"
+   },
+   "16": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhLcOZA"
+   },
+   "44": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhLcOe8",
+    "Status": "Blocked",
+    "Slice": "Map upkeep",
+    "Kind": "Task"
+   },
+   "45": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhLcOn0",
+    "Status": "Todo",
+    "Slice": "Map upkeep",
+    "Kind": "Task"
+   },
+   "46": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhLc9_c",
+    "Status": "Done",
+    "Slice": "Slice 1",
+    "Kind": "Decision"
+   },
+   "47": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhLxtus",
+    "Kind": "Build",
+    "Slice": "Slice 1",
+    "Status": "Done"
+   },
+   "48": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhLxt2o",
+    "Kind": "Build",
+    "Slice": "Slices 2–4 spec",
+    "Status": "Blocked"
+   },
+   "49": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhL7T4w",
+    "Status": "Todo",
+    "Slice": "Slice 1",
+    "Kind": "Decision"
+   },
+   "50": {
+    "id": "PVTI_lAHOAYJwo84BtAwyzhL7xRM",
+    "Status": "Todo",
+    "Slice": "Slice 1",
+    "Kind": "Build"
+   }
+  }
+ }
+}

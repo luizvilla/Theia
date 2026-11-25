@@ -1,0 +1,120 @@
+# The dev map's drawing (#18): what the tracker cannot say. devmap.py takes colours from
+# each ticket's state and solid arrows from GitHub's blocking links; this file fixes the
+# groups, the node order, the short labels, the fog and the arrows the tracker does not hold.
+# A map ticket missing here still shows, in "New tickets": give it a place.
+#
+# Node kinds: tickets = [n, ...] (label without "#n" or icons; several tickets make one node),
+# done = "text" (a fixed done node), fog = "text" (not yet specified).
+
+destination = "🎯 OwnStudio 2.0 built through slice 5,<br/>accepted on the bench, PhD trial run"
+map_issue = 17
+repo = "luizvilla/Theia"
+project_owner = "luizvilla"
+project_number = 2
+stale_days = 3
+
+# Arrows the tracker does not hold: from done work before the map, into and out of fog,
+# "informs" links (dotted), and the way to the destination.
+edges = [
+    "D4 --> N19",
+    "D4 --> N20",
+    "N27 -.-> FS",
+    "N46 -.-> N23",
+    "N46 -.-> N28",
+    "N28 -.-> F2",
+    "N29 -.-> F3",
+    "N30 -.-> F4",
+    "F3 -.-> N31",
+    "N41 -.-> FT",
+    "N42 -.-> FT",
+    "N43 -.-> FT",
+    "N40 --> DEST",
+    "FT -.-> DEST",
+]
+
+[[group]]
+id = "Before"
+title = "Done before the map"
+nodes = [
+    { id = "D1", done = "Steps 1–4<br/>OwnStudio 1.0" },
+    { id = "D2", done = "Slice 0 · paper<br/>SPEC 2.0, ADRs, storyboards" },
+    { id = "D3", done = "Slice 1 · U1–U19" },
+    { id = "D4", done = "Fixes F1–F20<br/>after the 11-19 trial" },
+]
+
+[[group]]
+id = "Upkeep"
+title = "Map upkeep"
+slice = "Map upkeep"
+nodes = [
+    { id = "N18", tickets = [18], label = "Dev map tooling" },
+    { id = "N44", tickets = [44], label = "Move plan.md status<br/>onto the map" },
+    { id = "N45", tickets = [45], label = "Back-fill done units<br/>(after slice 5)" },
+]
+
+[[group]]
+id = "Skills"
+title = "Dev skills"
+slice = "Dev skills"
+nodes = [
+    { id = "N22", tickets = [22], label = "Dev skills<br/>inventory" },
+    { id = "N27", tickets = [27], label = "Choose which<br/>dev skills to write" },
+    { id = "FS", fog = "dev skill builds" },
+]
+
+[[group]]
+id = "S1"
+title = "Milestone A · slice 1 accepted"
+slice = "Slice 1"
+collapse_when_done = true
+nodes = [
+    { id = "N19", tickets = [19], label = "F20 checked<br/>on the bench" },
+    { id = "N20", tickets = [20], label = "F14 leftovers" },
+    { id = "N50", tickets = [50], label = "Cancelled token<br/>thrown on restore" },
+    { id = "N21", tickets = [21], label = "Agent SDK<br/>licence" },
+    { id = "N23", tickets = [23], label = "Power and<br/>agent shells" },
+    { id = "N24", tickets = [24], label = "Pulsim<br/>exact-edges fix" },
+    { id = "N46", tickets = [46], label = "Agent extensions<br/>installed by users" },
+    { id = "N25", tickets = [25], label = "Slice 1 rulings" },
+    { id = "N47", tickets = [47], label = "Agents installed<br/>on first use" },
+    { id = "N49", tickets = [49], label = "Signing in<br/>without a terminal" },
+    { id = "N26", tickets = [26], label = "Slice 1 retest:<br/>nine steps" },
+]
+
+[[group]]
+id = "Spec"
+title = "Slices 2–4"
+slice = "Slices 2–4 spec"
+nodes = [
+    { id = "N28", tickets = [28], label = "Specify slice 2" },
+    { id = "N48", tickets = [48], label = "Extensions view<br/>on Open VSX" },
+    { id = "N29", tickets = [29], label = "Specify slice 3" },
+    { id = "N30", tickets = [30], label = "Specify slice 4" },
+    { id = "F2", fog = "slice 2 build units" },
+    { id = "F3", fog = "slice 3 build units" },
+    { id = "F4", fog = "slice 4 build units" },
+]
+
+[[group]]
+id = "S5"
+title = "Slice 5 · timing on the Spin"
+slice = "Slice 5"
+collapse_when_done = true
+nodes = [
+    { id = "N31", tickets = [31], label = "T1 Spin API probes" },
+    { id = "N32", tickets = [32], label = "T2 Timing check" },
+    { id = "N33_38", tickets = [33, 34, 35, 36, 37, 38], label = "T3–T8<br/>gauge, tab, CodeLens,<br/>dots, restore, agent recipe" },
+    { id = "N39", tickets = [39], label = "Examples<br/>on ThingSet" },
+    { id = "N40", tickets = [40], label = "Slice 5 accepted<br/>on the bench" },
+]
+
+[[group]]
+id = "Trial"
+title = "PhD trial"
+slice = "PhD trial"
+nodes = [
+    { id = "N41", tickets = [41], label = "Bench accuracy<br/>before students" },
+    { id = "N42", tickets = [42], label = "Trial protocol" },
+    { id = "N43", tickets = [43], label = "Tutorial on 2.0" },
+    { id = "FT", fog = "trial build work" },
+]

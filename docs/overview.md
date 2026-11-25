@@ -4,7 +4,7 @@ The decided structure so far, drawn. Terms are defined in the [glossary](../GLOS
 
 ## The dev map
 
-Where OwnStudio's development stands, copied from the [dev map](https://github.com/luizvilla/Theia/issues/17) (round 26). The map issue is the live version; this copy is updated with it.
+Where OwnStudio's development stands: the [dev map](https://github.com/luizvilla/Theia/issues/17) (round 26), drawn from the tracker by [tools/devmap](../tools/devmap/README.md) into the map issue and here.
 
 <!-- devmap:diagram:start -->
 ```mermaid
@@ -27,7 +27,7 @@ flowchart LR
   end
 
   subgraph Upkeep["Map upkeep"]
-    N18["🔨 #18 Dev map tooling"]:::open
+    N18["🔨 #18 Dev map tooling"]:::wip
     N44["#44 Move plan.md status<br/>onto the map"]:::blocked
     N45["#45 Back-fill done units<br/>(after slice 5)"]:::open
   end
@@ -77,27 +77,42 @@ flowchart LR
     FT["trial build work"]:::fog
   end
 
-  D4 --> N19 & N20
   N18 --> N44
-  N22 --> N27 -.-> FS
+  N22 --> N27
+  N19 --> N26
+  N20 --> N26
   N21 --> N25
+  N23 --> N26
+  N24 --> N26
   N46 --> N25
-  N46 -.-> N23 & N28
-  N19 & N20 & N23 & N24 & N25 & N47 --> N26
-  N25 --> N47 & N48
+  N25 --> N47
   N47 --> N49
+  N47 --> N26
+  N26 --> N28
   N28 --> N48
-  N26 --> N28 --> N29 --> N30
-  N23 --> N30
+  N28 --> N29
+  N29 --> N30
+  N30 --> N31
+  N30 --> N39
+  N31 --> N32
+  N32 --> N33_38
+  N33_38 --> N40
+  N39 --> N40
+  N40 --> N41
+  N40 --> N42
+  N40 --> N43
+  D4 --> N19
+  D4 --> N20
+  N27 -.-> FS
+  N46 -.-> N23
+  N46 -.-> N28
   N28 -.-> F2
   N29 -.-> F3
   N30 -.-> F4
-  N30 --> N31 & N39
   F3 -.-> N31
-  N31 --> N32 --> N33_38
-  N33_38 & N39 --> N40
-  N40 --> N41 & N42 & N43
-  N41 & N42 & N43 -.-> FT
+  N41 -.-> FT
+  N42 -.-> FT
+  N43 -.-> FT
   N40 --> DEST
   FT -.-> DEST
 ```
