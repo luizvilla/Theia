@@ -394,7 +394,7 @@ Facts found:
 | Q177 | clangd shipped with OwnStudio, and `compile_commands.json` from PlatformIO at creation and after each build; `.conf` and `.ini` coloured? | Yes. | Yes. | plan F5 |
 | Q178 | The Firmware line names both builds and offers **Upload**? | Yes. | Yes. | plan F6 |
 | Q179 | Several Spins connected: pick one by serial number, remembered by the setup; setups using several boards later? | Yes. | Yes. | plan F8 |
-| Q180 | The Claude agent SDK ships as a dependency of OwnStudio? | Yes. | Yes. | plan F7 |
+| Q180 | The Claude agent SDK ships as a dependency of OwnStudio? | Yes. | Yes; replaced by Q211 (the student installs the agent). | plan F7 |
 | Q181 | The file tree in three groups (user code, app, hidden), with **Show all files**, as a slice 1 fix? | Yes. | Yes. | plan F9 |
 | Q182 | Build output in green and red, the examples list without paths, the inside view on a fixed grid? | Yes. | Yes. | plan F10 |
 | Q183 | Applied Kp and Ti link to their line in `control.cpp`; the automatic comment on Apply goes to slice 2? | Yes. | Yes. | plan F11, slice 2 |
@@ -452,3 +452,5 @@ The three open points of the slice 1 report, worked as [Slice 1 rulings](https:/
 | # | Question | Recommended | Answer | Where |
 |---|---|---|---|---|
 | Q210 | Keep the navigation rule "95 % of switches within 200 ms, none above 300 ms" (changed by Codex in U2)? | Yes | Yes. | plan U2 |
+| Q211 | Students install Claude Code and/or Codex themselves and OwnStudio ships neither (replaces Q180): the CLI driven by OwnStudio's AI tab, the vendor's extension from Open VSX, or either? | Either | Either: try both and see how it goes. OwnStudio's limits hold in the AI tab only. Settles the Codex version (the student's own) and the SDK licence (nothing redistributed). | ADR 0031, [#25](https://github.com/luizvilla/Theia/issues/25) |
+| Q212 | Safety stops deciding the agent route and moves wholly to [#23](https://github.com/luizvilla/Theia/issues/23), starting from "the token stops mistakes, not agents"? | Yes | Yes. Luiz: any AI in VS Code can take over an experiment by launching the prepared scripts; OwnStudio is no different once the student installs the agent. | [#23](https://github.com/luizvilla/Theia/issues/23) |
