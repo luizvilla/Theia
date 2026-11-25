@@ -63,6 +63,10 @@ tools/storyboard-shots/run.sh 9490 $S tools/storyboard-shots/design-test.mjs $S 
 - **`agents-test.mjs`** (U17): types "@" in the AI tab and checks that Claude Code
   and Codex are offered and the old OwnStudio agent is not, that Codex's sandbox
   menu has no Full Access, and that the setup carries AGENTS.md with the power rule.
+  Since #47 it also addresses each agent on the run's empty home and checks the
+  one-click install offer (version, size, folder, vendor's terms) and that "Not now"
+  installs nothing. It never clicks Install: the request would then use the account
+  of whoever runs it.
 - **`timeline-test.mjs`** (U18): makes three dots in the window (L, Kp, an outside build),
   previews the dot before them, restores it (canvas, file and open editor), returns, then
   times 200 restores and returns (each within 2 s, no new branch) and checks that an edit

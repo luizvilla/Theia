@@ -2,6 +2,9 @@
 // U17 gate: the AI tab offers the user's own Claude Code and Codex agents, the
 // old key-based OwnStudio agent is gone, Codex offers no "Full Access" mode,
 // and the setup's AGENTS.md is there for them to read.
+// #47: on an empty profile, addressing either agent offers its one-click install
+// (version, size, vendor's terms) and "Not now" leaves it uninstalled. The test
+// never clicks Install: the request would then go out on the account of whoever runs it.
 // Usage: run.sh <port> <setup> agents-test.mjs <setup>
 import fs from 'node:fs';
 import path from 'node:path';
@@ -62,10 +65,43 @@ if (!codexModes.some(m => m.includes('Read-Only'))) failures.push(`Codex modes d
 if (codexModes.some(m => /Full Access/i.test(m))) failures.push(`Codex still offers Full Access: ${JSON.stringify(codexModes)}`);
 for (const type of ['keyDown', 'keyUp']) { await app.send('Input.dispatchKeyEvent', { type, key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 }); }
 
+// #47: only on a home without agents, so no message can reach anybody's account.
+const home = process.env.OWNSTUDIO_HOME;
+const offers = {};
+if (!home || fs.existsSync(path.join(home, '.agents'))) {
+    failures.push(`the install offer needs an empty OwnStudio home (OWNSTUDIO_HOME=${home ?? 'unset'} has .agents)`);
+} else {
+    for (const [id, label] of [['Codex', 'Codex'], ['ClaudeCode', 'Claude Code']]) {
+        await app.clickOn('#chat-view-widget .monaco-editor .view-lines');
+        for (const type of ['keyDown', 'keyUp']) { await app.send('Input.dispatchKeyEvent', { type, key: 'a', code: 'KeyA', modifiers: 2, windowsVirtualKeyCode: 65 }); }
+        await app.send('Input.insertText', { text: `@${id} hello` });
+        await sleep(400);
+        for (const type of ['keyDown', 'keyUp']) { await app.send('Input.dispatchKeyEvent', { type, key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 }); }
+        for (const type of ['keyDown', 'keyUp']) { await app.send('Input.dispatchKeyEvent', { type, key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 }); }
+        let text = '';
+        for (let n = 0; n < 30 && !text.includes(`Install ${label}?`); n++) {
+            await sleep(300);
+            text = await app.evaluate(`[...document.querySelectorAll('#chat-view-widget .theia-ChatNode')].pop()?.innerText ?? ''`);
+        }
+        offers[id] = text.slice(0, 400);
+        if (!text.includes(`${label} is not installed`)) failures.push(`${label}: no install offer (${JSON.stringify(text.slice(0, 200))})`);
+        if (!/OwnStudio's own folder/.test(text) || !/terms/.test(text) || !/\d+ MB/.test(text)) failures.push(`${label}: the offer does not name the folder, size and terms`);
+        const notNow = await app.evaluate(`(() => { const b = [...document.querySelectorAll('#chat-view-widget button, #chat-view-widget .theia-button')]
+            .filter(e => e.textContent.trim() === 'Not now' && e.offsetWidth > 0).pop();
+            const install = [...document.querySelectorAll('#chat-view-widget button, #chat-view-widget .theia-button')]
+            .some(e => e.textContent.trim() === 'Install ${label}' && e.offsetWidth > 0);
+            if (b) b.click(); return { notNow: !!b, install }; })()`);
+        if (!notNow.install) failures.push(`${label}: no "Install ${label}" button`);
+        if (!notNow.notNow) failures.push(`${label}: no "Not now" button`);
+        await sleep(800);
+    }
+    if (fs.existsSync(path.join(home, '.agents'))) failures.push('"Not now" installed something');
+}
+
 const agentsMd = setup && fs.existsSync(path.join(setup, 'AGENTS.md')) ? fs.readFileSync(path.join(setup, 'AGENTS.md'), 'utf8') : '';
 if (!/never switch the converter on/i.test(agentsMd)) failures.push('the setup has no AGENTS.md with the power rule');
 if (exceptions.length) failures.push(`browser exceptions: ${exceptions.join(' | ')}`);
 
-console.log(JSON.stringify({ agents, codexModes, agentsMd: agentsMd.length, failures }, null, 1));
+console.log(JSON.stringify({ agents, codexModes, offers, agentsMd: agentsMd.length, failures }, null, 1));
 app.close();
 process.exit(failures.length ? 1 : 0);
