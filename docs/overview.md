@@ -46,7 +46,7 @@ flowchart LR
     N24["👤 #24 Pulsim<br/>exact-edges fix"]:::open
     N46["✓ #46 Agent extensions<br/>installed by users"]:::done
     N25["✓ #25 Slice 1 rulings"]:::done
-    N47["🔨 #47 Agents installed<br/>on first use"]:::open
+    N47["🔨👤 #47 Agents installed<br/>on first use: check by Luiz"]:::wip
     N26["👤 #26 Slice 1 retest:<br/>nine steps"]:::blocked
   end
 
