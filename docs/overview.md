@@ -46,7 +46,8 @@ flowchart LR
     N24["👤 #24 Pulsim<br/>exact-edges fix"]:::open
     N46["✓ #46 Agent extensions<br/>installed by users"]:::done
     N25["✓ #25 Slice 1 rulings"]:::done
-    N47["🔨👤 #47 Agents installed<br/>on first use: check by Luiz"]:::wip
+    N47["✓ #47 Agents installed<br/>on first use"]:::done
+    N49["👤 #49 Signing in<br/>without a terminal"]:::open
     N26["👤 #26 Slice 1 retest:<br/>nine steps"]:::blocked
   end
 
@@ -83,6 +84,7 @@ flowchart LR
   N46 -.-> N23 & N28
   N19 & N20 & N23 & N24 & N25 & N47 --> N26
   N25 --> N47 & N48
+  N47 --> N49
   N28 --> N48
   N26 --> N28 --> N29 --> N30
   N23 --> N30
