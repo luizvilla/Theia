@@ -37,6 +37,8 @@ import { DesignWidget } from './design-widget.js';
 import { DesignModel } from './design-model.js';
 import { ClaudeCodeChatAgent } from '@theia/ai-claude-code/lib/browser/claude-code-chat-agent';
 import { CodexChatAgent } from '@theia/ai-codex/lib/browser/codex-chat-agent';
+import { WindowTitleUpdater } from '@theia/core/lib/browser/window/window-title-updater';
+import { OwnStudioWindowTitleUpdater } from './window-title.js';
 import { AgentInstallClientImpl, AgentInstallOffer, OwnStudioClaudeCodeChatAgent, OwnStudioCodexChatAgent } from './ai/agents.js';
 import { AGENT_INSTALL_SERVICE_PATH, AgentInstallService } from '../common/agent-install-protocol.js';
 import { TimelineWidget } from './timeline-widget.js';
@@ -154,6 +156,8 @@ export default new ContainerModule((bind, _unbind, _isBound, rebind) => {
         id: TIMELINE_PREVIEW_ID,
         createWidget: () => ctx.container.get(TimelinePreviewWidget),
     })).inSingletonScope();
+    bind(OwnStudioWindowTitleUpdater).toSelf().inSingletonScope();
+    rebind(WindowTitleUpdater).toService(OwnStudioWindowTitleUpdater);
     bind(OwnStudioApplicationShell).toSelf().inSingletonScope();
     rebind(ApplicationShell).toService(OwnStudioApplicationShell);
     const panels = [

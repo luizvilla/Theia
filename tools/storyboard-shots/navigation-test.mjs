@@ -32,9 +32,19 @@ async function key(k, modifiers = 0, code = k) {
         await app.send('Input.dispatchKeyEvent', { type, key: k, code, modifiers, windowsVirtualKeyCode: k.length === 1 ? k.toUpperCase().charCodeAt(0) : (k === 'Enter' ? 13 : 0) });
     }
 }
-await key('p', 2, 'KeyP'); await sleep(1500);
-await app.send('Input.insertText', { text: file }); await sleep(4000);
-await key('Enter'); await sleep(5000);
+// Right after start-up Quick Open sometimes drops the Enter (the file is listed, nothing opens): try up to three times.
+for (let attempt = 0; attempt < 3; attempt++) {
+    await app.clickOn('#theia-main-content-panel'); await sleep(300);
+    await key('p', 2, 'KeyP'); await sleep(1500);
+    await app.send('Input.insertText', { text: file });
+    for (let n = 0; n < 40 && !await app.evaluate(`document.querySelectorAll('.quick-input-list .monaco-list-row').length > 0`); n++) { await sleep(200); }
+    await sleep(500);
+    await key('Enter');
+    for (let n = 0; n < 40 && !(await app.evaluate(STATE)).main; n++) { await sleep(200); }
+    if ((await app.evaluate(STATE)).main) { break; }
+    await key('Escape'); await sleep(1000);
+}
+await sleep(1500);
 const box = await app.evaluate(`(() => { const r = document.querySelector('#theia-main-content-panel .monaco-editor')?.getBoundingClientRect(); return r ? { x: r.x + r.width / 2, y: r.y + r.height / 2 } : null; })()`);
 if (box) {
     await app.send('Input.dispatchMouseEvent', { type: 'mouseWheel', x: box.x, y: box.y, deltaX: 0, deltaY: 300 });

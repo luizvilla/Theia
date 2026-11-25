@@ -15,6 +15,7 @@ import { SetupService } from '../common/setup-protocol.js';
 import { START_WIDGET_ID } from './start-widget.js';
 import { SetupFilesContribution } from './setup-files-widget.js';
 import { TimelineWidget } from './timeline-widget.js';
+import { OwnStudioWindowTitleUpdater } from './window-title.js';
 
 const THEIA_NEW_TERMINAL = 'terminal:new';
 type Side = 'left' | 'right';
@@ -44,6 +45,7 @@ export class WorkbenchContribution implements CommandContribution, KeybindingCon
     @inject(SetupService) protected readonly setups: SetupService;
     @inject(TimelineWidget) protected readonly timeline: TimelineWidget;
     @inject(SetupFilesContribution) protected readonly setupFiles: SetupFilesContribution;
+    @inject(OwnStudioWindowTitleUpdater) protected readonly titles: OwnStudioWindowTitleUpdater;
 
     /** No setup open: the Start page fills the window (frame 1) until a workbench is chosen. */
     protected startMode = false;
@@ -278,6 +280,8 @@ export class WorkbenchContribution implements CommandContribution, KeybindingCon
         }
         this.widgets.tryGetWidget<CanvasWidget>(BOTTOM_SLOTS[0].widgetId)?.setWorkbench(target.id);
         document.body.dataset.ownstudioWorkbench = target.id;
+        // #20: the title follows the centre, also when the switch only detached the old view.
+        this.titles.showWorkbench(target.label, this.shell.getCurrentWidget('main'));
     }
 
     protected renderStatus(): void {
