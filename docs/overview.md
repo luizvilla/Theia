@@ -45,12 +45,14 @@ flowchart LR
     N23["👤 #23 Power and<br/>agent shells"]:::open
     N24["👤 #24 Pulsim<br/>exact-edges fix"]:::open
     N46["✓ #46 Agent extensions<br/>installed by users"]:::done
-    N25["👤 #25 Slice 1 rulings"]:::open
+    N25["✓ #25 Slice 1 rulings"]:::done
+    N47["🔨 #47 Agents installed<br/>on first use"]:::open
     N26["👤 #26 Slice 1 retest:<br/>nine steps"]:::blocked
   end
 
   subgraph Spec["Slices 2–4"]
     N28["👤 #28 Specify slice 2"]:::blocked
+    N48["🔨 #48 Extensions view<br/>on Open VSX"]:::blocked
     N29["👤 #29 Specify slice 3"]:::blocked
     N30["👤 #30 Specify slice 4"]:::blocked
     F2["slice 2 build units"]:::fog
@@ -79,7 +81,9 @@ flowchart LR
   N21 --> N25
   N46 --> N25
   N46 -.-> N23 & N28
-  N19 & N20 & N23 & N24 & N25 --> N26
+  N19 & N20 & N23 & N24 & N25 & N47 --> N26
+  N25 --> N47 & N48
+  N28 --> N48
   N26 --> N28 --> N29 --> N30
   N23 --> N30
   N28 -.-> F2

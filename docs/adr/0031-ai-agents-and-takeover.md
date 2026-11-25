@@ -31,3 +31,14 @@ Options:
 3. **Make the port unreachable for the user's processes**: a small OwnStudio service owns the serial port (a udev rule on Linux, a service account on Windows), and only it accepts a token. A real boundary; it belongs with the installer (#5).
 
 Recommendation: 2 now, 3 with the installer; until 3, AI takeover (slice 4) should not be enabled on a bench without someone at it, as this ADR already requires.
+
+## Amendment (2026-11-25, slice 1 rulings, Q211–Q219)
+
+Worked in [Slice 1 rulings](https://github.com/luizvilla/Theia/issues/25), with the [licence](https://github.com/luizvilla/Theia/issues/21) and [agent extensions](https://github.com/luizvilla/Theia/issues/46) research as input.
+
+- **The agent is the student's own install; OwnStudio ships none.** The installer carries neither the Claude agent SDK (replacing Q180, F7) nor the Codex binary. On first use, the AI tab offers one click per agent ("Install Claude Code", "Install Codex") that fetches it from npm into OwnStudio's own folder, at a version OwnStudio has pinned and on which the sandbox probe passed; no terminal, nothing global. The vendor's terms are named in that step. Each OwnStudio release moves the pins after the probe passes. Downloading on the student's request is the student installing, not OwnStudio redistributing; this also settles the Codex version (no longer Theia's 0.49).
+- **Any Open VSX extension may be installed** (the research's option E), including Claude Code, Codex, Cline or any other agent. Extensions run outside OwnStudio's limits, and one crashing extension stops the others (OwnStudio's own panels keep running).
+- **OwnStudio's limits hold in the AI tab only**: Codex without Full Access and in its sandbox, Claude Code without `bypassPermissions`.
+- **A lab's own AI** connects in two ways: through a harness (an extension such as Cline, or a terminal program such as OpenCode or pi.dev) pointed at the lab's endpoint, which works as soon as extensions are open; or as a bare OpenAI-compatible endpoint driving an agent in the AI tab, to be designed in the slice 2 spec.
+- **Safety no longer chooses the agent route.** As with any AI in VS Code, an agent the student installs can launch the prepared scripts or open the port. The token stops mistakes, not agents; where the real guard lives (the bench, or a port service with the installer) is decided in [Power and agent shells](https://github.com/luizvilla/Theia/issues/23).
+- Rejected: a shortlist of allowed extensions (Q214), since users may want their own lab's AI; asking students to install agents from a terminal (Q213).
