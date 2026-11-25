@@ -28,7 +28,7 @@ flowchart LR
 
   subgraph Upkeep["Map upkeep"]
     N18["✓ #18 Dev map tooling"]:::done
-    N44["#44 Move plan.md status<br/>onto the map"]:::open
+    N44["✓ #44 Move plan.md status<br/>onto the map"]:::done
     N45["#45 Back-fill done units<br/>(after slice 5)"]:::open
   end
 
