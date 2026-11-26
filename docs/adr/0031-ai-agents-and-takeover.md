@@ -17,6 +17,8 @@ Coding agents run shell commands, so the confirmation rule of ADR 0010 cannot re
 
 ## Open point for Luiz (2026-11-12, found while building U17)
 
+_Resolved on 2026-11-26 in the second amendment below (Q220–Q229)._
+
 The token is not a boundary against a coding agent's shell. The runner checks a token file against a token argument, and the caller supplies both, so any command running as the user can write its own pair. More generally, nothing local is: a program running as the user can open the board's serial port and write `Converter/Mode` without OwnStudio. The token stops mistakes and keeps OwnStudio's own buttons honest; it does not stop an agent determined to switch power on.
 
 What U17 measured and enforces instead:
@@ -42,3 +44,16 @@ Worked in [Slice 1 rulings](https://github.com/luizvilla/Theia/issues/25), with 
 - **A lab's own AI** connects in two ways: through a harness (an extension such as Cline, or a terminal program such as OpenCode or pi.dev) pointed at the lab's endpoint, which works as soon as extensions are open; or as a bare OpenAI-compatible endpoint driving an agent in the AI tab, to be designed in the slice 2 spec.
 - **Safety no longer chooses the agent route.** As with any AI in VS Code, an agent the student installs can launch the prepared scripts or open the port. The token stops mistakes, not agents; where the real guard lives (the bench, or a port service with the installer) is decided in [Power and agent shells](https://github.com/luizvilla/Theia/issues/23).
 - Rejected: a shortlist of allowed extensions (Q214), since users may want their own lab's AI; asking students to install agents from a terminal (Q213).
+
+## Amendment (2026-11-26, power and agent shells, Q220–Q229)
+
+Worked in [Power and agent shells](https://github.com/luizvilla/Theia/issues/23), with a measurement of Claude Code 2.1.332 (agent SDK 0.3.332) as input: its Linux sandbox (bubblewrap) gives commands a minimal `/dev` without serial devices and refuses writes outside the working folder; it needs bubblewrap and socat, and when they are missing the SDK's sandbox option refuses to start while a project `.claude/settings.json` runs commands unsandboxed.
+
+- **The guard is the bench** (Q220). Through slice 5 and the PhD trial, a person is present at every power run and sets the supply's voltage and current limits on the instrument. The power token stays a guard against mistakes that keeps OwnStudio's own buttons honest.
+- **No port service in this effort** (Q221). Option 3 stays out on every platform, Linux's udev rule included: it would take the port from every tool the student uses.
+- **AI takeover goes to the AI tab's agents only** (Q222), where OwnStudio's limits hold. An agent from an extension or a terminal never gets a takeover button.
+- **Said plainly** (Q223), in the AI tab's first-use install step and in the takeover dialog: "The power token stops mistakes, not programs: any agent you install can switch the converter on. Your guard is the bench: stay at it and set the supply limits yourself." Text only; no tick box, no Lab checklist line.
+- **Claude Code is sandboxed in the AI tab** (option 2, Q225): OwnStudio passes the SDK's `sandbox` option enabled, with `allowUnsandboxedCommands: false` and `failIfUnavailable` on, not the setup's `.claude/settings.json`. Both agents are then measured by the same probe.
+- **No sandbox, no Claude Code** (Q226, Q228). Where the sandbox cannot start, the AI tab names what is missing and offers Codex meanwhile. On Debian and Ubuntu an Install button runs the package manager through the desktop's password dialog (`pkexec`) and re-runs the probe; elsewhere, or without admin rights, it shows the command for whoever runs the machine. A future Linux package may declare both as dependencies.
+- Rejected: keeping Claude Code unsandboxed and saying so (option 1), since the AI tab's two agents would then differ; sandboxing through the setup's settings file, since it fails open.
+

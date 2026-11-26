@@ -73,6 +73,7 @@ nodes = [
     { id = "N50", tickets = [50], label = "Cancelled token<br/>thrown on restore" },
     { id = "N21", tickets = [21], label = "Agent SDK<br/>licence" },
     { id = "N23", tickets = [23], label = "Power and<br/>agent shells" },
+    { id = "N51", tickets = [51], label = "Claude Code sandboxed<br/>in the AI tab" },
     { id = "N24", tickets = [24], label = "Pulsim<br/>exact-edges fix" },
     { id = "N46", tickets = [46], label = "Agent extensions<br/>installed by users" },
     { id = "N25", tickets = [25], label = "Slice 1 rulings" },

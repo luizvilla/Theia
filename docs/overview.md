@@ -43,7 +43,8 @@ flowchart LR
     N20["✓ #20 F14 leftovers"]:::done
     N50["✓ #50 Cancelled token<br/>thrown on restore"]:::done
     N21["✓ #21 Agent SDK<br/>licence"]:::done
-    N23["👤 #23 Power and<br/>agent shells"]:::wip
+    N23["✓ #23 Power and<br/>agent shells"]:::done
+    N51["🔨👤 #51 Claude Code sandboxed<br/>in the AI tab"]:::open
     N24["👤 #24 Pulsim<br/>exact-edges fix"]:::open
     N46["✓ #46 Agent extensions<br/>installed by users"]:::done
     N25["✓ #25 Slice 1 rulings"]:::done
@@ -83,6 +84,7 @@ flowchart LR
   N20 --> N26
   N21 --> N25
   N23 --> N26
+  N51 --> N26
   N24 --> N26
   N46 --> N25
   N25 --> N47
