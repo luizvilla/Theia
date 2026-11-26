@@ -461,3 +461,15 @@ The three open points of the slice 1 report, worked as [Slice 1 rulings](https:/
 | Q217 | The Extensions view opens on all of Open VSX (research option E), a slice 2 build ticket after the retest; extensions run outside OwnStudio's limits? | Yes | Yes. | build ticket, [#23](https://github.com/luizvilla/Theia/issues/23) |
 | Q218 | "Their own lab's AI": a model the lab hosts, which the AI tab accepts again? | Yes, as slice 2 fog | A local harness and a local agent, or one a university or company provides (for example the LAAS's OpenAI-compatible service, used with pi.dev, OpenCode or Cline): OwnStudio must be able to connect to it. | Q219 |
 | Q219 | Connect a lab's AI by both routes: harnesses through Open VSX and the terminal now; a bare OpenAI-compatible endpoint driving an agent in the AI tab designed in the slice 2 spec? | Yes | Yes. | ADR 0031, map "Not yet specified" |
+
+## Round 28 (2026-11-26): power and agent shells
+
+ADR 0031's open point, worked as [Power and agent shells](https://github.com/luizvilla/Theia/issues/23), starting from Q212's "the token stops mistakes, not agents". Input: the ticket's comments and a measurement of Claude Code's sandbox (2.1.332, the pinned agent SDK 0.3.332): bubblewrap gives commands a minimal `/dev` with no serial device; on this machine it cannot start (socat missing), and then the SDK option refuses to start while a project `.claude/settings.json` falls back to running unsandboxed.
+
+| # | Question | Recommended | Answer | Where |
+|---|---|---|---|---|
+| Q220 | Through slice 5 and the PhD trial the real guard is the bench: a person present at every power run, supply voltage and current limits set by a person on the instrument; the power token stays a guard against mistakes? | Yes | Yes. | ADR 0031 |
+| Q221 | ADR 0031's option 3 (a service owns the serial port) stays out of this map on every platform, Linux's udev rule included: it takes the port from every tool the student uses? | Yes | Yes. | map "Out of scope" |
+| Q222 | AI takeover goes only to agents started from the AI tab, where OwnStudio's limits hold; an extension or terminal agent never gets a takeover button? | Yes | Yes. | ADR 0031 |
+| Q223 | Say it plainly ("the power token stops mistakes, not programs: any agent you install can switch the converter on; your guard is the bench") in the AI tab's first-use install step (slice 1) and the takeover dialog (slice 4); text only, no tick box, no new Lab checklist line? | Yes | Yes. | ADR 0031, slice 4 spec |
+| Q224 | "Power token" enters the glossary? | Yes | Yes. | GLOSSARY |

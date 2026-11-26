@@ -43,7 +43,7 @@ flowchart LR
     N20["✓ #20 F14 leftovers"]:::done
     N50["✓ #50 Cancelled token<br/>thrown on restore"]:::done
     N21["✓ #21 Agent SDK<br/>licence"]:::done
-    N23["👤 #23 Power and<br/>agent shells"]:::open
+    N23["👤 #23 Power and<br/>agent shells"]:::wip
     N24["👤 #24 Pulsim<br/>exact-edges fix"]:::open
     N46["✓ #46 Agent extensions<br/>installed by users"]:::done
     N25["✓ #25 Slice 1 rulings"]:::done

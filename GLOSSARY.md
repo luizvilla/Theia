@@ -220,6 +220,10 @@ _Avoid_: preflight, interlock (that is hardware)
 The user's grant to the AI agent to run one test sequence on the board, power included, for a limited time, ended by any failed check, any change to the setup, or Stop.
 _Avoid_: autopilot, unattended mode
 
+**Power token**:
+OwnStudio's one-time permission for one run to switch the converter on, given by the person's confirmation or by AI takeover; a guard against mistakes, not against programs running as the user.
+_Avoid_: interlock (that is hardware), lock
+
 **Data object**:
 One named value a firmware exchanges with the outside world through ThingSet, with its unit and access.
 _Avoid_: variable (unqualified), register, parameter (unqualified)
