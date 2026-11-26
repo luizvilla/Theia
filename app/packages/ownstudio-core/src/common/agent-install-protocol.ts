@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-2.1-only
 // #47: the AI tab asks the backend whether an agent is installed, and installs it on one click.
 import { AgentId } from './agent-pins.js';
+import { SandboxStatus } from './sandbox-offer.js';
 
 export const AGENT_INSTALL_SERVICE_PATH = '/services/ownstudio-agent-install';
 export const AgentInstallService = Symbol('AgentInstallService');
@@ -28,4 +29,8 @@ export interface AgentInstallService {
     status(id: AgentId): Promise<AgentInstallStatus>;
     /** Resolves once installed; a second window asking meanwhile waits on the same install. */
     install(id: AgentId): Promise<AgentInstallStatus>;
+    /** #51: whether Claude Code's sandbox can start here, and what it lacks. */
+    sandbox(): Promise<SandboxStatus>;
+    /** #51: installs the missing sandbox tools through the desktop's password dialog (Debian, Ubuntu). */
+    installSandbox(): Promise<'done' | 'cancelled' | 'failed'>;
 }

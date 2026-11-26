@@ -14,6 +14,7 @@ import { CODEX_MODES, claudePermissionMode, codexSandboxMode } from '../../commo
 import { AgentId } from '../../common/agent-pins.js';
 import { AgentInstallClient, AgentInstallProgress, AgentInstallService } from '../../common/agent-install-protocol.js';
 import { installOffer, installProgressText } from '../../common/agent-install-offer.js';
+import { sandboxOffer } from '../../common/sandbox-offer.js';
 
 @injectable()
 export class AgentInstallClientImpl implements AgentInstallClient {
@@ -64,6 +65,40 @@ export class AgentInstallOffer {
         response.waitForInput();
     }
 
+    /** #51: runs Claude Code only when its sandbox can start; otherwise says what is missing and offers the install. */
+    async runSandboxed(request: MutableChatRequestModel, run: () => Promise<void>): Promise<void> {
+        const status = await this.service.sandbox();
+        if (status.supported && !status.missing.length) {
+            return run();
+        }
+        const offer = sandboxOffer(status);
+        const response = request.response;
+        response.response.addContent(new MarkdownChatResponseContentImpl(offer.text));
+        if (!offer.options.length) {
+            response.complete();
+            return;
+        }
+        const question = new QuestionResponseContentImpl(offer.question, offer.options, request, async choice => {
+            question.selectedOption = choice;
+            response.stopWaitingForInput();
+            if (choice.value !== 'install') {
+                response.complete();
+                return;
+            }
+            const outcome = await this.service.installSandbox();
+            const after = await this.service.sandbox();
+            if (outcome === 'done' && !after.missing.length) {
+                response.response.addContent(new MarkdownChatResponseContentImpl('The sandbox is ready.'));
+                await run();
+                return;
+            }
+            response.response.addContent(new MarkdownChatResponseContentImpl(sandboxOffer(after.missing.length ? after : status, outcome === 'done' ? 'failed' : outcome).text));
+            response.complete();
+        }, { onSkip: () => { response.stopWaitingForInput(); response.complete(); } });
+        response.response.addContent(question);
+        response.waitForInput();
+    }
+
     protected async install(id: AgentId, label: string): Promise<void> {
         const progress = await this.messages.showProgress({ text: `Installing ${label}` });
         const listener = this.client.onDidProgress(p => {
@@ -85,7 +120,8 @@ export class OwnStudioClaudeCodeChatAgent extends ClaudeCodeChatAgent {
     @inject(AgentInstallOffer) protected readonly installOffer: AgentInstallOffer;
 
     override async invoke(request: MutableChatRequestModel, chatAgentService?: ChatAgentService): Promise<void> {
-        return this.installOffer.runOrOffer('claude', request, () => super.invoke(request, chatAgentService));
+        return this.installOffer.runOrOffer('claude', request,
+            () => this.installOffer.runSandboxed(request, () => super.invoke(request, chatAgentService)));
     }
 
     protected override getClaudePermissionMode(request: MutableChatRequestModel): ReturnType<ClaudeCodeChatAgent['getClaudePermissionMode']> {

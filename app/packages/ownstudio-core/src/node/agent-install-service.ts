@@ -3,7 +3,9 @@
 import { injectable } from '@theia/core/shared/inversify';
 import { AGENT_PINS, AgentId, agentPackages } from '../common/agent-pins.js';
 import { AgentInstallClient, AgentInstallService, AgentInstallStatus } from '../common/agent-install-protocol.js';
+import { SandboxStatus } from '../common/sandbox-offer.js';
 import { currentTarget, findAgent, installAgent } from './agent-installer.js';
+import { installSandboxTools, sandboxStatus } from './sandbox-check.js';
 
 /** One install per agent at a time, whichever window asked. */
 const running = new Map<AgentId, Promise<string>>();
@@ -36,5 +38,17 @@ export class AgentInstallServiceImpl implements AgentInstallService {
             await job;
         }
         return this.status(id);
+    }
+
+    async sandbox(): Promise<SandboxStatus> {
+        return sandboxStatus();
+    }
+
+    async installSandbox(): Promise<'done' | 'cancelled' | 'failed'> {
+        const status = sandboxStatus();
+        if (!status.missing.length) {
+            return 'done';
+        }
+        return status.canInstall ? installSandboxTools(status.missing) : 'failed';
     }
 }

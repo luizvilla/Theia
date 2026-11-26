@@ -12,7 +12,10 @@ export function installOffer(s: AgentInstallStatus): InstallOffer {
         text: `**${s.label} is not installed.** OwnStudio ships no AI agent: you install your own. ` +
             `One click downloads ${s.label} ${s.version} from npm (about ${s.downloadMB} MB) into OwnStudio's own folder: ` +
             `no terminal, nothing installed for the rest of the computer. ` +
-            `${s.label} is ${s.vendor}'s; you use it with your own account, under [${s.vendor}'s terms](${s.termsUrl}).`,
+            `${s.label} is ${s.vendor}'s; you use it with your own account, under [${s.vendor}'s terms](${s.termsUrl}).\n\n` +
+            // #51 (Q227): said at install, for either agent.
+            'The power token stops mistakes, not programs: any agent you install can switch the converter on. ' +
+            'Your guard is the bench: stay at it and set the supply limits yourself.',
         question: `Install ${s.label}?`,
         options: [{ text: `Install ${s.label}`, value: 'install' }, { text: 'Not now', value: 'skip' }],
     };

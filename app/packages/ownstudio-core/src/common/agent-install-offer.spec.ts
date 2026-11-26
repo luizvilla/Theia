@@ -31,3 +31,9 @@ test('#47: progress in MB, with the package count when there are several', () =>
     assert.equal(installProgressText({ id: 'codex', index: 0, count: 1, received: 50 * 1048576, total: 175 * 1048576 }), '50 of 175 MB');
     assert.equal(installProgressText({ id: 'claude', index: 1, count: 2, received: 1048576 }), 'part 2 of 2: 1 MB');
 });
+
+test('#51: both agents\' install steps say the power token stops mistakes, not programs', () => {
+    for (const status of [claude, { ...claude, id: 'codex' as const, label: 'Codex', vendor: 'OpenAI' }]) {
+        assert.match(installOffer(status).text, /The power token stops mistakes, not programs: any agent you install can switch the converter on\. Your guard is the bench: stay at it and set the supply limits yourself\./);
+    }
+});
