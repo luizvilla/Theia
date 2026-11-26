@@ -13,6 +13,15 @@ export function claudePermissionMode(modeId: string | undefined): ClaudePermissi
     return CLAUDE_MODES.includes(modeId ?? '') ? modeId as ClaudePermissionMode : 'default';
 }
 
+/**
+ * #51 (ADR 0031 second amendment, Q223): every Claude Code session runs its commands in
+ * the agent SDK's sandbox. No command may leave it (dangerouslyDisableSandbox is ignored),
+ * and when the sandbox cannot start Claude Code does not start. Passed as an SDK option,
+ * never written to the setup's .claude/settings.json, where a missing sandbox falls back
+ * to running commands unsandboxed.
+ */
+export const CLAUDE_SANDBOX = { enabled: true, allowUnsandboxedCommands: false, failIfUnavailable: true } as const;
+
 /** Codex's sandboxes OwnStudio offers. `danger-full-access` (no sandbox) is never used. */
 export type CodexSandboxMode = 'workspace-write' | 'read-only';
 export const CODEX_MODES: { id: CodexSandboxMode; name: string }[] = [

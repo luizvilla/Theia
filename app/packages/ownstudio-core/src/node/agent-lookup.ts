@@ -4,7 +4,8 @@
 // Both services are bound per connection, so OwnStudio patches their prototypes once:
 // - Claude Code: a path in the ai-features.claudeCode.executablePath setting still wins
 //   (Theia checks it first); otherwise the installed SDK. No global npm lookup: OwnStudio
-//   runs the pinned version, on which the sandbox probe passed.
+//   runs the pinned version, on which the sandbox probe passed. Since #51 every query the
+//   service makes runs in the SDK's sandbox, set here so no request can turn it off.
 // - Codex: Theia's `new Codex()` takes no path (it runs the binary inside @openai/codex-sdk
 //   0.49), so the request runs the installed binary through codexPathOverride. The 0.49 SDK
 //   starts it as the current SDK does (`codex exec --experimental-json`).
@@ -13,6 +14,7 @@ import { CodexServiceImpl } from '@theia/ai-codex/lib/node/codex-service-impl.js
 import type { CodexBackendRequest, CodexClient } from '@theia/ai-codex/lib/common/codex-service.js';
 import type { CodexOptions, Thread } from '@openai/codex-sdk';
 import { AGENT_PINS, AgentId } from '../common/agent-pins.js';
+import { CLAUDE_SANDBOX } from '../common/agent-policy.js';
 import { findAgent } from './agent-installer.js';
 
 export type FindAgent = (id: AgentId) => string | undefined;
@@ -40,6 +42,17 @@ interface CodexInternals {
     cleanup(streamId: string): void;
 }
 
+type ImportClaudeSdk = (custom?: string) => Promise<{ query: unknown; SDKUserMessage: unknown; Options: unknown }>;
+const theiaImportClaudeSdk = (ClaudeCodeServiceImpl.prototype as unknown as { importClaudeCodeSDK: ImportClaudeSdk }).importClaudeCodeSDK;
+
+/** The SDK's query, with OwnStudio's sandbox over whatever the request set. */
+export function sandboxed(query: unknown): unknown {
+    if (typeof query !== 'function') {
+        return query;
+    }
+    return (args: { prompt: unknown; options?: Record<string, unknown> }) => query({ ...args, options: { ...args.options, sandbox: { ...CLAUDE_SANDBOX } } });
+}
+
 /** Once, at backend start (tests call it again with their own finder). */
 export function useInstalledAgents(find: FindAgent = id => findAgent(id)): void {
     const claude = ClaudeCodeServiceImpl.prototype as unknown as { resolveClaudeCodePath(): string };
@@ -49,6 +62,10 @@ export function useInstalledAgents(find: FindAgent = id => findAgent(id)): void 
             throw new Error(notInstalled('claude'));
         }
         return sdk;
+    };
+    (claude as unknown as { importClaudeCodeSDK: ImportClaudeSdk }).importClaudeCodeSDK = async function (this: unknown, custom?: string) {
+        const sdk = await theiaImportClaudeSdk.call(this, custom);
+        return { ...sdk, query: sandboxed(sdk.query) };
     };
 
     // Theia 1.77's sendMessages, with the installed binary. Keep in step with Theia on upgrade.

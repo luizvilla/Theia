@@ -34,6 +34,27 @@ test('#47: Claude Code loads the SDK installed in OwnStudio\'s folder, and a set
     }
 });
 
+test('#51: every Claude Code session runs sandboxed, whatever the request asks', async () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'ownstudio-lookup-'));
+    try {
+        const dir = path.join(root, 'recording');
+        fs.mkdirSync(dir);
+        fs.writeFileSync(path.join(dir, 'sdk.mjs'), 'export const query = args => { globalThis.ownstudioQueryArgs = args; return "stream"; };');
+        fs.writeFileSync(path.join(dir, 'cli.js'), '');
+        useInstalledAgents(id => id === 'claude' ? dir : undefined);
+        const service = Object.create(ClaudeCodeServiceImpl.prototype) as ClaudeInternals;
+        const { query } = await service.importClaudeCodeSDK();
+        const stream = (query as Function)({ prompt: 'hi', options: { cwd: '/setup', sandbox: { enabled: false, allowUnsandboxedCommands: true } } });
+        const args = (globalThis as { ownstudioQueryArgs?: { prompt: string; options: Record<string, unknown> } }).ownstudioQueryArgs!;
+        assert.equal(stream, 'stream');
+        assert.equal(args.prompt, 'hi');
+        assert.equal(args.options.cwd, '/setup');
+        assert.deepEqual(args.options.sandbox, { enabled: true, allowUnsandboxedCommands: false, failIfUnavailable: true });
+    } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+    }
+});
+
 test('#47: without an install, Claude Code says to install it from the AI tab (no global npm lookup)', async () => {
     useInstalledAgents(() => undefined);
     const service = Object.create(ClaudeCodeServiceImpl.prototype) as ClaudeInternals;
