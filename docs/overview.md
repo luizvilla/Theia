@@ -44,7 +44,7 @@ flowchart LR
     N50["✓ #50 Cancelled token<br/>thrown on restore"]:::done
     N21["✓ #21 Agent SDK<br/>licence"]:::done
     N23["✓ #23 Power and<br/>agent shells"]:::done
-    N51["🔨👤 #51 Claude Code sandboxed<br/>in the AI tab"]:::wip
+    N51["✓ #51 Claude Code sandboxed<br/>in the AI tab"]:::done
     N24["👤 #24 Pulsim<br/>exact-edges fix"]:::open
     N46["✓ #46 Agent extensions<br/>installed by users"]:::done
     N25["✓ #25 Slice 1 rulings"]:::done
